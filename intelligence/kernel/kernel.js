@@ -8,8 +8,8 @@
     const safe=(name,value,kind,version)=>{if(value&&!r.has(name))r.register(name,value,{kind,version})};
     safe('environment',window.LuviaEnvironment,'foundation',window.LuviaEnvironment?.version);
     safe('data',window.LuviaData,'service',window.LuviaData?.version);
-    safe('auth',window.ParisAuth,'service','3.1.0.3-central-supabase-client');
-    safe('trips',window.LuviaTripContext,'service','3.1.0.3-canonical-trip-store');
+    safe('auth',window.ParisAuth,'service','3.2.0-central-supabase-client');
+    safe('trips',window.LuviaTripContext,'service','3.2.0-canonical-trip-store');
     safe('destination-context',window.LuviaDestinationContext,'service',window.LuviaDestinationContext?.version||'legacy-adapter');
     safe('database-foundation',window.LuviaDatabaseFoundation,'diagnostic',window.LuviaDatabaseFoundation?.version||'2.1');
     safe('service-registry',window.LuviaServiceRegistry,'kernel',window.LuviaServiceRegistry?.version);

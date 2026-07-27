@@ -1,0 +1,9 @@
+:root{
+ --lv-font-body:Inter,"Avenir Next","Segoe UI",system-ui,sans-serif;
+ --lv-font-display:"DM Serif Display","Iowan Old Style",Georgia,serif;
+ --lv-type-xs:.75rem;--lv-type-sm:.875rem;--lv-type-md:1rem;--lv-type-lg:1.2rem;--lv-type-xl:1.55rem;
+ --lv-radius-sm:12px;--lv-radius-md:18px;--lv-radius-lg:26px;--lv-radius-xl:32px;
+ --lv-shadow-soft:0 12px 34px rgba(35,49,60,.06);--lv-shadow-float:0 24px 70px rgba(28,42,53,.16);
+}
+html,body{font-family:var(--lv-font-body);font-weight:400;letter-spacing:-.006em;text-rendering:optimizeLegibility;-webkit-font-smoothing:antialiased}
+body{line-height:1.58}h1,h2,h3,.lv-card h1,.lv-card h2,.lv-card h3{font-family:var(--lv-font-display)!important;font-weight:400!important;letter-spacing:-.025em!important;line-height:1.08!important}p,small,.lv-meta{line-height:1.58}.lv-card,.pf-card{border-radius:var(--lv-radius-lg)!important;box-shadow:var(--lv-shadow-soft)!important}.lv-primary,.lv-secondary,button{letter-spacing:-.01em}.lv-primary,.lv-secondary{font-weight:700!important;border-radius:14px!important}.lv-kicker,.pf-kicker{font-weight:800!important;letter-spacing:.13em!important}.pf-top h1{font-weight:400!important}.pf-side nav button,.pf-actions button,.pf-quick button,.pf-trip-toolbar button,.pf-savebar button{font-weight:700!important}.pf-card h2,.pf-card h3{font-weight:400!important}.pf-shell{box-shadow:var(--lv-shadow-float)!important}

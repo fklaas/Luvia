@@ -1,6 +1,6 @@
 (function(){
   'use strict';
-  const VERSION='3.1.0.3-auth-refresh-retry';
+  const VERSION='3.2.0-auth-refresh-retry';
   const DEFAULT_FUNCTION='luvia-gateway';
   const DEFAULT_TIMEOUT=12000;
   const ACTION_PATTERN=/^[a-z][a-z0-9]*(?:[._-][a-z0-9]+)*$/;
