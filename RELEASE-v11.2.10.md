@@ -1,4 +1,4 @@
-# Luvia 11.2.10 · Core 3.0.2.10
+# Luvia 11.2.11 · Core 3.0.2.11
 
 ## Stable Module Instance & Destination Preservation
 

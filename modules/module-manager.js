@@ -3,6 +3,7 @@
   const REGISTRY_KEY='parisTripRegistryV1', ID_KEY='parisIdentityV1';
   const catalog=[];
   const instances=new Map();
+  const pendingMounts=new Map();
   const defaults=['hero','assistant','liveMoments','apps','language','mobility','restaurants','budget','gallery','photoSpots','memories','dayPlans','review','travelBook','closing'];
   const reminderPresets=[['photo','📷 Familien- oder Gruppenfoto'],['localFood','🍽️ Etwas Typisches probieren'],['sunset','🌅 Einen Sonnenuntergang genießen'],['souvenir','🎁 Ein besonderes Souvenir finden'],['quietMoment','❤️ Einen stillen Lieblingsmoment festhalten']];
   const parse=(v,f)=>{try{const x=JSON.parse(v);return x==null?f:x}catch{return f}};
@@ -63,12 +64,20 @@
     let instance=instances.get(id);
     const roots=rootsFor(def);
     if(!instance){instance={id,def,roots,mounted:false,revision:0,lastTripId:null,lastContentSignature:null};instances.set(id,instance)}else instance.roots=roots;
+    if(!roots.length){
+      instance.mounted=false;
+      if(!pendingMounts.has(id)){
+        let attempts=0;const timer=setInterval(()=>{attempts++;const found=rootsFor(def);if(found.length||attempts>=40){clearInterval(timer);pendingMounts.delete(id);if(found.length){instance.roots=found;instance.lastContentSignature=null;mountModule(id,trip)}}},50);pendingMounts.set(id,timer);
+      }
+      return instance;
+    }
+    const pending=pendingMounts.get(id);if(pending){clearInterval(pending);pendingMounts.delete(id)}
     const contentRef=trip?.moduleContent?.[id]||null;
     let contentSignature='';try{contentSignature=JSON.stringify(contentRef||null)}catch{contentSignature=String(contentRef)}
     const shouldRender=typeof def.render==='function' && (!instance.mounted || instance.lastTripId!==(trip?.tripId||null) || instance.lastContentSignature!==contentSignature);
     if(shouldRender){
       if(instance.mounted){try{def.unmount?.(instance,{manager:api})}catch(e){console.error('Luvia Modul unmount vor Render fehlgeschlagen:',id,e)}instance.mounted=false}
-      try{def.render(instance,{trip,manager:api})}catch(e){console.error('Luvia Modul render fehlgeschlagen:',id,e)}
+      try{const rendered=def.render(instance,{trip,manager:api});if(rendered&&typeof rendered.then==='function')rendered.then(()=>{instance.roots=rootsFor(def);annotate(instance);applyContent(instance,trip);if(instance.roots.length&&!instance.mounted){try{def.mount?.(instance,{trip,manager:api});instance.mounted=true}catch(e){console.error('Luvia Modul mount nach Render fehlgeschlagen:',id,e)}}}).catch(e=>console.error('Luvia Modul render fehlgeschlagen:',id,e))}catch(e){console.error('Luvia Modul render fehlgeschlagen:',id,e)}
     }
     annotate(instance);applyContent(instance,trip);
     if(!instance.mounted){try{def.mount?.(instance,{trip,manager:api})}catch(e){console.error('Luvia Modul mount fehlgeschlagen:',id,e)}instance.mounted=true}

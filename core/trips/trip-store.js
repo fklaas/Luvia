@@ -20,8 +20,17 @@
       console.warn('[LuviaTripStore] Remote-Liste nicht verfügbar, lokaler Cache bleibt als Offline-Fallback aktiv.',error);
       return snapshot();
     }
-    const remote=sort((rows||[]).map(row=>migrator().normalize(row)).filter(t=>t.id));
+    let remote=sort((rows||[]).map(row=>migrator().normalize(row)).filter(t=>t.id));
     if(authoritative){
+      const cachedForRepair=new Map(state.trips.map(t=>[t.id,t]));
+      for(let i=0;i<remote.length;i++){
+        const cloudTrip=remote[i],cached=cachedForRepair.get(cloudTrip.id);
+        const cloudIncomplete=!cloudTrip.destination?.name||!cloudTrip.destination?.country||!cloudTrip.startDate||!cloudTrip.endDate;
+        const cacheComplete=Boolean(cached?.destination?.name&&(cached.destination.country||cached.destination.placeId)&&cached.startDate&&cached.endDate);
+        if(cloudIncomplete&&cacheComplete){
+          try{await window.LuviaLegacyParisCloud.saveProfile(client,cached);remote[i]=mergeTrip(cloudTrip,cached);console.info('[LuviaTripStore] Vollständiges lokales Reiseprofil einmalig nach Supabase repariert.',cloudTrip.id)}catch(error){console.warn('[LuviaTripStore] Cloud-Profil konnte nicht repariert werden.',error)}
+        }
+      }
       const previousActive=state.activeTripId;
       const cachedTrips=[...state.trips];
       // Eine unerwartet leere Cloud-Antwort darf einen bereits vorhandenen, gültigen
