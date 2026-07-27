@@ -1,6 +1,6 @@
 (() => {
   'use strict';
-  const VERSION='3.8.0';
+  const VERSION='3.8.1';
   const RULE_VERSION='restaurant-intelligence-1';
   const adapters=new Map(), providers=new Map(), contextSources=new Map(), constraints=new Map(), listeners=new Set(), cache=new Map();
   const DEFAULT_SETTINGS={enabled:true,personalization:true,useLocation:true,learning:true,debug:false,maxDistanceMeters:30000,minimumScore:0};

@@ -1,6 +1,6 @@
 (() => {
   'use strict';
-  const VERSION='3.8.0';
+  const VERSION='3.8.1';
   const listeners=new Set();
   const state={loading:false,tripId:null,restaurants:[],primary:null,nearby:null,reservationMissing:null,departure:null,betterAlternative:null,lastUpdatedAt:null,lastError:null};
   const clone=v=>v==null?v:JSON.parse(JSON.stringify(v));
@@ -11,6 +11,34 @@
   const minutesFor=(distance,mode='walk')=>{const n=meters(distance);if(n==null)return null;return Math.max(1,Math.ceil(n/(mode==='drive'?420:75))+(mode==='drive'?3:0))};
   const timeString=d=>`${String(d.getHours()).padStart(2,'0')}:${String(d.getMinutes()).padStart(2,'0')}`;
   const normalizeTime=value=>/^([01]\d|2[0-3]):[0-5]\d$/.test(String(value||''))?String(value):null;
+  const messageKey=value=>String(value||'').toLowerCase().replace(/[äÄ]/g,'ae').replace(/[öÖ]/g,'oe').replace(/[üÜ]/g,'ue').replace(/ß/g,'ss').replace(/[^a-z0-9]+/g,' ').trim();
+  function uniqueMessages(values=[],limit=6){
+    const result=[];
+    for(const raw of values){
+      const text=String(raw||'').replace(/^[✓•✨\s]+/,'').trim();
+      if(!text)continue;
+      const key=messageKey(text);
+      const concepts=new Set(key.split(' ').filter(word=>word.length>3));
+      const duplicate=result.some(existing=>{
+        const other=new Set(messageKey(existing).split(' ').filter(word=>word.length>3));
+        const overlap=[...concepts].filter(word=>other.has(word)).length;
+        const base=Math.min(concepts.size,other.size)||1;
+        return key===messageKey(existing)||overlap/base>=0.6;
+      });
+      if(!duplicate)result.push(text);
+      if(result.length>=limit)break;
+    }
+    return result;
+  }
+  function groupInsight(rec,score){
+    const participants=Array.isArray(rec?.groupMatch?.participants)?rec.groupMatch.participants:[];
+    const known=Number(rec?.contextSnapshot?.group?.memberCount||rec?.contextSnapshot?.group?.participants?.length||participants.length||1);
+    const evaluated=participants.length;
+    const groupScore=Number.isFinite(Number(rec?.groupMatch?.groupScore))?Number(rec.groupMatch.groupScore):Number(score||0);
+    if(evaluated<=1)return {score:groupScore,label:'Persönlicher Match',detail:known>1?`Aktuell ist 1 von ${known} Profilen auswertbar. Weitere Profile verfeinern den Gruppenwert.`:'Basierend auf deinen zentralen Reisepräferenzen.',complete:known<=1,evaluated,known};
+    return {score:groupScore,label:'Gruppen-Match',detail:`${evaluated} Profile wurden fair gewichtet. Schwächere Einzelmatches zählen bewusst stärker als ein einfacher Durchschnitt.`,complete:evaluated>=known,evaluated,known};
+  }
+
   function bestVisitTime(place,context={}){
     const explicit=normalizeTime(place?.recommendedVisitTime||place?.time||place?.reservationTime);
     if(explicit)return explicit;
@@ -37,15 +65,16 @@
     return {ok:true,label:'Passt zu eurem Budget'};
   }
   function suggestionLines(place,all=[]){
-    const distance=meters(place?.distanceMeters),walk=minutesFor(distance,'walk'),drive=minutesFor(distance,'drive');
+    const distance=meters(place?.distanceMeters),walk=minutesFor(distance,'walk');
     const best=bestVisitTime(place),departure=walk?new Date(new Date(`${new Date().toISOString().slice(0,10)}T${best}:00`).getTime()-walk*60000):null;
-    const primary=place?.openNow===false?'Dieses Restaurant ist geschlossen. Hier sind drei Alternativen.':'Dieses Restaurant passt heute am besten.';
-    const items=[primary];
-    if(reservationHint(place)==='Reservierung empfohlen')items.push('Jetzt reservieren.');
-    if(departure&&departure>now())items.push(`Ihr solltet um ${timeString(departure)} Uhr losgehen.`);
-    if(distance!=null&&distance<=1400)items.push('Dieses Restaurant liegt direkt auf eurem Weg.');
-    if(all.some(x=>x!==place&&meters(x.distanceMeters)!=null&&meters(x.distanceMeters)<distance))items.push('Eine nähere Alternative ist verfügbar.');
-    return items;
+    const items=[];
+    if(place?.openNow===false)items.push('Passende geöffnete Alternativen ansehen.');
+    else items.push('Für heute einplanen.');
+    if(reservationHint(place)==='Reservierung empfohlen'&&place?.reservationStatus!=='confirmed')items.push('Reservierung prüfen.');
+    if(departure&&departure>now())items.push(`Abfahrt gegen ${timeString(departure)} Uhr einplanen.`);
+    if(place?.openNow!==false&&distance!=null&&distance<=1400)items.push('Lässt sich gut mit eurem aktuellen Standort verbinden.');
+    if(all.some(x=>x!==place&&meters(x.distanceMeters)!=null&&meters(x.distanceMeters)<distance))items.push('Nähere Alternative vergleichen.');
+    return uniqueMessages(items,4);
   }
   function enrich(place,all=[],context={}){
     const rec=place?.recommendation||{};
@@ -69,7 +98,11 @@
       else if(candidate.openNow===true&&place.openNow===false)reason='Diese Alternative ist aktuell geöffnet.';
       return {...candidate,alternativeReason:reason};
     }).sort((a,b)=>(Number(b.matchScore)||0)-(Number(a.matchScore)||0)).slice(0,3);
-    return {...place,intelligence:{version:VERSION,score:Number(rec.score||place.matchScore||55),distanceLabel:formatDistance(distance),openLabel:place.openNow===true?'Heute geöffnet':place.openNow===false?'Heute geschlossen':'Öffnungszeiten prüfen',bestTime:best,reservationHint:reservationHint(place),babyLabel:baby.label,budgetLabel:budget.label,walkMinutes:walk,driveMinutes:drive,groupMatch:rec.groupMatch||null,participantMatches:rec.groupMatch?.participants||[],reasons:[...new Set(reasons)].slice(0,6),warnings:[...new Set(warnings)].slice(0,5),suggestions:suggestionLines(place,all),alternatives}};
+    const score=Number(rec.score||place.matchScore||55),group=groupInsight(rec,score);
+    const cleanReasons=uniqueMessages(reasons,4);
+    const warningKeys=new Set(uniqueMessages(warnings,4).map(messageKey));
+    const cleanWarnings=uniqueMessages(warnings,4).filter(w=>!cleanReasons.some(r=>{const a=messageKey(r),b=messageKey(w);return a===b||[...new Set(a.split(' '))].filter(x=>x.length>3&&b.includes(x)).length>=2}));
+    return {...place,intelligence:{version:VERSION,score,distanceLabel:formatDistance(distance),openLabel:place.openNow===true?'Heute geöffnet':place.openNow===false?'Heute geschlossen':'Öffnungszeiten prüfen',bestTime:best,reservationHint:reservationHint(place),babyLabel:baby.label,budgetLabel:budget.label,walkMinutes:walk,driveMinutes:drive,groupMatch:rec.groupMatch||null,groupInsight:group,participantMatches:rec.groupMatch?.participants||[],reasons:cleanReasons,warnings:cleanWarnings,suggestions:suggestionLines(place,all),alternatives}};
   }
   async function enhance(candidates=[],context={}){return candidates.map(p=>enrich(p,candidates,context))}
   function emit(){const snap=snapshot();listeners.forEach(fn=>{try{fn(snap)}catch{}});window.dispatchEvent(new CustomEvent('luvia:restaurant-intelligence-changed',{detail:snap}))}
