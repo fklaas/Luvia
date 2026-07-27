@@ -4,3 +4,13 @@
 @media(min-width:1900px){.lv-stage{width:min(1640px,100%)}.lv-grid{grid-template-columns:repeat(4,minmax(0,1fr))}}
 @media(min-width:721px) and (max-width:980px){.lv-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.lv-hero .lv-actions{display:grid;grid-template-columns:repeat(2,minmax(0,1fr))}.lv-hero .lv-actions>*{width:100%}}
 @media(max-width:520px){.lv-titleline{min-width:0}.lv-titleline>div{min-width:0}.lv-hero h1{font-size:clamp(32px,11vw,42px);overflow-wrap:anywhere}.lv-meta{display:grid;gap:7px}.lv-actions{display:grid;grid-template-columns:1fr}.lv-actions>*{width:100%}.lv-grid .lv-card{padding:18px}.lv-widget{min-height:unset}}
+
+/* Core 3.4.1: deterministic dashboard layout. Avoid intrinsic-content columns. */
+.lv-grid{grid-template-columns:repeat(2,minmax(0,1fr))!important;width:100%;}
+.lv-grid>.lv-widget{width:100%;max-width:none;min-width:0;}
+.lv-widget h2{word-break:normal;overflow-wrap:break-word;hyphens:auto;}
+.lv-widget p{word-break:normal;overflow-wrap:break-word;}
+.lv-member-chip{display:inline-flex;max-width:100%;margin:4px 5px 4px 0;padding:7px 10px;border-radius:999px;background:var(--lv-surface-soft);overflow-wrap:anywhere;}
+@media(max-width:720px){.lv-grid{grid-template-columns:minmax(0,1fr)!important;}}
+@media(min-width:1280px){.lv-stage{width:min(1320px,100%)}.lv-grid{grid-template-columns:repeat(3,minmax(0,1fr))!important;}}
+@media(min-width:1840px){.lv-stage{width:min(1660px,100%)}.lv-grid{grid-template-columns:repeat(4,minmax(0,1fr))!important;}}
