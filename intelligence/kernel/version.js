@@ -1,1 +1,1 @@
-window.LuviaKernelVersion=window.LuviaCoreVersion=Object.freeze({core:'3.5.2',build:'11.7.2',name:'Central Travel Preferences',channel:'production',builtAt:'2026-07-27T23:10:00+02:00'});
+window.LuviaKernelVersion=window.LuviaCoreVersion=Object.freeze({core:'3.6.0',build:'11.8.0',name:'Smart Recommendation Engine',channel:'production',builtAt:'2026-07-27T19:30:00+02:00'});

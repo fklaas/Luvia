@@ -5,12 +5,14 @@ import { enforceRateLimit } from './_shared/rate-limit.ts';
 import { log } from './_shared/logger.ts';
 import { placesAction, placesDiagnostics } from './_shared/places.ts';
 import { restaurantAction, restaurantDiagnostics } from './_shared/restaurants.ts';
+import { recommendationAction, recommendationDiagnostics } from './_shared/recommendations.ts';
 
 type GatewayBody={action?:string;payload?:unknown;context?:Record<string,unknown>};
 const ACTION_PATTERN=/^[a-z][a-z0-9]*(?:[._-][a-z0-9]+)*$/;
 const PUBLIC_ACTIONS=new Set(['system.health','places.health']);
 const PLACES_ACTIONS=new Set(['destination.resolve','places.health','places.text-search','places.nearby-search','places.autocomplete','places.details','places.photo']);
 const RESTAURANT_ACTIONS=new Set(['restaurant.health','restaurant.list','restaurant.import','restaurant.lifecycle.update','restaurant.feedback']);
+const RECOMMENDATION_ACTIONS=new Set(['recommendation.health','recommendation.store','recommendation.decision','recommendation.list']);
 
 Deno.serve(async(req:Request)=>{
   const id=requestId(req);
@@ -27,7 +29,7 @@ Deno.serve(async(req:Request)=>{
 
   const forwarded=req.headers.get('x-forwarded-for')?.split(',')[0]?.trim();
   const clientKey=forwarded||req.headers.get('cf-connecting-ip')||'unknown';
-  const rate=enforceRateLimit(`${clientKey}:${action}`,action==='system.health'?60:PLACES_ACTIONS.has(action)?45:RESTAURANT_ACTIONS.has(action)?30:30,60_000);
+  const rate=enforceRateLimit(`${clientKey}:${action}`,action==='system.health'?60:PLACES_ACTIONS.has(action)?45:RESTAURANT_ACTIONS.has(action)?30:RECOMMENDATION_ACTIONS.has(action)?60:30,60_000);
   if(!rate.allowed)return errorResponse(429,'RATE_LIMITED','Zu viele Anfragen.',id,{...cors,'Retry-After':String(rate.retryAfter)});
 
   const supabaseUrl=Deno.env.get('SUPABASE_URL')||'';
@@ -49,7 +51,7 @@ Deno.serve(async(req:Request)=>{
     let data:unknown;
     switch(action){
       case 'system.health':
-        data={status:'ok',service:'luvia-gateway',version:'3.5.1',time:new Date().toISOString(),authenticated:Boolean(userId),places:placesDiagnostics(),restaurants:restaurantDiagnostics()};
+        data={status:'ok',service:'luvia-gateway',version:'3.6.0',time:new Date().toISOString(),authenticated:Boolean(userId),places:placesDiagnostics(),restaurants:restaurantDiagnostics(),recommendations:recommendationDiagnostics()};
         break;
       default:
         if(PLACES_ACTIONS.has(action)){
@@ -64,6 +66,13 @@ Deno.serve(async(req:Request)=>{
           const durationMs=Math.round((performance.now()-started)*100)/100;
           log('info','gateway.restaurant.success',{requestId:id,action,userId,durationMs,alreadyAdded:Boolean(restaurants.data?.alreadyAdded),created:restaurants.data?.created||null});
           return jsonResponse(200,{ok:true,data:restaurants.data,meta:{requestId:id,action,durationMs}},cors);
+        }
+        if(RECOMMENDATION_ACTIONS.has(action)){
+          if(!userClient) return errorResponse(401,'AUTH_REQUIRED','Für diese Aktion ist eine Anmeldung erforderlich.',id,cors);
+          const recommendations=await recommendationAction(action,body.payload||{},userClient);
+          const durationMs=Math.round((performance.now()-started)*100)/100;
+          log('info','gateway.recommendation.success',{requestId:id,action,userId,durationMs});
+          return jsonResponse(200,{ok:true,data:recommendations.data,meta:{requestId:id,action,durationMs}},cors);
         }
         return errorResponse(404,'ACTION_NOT_FOUND','Aktion ist nicht freigeschaltet.',id,cors);
     }
