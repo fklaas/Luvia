@@ -1,13 +1,7 @@
 (function(){
 'use strict';
 const ID_KEY='parisIdentityV1';
-function newTrip(){
-  if(!confirm('Neue Reise einrichten? Die aktuelle Reise bleibt in deiner Übersicht gespeichert.'))return;
-  localStorage.setItem('parisForceNewTripV1','1');
-  localStorage.removeItem(ID_KEY);
-  localStorage.removeItem('parisSupabaseTripIdV2');
-  location.reload();
-}
+function newTrip(){window.LuviaTripCreator?.open?.()}
 function mountProfile(){
   const bar=document.getElementById('liveTripBar');
   if(!bar||bar.querySelector('.luvia-trip-profile'))return;

@@ -6,5 +6,5 @@
   async function boot({client=null,refreshRemote=true}={}){try{window.LuviaTripStore.initialize();if(auth().authenticated&&refreshRemote)await window.LuviaTripStore.loadRemote(client);return calculate()}catch(error){console.error('[LuviaRuntime] Boot fehlgeschlagen',error);return calculate(error)}}
   function refresh(){return calculate()}
   document.addEventListener('paris:auth-changed',refresh);window.addEventListener('luvia:trips-changed',refresh);
-  window.LuviaRuntime=Object.freeze({version:'2.13.0',boot,refresh,getSnapshot:()=>current,subscribe(fn){listeners.add(fn);fn(current);return()=>listeners.delete(fn)}});
+  window.LuviaRuntime=Object.freeze({version:'2.13.1',boot,refresh,getSnapshot:()=>current,subscribe(fn){listeners.add(fn);fn(current);return()=>listeners.delete(fn)}});
 })();

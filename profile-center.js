@@ -162,7 +162,7 @@
     if(window.ParisAuthUI?.render)window.ParisAuthUI.render(c);else c.innerHTML='<div class="pc-card">Kontomodul wird geladen …</div>';
   }else if(tab==='trips'){
     c.innerHTML=`<div class="pc-head"><div><h2>Meine Reisen</h2><p>Alle Reisen dieser Anmeldung aus der Cloud verwalten.</p></div><button class="pc-btn primary" data-new>＋ Neue Reise</button></div><div class="pc-note" style="margin-bottom:14px">Cloud-Reisen werden deinem aktuellen Konto zugeordnet. Anonyme Konten sollten im Bereich „Konto“ dauerhaft gesichert werden.</div><div class="pc-grid" data-list><div class="pc-empty">Cloud-Reisen werden geladen …</div></div>`;
-    c.querySelector('[data-new]').onclick=()=>{if(confirm('Neue Reise einrichten? Die aktuelle Reise bleibt in deiner Übersicht gespeichert.')){localStorage.setItem('parisForceNewTripV1','1');localStorage.removeItem(ID_KEY);localStorage.removeItem('parisSupabaseTripIdV2');location.reload()}};
+    c.querySelector('[data-new]').onclick=()=>window.LuviaTripCreator?.open?.();
     const remote=await cloudTrips(),list=mergeTrips(remote,registry()),box=c.querySelector('[data-list]');
     if(!list.length){box.innerHTML='<div class="pc-empty">Für diese Anmeldung wurden noch keine Reisen gefunden.</div>';return}
     box.innerHTML='';
