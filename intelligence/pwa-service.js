@@ -1,17 +1,18 @@
 (function(){
 'use strict';
-const VERSION='3.0.2-core-health';
-const BASE_URL=new URL('./',document.baseURI);
-const SW_URL=new URL('sw.js',BASE_URL).toString();
-const SW_SCOPE=BASE_URL.pathname;
-const EXPECTED_CACHE='luvia-shell-v11.2.0';
+const VERSION='3.0.2.1-pwa-root-fix';
+const SCRIPT_URL=new URL(document.currentScript?.src||'intelligence/pwa-service.js',document.baseURI);
+const APP_ROOT_URL=new URL('../',SCRIPT_URL);
+const SW_URL=new URL('sw.js',APP_ROOT_URL).toString();
+const SW_SCOPE=APP_ROOT_URL.pathname;
+const EXPECTED_CACHE='luvia-shell-v11.2.1';
 const listeners=new Set();
 let registration=null,deferredPrompt=null,updateAvailable=false,lastUpdateCheck=null,lastError=null;
 const standalone=()=>matchMedia('(display-mode: standalone)').matches||navigator.standalone===true;
 const ios=()=>/iphone|ipad|ipod/i.test(navigator.userAgent);
 const emit=()=>{const s=snapshot();listeners.forEach(fn=>{try{fn(s)}catch{}});window.dispatchEvent(new CustomEvent('luvia:pwa-state',{detail:s}))};
 function snapshot(){return{version:VERSION,supported:'serviceWorker'in navigator,registered:Boolean(registration),controller:Boolean(navigator.serviceWorker?.controller),scope:registration?.scope||null,installable:Boolean(deferredPrompt),installed:standalone(),standalone:standalone(),ios:ios(),online:navigator.onLine,updateAvailable,waiting:Boolean(registration?.waiting),installing:Boolean(registration?.installing),active:Boolean(registration?.active),lastUpdateCheck,lastError}};
-async function removeWrongRegistrations(){const regs=await navigator.serviceWorker.getRegistrations();for(const reg of regs){const script=reg.active?.scriptURL||reg.waiting?.scriptURL||reg.installing?.scriptURL||'';if(script.endsWith('/sw.js')&&reg.scope!==BASE_URL.toString())await reg.unregister()}}
+async function removeWrongRegistrations(){const regs=await navigator.serviceWorker.getRegistrations();for(const reg of regs){const script=reg.active?.scriptURL||reg.waiting?.scriptURL||reg.installing?.scriptURL||'';if(script.endsWith('/sw.js')&&reg.scope!==APP_ROOT_URL.toString())await reg.unregister()}}
 async function clearOldCaches(){if(!('caches'in window))return[];const keys=await caches.keys(),removed=[];for(const key of keys){if(key.startsWith('luvia-')&&key!==EXPECTED_CACHE){await caches.delete(key);removed.push(key)}}return removed}
 async function register(){if(!('serviceWorker'in navigator))return snapshot();try{await removeWrongRegistrations();await clearOldCaches();registration=await navigator.serviceWorker.register(SW_URL,{scope:SW_SCOPE,updateViaCache:'none'});bindRegistration(registration);await registration.update();await navigator.serviceWorker.ready;lastError=null;emit();return snapshot()}catch(e){lastError=e.message||String(e);emit();throw e}}
 function activateWaiting(reg){if(!reg?.waiting)return;updateAvailable=true;sessionStorage.setItem('luvia-pwa-reloading','1');reg.waiting.postMessage({type:'SKIP_WAITING'});emit()}
