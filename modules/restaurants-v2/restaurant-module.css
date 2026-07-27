@@ -422,7 +422,7 @@
 @media(max-width:680px){.rv2-context-bar{align-items:stretch;flex-direction:column}.rv2-context-bar button{width:100%}.rv2-lifecycle{grid-template-columns:1fr}.rv2-lifecycle strong{justify-self:start}}
 
 
-/* Core 3.5.1 · Restaurant Workspace */
+/* Core 3.5.2 · Central Travel Preferences */
 #restaurants-module .rv2-card{cursor:pointer;transition:transform .2s ease,box-shadow .2s ease,border-color .2s ease}
 #restaurants-module .rv2-card:hover{transform:translateY(-2px);box-shadow:0 20px 48px rgba(35,49,61,.13);border-color:color-mix(in srgb,var(--rv2-accent) 28%,#dde3e7)}
 #restaurants-module .rv2-card:focus-visible{outline:0;box-shadow:0 0 0 4px color-mix(in srgb,var(--rv2-accent) 18%,transparent),0 20px 48px rgba(35,49,61,.13)}

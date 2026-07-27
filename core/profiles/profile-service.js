@@ -15,5 +15,5 @@
   async function setActiveTrip(id){const p=await save({activeTripId:id||null});return p.activeTripId;}
   async function archiveTrip(id,archived=true){const set=new Set(state.profile?.archivedTripIds||[]);archived?set.add(id):set.delete(id);return save({archivedTripIds:[...set]});}
   function completion(){const p=state.profile||{};const fields=[p.displayName,p.avatarUrl,p.homeLocation,p.timezone,(p.dietaryPreferences||[]).length,(p.travelPreferences?.interests||[]).length];return Math.round(fields.filter(Boolean).length/fields.length*100);}
-  window.LuviaProfileService=Object.freeze({version:'1.1.0',load,save,setActiveTrip,archiveTrip,completion,snapshot:snap,subscribe(fn){listeners.add(fn);fn(snap());return()=>listeners.delete(fn)}});
+  window.LuviaProfileService=Object.freeze({version:'1.2.0',load,save,setActiveTrip,archiveTrip,completion,snapshot:snap,subscribe(fn){listeners.add(fn);fn(snap());return()=>listeners.delete(fn)}});
 })();
