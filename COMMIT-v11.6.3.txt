@@ -1,0 +1,1 @@
+fix: Luvia 11.6.3 Core 3.4.3 stabilize live collaboration bootstrap

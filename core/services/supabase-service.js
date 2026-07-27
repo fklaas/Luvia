@@ -9,7 +9,7 @@
     if(typeof factory!=='function')throw new Error('Supabase-Bibliothek wurde nicht geladen.');
     const key=c.publishableKey||c.supabaseKey||c.anonKey;
     if(!c.url||!key)throw new Error('Supabase-Konfiguration fehlt.');
-    client=factory(c.url,key,{auth:{persistSession:true,autoRefreshToken:true,detectSessionInUrl:true,flowType:'pkce'},global:{headers:{'x-client-info':'luvia/11.6.2'}}});
+    client=factory(c.url,key,{auth:{persistSession:true,autoRefreshToken:true,detectSessionInUrl:true,flowType:'pkce'},global:{headers:{'x-client-info':'luvia/11.6.3'}}});
     created+=1;window.ParisSupabaseClient=client;
     window.dispatchEvent(new CustomEvent('luvia:supabase-client-ready',{detail:{instances:created}}));
     return client;
