@@ -49,7 +49,7 @@ Deno.serve(async(req:Request)=>{
     let data:unknown;
     switch(action){
       case 'system.health':
-        data={status:'ok',service:'luvia-gateway',version:'3.5.0',time:new Date().toISOString(),authenticated:Boolean(userId),places:placesDiagnostics(),restaurants:restaurantDiagnostics()};
+        data={status:'ok',service:'luvia-gateway',version:'3.5.1',time:new Date().toISOString(),authenticated:Boolean(userId),places:placesDiagnostics(),restaurants:restaurantDiagnostics()};
         break;
       default:
         if(PLACES_ACTIONS.has(action)){

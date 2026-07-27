@@ -15,7 +15,7 @@ function dbPlace(place:any){
 }
 
 export async function restaurantAction(action:string,payload:any,client:SupabaseClient){
-  if(action==='restaurant.health')return{data:{status:'ok',service:'restaurant-lifecycle',version:'3.5.0',metrics:{...metrics}}};
+  if(action==='restaurant.health')return{data:{status:'ok',service:'restaurant-lifecycle',version:'3.5.1',metrics:{...metrics}}};
   if(action==='restaurant.list'){
     const tripId=String(payload?.tripId||''); if(!tripId)throw Object.assign(new Error('Trip-ID fehlt.'),{code:'TRIP_ID_REQUIRED',status:400});
     const {data,error}=await client.rpc('luvia_list_restaurant_entities',{p_trip_id:tripId});
@@ -51,4 +51,4 @@ export async function restaurantAction(action:string,payload:any,client:Supabase
     return{data:{success:true,...data,providerPlace:place}};
   }catch(error){metrics.failures++;metrics.lastError={at:new Date().toISOString(),message:error instanceof Error?error.message:String(error)};throw error;}
 }
-export function restaurantDiagnostics(){return{version:'3.5.0',metrics:{...metrics}};}
+export function restaurantDiagnostics(){return{version:'3.5.1',metrics:{...metrics}};}
