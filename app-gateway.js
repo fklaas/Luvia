@@ -44,14 +44,7 @@
   }
   async function ensureClient(){
     if(client)return client;
-    if(!window.supabase||!window.ParisSupabaseConfig)throw new Error('Anmeldung lädt noch.');
-    client=window.ParisSupabaseClient||window.supabase.createClient(
-      window.ParisSupabaseConfig.url,
-      window.ParisSupabaseConfig.publishableKey,
-      {auth:{persistSession:true,autoRefreshToken:true,detectSessionInUrl:true,flowType:'pkce'}}
-    );
-    window.ParisSupabaseClient=client;
-    await window.ParisAuth.init(client);
+    client=await window.LuviaSupabaseService.start();
     return client;
   }
   async function enterApp({freshLogin=false}={}){

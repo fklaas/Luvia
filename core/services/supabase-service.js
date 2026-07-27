@@ -1,30 +1,22 @@
 (() => {
   'use strict';
-  let client = null;
-  let startPromise = null;
+  let client=null,startPromise=null,created=0;
+  function config(){return window.ParisSupabaseConfig||window.LUVIA_AUTH_CONFIG||{};}
   function create(){
-    if(client) return client;
-    const factory = window.supabase?.createClient;
-    const config = window.ParisSupabaseConfig || window.LUVIA_AUTH_CONFIG;
-    if(typeof factory !== 'function') throw new Error('Supabase-Bibliothek wurde nicht geladen.');
-    if(!config?.url || !(config.publishableKey || config.supabaseKey)) throw new Error('Supabase-Konfiguration fehlt.');
-    client = factory(config.url, config.publishableKey || config.supabaseKey, {
-      auth: { persistSession:true, autoRefreshToken:true, detectSessionInUrl:true },
-      global: { headers: { 'x-client-info':'luvia-core-health-destination/11.2.0' } }
-    });
-    window.ParisSupabaseClient = client;
+    if(client)return client;
+    if(window.ParisSupabaseClient){client=window.ParisSupabaseClient;return client;}
+    const factory=window.supabase?.createClient,c=config();
+    if(typeof factory!=='function')throw new Error('Supabase-Bibliothek wurde nicht geladen.');
+    const key=c.publishableKey||c.supabaseKey||c.anonKey;
+    if(!c.url||!key)throw new Error('Supabase-Konfiguration fehlt.');
+    client=factory(c.url,key,{auth:{persistSession:true,autoRefreshToken:true,detectSessionInUrl:true,flowType:'pkce'},global:{headers:{'x-client-info':'luvia/11.3.0'}}});
+    created+=1;window.ParisSupabaseClient=client;
+    window.dispatchEvent(new CustomEvent('luvia:supabase-client-ready',{detail:{instances:created}}));
     return client;
   }
-  async function start(){
-    if(startPromise) return startPromise;
-    startPromise = (async()=>{
-      const c=create();
-      await window.ParisAuth.init(c);
-      return c;
-    })().catch(error=>{ startPromise=null; throw error; });
-    return startPromise;
-  }
-  async function rpc(name,params={}){const c=await start();const result=await c.rpc(name,params);if(result.error)throw result.error;return result.data}
-  function getClient(){return client}
-  window.LuviaSupabaseService=Object.freeze({version:'1.1.0',create,start,rpc,getClient});
+  async function start(){if(startPromise)return startPromise;startPromise=(async()=>{const c=create();await window.ParisAuth.init(c);return c})().catch(e=>{startPromise=null;throw e});return startPromise;}
+  async function rpc(name,params={}){const c=await start(),r=await c.rpc(name,params);if(r.error)throw r.error;return r.data;}
+  function getClient(){return client||window.ParisSupabaseClient||null;}
+  function diagnostics(){return Object.freeze({ready:Boolean(getClient()),instances:created || (window.ParisSupabaseClient?1:0),version:'2.0.0'});}
+  window.LuviaSupabaseService=Object.freeze({version:'2.0.0',create,start,rpc,getClient,diagnostics});
 })();

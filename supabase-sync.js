@@ -12,10 +12,8 @@
   const LIVE_KEY = 'parisLiveMomentsV2';
   const NOTES_KEY = 'parisGalleryNotesV2';
 
-  const client = window.ParisSupabaseClient || window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY, {
-    auth: { persistSession: true, autoRefreshToken: true, detectSessionInUrl: true, flowType: 'pkce' }
-  });
-  window.ParisSupabaseClient = client;
+  const client = window.LuviaSupabaseService?.getClient?.() || window.ParisSupabaseClient;
+  if(!client) throw new Error('Der zentrale Supabase-Client ist noch nicht bereit.');
 
   const originalSetItem = Storage.prototype.setItem;
   const originalRemoveItem = Storage.prototype.removeItem;

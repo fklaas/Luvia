@@ -3,13 +3,7 @@
   const VERSION='2.12.2-database-foundation';
   const REQUIRED=['destinations','trip_preferences','places','trip_places','restaurants','generated_content','media','recommendations','user_activity_events','automation_jobs'];
   function config(){const c=window.ParisSupabaseConfig||window.LUVIA_AUTH_CONFIG||{};return {url:c.url||c.supabaseUrl||'',key:c.publishableKey||c.anonKey||''};}
-  function client(){
-    if(window.ParisSupabaseClient)return window.ParisSupabaseClient;
-    const c=config();
-    if(!c.url||!c.key||!window.supabase)return null;
-    window.ParisSupabaseClient=window.supabase.createClient(c.url,c.key,{auth:{persistSession:true,autoRefreshToken:true,detectSessionInUrl:true}});
-    return window.ParisSupabaseClient;
-  }
+  function client(){return window.LuviaSupabaseService?.getClient?.()||window.ParisSupabaseClient||null;}
   async function check(){
     const c=client();
     if(!c)return {version:VERSION,connected:false,authenticated:false,installed:false,error:'Supabase-Client nicht verfügbar.'};
