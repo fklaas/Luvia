@@ -20,6 +20,16 @@
     const remote=sort((rows||[]).map(row=>migrator().normalize(row)).filter(t=>t.id));
     if(authoritative){
       const previousActive=state.activeTripId;
+      const cachedTrips=[...state.trips];
+      // Eine unerwartet leere Cloud-Antwort darf einen bereits vorhandenen, gültigen
+      // Geräte-Cache nicht zerstören. Auf einem neuen Gerät bleibt die Liste korrekt leer.
+      if(!remote.length&&cachedTrips.length){
+        state.loaded=true;
+        state.activeTripId=cachedTrips.some(t=>t.id===previousActive)?previousActive:(cachedTrips[0]?.id||null);
+        persist();
+        console.warn('[LuviaTripStore] Cloud lieferte keine Reisen; vorhandener Cache bleibt bis zur nächsten erfolgreichen Hydration erhalten.');
+        return emit('remote-empty-cache-preserved');
+      }
       state.trips=remote;
       state.activeTripId=remote.some(t=>t.id===previousActive)?previousActive:(remote[0]?.id||null);
       state.loaded=true;

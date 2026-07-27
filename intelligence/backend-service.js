@@ -1,6 +1,6 @@
 (function(){
   'use strict';
-  const VERSION='2.13.0-architecture-separation';
+  const VERSION='3.0.2.5-gateway-auth-contract';
   const DEFAULT_FUNCTION='luvia-gateway';
   const DEFAULT_TIMEOUT=12000;
   const ACTION_PATTERN=/^[a-z][a-z0-9]*(?:[._-][a-z0-9]+)*$/;
@@ -21,6 +21,7 @@
       timeoutMs:clamp(Number(runtime.timeoutMs)||DEFAULT_TIMEOUT,1000,30000),
       configured:Boolean(supabaseUrl),
       secureContext:window.isSecureContext===true,
+      publishableKey:String(source.publishableKey||source.supabaseKey||window.ParisSupabaseConfig?.publishableKey||''),
       clientBuild:window.LuviaCoreVersion?.build||'unknown'
     });
   }
@@ -79,6 +80,7 @@
     state.requests++;state.lastRequestAt=now();state.lastRequestId=requestId;
     const token=await accessToken();
     const headers={'Content-Type':'application/json','Accept':'application/json','X-Luvia-Request-Id':requestId,'X-Luvia-Client-Version':VERSION,'X-Luvia-Build':cfg.clientBuild};
+    if(cfg.publishableKey)headers.apikey=cfg.publishableKey;
     if(token)headers.Authorization=`Bearer ${token}`;
     emit('request.started',{requestId,action:safeAction,authenticated:Boolean(token)});
     try{
