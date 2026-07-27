@@ -15,12 +15,25 @@ function dbPlace(place:any){
 }
 
 export async function restaurantAction(action:string,payload:any,client:SupabaseClient){
-  if(action==='restaurant.health')return{data:{status:'ok',service:'restaurant-import',version:'2.12.4.3',metrics:{...metrics}}};
+  if(action==='restaurant.health')return{data:{status:'ok',service:'restaurant-lifecycle',version:'3.5.0',metrics:{...metrics}}};
   if(action==='restaurant.list'){
     const tripId=String(payload?.tripId||''); if(!tripId)throw Object.assign(new Error('Trip-ID fehlt.'),{code:'TRIP_ID_REQUIRED',status:400});
     const {data,error}=await client.rpc('luvia_list_restaurant_entities',{p_trip_id:tripId});
     if(error)throw Object.assign(new Error(error.message||'Restaurants konnten nicht geladen werden.'),{code:'RESTAURANT_LIST_FAILED',status:400});
     metrics.lists++; return{data:{entities:Array.isArray(data)?data:[]}};
+  }
+  if(action==='restaurant.lifecycle.update'){
+    const tripId=String(payload?.tripId||''),tripPlaceId=String(payload?.tripPlaceId||''),status=String(payload?.status||'');
+    if(!tripId||!tripPlaceId||!status)throw Object.assign(new Error('Trip-ID, Restaurant-Verknüpfung und Status werden benötigt.'),{code:'LIFECYCLE_INPUT_REQUIRED',status:400});
+    const {data,error}=await client.rpc('luvia_update_restaurant_lifecycle',{p_trip_id:tripId,p_trip_place_id:tripPlaceId,p_status:status,p_patch:payload?.patch||{}});
+    if(error)throw Object.assign(new Error(error.message||'Restaurantstatus konnte nicht gespeichert werden.'),{code:'LIFECYCLE_UPDATE_FAILED',status:400});
+    return{data};
+  }
+  if(action==='restaurant.feedback'){
+    const tripId=String(payload?.tripId||'');if(!tripId)throw Object.assign(new Error('Trip-ID fehlt.'),{code:'TRIP_ID_REQUIRED',status:400});
+    const {data,error}=await client.rpc('luvia_record_place_recommendation_feedback',{p_trip_id:tripId,p_place_id:payload?.placeId||null,p_provider_place_id:payload?.providerPlaceId||null,p_decision:payload?.decision||'shown',p_match_score:payload?.matchScore??null,p_reasons:payload?.reasons||[],p_context:payload?.context||{}});
+    if(error)throw Object.assign(new Error(error.message||'Empfehlungsentscheidung konnte nicht gespeichert werden.'),{code:'FEEDBACK_FAILED',status:400});
+    return{data:{id:data}};
   }
   if(action!=='restaurant.import')throw Object.assign(new Error('Restaurant-Aktion unbekannt.'),{code:'ACTION_NOT_FOUND',status:404});
   const tripId=String(payload?.tripId||''); const providerPlaceId=String(payload?.providerPlaceId||payload?.placeId||'').replace(/^places\//,'');
@@ -38,4 +51,4 @@ export async function restaurantAction(action:string,payload:any,client:Supabase
     return{data:{success:true,...data,providerPlace:place}};
   }catch(error){metrics.failures++;metrics.lastError={at:new Date().toISOString(),message:error instanceof Error?error.message:String(error)};throw error;}
 }
-export function restaurantDiagnostics(){return{version:'2.12.4.3',metrics:{...metrics}};}
+export function restaurantDiagnostics(){return{version:'3.5.0',metrics:{...metrics}};}

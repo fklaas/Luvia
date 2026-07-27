@@ -10,7 +10,7 @@ type GatewayBody={action?:string;payload?:unknown;context?:Record<string,unknown
 const ACTION_PATTERN=/^[a-z][a-z0-9]*(?:[._-][a-z0-9]+)*$/;
 const PUBLIC_ACTIONS=new Set(['system.health','places.health']);
 const PLACES_ACTIONS=new Set(['destination.resolve','places.health','places.text-search','places.nearby-search','places.autocomplete','places.details','places.photo']);
-const RESTAURANT_ACTIONS=new Set(['restaurant.health','restaurant.list','restaurant.import']);
+const RESTAURANT_ACTIONS=new Set(['restaurant.health','restaurant.list','restaurant.import','restaurant.lifecycle.update','restaurant.feedback']);
 
 Deno.serve(async(req:Request)=>{
   const id=requestId(req);
@@ -49,7 +49,7 @@ Deno.serve(async(req:Request)=>{
     let data:unknown;
     switch(action){
       case 'system.health':
-        data={status:'ok',service:'luvia-gateway',version:'3.0.2.13',time:new Date().toISOString(),authenticated:Boolean(userId),places:placesDiagnostics(),restaurants:restaurantDiagnostics()};
+        data={status:'ok',service:'luvia-gateway',version:'3.5.0',time:new Date().toISOString(),authenticated:Boolean(userId),places:placesDiagnostics(),restaurants:restaurantDiagnostics()};
         break;
       default:
         if(PLACES_ACTIONS.has(action)){

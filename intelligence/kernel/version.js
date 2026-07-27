@@ -1,1 +1,1 @@
-window.LuviaKernelVersion=window.LuviaCoreVersion=Object.freeze({core:'3.4.3',build:'11.6.3',name:'Luvia Live Bootstrap Stability',channel:'production',builtAt:'2026-07-27T20:15:00+02:00'});
+window.LuviaKernelVersion=window.LuviaCoreVersion=Object.freeze({core:'3.5.0',build:'11.7.0',name:'Luvia Live Travel Context & Restaurant Lifecycle',channel:'production',builtAt:'2026-07-27T21:20:00+02:00'});
