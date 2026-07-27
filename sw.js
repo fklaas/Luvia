@@ -1,8 +1,8 @@
-const CACHE='luvia-shell-v11.4.0';
+const CACHE='luvia-shell-v11.5.0';
 const SCOPE=new URL(self.registration.scope);
 const scoped=path=>new URL(path.replace(/^\/+/,''),SCOPE).toString();
 const OFFLINE=scoped('offline.html');
-const APP_SHELL=['','index.html','offline.html','manifest.webmanifest','icon-192.png','icon-512.png','favicon.svg','favicon.ico','luvia-logo.svg','app/app-shell.css','app/app-shell.js','core/services/supabase-service.js','core/services/theme-service.js','core/storage/storage.js','core/legacy/paris-migrator.js','legacy/paris/cloud-adapter.js','core/trips/trip-store.js','core/trips/trip-creator.js','core/trips/trip-experience.js','core/runtime/runtime.js','core/modules/module-registry.js','modules/restaurants-v2/restaurant-module.css','modules/restaurants-v2/restaurant-module.js','intelligence/environment.js','intelligence/destination-service.js','intelligence/destination-context.js','intelligence/backend-service.js','intelligence/places-service.js','intelligence/restaurant-service.js','intelligence/pwa-service.js'].map(scoped);
+const APP_SHELL=['','index.html','offline.html','manifest.webmanifest','icon-192.png','icon-512.png','favicon.svg','favicon.ico','luvia-logo.svg','app/app-shell.css','app/app-shell.js','core/design/design-system-v3.css','core/ui/ui-kit.js','core/services/supabase-service.js','core/services/theme-service.js','core/storage/storage.js','core/legacy/paris-migrator.js','legacy/paris/cloud-adapter.js','core/trips/trip-store.js','core/trips/trip-creator.js','core/trips/trip-experience.js','core/runtime/runtime.js','core/modules/module-registry.js','modules/restaurants-v2/restaurant-module.css','modules/restaurants-v2/restaurant-module.js','intelligence/environment.js','intelligence/destination-service.js','intelligence/destination-context.js','intelligence/backend-service.js','intelligence/places-service.js','intelligence/restaurant-service.js','intelligence/pwa-service.js'].map(scoped);
 
 self.addEventListener('install',event=>{
   event.waitUntil((async()=>{

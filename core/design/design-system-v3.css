@@ -1,0 +1,102 @@
+/* Luvia Design Language V3 — one modern, soft and extensible UI system. */
+:root{
+  --lv-font-sans:"Manrope","Inter","Avenir Next","Segoe UI",system-ui,-apple-system,BlinkMacSystemFont,sans-serif;
+  --lv-font-body:var(--lv-font-sans);
+  --lv-font-display:var(--lv-font-sans);
+  --lv-font-mono:"SFMono-Regular",Consolas,"Liberation Mono",monospace;
+  --lv-type-2xs:.6875rem;--lv-type-xs:.75rem;--lv-type-sm:.875rem;--lv-type-md:1rem;--lv-type-lg:1.125rem;
+  --lv-type-xl:1.375rem;--lv-type-2xl:clamp(1.7rem,3vw,2.25rem);--lv-type-display:clamp(2.35rem,6vw,4.25rem);
+  --lv-weight-regular:400;--lv-weight-medium:500;--lv-weight-semibold:600;--lv-weight-bold:700;
+  --lv-leading-tight:1.08;--lv-leading-heading:1.18;--lv-leading-body:1.64;
+  --lv-space-1:4px;--lv-space-2:8px;--lv-space-3:12px;--lv-space-4:16px;--lv-space-5:20px;--lv-space-6:24px;
+  --lv-space-8:32px;--lv-space-10:40px;--lv-space-12:48px;--lv-space-16:64px;
+  --lv-radius-xs:10px;--lv-radius-sm:14px;--lv-radius-md:18px;--lv-radius-lg:24px;--lv-radius-xl:30px;--lv-radius-pill:999px;
+  --lv-shadow-card:0 14px 40px rgba(41,49,67,.065);--lv-shadow-float:0 28px 90px rgba(31,38,53,.18);
+  --lv-shadow-control:0 5px 16px rgba(41,49,67,.055);
+  --lv-motion-fast:140ms;--lv-motion-base:220ms;--lv-motion-slow:360ms;
+  --lv-ease:cubic-bezier(.22,.72,.2,1);--lv-ease-out:cubic-bezier(.16,1,.3,1);
+  --lv-grid-columns:12;--lv-grid-gap:20px;--lv-content-max:1180px;
+}
+*{box-sizing:border-box}
+html,body{font-family:var(--lv-font-body)!important;font-weight:var(--lv-weight-regular);letter-spacing:-.012em;text-rendering:optimizeLegibility;-webkit-font-smoothing:antialiased}
+body{line-height:var(--lv-leading-body)}
+:is(h1,h2,h3,h4,h5,h6,.lv11-trip strong,.lv11-hero h1,.lv11-card h2,.pf-top h1,.pf-card h2,.pf-card h3,.ltx-head h2,.ltx-preview h3,.ltx-section h3,#restaurants-module h1,#restaurants-module h2,#restaurants-module h3){font-family:var(--lv-font-display)!important;font-style:normal!important;letter-spacing:-.04em!important;color:var(--lv-text,#263b4b)}
+h1{font-size:var(--lv-type-display);font-weight:var(--lv-weight-semibold)!important;line-height:var(--lv-leading-tight)!important}
+h2{font-size:var(--lv-type-2xl);font-weight:var(--lv-weight-semibold)!important;line-height:var(--lv-leading-heading)!important}
+h3{font-size:var(--lv-type-xl);font-weight:var(--lv-weight-semibold)!important;line-height:var(--lv-leading-heading)!important}
+p{line-height:var(--lv-leading-body);letter-spacing:-.012em}
+small,.lv-meta{line-height:1.48}
+button,input,select,textarea{font-family:var(--lv-font-body)!important}
+button{font-weight:var(--lv-weight-semibold)!important;letter-spacing:-.018em!important}
+.lv-kicker,.pf-kicker,.ltx-kicker,.lv11-kicker,#restaurants-module [class*="kicker"]{font-family:var(--lv-font-body)!important;font-size:var(--lv-type-2xs)!important;font-weight:var(--lv-weight-bold)!important;letter-spacing:.12em!important;text-transform:uppercase}
+
+/* Foundation surfaces: use either a quiet border or shadow, never both heavily. */
+:is(.lv-card,.lv11-card,.pf-card,.ltx-preview,.ltx-section-card,.restaurant-result-card){border-radius:var(--lv-radius-lg)!important;box-shadow:var(--lv-shadow-card)!important}
+:is(.lv11-card,.pf-card,.restaurant-result-card){border-color:color-mix(in srgb,var(--lv-line,#dfe5e8) 62%,transparent)!important}
+
+/* Controls */
+:is(.lv-primary,.lv-secondary,.lv11-primary,.lv11-secondary,.ltx-btn,.pf-actions button,.pf-quick button,.pf-trip-toolbar button,.pf-savebar button){min-height:44px;border-radius:var(--lv-radius-sm)!important;padding-inline:18px!important;font-weight:var(--lv-weight-semibold)!important;box-shadow:none;transition:transform var(--lv-motion-fast) var(--lv-ease),box-shadow var(--lv-motion-base) var(--lv-ease),background var(--lv-motion-base) var(--lv-ease)}
+:is(.lv-primary,.lv11-primary,.ltx-btn.primary):hover{transform:translateY(-1px);box-shadow:var(--lv-shadow-control)}
+:is(button,[role="button"]):active{transform:scale(.985)}
+:is(input,select,textarea){border-radius:var(--lv-radius-sm)!important;font-size:.95rem!important;font-weight:var(--lv-weight-medium)!important;letter-spacing:-.014em!important}
+:is(input,select,textarea):focus{outline:none;box-shadow:0 0 0 4px color-mix(in srgb,var(--trip-accent,var(--lv-accent,#e96f87)) 12%,transparent)!important}
+
+/* App shell */
+#luviaV11Root{font-family:var(--lv-font-body)!important}
+.lv11-head{padding:15px 22px!important}
+.lv11-trip strong{font-size:1.08rem!important;font-weight:var(--lv-weight-bold)!important;line-height:1.2!important;letter-spacing:-.03em!important}
+.lv11-hero{padding:clamp(24px,4vw,38px)!important;border-radius:var(--lv-radius-xl)!important;box-shadow:var(--lv-shadow-card)!important}
+.lv11-hero h1{font-size:var(--lv-type-display)!important;font-weight:var(--lv-weight-semibold)!important;line-height:.98!important}
+.lv11-symbol{border-radius:20px!important;box-shadow:var(--lv-shadow-control)!important}
+.lv11-meta{font-size:.95rem;gap:7px!important}
+.lv11-meta span{font-weight:var(--lv-weight-medium);background:color-mix(in srgb,#fff 68%,transparent)!important}
+.lv11-card{padding:clamp(20px,3vw,28px)!important}
+.lv11-card h2{font-size:1.35rem!important;font-weight:var(--lv-weight-semibold)!important;margin-bottom:10px!important}
+.lv11-card p{font-size:.97rem;line-height:1.7!important}
+.lv11-nav{font-weight:var(--lv-weight-semibold)!important}
+
+/* Profile Foundation */
+.pf-shell{border-radius:var(--lv-radius-xl)!important;box-shadow:var(--lv-shadow-float)!important}
+.pf-top h1{font-size:clamp(2rem,4vw,3rem)!important;font-weight:var(--lv-weight-semibold)!important}
+.pf-side nav button,.pf-actions button,.pf-quick button,.pf-trip-toolbar button,.pf-savebar button{font-weight:var(--lv-weight-semibold)!important}
+.pf-card h2,.pf-card h3{font-weight:var(--lv-weight-semibold)!important;letter-spacing:-.035em!important}
+
+/* Trip editor */
+.ltx-modal{font-family:var(--lv-font-body)!important}
+.ltx-card{border-radius:var(--lv-radius-xl)!important;box-shadow:var(--lv-shadow-float)!important}
+.ltx-head{padding:28px 32px 23px!important}
+.ltx-head h2{font-size:clamp(1.8rem,4vw,2.55rem)!important;font-weight:var(--lv-weight-semibold)!important;line-height:1.08!important}
+.ltx-body{padding:28px 32px 10px!important}
+.ltx-preview h3{font-size:1.45rem!important;font-weight:var(--lv-weight-semibold)!important}
+.ltx-section h3{font-size:1.2rem!important;font-weight:var(--lv-weight-semibold)!important}
+.ltx-field label{font-weight:var(--lv-weight-semibold)!important;letter-spacing:-.01em}
+.ltx-color-choice{font-weight:var(--lv-weight-medium)!important}
+.ltx-custom-color span{display:grid;gap:2px}.ltx-custom-color b{font-weight:var(--lv-weight-semibold)!important}.ltx-custom-color small{font-size:.78rem;color:var(--lv-muted,#71818e)}
+
+/* Module framework */
+.lv-module{width:min(100%,var(--lv-content-max));margin-inline:auto;display:grid;gap:var(--lv-space-6)}
+.lv-module-hero{display:grid;gap:var(--lv-space-3);padding-block:var(--lv-space-4)}
+.lv-module-title{margin:0;font-size:clamp(2rem,5vw,3.55rem);font-weight:var(--lv-weight-semibold);line-height:1.02}
+.lv-module-subtitle{max-width:68ch;margin:0;color:var(--lv-muted,#71818e)}
+.lv-module-toolbar{display:flex;align-items:center;gap:var(--lv-space-3);flex-wrap:wrap}
+.lv-module-content{display:grid;gap:var(--lv-space-5)}
+.lv-ui-card{border:1px solid color-mix(in srgb,var(--lv-line,#dfe5e8) 64%,transparent);border-radius:var(--lv-radius-lg);background:var(--lv-surface,#fff);padding:var(--lv-space-6);box-shadow:var(--lv-shadow-card)}
+.lv-ui-chip{display:inline-flex;align-items:center;gap:7px;min-height:38px;padding:0 14px;border:0;border-radius:var(--lv-radius-pill);background:var(--lv-surface-soft,#f4f5f7);color:var(--lv-text);font-size:.84rem;font-weight:var(--lv-weight-semibold);cursor:pointer;transition:all var(--lv-motion-base) var(--lv-ease)}
+.lv-ui-chip[aria-pressed="true"],.lv-ui-chip.is-active{background:color-mix(in srgb,var(--trip-accent,var(--lv-accent,#e96f87)) 13%,var(--lv-surface,#fff));color:color-mix(in srgb,var(--trip-accent,var(--lv-accent,#e96f87)) 75%,#192c3a)}
+.lv-ui-empty,.lv-ui-error,.lv-ui-loading{display:grid;place-items:center;min-height:210px;padding:var(--lv-space-8);text-align:center;border-radius:var(--lv-radius-lg);background:var(--lv-surface-soft,#f7f8f9);color:var(--lv-muted,#71818e)}
+.lv-ui-skeleton{position:relative;overflow:hidden;border-radius:var(--lv-radius-sm);background:color-mix(in srgb,var(--lv-line,#dfe5e8) 65%,transparent)}
+.lv-ui-skeleton:after{content:"";position:absolute;inset:0;transform:translateX(-100%);background:linear-gradient(90deg,transparent,rgba(255,255,255,.65),transparent);animation:lv-shimmer 1.35s infinite}@keyframes lv-shimmer{to{transform:translateX(100%)}}
+
+/* Restaurant module adopts the same language without changing its behavior. */
+#restaurants-module{font-family:var(--lv-font-body)!important}
+#restaurants-module :is(h1,h2,h3){font-family:var(--lv-font-body)!important;font-weight:var(--lv-weight-semibold)!important;letter-spacing:-.04em!important}
+#restaurants-module h1{font-size:clamp(2.25rem,5.6vw,4rem)!important;line-height:1!important}
+#restaurants-module button{font-weight:var(--lv-weight-semibold)!important}
+#restaurants-module [class*="card"],#restaurants-module [class*="panel"]{border-radius:var(--lv-radius-lg)!important}
+
+/* Responsive grid */
+.lv-grid{display:grid;grid-template-columns:repeat(12,minmax(0,1fr));gap:var(--lv-grid-gap)}
+.lv-span-12{grid-column:span 12}.lv-span-8{grid-column:span 8}.lv-span-6{grid-column:span 6}.lv-span-4{grid-column:span 4}.lv-span-3{grid-column:span 3}
+@media(max-width:980px){:root{--lv-grid-columns:8;--lv-grid-gap:16px}.lv-span-8,.lv-span-6{grid-column:span 8}.lv-span-4,.lv-span-3{grid-column:span 4}}
+@media(max-width:640px){:root{--lv-grid-columns:4;--lv-grid-gap:12px}.lv-grid>[class*="lv-span-"]{grid-column:span 4}.ltx-head{padding:22px 20px 18px!important}.ltx-body{padding:22px 20px 8px!important}.lv11-hero{padding:22px!important}}
+@media(prefers-reduced-motion:reduce){*,*:before,*:after{scroll-behavior:auto!important;animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important}}
