@@ -1,0 +1,101 @@
+(() => {
+  'use strict';
+  const VERSION='3.8.0';
+  const listeners=new Set();
+  const state={loading:false,tripId:null,restaurants:[],primary:null,nearby:null,reservationMissing:null,departure:null,betterAlternative:null,lastUpdatedAt:null,lastError:null};
+  const clone=v=>v==null?v:JSON.parse(JSON.stringify(v));
+  const now=()=>new Date();
+  const tripId=()=>String(window.LuviaTripContext?.getActiveTrip?.()?.tripId||window.LuviaTripStore?.snapshot?.()?.activeTripId||'');
+  const meters=v=>Number.isFinite(Number(v))?Number(v):null;
+  const formatDistance=v=>{const n=meters(v);if(n==null)return null;return n<1000?`${Math.round(n)} m`:`${(n/1000).toFixed(1).replace('.',',')} km`};
+  const minutesFor=(distance,mode='walk')=>{const n=meters(distance);if(n==null)return null;return Math.max(1,Math.ceil(n/(mode==='drive'?420:75))+(mode==='drive'?3:0))};
+  const timeString=d=>`${String(d.getHours()).padStart(2,'0')}:${String(d.getMinutes()).padStart(2,'0')}`;
+  const normalizeTime=value=>/^([01]\d|2[0-3]):[0-5]\d$/.test(String(value||''))?String(value):null;
+  function bestVisitTime(place,context={}){
+    const explicit=normalizeTime(place?.recommendedVisitTime||place?.time||place?.reservationTime);
+    if(explicit)return explicit;
+    const current=now(),hour=current.getHours();
+    if(context.intent==='now'||hour>=17)return hour<18?'18:15':hour<20?timeString(new Date(current.getTime()+45*60000)):'20:15';
+    return '18:45';
+  }
+  function reservationHint(place){
+    if(place?.reservationStatus==='confirmed'||place?.reservationStatus==='reserved'||place?.lifecycleStatus==='reserved')return 'Reservierung bestätigt';
+    if(place?.features?.reservable===true||place?.requiresReservation===true||Number(place?.rating)>=4.5)return 'Reservierung empfohlen';
+    return 'Spontaner Besuch möglich';
+  }
+  function babyFit(place){
+    if(place?.features?.childrenAllowed===false)return {ok:false,label:'Nicht für Baby oder Kinder bestätigt'};
+    const text=[place?.name,place?.editorialSummary,...(place?.types||[])].join(' ').toLowerCase();
+    if(place?.features?.childrenAllowed===true||place?.features?.strollerFriendly===true||/family|famil|casual|café|cafe/.test(text))return {ok:true,label:'Gut mit Baby geeignet'};
+    return {ok:null,label:'Baby-Eignung noch nicht bestätigt'};
+  }
+  function budgetFit(place){
+    const budget=window.LuviaTravelPreferences?.context?.('restaurants')?.group?.budget||'balanced';
+    const p=String(place?.priceLevel||'');
+    const expensive=/EXPENSIVE|VERY_EXPENSIVE|^[34]$/.test(p);
+    if(expensive&&/low|spar|günstig/i.test(String(budget)))return {ok:false,label:'Über eurem bevorzugten Budget'};
+    return {ok:true,label:'Passt zu eurem Budget'};
+  }
+  function suggestionLines(place,all=[]){
+    const distance=meters(place?.distanceMeters),walk=minutesFor(distance,'walk'),drive=minutesFor(distance,'drive');
+    const best=bestVisitTime(place),departure=walk?new Date(new Date(`${new Date().toISOString().slice(0,10)}T${best}:00`).getTime()-walk*60000):null;
+    const primary=place?.openNow===false?'Dieses Restaurant ist geschlossen. Hier sind drei Alternativen.':'Dieses Restaurant passt heute am besten.';
+    const items=[primary];
+    if(reservationHint(place)==='Reservierung empfohlen')items.push('Jetzt reservieren.');
+    if(departure&&departure>now())items.push(`Ihr solltet um ${timeString(departure)} Uhr losgehen.`);
+    if(distance!=null&&distance<=1400)items.push('Dieses Restaurant liegt direkt auf eurem Weg.');
+    if(all.some(x=>x!==place&&meters(x.distanceMeters)!=null&&meters(x.distanceMeters)<distance))items.push('Eine nähere Alternative ist verfügbar.');
+    return items;
+  }
+  function enrich(place,all=[],context={}){
+    const rec=place?.recommendation||{};
+    const distance=meters(place?.distanceMeters),walk=minutesFor(distance,'walk'),drive=minutesFor(distance,'drive');
+    const baby=babyFit(place),budget=budgetFit(place),best=rec.suggestedTime||bestVisitTime(place,context);
+    const reasons=[...(rec.reasons||[])];
+    if(distance!=null&&distance<=1500)reasons.push('Sehr gut von eurem aktuellen Standort erreichbar.');
+    if(place?.openNow===true)reasons.push('Heute geöffnet und aktuell erreichbar.');
+    if(baby.ok===true)reasons.push('Passt zu eurer Reise mit Baby oder Kind.');
+    if(budget.ok===true)reasons.push('Das Preisniveau passt zu eurem Budgetstil.');
+    const warnings=[...(rec.warnings||[])];
+    if(place?.openNow===false)warnings.push('Das Restaurant ist aktuell geschlossen.');
+    if(baby.ok===null)warnings.push('Baby- und Kinderwageneignung ist noch nicht bestätigt.');
+    if(budget.ok===false)warnings.push(budget.label+'.');
+    const alternatives=all.filter(x=>x!==place&&String(x.id||x.providerPlaceId)!==String(place.id||place.providerPlaceId)).map(candidate=>{
+      const cd=meters(candidate.distanceMeters),cp=String(candidate.priceLevel||''),pp=String(place.priceLevel||'');
+      let reason='Ähnlicher Stil';
+      if(cd!=null&&distance!=null&&cd<distance)reason='Diese Alternative ist näher.';
+      else if(cp&&pp&&cp<pp)reason='Diese Alternative ist günstiger.';
+      else if(babyFit(candidate).ok===true&&baby.ok!==true)reason='Diese Alternative passt besser mit Baby.';
+      else if(candidate.openNow===true&&place.openNow===false)reason='Diese Alternative ist aktuell geöffnet.';
+      return {...candidate,alternativeReason:reason};
+    }).sort((a,b)=>(Number(b.matchScore)||0)-(Number(a.matchScore)||0)).slice(0,3);
+    return {...place,intelligence:{version:VERSION,score:Number(rec.score||place.matchScore||55),distanceLabel:formatDistance(distance),openLabel:place.openNow===true?'Heute geöffnet':place.openNow===false?'Heute geschlossen':'Öffnungszeiten prüfen',bestTime:best,reservationHint:reservationHint(place),babyLabel:baby.label,budgetLabel:budget.label,walkMinutes:walk,driveMinutes:drive,groupMatch:rec.groupMatch||null,participantMatches:rec.groupMatch?.participants||[],reasons:[...new Set(reasons)].slice(0,6),warnings:[...new Set(warnings)].slice(0,5),suggestions:suggestionLines(place,all),alternatives}};
+  }
+  async function enhance(candidates=[],context={}){return candidates.map(p=>enrich(p,candidates,context))}
+  function emit(){const snap=snapshot();listeners.forEach(fn=>{try{fn(snap)}catch{}});window.dispatchEvent(new CustomEvent('luvia:restaurant-intelligence-changed',{detail:snap}))}
+  async function refresh(options={}){
+    const id=String(options.tripId||tripId());if(!id||!window.LuviaRestaurants?.list)return snapshot();if(!options.force&&state.tripId===id&&state.lastUpdatedAt&&Date.now()-new Date(state.lastUpdatedAt).getTime()<30000)return snapshot();if(state.loading)return snapshot();
+    state.loading=true;state.tripId=id;emit();
+    try{
+      const response=await window.LuviaRestaurants.list({tripId:id});
+      const entries=(response?.data?.entities||[]).map(window.LuviaRestaurants.entityToEntry);
+      const enriched=await enhance(entries,{intent:'dashboard'});
+      const active=enriched.filter(x=>!['visited','rated','memory','travel_book'].includes(x.lifecycleStatus));
+      const sorted=[...active].sort((a,b)=>(Number(b.intelligence?.score)||0)-(Number(a.intelligence?.score)||0));
+      const primary=sorted.find(x=>x.date===new Date().toISOString().slice(0,10))||sorted[0]||null;
+      const nearby=[...active].filter(x=>meters(x.distanceMeters)!=null).sort((a,b)=>a.distanceMeters-b.distanceMeters)[0]||null;
+      const reservationMissing=active.find(x=>['planned','favorited','saved'].includes(x.lifecycleStatus)&&x.intelligence?.reservationHint==='Reservierung empfohlen')||null;
+      let departure=null;
+      if(primary?.date&&primary?.time){const visit=new Date(`${primary.date}T${primary.time}:00`),travel=primary.intelligence?.walkMinutes||0,leave=new Date(visit.getTime()-travel*60000),diff=Math.round((leave-now())/60000);if(diff>0&&diff<240)departure={restaurant:primary,minutes:diff,time:timeString(leave)}}
+      const betterAlternative=primary?sorted.find(x=>x!==primary&&Number(x.intelligence?.score)>Number(primary.intelligence?.score)+3)||null:null;
+      Object.assign(state,{restaurants:enriched,primary,nearby,reservationMissing,departure,betterAlternative,lastUpdatedAt:new Date().toISOString(),lastError:null});
+    }catch(error){state.lastError=error?.message||String(error)}finally{state.loading=false;emit()}
+    return snapshot();
+  }
+  function snapshot(){return clone(state)}
+  function subscribe(fn){listeners.add(fn);return()=>listeners.delete(fn)}
+  const api=Object.freeze({version:VERSION,enrich,enhance,refresh,snapshot,subscribe,formatDistance,minutesFor,bestVisitTime,diagnostics:()=>({version:VERSION,...snapshot()})});
+  window.LuviaRestaurantIntelligence=api;
+  ['luvia:trip-changed','luvia:restaurant-lifecycle-changed','luvia:restaurants-v2-updated','luvia:travel-context-changed','luvia:travel-preferences-changed'].forEach(name=>window.addEventListener(name,()=>refresh().catch(()=>{})));
+  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',()=>refresh().catch(()=>{}),{once:true});else queueMicrotask(()=>refresh().catch(()=>{}));
+})();
