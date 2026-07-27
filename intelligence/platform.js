@@ -1,7 +1,8 @@
 (function(){
   'use strict';
-  const VERSION='2.11.2-destination-intelligence';
-  const BUILD=Object.freeze({core:'2.13.0',build:'10.0.0',name:'Architecture Separation',releasedAt:'2026-07-27',builtAt:'2026-07-27T09:05:00+02:00'});
+  const VERSION='3.0.2.2-runtime-consistency';
+  const FALLBACK_BUILD=Object.freeze({core:'3.0.2.2',build:'11.2.2',name:'Runtime Configuration Consistency',releasedAt:'2026-07-27',builtAt:'2026-07-27T13:45:00+02:00'});
+  const currentBuild=()=>window.LuviaKernelVersion||window.LuviaCoreVersion||FALLBACK_BUILD;
   const DEFAULTS=Object.freeze({schemaVersion:1,maintenance:{enabled:false,message:''},endpoints:{intelligence:'',assets:'',api:'',media:'',auth:''},featureFlags:{developerConsole:true,pwa:false,native:false,places:true,ai:false,recommendations:false,mediaV2:false,automation:false,platformLayer:true},limits:{eventHistory:300,logHistory:500},release:{channel:'development'}});
   const state={config:structuredClone(DEFAULTS),source:'defaults',loadedAt:null,lastError:null,listeners:new Set()};
   const env=()=>window.LuviaEnvironment?.current?.()||{};
@@ -12,7 +13,7 @@
   const safeCall=(fn,fallback)=>{try{return fn()}catch{return fallback}};
   const emit=()=>{const snap=snapshot();state.listeners.forEach(fn=>{try{fn(snap)}catch(e){console.error(e)}});window.dispatchEvent(new CustomEvent('luvia:platform-config-changed',{detail:snap}))};
   function detectChannel(){const e=env();return e.isProduction?'production':e.isStaging?'staging':e.isGitHubPages?'preview':'development'}
-  function build(){return Object.freeze({...BUILD,channel:state.config.release?.channel||detectChannel(),environment:env().name||'unknown'})}
+  function build(){const central=currentBuild();return Object.freeze({...FALLBACK_BUILD,...central,channel:state.config.release?.channel||central.channel||detectChannel(),environment:env().name||'unknown'})}
   async function load(options={}){const override=window.LUVIA_RUNTIME_CONFIG||{};const url=options.url||window.LuviaEnvironment?.resolveUrl?.('intelligence/runtime-config.json')||'runtime-config.json';let remote={};try{const response=await fetch(url,{cache:'no-store'});if(response.ok){remote=await response.json();state.source='runtime-config.json'}else state.source='defaults';state.lastError=null}catch(error){state.lastError=error.message;state.source='defaults'}state.config=merge(merge(DEFAULTS,remote),override);if(!state.config.release?.channel)state.config.release={...(state.config.release||{}),channel:detectChannel()};applyLocalOverrides();state.loadedAt=new Date().toISOString();emit();return snapshot()}
   function get(path,fallback){if(!path)return clone(state.config);let value=state.config;for(const part of String(path).split('.')){if(value==null||!(part in value))return fallback;value=value[part]}return clone(value)}
   function localOverrides(){try{return JSON.parse(localStorage.getItem('luvia:feature-flag-overrides')||'{}')}catch{return {}}}

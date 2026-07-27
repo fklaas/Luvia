@@ -13,7 +13,7 @@
   },
   "featureFlags": {
     "developerConsole": true,
-    "pwa": false,
+    "pwa": true,
     "native": false,
     "places": true,
     "ai": false,
@@ -28,9 +28,9 @@
     "logHistory": 500
   },
   "release": {
-    "core": "2.13.0",
-    "build": "10.0.0",
-    "name": "Restaurant Experience",
+    "core": "3.0.2.2",
+    "build": "11.2.2",
+    "name": "Runtime Configuration Consistency",
     "channel": "production"
   },
   "deployment": {
@@ -40,11 +40,11 @@
     "githubPagesFallback": "https://fklaas.github.io/Luvia/"
   },
   "build": {
-    "core": "2.13.0",
-    "build": "10.0.0",
-    "name": "Restaurant Experience",
+    "core": "3.0.2.2",
+    "build": "11.2.2",
+    "name": "Runtime Configuration Consistency",
     "channel": "production",
-    "builtAt": "2026-07-26T19:05:00+02:00"
+    "builtAt": "2026-07-27T13:45:00+02:00"
   },
   "backend": {
     "functionName": "luvia-gateway",
@@ -62,7 +62,7 @@
     "destinationCacheDays": 7
   },
   "restaurantEntityPipeline": {
-    "contractVersion": "2.13.0",
+    "contractVersion": "3.0.2.2",
     "moduleKey": "restaurants",
     "providerManagedFields": true,
     "userManagedFields": true,
