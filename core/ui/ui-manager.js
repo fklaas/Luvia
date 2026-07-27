@@ -4,7 +4,8 @@
   const stack = [];
   let sequence = 0;
   function register(name, handler) { if (!name || typeof handler !== 'function') throw new Error('UI-Dialog benötigt Name und Handler.'); registry.set(name, handler); return () => registry.delete(name); }
-  async function open(name, payload) { const handler = registry.get(name); if (!handler) throw new Error(`UI-Dialog nicht registriert: ${name}`); return handler(payload); }
+  function has(name) { return registry.has(name); }
+  async function open(name, payload) { const handler = registry.get(name); if (!handler) throw new Error(`UI-Dialog nicht registriert: ${name}`); try { return await handler(payload); } catch (error) { console.error('[LuviaUI]', name, error); throw error; } }
   function mount({ name = 'dialog', content, className = '', closeOnBackdrop = true, closeOnEscape = true, onClose } = {}) {
     if (!(content instanceof HTMLElement)) throw new Error('UI-Overlay benötigt ein HTMLElement.');
     const id = `${name}-${++sequence}`, overlay = document.createElement('div');
@@ -21,5 +22,5 @@
   function closeAll(reason = 'api') { [...stack].reverse().forEach(item => item.close(reason)); }
   function diagnostics() { return { registered: [...registry.keys()], open: stack.map(item => ({ id: item.id, name: item.name })) }; }
   const style = document.createElement('style'); style.textContent = `.luvia-ui-overlay{position:fixed;inset:0;z-index:1000000;display:grid;place-items:center;padding:20px;background:rgba(31,43,54,.56);backdrop-filter:blur(12px)}html.luvia-ui-open{overflow:hidden}@media(max-width:760px){.luvia-ui-overlay{padding:0;place-items:stretch}}`; document.head.appendChild(style);
-  window.LuviaUI = Object.freeze({ version: '1.0.0', register, open, mount, closeTop, closeAll, diagnostics }); window.dispatchEvent(new CustomEvent('luvia:ui-ready'));
+  window.LuviaUI = Object.freeze({ version: '1.1.0', register, has, open, mount, closeTop, closeAll, diagnostics }); window.dispatchEvent(new CustomEvent('luvia:ui-ready'));
 })();
