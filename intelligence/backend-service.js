@@ -1,6 +1,6 @@
 (function(){
   'use strict';
-  const VERSION='3.0.2.6-gateway-auth-contract';
+  const VERSION='3.0.2.7-gateway-auth-contract';
   const DEFAULT_FUNCTION='luvia-gateway';
   const DEFAULT_TIMEOUT=12000;
   const ACTION_PATTERN=/^[a-z][a-z0-9]*(?:[._-][a-z0-9]+)*$/;

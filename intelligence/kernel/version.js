@@ -1,1 +1,1 @@
-window.LuviaKernelVersion=window.LuviaCoreVersion=Object.freeze({core:'3.0.2.6',build:'11.2.6',name:'Places Bootstrap & Diagnostics Consistency',channel:'production',builtAt:'2026-07-27T14:40:00+02:00'});
+window.LuviaKernelVersion=window.LuviaCoreVersion=Object.freeze({core:'3.0.2.7',build:'11.2.7',name:'Places Bootstrap & Diagnostics Consistency',channel:'production',builtAt:'2026-07-27T14:40:00+02:00'});
