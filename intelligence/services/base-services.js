@@ -5,29 +5,54 @@
   const ready=status=>({state:R.states.READY,...status});
   const safeJson=value=>{try{return JSON.parse(JSON.stringify(value));}catch{return null;}};
   let pwaLoadPromise=null;
+  function pwaScriptUrl(){
+    const base=new URL(document.currentScript?.src||'services/base-services.js',document.baseURI);
+    return new URL('../pwa-service.js?v=11.2.3',base).href;
+  }
   function ensurePwaApi(){
     if(window.LuviaPWA)return Promise.resolve(window.LuviaPWA);
     if(pwaLoadPromise)return pwaLoadPromise;
     pwaLoadPromise=new Promise((resolve,reject)=>{
-      const existing=document.querySelector('script[data-luvia-pwa-service],script[src*=\"pwa-service.js\"]');
       const finish=()=>window.LuviaPWA?resolve(window.LuviaPWA):reject(new Error('LuviaPWA API konnte nicht initialisiert werden.'));
-      if(existing){
-        existing.addEventListener('load',finish,{once:true});
-        existing.addEventListener('error',()=>reject(new Error('PWA-Service konnte nicht geladen werden.')),{once:true});
-        // A cached/deferred script may already have completed between checks.
-        queueMicrotask(()=>{if(window.LuviaPWA)resolve(window.LuviaPWA);});
-        setTimeout(finish,3000);
-        return;
-      }
-      const script=document.createElement('script');
-      script.src=new URL('../pwa-service.js?v=11.2.1',document.currentScript?.src||location.href).href;
-      script.dataset.luviaPwaService='dynamic';
-      script.onload=finish;
-      script.onerror=()=>reject(new Error('PWA-Service konnte nicht geladen werden.'));
-      document.head.appendChild(script);
+      const loadFresh=()=>{
+        if(window.LuviaPWA){resolve(window.LuviaPWA);return;}
+        const script=document.createElement('script');
+        script.src=pwaScriptUrl();
+        script.dataset.luviaPwaService='diagnostic';
+        script.onload=finish;
+        script.onerror=()=>reject(new Error('PWA-Service konnte nicht geladen werden.'));
+        document.head.appendChild(script);
+      };
+      const existing=document.querySelector('script[data-luvia-pwa-service],script[src*="pwa-service.js"]');
+      if(!existing){loadFresh();return;}
+      if(window.LuviaPWA){resolve(window.LuviaPWA);return;}
+      existing.addEventListener('load',()=>window.LuviaPWA?resolve(window.LuviaPWA):loadFresh(),{once:true});
+      existing.addEventListener('error',loadFresh,{once:true});
+      setTimeout(()=>window.LuviaPWA?resolve(window.LuviaPWA):loadFresh(),250);
     }).catch(error=>{pwaLoadPromise=null;throw error;});
     return pwaLoadPromise;
   }
+  function canonicalTripSnapshot(){
+    try{
+      if(window.LuviaTripStore){
+        const store=window.LuviaTripStore.snapshot?.();
+        if(!store?.loaded)window.LuviaTripStore.initialize?.();
+        const refreshed=window.LuviaTripStore.snapshot?.();
+        const trip=refreshed?.activeTrip||null;
+        if(trip)return {
+          trip,
+          tripId:trip.id||trip.tripId||trip.trip_id||null,
+          tripName:trip.title||trip.tripName||trip.trip_name||'',
+          destination:trip.destination||null,
+          startDate:trip.startDate||trip.start_date||null,
+          endDate:trip.endDate||trip.end_date||null
+        };
+      }
+    }catch(error){console.warn('[Luvia Diagnostics] TripStore konnte nicht gelesen werden.',error);}
+    const legacy=window.LuviaTripContext?.getSnapshot?.()||{};
+    return legacy;
+  }
+
 
   R.register({name:'environment',version:window.LuviaEnvironment?.version||'2.3',description:'Erkennt Hosting, URLs, PWA- und Native-Kontext.',async init(){if(!window.LuviaEnvironment)throw new Error('Environment API fehlt.');},status(){return ready({environment:window.LuviaEnvironment.current().name});},diagnostics(){return window.LuviaEnvironment.snapshot();},test(){const s=window.LuviaEnvironment.snapshot();const checks={baseUrl:Boolean(s.baseUrl),appIndex:Boolean(s.appIndex),secure:Boolean(s.secureContext),resolved:window.LuviaEnvironment.resolveUrl('intelligence/test.html').includes('intelligence/test.html')};return{ok:Object.values(checks).every(Boolean),message:'URL-Auflösung geprüft.',checks,snapshot:s};}});
 
@@ -39,7 +64,7 @@
 
   R.register({name:'data',version:window.LuviaData?.version||'2.2',description:'Persistente Daten-API mit Supabase, Cache und Sync Queue.',dependencies:['auth','storage'],init(){if(!window.LuviaData)throw new Error('LuviaData API fehlt.');},status(){const s=window.LuviaData.snapshot();return ready({online:s.online,queueCount:s.queueCount});},diagnostics(){return window.LuviaData.snapshot();},test(){const required=['list','get','create','update','remove','upsert','flush','snapshot'];const checks=Object.fromEntries(required.map(k=>[k,typeof window.LuviaData[k]==='function']));const snap=window.LuviaData.snapshot();return{ok:Object.values(checks).every(Boolean),message:'Data API und Queue-Status geprüft.',checks,queueCount:snap.queueCount,online:snap.online};}});
 
-  R.register({name:'trips',version:'legacy-adapter-1',description:'Normalisiert aktive Reise, Zeitraum, Rolle und Ziel.',dependencies:['data','user'],init(){if(!window.LuviaTripContext)throw new Error('LuviaTripContext fehlt.');},status(){const s=window.LuviaTripContext.getSnapshot();return ready({tripId:s.tripId});},diagnostics(){return safeJson(window.LuviaTripContext.getSnapshot());},test(){const s=window.LuviaTripContext.getSnapshot();return{ok:Boolean(s.tripId),message:s.tripId?'Aktive Reise erkannt.':'Keine aktive Reise erkannt.',checks:{tripId:Boolean(s.tripId),tripName:Boolean(s.tripName),destination:Boolean(s.destination),dates:Boolean(s.startDate&&s.endDate)}};}});
+  R.register({name:'trips',version:'3.0.2.3-canonical-trip-store',description:'Normalisiert aktive Reise, Zeitraum, Rolle und Ziel.',dependencies:['data','user'],init(){if(!window.LuviaTripStore&&!window.LuviaTripContext)throw new Error('Kein zentraler Reise-Kontext verfügbar.');if(window.LuviaTripStore&&!window.LuviaTripStore.snapshot?.().loaded)window.LuviaTripStore.initialize?.();},status(){const s=canonicalTripSnapshot();return ready({tripId:s.tripId||null,tripName:s.tripName||'',destination:Boolean(s.destination)});},diagnostics(){return safeJson(canonicalTripSnapshot());},test(){const s=canonicalTripSnapshot();const destination=s.destination||{};const hasDestination=Boolean(typeof destination==='string'?destination.trim():destination.name||destination.formattedAddress||destination.displayName);const checks={tripId:Boolean(s.tripId),tripName:Boolean(s.tripName),destination:hasDestination,dates:Boolean(s.startDate&&s.endDate)};const required=checks.tripId&&checks.tripName&&checks.destination;return{ok:required,message:required?(checks.dates?'Aktive Reise vollständig erkannt.':'Aktive Reise und Reiseziel erkannt; Zeitraum ist optional noch offen.'):'Keine vollständig erkennbare aktive Reise.',checks,severity:required&&!checks.dates?'limited':required?'ready':'failed'};}});
 
   R.register({name:'events',version:window.LuviaKernelEvents?.version||'2.4.4',description:'Entkoppelte Kommunikation zwischen Core-Services und Modulen.',dependencies:['environment'],init(){if(!window.LuviaKernelEvents)throw new Error('Event Bus API fehlt.');},status(){const d=window.LuviaKernelEvents.diagnostics();return ready({subscriptions:d.subscriptionCount,history:d.historyCount});},diagnostics(){return window.LuviaKernelEvents.diagnostics();},async test(){return window.LuviaEventBusTest?.run?window.LuviaEventBusTest.run():{ok:Boolean(window.LuviaKernelEvents),message:'Event Bus API erkannt.'};}});
 
@@ -47,7 +72,7 @@
   R.register({name:'platform',version:window.LuviaPlatform?.version||'2.9.0',description:'Zentrale Platform Layer mit Web-Adapter für Runtime, Storage, Netzwerk, Lifecycle, Navigation und Gerätefunktionen.',dependencies:['environment','events'],async init(){if(!window.LuviaPlatform)throw new Error('LuviaPlatform API fehlt.');await window.LuviaPlatform.load();},status(){const s=window.LuviaPlatform.snapshot();return ready({channel:s.build.channel,maintenance:s.maintenance.enabled,online:s.capabilities.online});},diagnostics(){return window.LuviaPlatform.snapshot();},async test(){return window.LuviaPlatformTest?.run?window.LuviaPlatformTest.run():{ok:Boolean(window.LuviaPlatform),message:'Platform API erkannt.'};}});
 
 
-  R.register({name:'pwa',version:window.LuviaPWA?.version||'2.9.0',description:'Installation, Offline-App-Shell, Cache-Versionen und kontrollierte Updates.',dependencies:['environment','storage','events','platform'],async init(){const pwa=await ensurePwaApi();await pwa.register();},status(){const s=window.LuviaPWA?.snapshot?.()||{registered:false,installed:false,updateAvailable:false,online:navigator.onLine};return ready({registered:s.registered,controller:s.controller,installed:s.installed,installable:s.installable,updateAvailable:s.updateAvailable,online:s.online});},diagnostics(){return window.LuviaPWA?.snapshot?.()||{available:false,reason:'PWA API noch nicht initialisiert'};},async test(){await ensurePwaApi();return window.LuviaPWATest?.run?window.LuviaPWATest.run():{ok:Boolean(window.LuviaPWA),message:'PWA API erkannt.'};}});
+  R.register({name:'pwa',version:window.LuviaPWA?.version||'3.0.2.3-diagnostics',description:'Installation, Offline-App-Shell, Cache-Versionen und kontrollierte Updates.',dependencies:['environment','storage','events','platform'],async init(){const pwa=await ensurePwaApi();await pwa.register();},status(){const s=window.LuviaPWA?.snapshot?.()||{registered:false,installed:false,updateAvailable:false,online:navigator.onLine};return ready({registered:s.registered,controller:s.controller,installed:s.installed,installable:s.installable,updateAvailable:s.updateAvailable,online:s.online});},diagnostics(){return window.LuviaPWA?.snapshot?.()||{available:false,reason:'PWA API noch nicht initialisiert'};},async test(){await ensurePwaApi();return window.LuviaPWATest?.run?window.LuviaPWATest.run():{ok:Boolean(window.LuviaPWA),message:'PWA API erkannt.'};}});
 
   R.register({name:'destination',version:window.LuviaDestination?.version||'2.9.0',description:'Zentraler Destination Service mit Registry, Cache, Resolver, Validation, Context und Reise-Migration.',dependencies:['data','trips','events'],async init(){if(!window.LuviaDestination)throw new Error('LuviaDestination API fehlt.');await window.LuviaDestination.init();},status(){const d=window.LuviaDestination.diagnostics();return ready({destination:d.active?.displayName||d.active?.name||'',usable:Boolean(d.active?.isUsable),resolved:Boolean(d.active?.isResolved),registryCount:d.registryCount});},diagnostics(){return window.LuviaDestination.diagnostics();},async test(){return window.LuviaDestinationTest?.run?window.LuviaDestinationTest.run():{ok:Boolean(window.LuviaDestination),message:'Destination API erkannt.'};}});
 
