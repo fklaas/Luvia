@@ -1,0 +1,82 @@
+{
+  "schemaVersion": 1,
+  "maintenance": {
+    "enabled": false,
+    "message": ""
+  },
+  "endpoints": {
+    "intelligence": "",
+    "assets": "",
+    "api": "",
+    "media": "",
+    "auth": ""
+  },
+  "featureFlags": {
+    "developerConsole": true,
+    "pwa": false,
+    "native": false,
+    "places": true,
+    "ai": false,
+    "recommendations": false,
+    "mediaV2": false,
+    "automation": false,
+    "pwaFoundation": true,
+    "platformLayer": true
+  },
+  "limits": {
+    "eventHistory": 300,
+    "logHistory": 500
+  },
+  "release": {
+    "core": "2.13.0",
+    "build": "10.0.0",
+    "name": "Restaurant Experience",
+    "channel": "production"
+  },
+  "deployment": {
+    "canonicalHost": "myluvia.app",
+    "wwwHost": "www.myluvia.app",
+    "stagingHost": "staging.myluvia.app",
+    "githubPagesFallback": "https://fklaas.github.io/Luvia/"
+  },
+  "build": {
+    "core": "2.13.0",
+    "build": "10.0.0",
+    "name": "Restaurant Experience",
+    "channel": "production",
+    "builtAt": "2026-07-26T19:05:00+02:00"
+  },
+  "backend": {
+    "functionName": "luvia-gateway",
+    "timeoutMs": 12000,
+    "securityModel": "edge-gateway"
+  },
+  "places": {
+    "provider": "google-places-new",
+    "gateway": "luvia-gateway",
+    "cacheTtlMinutes": 15,
+    "detailsCacheHours": 6,
+    "autoGeocodeDestination": true,
+    "defaultRadiusMeters": 20000,
+    "strictDestinationSearch": true,
+    "destinationCacheDays": 7
+  },
+  "restaurantEntityPipeline": {
+    "contractVersion": "2.13.0",
+    "moduleKey": "restaurants",
+    "providerManagedFields": true,
+    "userManagedFields": true,
+    "secureImport": true,
+    "gatewayAction": "restaurant.import",
+    "listAction": "restaurant.list",
+    "diagnostics": true
+  },
+  "destinationIntelligence": {
+    "timezone": true,
+    "languageCodes": true,
+    "currency": true,
+    "flagEmoji": true,
+    "dynamicRadius": true,
+    "profileSchemaVersion": 5
+  }
+}

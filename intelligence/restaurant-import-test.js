@@ -1,0 +1,6 @@
+(function(){
+'use strict';
+const VERSION='2.12.3-restaurant-import-test';
+async function run(options={}){const checks={service:Boolean(window.LuviaRestaurants),backend:Boolean(window.LuviaBackend),places:Boolean(window.LuviaPlaces),search:typeof window.LuviaRestaurants?.search==='function',importPlace:typeof window.LuviaRestaurants?.importPlace==='function',list:typeof window.LuviaRestaurants?.list==='function',entityMapping:false};const sample=window.LuviaRestaurants?.entityToEntry?.({place:{id:'p1',provider_place_id:'google-1',name:'Test',address:'Berlin'},tripPlace:{id:'tp1'},restaurant:{id:'r1',reservation_status:'idea'}});checks.entityMapping=sample?.name==='Test'&&sample?.providerPlaceId==='google-1';let remote={skipped:true};if(options.remote===true){try{remote=await window.LuviaRestaurants.health();checks.remote=remote?.data?.status==='ok';}catch(error){remote={ok:false,code:error.code,message:error.message};checks.remote=false;}}return{service:'restaurant-import',version:VERSION,ok:Object.values(checks).every(Boolean),message:'Restaurant Import Service, Entity-Mapping und Gateway-Vertrag geprüft.',checks,remote,diagnostics:window.LuviaRestaurants?.diagnostics?.()||null};}
+window.LuviaRestaurantImportTest={version:VERSION,run};
+})();

@@ -1,0 +1,41 @@
+import { placesAction } from './places.ts';
+
+type SupabaseClient = { rpc:(name:string,args:Record<string,unknown>)=>Promise<{data:any,error:any}> };
+const metrics={imports:0,successes:0,failures:0,placesCreated:0,placesReused:0,duplicatesPrevented:0,lists:0,lastImportAt:null as string|null,lastError:null as unknown};
+
+function dbPlace(place:any){
+  return {
+    provider:'google-places',provider_place_id:String(place?.id||'').replace(/^places\//,''),name:place?.name||place?.displayName||'',
+    address:place?.formattedAddress||place?.shortAddress||'',latitude:place?.location?.latitude??null,longitude:place?.location?.longitude??null,
+    maps_url:place?.mapsUri||null,website:place?.website||null,phone:place?.phone||null,rating:place?.rating??null,
+    rating_count:place?.userRatingCount??0,price_level:Number.isFinite(Number(place?.priceLevel))?Number(place.priceLevel):null,
+    categories:Array.isArray(place?.types)?place.types:[],attributes:{primaryType:place?.primaryType||null,primaryTypeLabel:place?.primaryTypeLabel||null,businessStatus:place?.businessStatus||null,openNow:place?.openNow??null,features:place?.features||{},accessibility:place?.accessibility||null},
+    opening_hours:place?.openingHours||[],raw_provider_data:place?.raw||place,source_updated_at:new Date().toISOString()
+  };
+}
+
+export async function restaurantAction(action:string,payload:any,client:SupabaseClient){
+  if(action==='restaurant.health')return{data:{status:'ok',service:'restaurant-import',version:'2.12.4.3',metrics:{...metrics}}};
+  if(action==='restaurant.list'){
+    const tripId=String(payload?.tripId||''); if(!tripId)throw Object.assign(new Error('Trip-ID fehlt.'),{code:'TRIP_ID_REQUIRED',status:400});
+    const {data,error}=await client.rpc('luvia_list_restaurant_entities',{p_trip_id:tripId});
+    if(error)throw Object.assign(new Error(error.message||'Restaurants konnten nicht geladen werden.'),{code:'RESTAURANT_LIST_FAILED',status:400});
+    metrics.lists++; return{data:{entities:Array.isArray(data)?data:[]}};
+  }
+  if(action!=='restaurant.import')throw Object.assign(new Error('Restaurant-Aktion unbekannt.'),{code:'ACTION_NOT_FOUND',status:404});
+  const tripId=String(payload?.tripId||''); const providerPlaceId=String(payload?.providerPlaceId||payload?.placeId||'').replace(/^places\//,'');
+  if(!tripId)throw Object.assign(new Error('Trip-ID fehlt.'),{code:'TRIP_ID_REQUIRED',status:400});
+  if(!providerPlaceId)throw Object.assign(new Error('Google Place ID fehlt.'),{code:'PLACE_ID_REQUIRED',status:400});
+  metrics.imports++;
+  try{
+    const details=await placesAction('places.details',{placeId:providerPlaceId,languageCode:payload?.languageCode||'de',regionCode:payload?.regionCode||'DE'});
+    const place=details?.data?.place; if(!place?.id)throw Object.assign(new Error('Restaurant wurde beim Provider nicht gefunden.'),{code:'PLACE_NOT_FOUND',status:404});
+    const {data,error}=await client.rpc('luvia_import_restaurant_entity',{p_trip_id:tripId,p_place:dbPlace(place),p_trip_place:{module_key:'restaurants',status:payload?.tripPlace?.status||'idea',position:payload?.tripPlace?.position||0,is_favorite:payload?.tripPlace?.isFavorite===true,user_notes:payload?.tripPlace?.userNotes||null,planned_date:payload?.tripPlace?.plannedDate||null,planned_time:payload?.tripPlace?.plannedTime||null},p_restaurant:{reservation_status:payload?.restaurant?.reservationStatus||'idea',reservation_date:payload?.restaurant?.reservationDate||null,reservation_time:payload?.restaurant?.reservationTime||null,reservation_name:payload?.restaurant?.reservationName||null,reservation_url:payload?.restaurant?.reservationUrl||null,menu_url:payload?.restaurant?.menuUrl||null,metadata:{importedBy:'luvia-gateway',provider:'google-places'}}});
+    if(error){const code=String(error.message||'').includes('NOT_AUTHORIZED')?'NOT_AUTHORIZED':'PLACE_IMPORT_FAILED';throw Object.assign(new Error(error.message||'Restaurant konnte nicht importiert werden.'),{code,status:code==='NOT_AUTHORIZED'?403:400});}
+    metrics.successes++;metrics.lastImportAt=new Date().toISOString();
+    if(data?.created?.place)metrics.placesCreated++;else metrics.placesReused++;
+    if(data?.alreadyAdded)metrics.duplicatesPrevented++;
+    return{data:{success:true,...data,providerPlace:place}};
+  }catch(error){metrics.failures++;metrics.lastError={at:new Date().toISOString(),message:error instanceof Error?error.message:String(error)};throw error;}
+}
+export function restaurantDiagnostics(){return{version:'2.12.4.3',metrics:{...metrics}};}

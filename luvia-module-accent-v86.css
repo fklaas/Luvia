@@ -1,0 +1,143 @@
+/* Luvia 8.6 · robuste Kontraste + sauber begrenzter mobiler Modulbereich */
+
+/* Jede echte Akzentaktion bekommt eine eindeutige Kontrastfarbe; Kind-Elemente erben sie. */
+html.luvia-shell-active .luvia-accent-normalized :is(
+  .live-moment-btn.primary,.gallery-primary,.gallery-upload-button,.gallery-save,.gallery-clear,
+  .photo-route,.restaurant-link,.restaurant-map,.memory-add-form button,.memory-add-button,
+  .book-create-button,.travel-book-create,.budget-add,.budget-add-button,.day-closure button.primary,
+  .route-button,.route-map-button,.map-button,.study-reveal,
+  [data-coach-language].active,[data-coach-language].is-active,
+  [data-coach-mode].active,[data-coach-mode].is-active,
+  .language-category.active,.language-category.is-active,
+  .coach-category.active,.coach-category.is-active
+){
+  background:var(--module-accent)!important;
+  border-color:var(--module-accent)!important;
+  color:var(--module-accent-ink)!important;
+  text-shadow:none!important;
+  -webkit-text-fill-color:currentColor!important;
+}
+html.luvia-shell-active .luvia-accent-normalized :is(
+  .live-moment-btn.primary,.gallery-primary,.gallery-upload-button,.gallery-save,.gallery-clear,
+  .photo-route,.restaurant-link,.restaurant-map,.memory-add-form button,.memory-add-button,
+  .book-create-button,.travel-book-create,.budget-add,.budget-add-button,.day-closure button.primary,
+  .route-button,.route-map-button,.map-button,.study-reveal,
+  [data-coach-language].active,[data-coach-language].is-active,
+  [data-coach-mode].active,[data-coach-mode].is-active,
+  .language-category.active,.language-category.is-active,
+  .coach-category.active,.coach-category.is-active
+) *{
+  color:inherit!important;
+  -webkit-text-fill-color:currentColor!important;
+  opacity:1!important;
+}
+
+html.luvia-shell-active .luvia-accent-normalized :is(
+  .live-moment-btn.primary,.gallery-primary,.gallery-upload-button,.gallery-save,.gallery-clear,
+  .photo-route,.restaurant-link,.restaurant-map,.memory-add-form button,.memory-add-button,
+  .book-create-button,.travel-book-create,.budget-add,.budget-add-button,.day-closure button.primary,
+  .route-button,.route-map-button,.map-button,.study-reveal
+):not(:disabled):hover,
+html.luvia-shell-active .luvia-accent-normalized :is(
+  [data-coach-language].active,[data-coach-language].is-active,
+  [data-coach-mode].active,[data-coach-mode].is-active,
+  .language-category.active,.language-category.is-active,
+  .coach-category.active,.coach-category.is-active
+):hover{
+  background:var(--module-accent-hover)!important;
+  border-color:var(--module-accent-hover)!important;
+  color:var(--module-accent-hover-ink)!important;
+  -webkit-text-fill-color:currentColor!important;
+}
+
+/* Deaktivierte Aktionen: bewusst neutral statt dunkler Schrift auf dunkler Akzentfläche. */
+html.luvia-shell-active .luvia-accent-normalized :is(button,a,[role="button"]):disabled,
+html.luvia-shell-active .luvia-accent-normalized :is(button,a,[role="button"])[aria-disabled="true"]{
+  background:#e8edf0!important;
+  border-color:#d7dfe4!important;
+  color:#667985!important;
+  -webkit-text-fill-color:#667985!important;
+  box-shadow:none!important;
+  text-shadow:none!important;
+  opacity:1!important;
+}
+html.luvia-shell-active .luvia-accent-normalized :is(button,a,[role="button"]):disabled *,
+html.luvia-shell-active .luvia-accent-normalized :is(button,a,[role="button"])[aria-disabled="true"] *{
+  color:inherit!important;
+  -webkit-text-fill-color:currentColor!important;
+  opacity:1!important;
+}
+
+/* Restaurantkarten: dunkler Text auf heller Fläche, kontrastreicher Header. */
+html.luvia-shell-active .luvia-accent-normalized .restaurant-card-header{
+  background:var(--module-accent-deep)!important;
+  color:var(--module-accent-deep-ink)!important;
+}
+html.luvia-shell-active .luvia-accent-normalized .restaurant-card-header *{color:inherit!important;-webkit-text-fill-color:currentColor!important;opacity:1!important}
+html.luvia-shell-active .luvia-accent-normalized .restaurant-card-body{
+  background:linear-gradient(145deg,var(--module-accent-softer),var(--module-accent-soft))!important;
+  color:var(--module-accent-soft-ink)!important;
+}
+html.luvia-shell-active .luvia-accent-normalized .restaurant-card-body :is(h1,h2,h3,h4,p,span,strong,small,.restaurant-time,.restaurant-copy){
+  color:inherit!important;-webkit-text-fill-color:currentColor!important;opacity:1!important
+}
+
+/* Live Moments, Galerie, Fotospots und Reisebuch: sichtbarer Text auf Hauptaktionen. */
+html.luvia-shell-active .luvia-accent-normalized :is(
+  #liveMomentsLocationButton,#liveMomentsActivateButton,
+  #galleryUploadButton,#gallerySaveButton,#galleryClearButton,
+  #travelBookCreateButton
+){color:var(--module-accent-ink)!important;-webkit-text-fill-color:currentColor!important}
+
+/* Neutraler Tippbereich bei Fotospots bleibt eigenständig lesbar. */
+html.luvia-shell-active .luvia-accent-normalized #fotospots :is(.photo-tip,.photo-spots-tip){
+  background:var(--module-accent-soft)!important;
+  color:var(--module-accent-soft-ink)!important;
+}
+html.luvia-shell-active .luvia-accent-normalized #fotospots :is(.photo-tip,.photo-spots-tip) *{color:inherit!important}
+
+/* Mobile: nur der Modul-Screen scrollt. Unterhalb der Navigation gibt es keinen Seitenraum mehr. */
+@media(max-width:760px){
+  html.luvia-shell-active,
+  html.luvia-shell-active body{
+    height:100%!important;
+    min-height:100%!important;
+    overflow:hidden!important;
+    overscroll-behavior:none!important;
+  }
+  html.luvia-shell-active main.wrap{
+    height:var(--luvia-mobile-shell-height,calc(100dvh - 142px))!important;
+    min-height:0!important;
+    max-height:var(--luvia-mobile-shell-height,calc(100dvh - 142px))!important;
+    overflow:hidden!important;
+    padding-bottom:0!important;
+    margin-bottom:0!important;
+  }
+  .luvia-app-shell{
+    height:100%!important;
+    min-height:0!important;
+    grid-template-rows:minmax(0,1fr) auto!important;
+    overflow:hidden!important;
+  }
+  .luvia-app-viewport{
+    height:100%!important;
+    min-height:0!important;
+    overflow:hidden!important;
+  }
+  .luvia-app-screen{
+    height:100%!important;
+    min-height:0!important;
+    max-height:100%!important;
+    overflow-x:hidden!important;
+    overflow-y:auto!important;
+    overscroll-behavior-y:contain!important;
+    padding-bottom:18px!important;
+  }
+  .luvia-shell-nav{
+    position:relative!important;
+    inset:auto!important;
+    flex:0 0 auto!important;
+    margin:0 0 var(--shell-safe-bottom)!important;
+    transform:none!important;
+  }
+}

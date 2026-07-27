@@ -1,0 +1,125 @@
+/* Luvia 6.3 – globales Onboarding-Designsystem */
+:root{
+  --luvia-font-ui:"Manrope","Inter",ui-sans-serif,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
+  --luvia-font-display:"Fraunces","Playfair Display",Georgia,serif;
+  --luvia-ink:#294052;
+  --luvia-muted:#71818d;
+  --luvia-paper:rgba(255,255,255,.9);
+  --luvia-border:rgba(48,75,94,.09);
+  --luvia-radius-card:28px;
+  --luvia-radius-control:17px;
+  --luvia-shadow-card:0 16px 42px rgba(43,63,78,.09);
+  --luvia-shadow-float:0 28px 80px rgba(34,49,62,.20);
+}
+html,body,button,input,textarea,select{font-family:var(--luvia-font-ui)!important}
+body{color:var(--luvia-ink)}
+:is(h1,h2,.po-title,.pc-head h2,.pc-title,.gateway-title,.gateway-auth-title){font-family:var(--luvia-font-display)!important;letter-spacing:-.035em!important}
+:is(h3,h4,strong,b){letter-spacing:-.012em}
+
+/* Modulscreens wie Dashboard – gleiche Oberfläche, Reiseakzent */
+html.luvia-shell-active .luvia-app-screen:not([data-screen="dashboard"]){
+  --module-accent:var(--shell-accent,#e76f91);
+  background:
+    radial-gradient(circle at 92% 2%,color-mix(in srgb,var(--module-accent) 13%,transparent),transparent 22rem),
+    radial-gradient(circle at 5% 95%,color-mix(in srgb,var(--module-accent) 7%,transparent),transparent 18rem),
+    linear-gradient(165deg,rgba(255,252,250,.98),rgba(247,250,251,.96));
+}
+html.luvia-shell-active .luvia-app-screen:not([data-screen="dashboard"]) .luvia-screen-content{
+  display:grid;gap:16px;padding:4px 2px 22px;
+}
+html.luvia-shell-active .luvia-app-screen:not([data-screen="dashboard"]) .luvia-screen-content>:is(section,article,div[class*="section"],div[class*="feature"],div[class*="card"]):not(.luvia-module-intro-card){
+  border-color:var(--luvia-border)!important;
+}
+html.luvia-shell-active .luvia-app-screen:not([data-screen="dashboard"]) :is(.app-section,.day-group,.highlight-section,.travel-assistant,.live-moments,.travel-apps-section,.language-coach,.budget-section,.gallery-section,.photo-spots-section,.memories-section,.travel-book-section,.review-section,.restaurant-section,.mobility-section){
+  margin:0!important;
+  padding:clamp(18px,3vw,28px)!important;
+  border-radius:var(--luvia-radius-card)!important;
+  background:
+    linear-gradient(145deg,rgba(255,255,255,.95),color-mix(in srgb,var(--module-accent) 3.5%,rgba(255,255,255,.88)))!important;
+  border:1px solid var(--luvia-border)!important;
+  box-shadow:var(--luvia-shadow-card)!important;
+  backdrop-filter:blur(18px) saturate(112%)!important;
+  -webkit-backdrop-filter:blur(18px) saturate(112%)!important;
+}
+html.luvia-shell-active .luvia-app-screen:not([data-screen="dashboard"]) :is(h1,h2){
+  font-family:var(--luvia-font-display)!important;color:var(--luvia-ink)!important;
+  font-size:clamp(30px,5vw,46px)!important;line-height:1.03!important;margin-top:0!important;
+}
+html.luvia-shell-active .luvia-app-screen:not([data-screen="dashboard"]) :is(h3,h4){font-family:var(--luvia-font-ui)!important;color:var(--luvia-ink)!important}
+html.luvia-shell-active .luvia-app-screen:not([data-screen="dashboard"]) :is(p,li,small,label){color:var(--luvia-muted)}
+html.luvia-shell-active .luvia-app-screen:not([data-screen="dashboard"]) :is(.eyebrow,.kicker,[class*="eyebrow"],[class*="kicker"]){
+  width:max-content;max-width:100%;padding:7px 11px!important;border-radius:999px!important;
+  background:color-mix(in srgb,var(--module-accent) 10%,white)!important;
+  color:color-mix(in srgb,var(--module-accent) 78%,#405a6e)!important;
+  font-family:var(--luvia-font-ui)!important;font-style:normal!important;font-size:11px!important;font-weight:850!important;letter-spacing:.1em!important;
+}
+html.luvia-shell-active .luvia-app-screen:not([data-screen="dashboard"]) :is(input,textarea,select){
+  border:1px solid rgba(48,75,94,.12)!important;border-radius:var(--luvia-radius-control)!important;
+  background:rgba(255,255,255,.94)!important;box-shadow:inset 0 1px 0 rgba(255,255,255,.8)!important;
+}
+html.luvia-shell-active .luvia-app-screen:not([data-screen="dashboard"]) :is(input,textarea,select):focus{
+  outline:none!important;border-color:color-mix(in srgb,var(--module-accent) 55%,#dbe3e7)!important;
+  box-shadow:0 0 0 4px color-mix(in srgb,var(--module-accent) 12%,transparent)!important;
+}
+html.luvia-shell-active .luvia-app-screen:not([data-screen="dashboard"]) :is(button,.map-button,.restaurant-link,.restaurant-map,.pc-btn):not(.plain):not([class*="close"]){
+  border-radius:999px!important;font-family:var(--luvia-font-ui)!important;font-weight:800!important;
+}
+
+/* Modul-Intro: lesbar, weich und bewusst */
+.luvia-module-intro{transition:opacity .42s cubic-bezier(.22,.8,.2,1),visibility .42s!important}
+.luvia-module-intro-card{transform:translateY(18px) scale(.965)!important;opacity:0;transition:transform .55s cubic-bezier(.18,.85,.22,1),opacity .42s ease!important}
+.luvia-module-intro.is-visible .luvia-module-intro-card{transform:none!important;opacity:1}
+.luvia-module-intro.is-leaving .luvia-module-intro-card{transform:translateY(-10px) scale(.985)!important;opacity:0}
+
+/* Profil-Center – Onboarding als visuelle Leitidee */
+.pc-overlay{z-index:900000!important;background:rgba(36,51,63,.38)!important;backdrop-filter:blur(18px) saturate(120%)!important;-webkit-backdrop-filter:blur(18px) saturate(120%)!important}
+.pc-shell{
+  --pc-accent:var(--trip-accent,#e76f91);
+  border:1px solid rgba(255,255,255,.7)!important;border-radius:36px!important;
+  background:
+    radial-gradient(circle at 0 0,color-mix(in srgb,var(--pc-accent) 13%,transparent),transparent 26rem),
+    linear-gradient(145deg,#fffaf9,#f4faf9)!important;
+  box-shadow:var(--luvia-shadow-float)!important;
+}
+.pc-side{padding:24px 16px!important;background:linear-gradient(165deg,color-mix(in srgb,var(--pc-accent) 11%,#fff8fa),#edf8f7)!important;border-right:1px solid rgba(45,70,87,.07)}
+.pc-brand{font-family:var(--luvia-font-display)!important;color:var(--luvia-ink)!important;padding-bottom:20px!important}
+.pc-nav{gap:6px!important}.pc-nav button{
+  min-height:48px!important;display:flex!important;align-items:center!important;gap:10px!important;
+  border-radius:17px!important;padding:12px 14px!important;color:#5f7280!important;font:750 13px/1.2 var(--luvia-font-ui)!important;
+  transition:transform .2s ease,background .2s ease,color .2s ease,box-shadow .2s ease!important;
+}
+.pc-nav button:hover{transform:translateX(2px);background:rgba(255,255,255,.5)!important}
+.pc-nav button.active{background:rgba(255,255,255,.92)!important;color:color-mix(in srgb,var(--pc-accent) 82%,#405a6e)!important;box-shadow:0 10px 25px color-mix(in srgb,var(--pc-accent) 13%,transparent)!important}
+.pc-main{padding:clamp(22px,4vw,40px)!important}.pc-head h2{font-size:clamp(32px,4vw,48px)!important;color:var(--luvia-ink)!important}.pc-head p{font-size:15px;line-height:1.6!important}
+.pc-card,.pc-trip{border-radius:26px!important;border:1px solid var(--luvia-border)!important;background:rgba(255,255,255,.88)!important;box-shadow:var(--luvia-shadow-card)!important}
+.pc-title{font-family:var(--luvia-font-display)!important;color:var(--luvia-ink)!important;font-size:25px!important}
+.pc-btn{border-radius:999px!important;padding:11px 15px!important;font-family:var(--luvia-font-ui)!important;font-weight:800!important}
+.pc-close{border-radius:999px!important;background:rgba(255,255,255,.82)!important}
+.pc-active-trip-global{border-radius:24px!important;background:linear-gradient(135deg,color-mix(in srgb,var(--pc-accent) 12%,#fff),rgba(255,255,255,.88))!important}
+
+/* Jedes Unterfenster muss über Profil und Shell liegen */
+.pc-submodal,.lm-modal,.po-scanner{z-index:1100000!important}
+.pc-submodal{background:rgba(34,48,60,.43)!important;backdrop-filter:blur(18px)!important;-webkit-backdrop-filter:blur(18px)!important}
+.pc-submodal-card,.lm-modal-card{border:1px solid rgba(255,255,255,.72)!important;border-radius:32px!important;background:linear-gradient(145deg,#fffaf9,#f5faf9)!important;box-shadow:var(--luvia-shadow-float)!important}
+.lm-modal{background:rgba(34,48,60,.43)!important;backdrop-filter:blur(18px)!important;-webkit-backdrop-filter:blur(18px)!important}
+.lm-modal-card{width:min(1040px,100%)!important}.lm-option{border-radius:20px!important;background:rgba(255,255,255,.9)!important}.lm-option.selected{background:color-mix(in srgb,var(--lm-accent,#e76f91) 8%,white)!important}
+
+/* Login/Gateway und Onboarding global im gleichen Ton */
+:is(.gateway-auth-card,.gateway-card,.po-shell){border:1px solid rgba(255,255,255,.72)!important;background:linear-gradient(145deg,rgba(255,250,249,.97),rgba(241,249,248,.96))!important;box-shadow:var(--luvia-shadow-float)!important}
+:is(.gateway-auth-title,.gateway-title){font-family:var(--luvia-font-display)!important;color:var(--luvia-ink)!important}
+.paris-onboarding .po-title{font-family:var(--luvia-font-display)!important;font-weight:750!important;color:var(--luvia-ink)!important}
+.paris-onboarding .po-copy{color:var(--luvia-muted)!important}
+.paris-onboarding :is(.po-choice,.po-template-card,.po-option,.po-trip-option,.po-connect-card,.po-create-summary){
+  border-radius:26px!important;border:1px solid var(--luvia-border)!important;background:linear-gradient(145deg,rgba(255,255,255,.94),rgba(255,248,250,.88))!important;box-shadow:var(--luvia-shadow-card)!important;
+}
+.paris-onboarding .po-option.selected{border-color:var(--pc-accent,#e76f91)!important;background:color-mix(in srgb,var(--pc-accent,#e76f91) 8%,white)!important}
+.paris-onboarding .po-symbol-grid{grid-template-columns:repeat(6,minmax(0,1fr))!important}
+.paris-onboarding .po-symbol-grid .po-option{display:grid;place-items:center;min-height:64px!important;font-size:27px!important;padding:10px!important}
+.paris-onboarding .po-color-grid{max-width:620px;margin-inline:auto!important;gap:12px!important}.paris-onboarding .po-color{width:46px!important;height:46px!important}
+
+@media(max-width:760px){
+ .pc-overlay{padding:0!important;place-items:stretch!important}.pc-shell{width:100%!important;height:100dvh!important;border-radius:0!important;grid-template-columns:1fr!important}.pc-side{padding:calc(18px + env(safe-area-inset-top)) 16px calc(18px + env(safe-area-inset-bottom))!important}.pc-main{padding:calc(18px + env(safe-area-inset-top)) 16px calc(28px + env(safe-area-inset-bottom))!important}
+ .pc-nav button{font-size:14px!important}.pc-submodal-card,.lm-modal-card{border-radius:0!important}
+ .paris-onboarding .po-symbol-grid{grid-template-columns:repeat(4,minmax(0,1fr))!important}
+ html.luvia-shell-active .luvia-app-screen:not([data-screen="dashboard"]) :is(.app-section,.day-group,.highlight-section,.travel-assistant,.live-moments,.travel-apps-section,.language-coach,.budget-section,.gallery-section,.photo-spots-section,.memories-section,.travel-book-section,.review-section,.restaurant-section,.mobility-section){border-radius:24px!important;padding:17px!important}
+}

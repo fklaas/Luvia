@@ -1,0 +1,1 @@
+window.LuviaModules?.register({id:'finalQuote',order:160,group:'Reiseabschluss',icon:'💬',title:'Schlusssatz',description:'Ein persönlicher Abschluss passend zu Reiseziel und Reiseart.',selectors:['#trip-final-quote']});

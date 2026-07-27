@@ -1,0 +1,1 @@
+(function(){'use strict';async function run(options={}){if(!window.LuviaPlaces)return{ok:false,message:'LuviaPlaces API fehlt.',checks:{api:false}};return window.LuviaPlaces.testContract(options);}window.LuviaPlacesTest=Object.freeze({run});})();

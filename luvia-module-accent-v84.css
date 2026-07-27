@@ -1,0 +1,118 @@
+/* Luvia 8.4 · intelligente Kontrast- und Hover-Farbsteuerung */
+.luvia-accent-normalized{
+  --module-accent:var(--luvia-trip-accent,var(--trip-accent,#e76f91));
+  --module-accent-ink:var(--luvia-accent-contrast,#fff);
+  --module-accent-deep:var(--luvia-accent-deep,color-mix(in srgb,var(--module-accent) 72%,#172f40));
+  --module-accent-deep-ink:var(--luvia-accent-deep-ink,#fff);
+  --module-accent-hover:var(--luvia-accent-hover,color-mix(in srgb,var(--module-accent) 86%,#fff));
+  --module-accent-hover-ink:var(--luvia-accent-hover-ink,#172f40);
+  --module-accent-soft:var(--luvia-accent-soft,color-mix(in srgb,var(--module-accent) 16%,#fff));
+  --module-accent-soft-ink:var(--luvia-accent-soft-ink,#172f40);
+  --module-accent-softer:var(--luvia-accent-softer,color-mix(in srgb,var(--module-accent) 8%,#fff));
+  --module-accent-pale:var(--luvia-accent-pale,color-mix(in srgb,var(--module-accent) 4%,#fff));
+  --module-accent-mid:var(--luvia-accent-mid,color-mix(in srgb,var(--module-accent) 68%,#fff));
+  --module-accent-border:color-mix(in srgb,var(--module-accent) 36%,#fff);
+  --module-accent-shadow:color-mix(in srgb,var(--module-accent) 22%,transparent);
+}
+
+/* Primäre Flächen: Textfarbe wird aus der tatsächlichen Reisefarbe berechnet. */
+.luvia-accent-normalized :is(.primary,.is-active,[aria-selected="true"],[aria-current="page"]):not(.luvia-shell-nav-item),
+.luvia-accent-normalized :is(button,a)[class*="button"]:not(.secondary):not(.ghost):not(.cinematic-button),
+.luvia-accent-normalized :is(button,a)[class*="btn"]:not(.secondary):not(.ghost),
+.luvia-accent-normalized :is(.photo-route,.restaurant-link,.memory-add-form button,.book-create-button,.budget-add,.gallery-upload-button,.gallery-primary,.study-reveal){
+  background:var(--module-accent)!important;
+  border-color:var(--module-accent)!important;
+  color:var(--module-accent-ink)!important;
+  text-shadow:none!important;
+  box-shadow:0 12px 28px var(--module-accent-shadow)!important;
+}
+.luvia-accent-normalized :is(button,a)[class*="button"]:not(.secondary):not(.ghost):not(.cinematic-button):hover,
+.luvia-accent-normalized :is(button,a)[class*="btn"]:not(.secondary):not(.ghost):hover,
+.luvia-accent-normalized :is(.photo-route,.restaurant-link,.memory-add-form button,.book-create-button,.budget-add,.gallery-upload-button,.gallery-primary,.study-reveal):hover{
+  background:var(--module-accent-hover)!important;
+  border-color:var(--module-accent-hover)!important;
+  color:var(--module-accent-hover-ink)!important;
+  filter:none!important;
+}
+
+/* Helle Akzentflächen */
+.luvia-accent-normalized :is(.assistant-toggle,.study-option,.coach-language-switch button,.coach-mode button,.coach-category,.photo-tip,.photo-spots-tip,.book-launch-kicker,.cinematic-kicker){
+  color:var(--module-accent-soft-ink)!important;
+}
+.luvia-accent-normalized .assistant-toggle{
+  background:var(--module-accent-soft)!important;
+  border:1px solid var(--module-accent-border)!important;
+  box-shadow:0 10px 24px var(--module-accent-shadow)!important;
+}
+.luvia-accent-normalized .assistant-toggle:hover{background:var(--module-accent-hover)!important;color:var(--module-accent-hover-ink)!important}
+.luvia-accent-normalized .assistant-toggle-arrow{color:currentColor!important}
+
+/* Live Moments */
+.luvia-accent-normalized .live-trip-step.active .live-trip-dot,
+.luvia-accent-normalized .live-location-dot.is-active,
+.luvia-accent-normalized .live-progress-dot.is-active{
+  background:var(--module-accent)!important;border-color:var(--module-accent)!important;color:var(--module-accent-ink)!important;
+  box-shadow:0 0 0 5px color-mix(in srgb,var(--module-accent) 24%,transparent)!important;
+}
+.luvia-accent-normalized :is(.live-trip-progress:before,.live-location-line,.live-progress-track){background:var(--module-accent-soft)!important}
+.luvia-accent-normalized .live-trip-step.active small{color:var(--module-accent-deep)!important}
+
+/* Sprachcoach */
+.luvia-accent-normalized .coach-context{background:var(--module-accent-deep)!important;border-color:var(--module-accent-border)!important;box-shadow:0 22px 48px var(--module-accent-shadow)!important}
+.luvia-accent-normalized .coach-context :is(small,strong,p,h2,h3){color:var(--module-accent-deep-ink)!important;opacity:1!important}
+.luvia-accent-normalized .coach-language-switch button.is-active,
+.luvia-accent-normalized .coach-mode button.is-active,
+.luvia-accent-normalized .coach-category.is-active{background:var(--module-accent)!important;color:var(--module-accent-ink)!important;border-color:var(--module-accent)!important}
+.luvia-accent-normalized .coach-language-switch button.is-active:hover,
+.luvia-accent-normalized .coach-mode button.is-active:hover,
+.luvia-accent-normalized .coach-category.is-active:hover{background:var(--module-accent-hover)!important;color:var(--module-accent-hover-ink)!important}
+.luvia-accent-normalized .study-option{background:var(--module-accent-soft)!important;color:var(--module-accent-soft-ink)!important}
+
+/* Fotospots */
+.luvia-accent-normalized #fotospots :is(.photo-spot-icon,.photo-spot-camera){background:var(--module-accent-soft)!important;border-color:var(--module-accent-border)!important;color:var(--module-accent-soft-ink)!important}
+.luvia-accent-normalized #fotospots :is(.photo-tip,.photo-spots-tip,[class*="tip"]){background:var(--module-accent-soft)!important;border-color:var(--module-accent-border)!important;color:var(--module-accent-soft-ink)!important}
+.luvia-accent-normalized #fotospots :is(.photo-tip,.photo-spots-tip,[class*="tip"]) *{color:inherit!important}
+
+/* Restaurants */
+.luvia-accent-normalized .restaurant-card{--restaurant-accent:var(--module-accent)!important;background:var(--module-accent-soft)!important;border-color:var(--module-accent-border)!important;box-shadow:0 22px 45px var(--module-accent-shadow)!important}
+.luvia-accent-normalized .restaurant-card-header{background:var(--module-accent-deep)!important;color:var(--module-accent-deep-ink)!important}
+.luvia-accent-normalized .restaurant-card-header *{color:inherit!important}
+.luvia-accent-normalized .restaurant-card-body{background:var(--module-accent-softer)!important;color:var(--module-accent-soft-ink)!important}
+.luvia-accent-normalized .restaurant-card-body :is(h3,.restaurant-time,.restaurant-copy,p,strong){color:inherit!important;opacity:1!important}
+.luvia-accent-normalized .restaurant-card :is(.restaurant-symbol,.restaurant-badge){background:var(--module-accent-soft)!important;color:var(--module-accent-soft-ink)!important}
+
+/* Erinnerungen */
+.luvia-accent-normalized #erinnerungen.memory-section{--memory-accent:var(--module-accent)!important}
+.luvia-accent-normalized .memory-progress-card{background:var(--module-accent-soft)!important;border-color:var(--module-accent-border)!important;color:var(--module-accent-soft-ink)!important}
+.luvia-accent-normalized .memory-progress-card *{color:inherit!important}
+.luvia-accent-normalized .memory-progress-fill{background:var(--module-accent)!important}
+.luvia-accent-normalized .memory-check{--memory-accent:var(--module-accent)!important}
+.luvia-accent-normalized .memory-add-card{border-color:var(--module-accent-border)!important;background:var(--module-accent-softer)!important}
+.luvia-accent-normalized .memory-add-label{color:var(--module-accent-deep)!important}
+.luvia-accent-normalized .memory-add-form input:focus{border-color:var(--module-accent)!important;box-shadow:0 0 0 4px color-mix(in srgb,var(--module-accent) 14%,transparent)!important}
+
+/* Cinematic Review */
+.luvia-accent-normalized #reise-revue.cinematic-launch{background:var(--module-accent-deep)!important;color:var(--module-accent-deep-ink)!important;box-shadow:0 28px 80px var(--module-accent-shadow)!important}
+.luvia-accent-normalized #reise-revue.cinematic-launch :is(h1,h2,h3,p,small,strong){color:inherit!important;opacity:1!important}
+.luvia-accent-normalized #reise-revue .cinematic-kicker{background:var(--module-accent-soft)!important;color:var(--module-accent-soft-ink)!important}
+.luvia-accent-normalized #reise-revue .cinematic-button{background:#fff!important;color:#172f40!important;border-color:#fff!important}
+.luvia-accent-normalized #reise-revue .cinematic-button:hover{background:var(--module-accent-soft)!important;color:var(--module-accent-soft-ink)!important}
+.luvia-accent-normalized #reise-revue .cinematic-preview{border-color:var(--module-accent-border)!important;background:var(--module-accent-soft)!important;color:var(--module-accent-soft-ink)!important}
+
+/* Reisebuch */
+.luvia-accent-normalized #reisebuch.travel-book-launch{background:var(--module-accent-softer)!important;border-color:var(--module-accent-border)!important;color:#172f40!important}
+.luvia-accent-normalized #reisebuch .book-launch-kicker{background:var(--module-accent-soft)!important;color:var(--module-accent-soft-ink)!important;border-color:var(--module-accent-border)!important}
+.luvia-accent-normalized #reisebuch .book-readiness{background:#fff!important;border:1px solid var(--module-accent-border)!important;box-shadow:0 22px 50px var(--module-accent-shadow)!important;color:#172f40!important}
+.luvia-accent-normalized #reisebuch .book-readiness-head span,
+.luvia-accent-normalized #reisebuch .book-source-row b{color:var(--module-accent-deep)!important}
+
+/* Budget und Galerie */
+.luvia-accent-normalized .budget-ring{border-color:var(--module-accent-soft)!important;box-shadow:inset 0 0 0 12px var(--module-accent-softer)!important;color:var(--module-accent-soft-ink)!important}
+.luvia-accent-normalized .budget-ring:before{background:var(--module-accent)!important}
+.luvia-accent-normalized .budget-ring *{color:inherit!important}
+.luvia-accent-normalized .route-card{--accent:var(--module-accent)!important}
+.luvia-accent-normalized :is(.eyebrow,.section-kicker,.app-section-kicker,.route-kicker,.book-launch-kicker){color:var(--module-accent-deep)!important}
+
+/* Disabled bleibt lesbar statt unsichtbar. */
+.luvia-accent-normalized button:disabled,
+.luvia-accent-normalized [aria-disabled="true"]{opacity:.62!important;color:var(--module-accent-ink)!important}

@@ -1,0 +1,4 @@
+const defaults=['https://myluvia.app','https://www.myluvia.app','http://localhost:3000','http://127.0.0.1:5500'];
+export function allowedOrigins(){return (Deno.env.get('LUVIA_ALLOWED_ORIGINS')||defaults.join(',')).split(',').map(v=>v.trim()).filter(Boolean);}
+export function resolveOrigin(origin:string|null){if(!origin)return allowedOrigins()[0]||'https://myluvia.app';return allowedOrigins().includes(origin)?origin:'';}
+export function corsHeaders(origin:string,requestId:string):HeadersInit{return{'Access-Control-Allow-Origin':origin||'null','Access-Control-Allow-Headers':'authorization, x-client-info, apikey, content-type, x-luvia-request-id, x-luvia-client-version, x-luvia-build','Access-Control-Allow-Methods':'POST, OPTIONS','Access-Control-Max-Age':'86400','Vary':'Origin','X-Luvia-Request-Id':requestId,'Cache-Control':'no-store'};}

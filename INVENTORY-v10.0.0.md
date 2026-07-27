@@ -1,0 +1,48 @@
+# Inventur · Luvia 10.0.0
+
+- Dateien gesamt: **424**
+- JavaScript: **102**
+- HTML: **43**
+- CSS: **22**
+- Dateien mit verbleibenden Paris-/Kompatibilitätsbezügen: **39**
+
+## Verbleibende Legacy-abhängige Dateien
+- `ARCHITECTURE-v10.0.0.md`
+- `LUVIA-CLOUD-TRAVEL-MANAGEMENT.sql`
+- `LUVIA-MODULE-CONFIG-SETUP.sql`
+- `LUVIA-PEOPLE-LIVE-MAP-SETUP.sql`
+- `PARIS-CLOUD-TRAVEL-MANAGEMENT.sql`
+- `PARIS-PEOPLE-LIVE-MAP-SETUP.sql`
+- `REISEZEIT-OWNER-REPAIR-V13.sql`
+- `RELEASE-v9.22.13.md`
+- `RELEASE-v9.22.14.md`
+- `TEST-v10.0.0.md`
+- `TEST-v9.22.13.md`
+- `app-gateway.js`
+- `app/app-shell.js`
+- `auth/session.js`
+- `auth/ui.js`
+- `core/legacy/paris-migrator.js`
+- `core/runtime/runtime.js`
+- `core/trips/trip-store.js`
+- `day-closure.js`
+- `intelligence/backend-console.js`
+- `intelligence/backend-service.js`
+- `intelligence/destination-service.js`
+- `intelligence/kernel/kernel.js`
+- `intelligence/services/base-services.js`
+- `legacy/paris/cloud-adapter.js`
+- `luvia-app-shell.js`
+- `luvia-dashboard.js`
+- `luvia-entry.js`
+- `luvia-v7-enhancements.js`
+- `modules/destination-content.js`
+- `modules/module-manager.js`
+- `modules/restaurants-v2/restaurant-module.js`
+- `people-system.js`
+- `profile-center.js`
+- `reminders.js`
+- `route-switcher.js`
+- `supabase-sync.js`
+- `supabase/migrations/20260727_006_core_v2_12_4_12_realtime_owner_delete_repair.sql`
+- `sync/core.js`

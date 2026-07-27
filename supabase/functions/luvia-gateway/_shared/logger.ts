@@ -1,0 +1,3 @@
+const sensitive=/authorization|token|secret|password|apikey|cookie/i;
+function sanitize(value:unknown,depth=0):unknown{if(depth>4)return'[max-depth]';if(Array.isArray(value))return value.slice(0,30).map(v=>sanitize(v,depth+1));if(value&&typeof value==='object'){const out:Record<string,unknown>={};for(const [key,item] of Object.entries(value as Record<string,unknown>))out[key]=sensitive.test(key)?'[redacted]':sanitize(item,depth+1);return out;}return typeof value==='string'&&value.length>500?value.slice(0,500)+'…':value;}
+export function log(level:'info'|'warn'|'error',event:string,detail:Record<string,unknown>={}){console.log(JSON.stringify({level,event,at:new Date().toISOString(),...sanitize(detail) as object}));}

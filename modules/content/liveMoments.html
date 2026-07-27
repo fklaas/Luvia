@@ -1,0 +1,27 @@
+<section aria-labelledby="liveMomentTitle" class="live-moments reveal" id="live-moments">
+<div class="live-moment-shell">
+<div class="live-moment-ribbon">
+<div class="live-moment-status"><span class="live-moment-dot"></span>Live Moment</div>
+<div class="live-moment-ribbon-actions">
+<div class="live-moment-phase" id="liveMomentPhase">Vor der Reise</div>
+<div class="live-moment-tools">
+<button aria-controls="liveMomentToolsPanel" aria-expanded="false" aria-label="Live-Moments-Einstellungen öffnen" class="live-tools-button" id="liveMomentToolsButton" type="button">⚙️</button>
+<div class="live-tools-panel" hidden="" id="liveMomentToolsPanel">
+<div class="live-tools-head"><div><strong>Live Moments</strong><span>Modus auswählen</span></div><button aria-label="Einstellungen schließen" class="live-tools-close" id="liveMomentToolsClose" type="button">×</button></div>
+<label class="live-mode-option"><input checked="" name="liveMomentMode" type="radio" value="auto"/><span><strong>Automatisch</strong><small>Datum, Reisephase und freigegebener Standort</small></span></label>
+<label class="live-mode-option"><input name="liveMomentMode" type="radio" value="test"/><span><strong>Testmodus</strong><small>Reisesituationen bereits zuhause simulieren</small></span></label>
+<div class="live-test-scenarios" hidden="" id="liveMomentTestScenarios">
+<label for="liveMomentPreview">Testsituation</label>
+<select aria-label="Live-Moment-Testsituation auswählen" class="live-preview-select" id="liveMomentPreview"><option value="pretrip">Vor der Reise</option><option value="drive">Auf der Fahrt</option><option value="trip">In Paris, ohne erkannten Ort</option><option value="loc:hotel">Am Hotel</option><option value="loc:eiffel">Am Eiffelturm</option><option value="loc:louvre">Am Louvre</option><option value="loc:seine">An der Seine</option><option value="loc:montmartre">In Montmartre</option><option value="loc:disney">Im Disneyland</option><option value="after">Nach der Reise</option></select>
+<button class="live-auto-return" id="liveMomentAutoReturn" type="button">Automatik wieder aktivieren</button>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="live-moment-main"><div class="live-moment-copy"><span class="live-moment-eyebrow" id="liveMomentEyebrow">🧳 Vorfreude auf Paris</span><h2 id="liveMomentTitle">Noch seid ihr zuhause – aber Paris rückt näher.</h2><p id="liveMomentIntro"></p><div class="live-moment-actions" id="liveMomentActions"></div></div><div class="live-moment-illustration" id="liveMomentIllustration"></div></div>
+<div class="live-moment-grid" id="liveMomentGrid"></div>
+<div class="live-moment-stay" id="liveMomentStay"><div class="live-moment-stay-icon">📸</div><div><strong>Ihr genießt diesen Ort jetzt schon eine Weile.</strong><p>Zeit für ein Polaroid? Ein ruhiger Moment wird oft zur schönsten Erinnerung.</p></div></div>
+<div class="live-moment-timeline-wrap"><div class="live-moment-timeline-title"><span>Eure Reise</span><span>Der aktuelle Ort wandert automatisch mit</span></div><div class="live-moment-timeline" id="liveMomentTimeline"></div></div>
+</div>
+</section>

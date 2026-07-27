@@ -1,0 +1,55 @@
+{
+  "version": 2.2,
+  "settings": {
+    "showEditor": true,
+    "showCountdown": true,
+    "mapsProvider": "google",
+    "sortMode": "manual",
+    "currency": "EUR",
+    "showDiscovery": true
+  },
+  "heading": {
+    "eyebrowTemplate": "Genussmomente in {destination}",
+    "title": "Unsere Restaurants",
+    "descriptionTemplate": "Reservierungen, Lieblingsorte und kulinarische Ideen für {destination}."
+  },
+  "entries": [],
+  "officialParisEntries": [
+    {
+      "id": "perruche",
+      "name": "Perruche Rooftop",
+      "date": "2026-07-31",
+      "time": "19:00",
+      "description": "Unser erster Pariser Abend über den Dächern der Stadt: mediterranes Dinner, goldene Abendsonne und ein besonderer Auftakt für unser Jubiläumswochenende.",
+      "symbol": "🌇",
+      "address": "2 Rue du Havre, 75009 Paris",
+      "mapsUrl": "https://www.google.com/maps/search/?api=1&query=Perruche%20Rooftop%20Restaurant%20Paris",
+      "reservationStatus": "confirmed",
+      "source": "official",
+      "menu": {
+        "enabled": true,
+        "label": "Speisekarte",
+        "original": "./carte-food-perruche-summer.pdf",
+        "pages": ["./menu-perruche-1.jpg", "./menu-perruche-2.jpg", "./menu-perruche-3.jpg", "./menu-perruche-4.jpg", "./menu-perruche-5.jpg", "./menu-perruche-6.jpg"]
+      }
+    },
+    {
+      "id": "elio",
+      "name": "Elio",
+      "date": "2026-08-02",
+      "time": "17:30",
+      "description": "Zum Abschluss noch einmal Paris ganz bewusst genießen: gemeinsam essen, den Blick Richtung Eiffelturm schweifen lassen und unsere Reise langsam ausklingen lassen.",
+      "symbol": "🗼",
+      "address": "Paris, Frankreich",
+      "mapsUrl": "https://www.google.com/maps/search/?api=1&query=Elio%20Restaurant%20Paris%20Eiffelturm",
+      "reservationStatus": "confirmed",
+      "source": "official",
+      "menu": {
+        "enabled": true,
+        "label": "Speisekarte",
+        "original": "./Elio.pdf",
+        "pages": ["./menu-elio-1.webp", "./menu-elio-2.webp", "./menu-elio-3.webp", "./menu-elio-4.webp"]
+      }
+    }
+  ]
+}

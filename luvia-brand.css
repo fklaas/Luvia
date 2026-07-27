@@ -1,0 +1,32 @@
+
+:root{--luvia-coral:#ee6f83;--luvia-rose:#f08aaa;--luvia-apricot:#f2a66f;--luvia-cream:#fff8f6;--luvia-navy:#263b54;--luvia-mist:#f0f8f7;--luvia-radius-sm:16px;--luvia-radius-md:24px;--luvia-radius-lg:34px;--luvia-shadow:0 18px 55px rgba(55,66,82,.12);--luvia-shadow-soft:0 10px 30px rgba(55,66,82,.08)}html,body{font-family:"Inter",ui-sans-serif,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}h1,h2,h3,.pc-brand,.gateway-title,.gateway-auth-title,.po-title{font-family:"Playfair Display",Georgia,serif}button,a,input{transition:transform .18s ease,box-shadow .18s ease,border-color .18s ease,background .18s ease}button:active,.pc-btn:active,.po-btn:active{transform:scale(.98)}.pc-card,.po-card,.gateway-auth-card{border-radius:var(--luvia-radius-md)!important;box-shadow:var(--luvia-shadow-soft)!important}.pc-btn.primary,.po-btn.primary{background:linear-gradient(100deg,var(--pc-accent,var(--luvia-coral)),color-mix(in srgb,var(--pc-accent,var(--luvia-coral)) 68%,var(--luvia-apricot)))!important;border:0!important;color:#fff!important;box-shadow:0 12px 26px color-mix(in srgb,var(--pc-accent,var(--luvia-coral)) 25%,transparent)!important}.pc-fab{background:linear-gradient(145deg,var(--luvia-coral),var(--luvia-apricot))!important}.pc-shell,.po-shell{animation:luviaPanelIn .34s cubic-bezier(.2,.75,.2,1)}.pc-card,.people-card,.trip-switch-card{animation:luviaCardIn .32s ease both}@keyframes luviaPanelIn{from{opacity:0;transform:translateY(12px) scale(.985)}to{opacity:1;transform:none}}@keyframes luviaCardIn{from{opacity:0;transform:translateY(9px)}to{opacity:1;transform:none}}@media(prefers-reduced-motion:reduce){*{animation-duration:.01ms!important;animation-iteration-count:1!important;scroll-behavior:auto!important}}#luviaSplash{position:fixed;inset:0;z-index:2000000;display:grid;place-items:center;background:linear-gradient(150deg,#fff8f6,#fff0f3 52%,#eef9f7);opacity:0;visibility:hidden;transition:opacity .28s ease,visibility .28s ease}html.auth-booting #luviaSplash{opacity:1;visibility:visible!important}.luvia-splash-inner{text-align:center;color:var(--luvia-navy)}.luvia-splash-logo{width:92px;height:92px;margin:0 auto 20px;filter:drop-shadow(0 18px 28px rgba(215,90,119,.2));animation:luviaPulse 1.8s ease-in-out infinite}.luvia-splash-name{font:800 42px/1 "Playfair Display",Georgia,serif;letter-spacing:-.03em}.luvia-splash-tag{margin-top:9px;color:#7f7180;font-size:14px;font-weight:650}@keyframes luviaPulse{50%{transform:translateY(-5px) scale(1.025)}}.pc-brand{display:flex!important;align-items:center!important;gap:10px!important;font-size:0!important}.pc-brand:before{content:"";width:31px;height:31px;flex:0 0 31px;background:url("luvia-logo.svg") center/contain no-repeat}.pc-brand:after{content:"Luvia";font:800 24px/1 "Playfair Display",Georgia,serif}.pc-nav button{border-radius:15px!important}.pc-nav button.active{background:rgba(255,255,255,.9)!important;box-shadow:0 8px 20px color-mix(in srgb,var(--pc-accent,#ee6f83) 12%,transparent)!important}.pc-logout{margin-top:10px!important;border:1px solid rgba(191,79,102,.12)!important}
+
+
+/* Luvia 2.1 – Formulare sind Bestandteil des Onboardings, keine schwebenden Unterkarten */
+.paris-onboarding .po-form{
+  width:min(620px,100%)!important;
+  max-width:620px!important;
+  margin:24px auto 0!important;
+  padding:0!important;
+  border:0!important;
+  border-radius:0!important;
+  background:transparent!important;
+  box-shadow:none!important;
+  backdrop-filter:none!important;
+}
+.paris-onboarding .po-field{
+  margin:16px 0!important;
+}
+.paris-onboarding .po-field input{
+  box-shadow:none!important;
+}
+.paris-onboarding .po-form:before,
+.paris-onboarding .po-form:after{
+  content:none!important;
+  display:none!important;
+}
+@media(max-width:760px){
+  .paris-onboarding .po-form{
+    margin-top:20px!important;
+  }
+}

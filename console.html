@@ -1,0 +1,22 @@
+<!doctype html>
+<html lang="de">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="robots" content="noindex">
+  <title>Luvia Developer Console</title>
+  <link rel="icon" href="favicon.svg" type="image/svg+xml">
+  <meta http-equiv="refresh" content="0; url=intelligence/console.html">
+  <script>
+    (() => {
+      const target = new URL('intelligence/console.html', window.location.href);
+      target.search = window.location.search;
+      target.hash = window.location.hash;
+      window.location.replace(target.href);
+    })();
+  </script>
+</head>
+<body>
+  <p>Weiterleitung zur Developer Console. <a href="intelligence/console.html">Seite öffnen</a></p>
+</body>
+</html>
