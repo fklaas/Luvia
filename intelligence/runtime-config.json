@@ -29,7 +29,7 @@
   },
   "release": {
     "core": "3.3.0",
-    "build": "11.5.1",
+    "build": "11.6.0",
     "name": "Luvia Design Language V3",
     "channel": "production"
   },
@@ -41,7 +41,7 @@
   },
   "build": {
     "core": "3.3.0",
-    "build": "11.5.1",
+    "build": "11.6.0",
     "name": "Luvia Design Language V3",
     "channel": "production",
     "releasedAt": "2026-07-27",
