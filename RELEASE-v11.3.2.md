@@ -1,6 +1,6 @@
-# Luvia 11.3.2 – Profile Foundation Stability & UI Runtime
+# Luvia 11.3.3 – Profile Interaction Reliability
 
-Build 11.3.2 · Core 3.1.0.2
+Build 11.3.3 · Core 3.1.0.3
 
 ## Umfang
 - Core-Diagnose und Developer Console verwenden den zentralen Supabase-Client.
@@ -11,4 +11,4 @@ Build 11.3.2 · Core 3.1.0.2
 - Neuer globaler UI Manager für Dialoge, Overlays, Escape und Backdrop-Schließen.
 - Reiseeditor mit Live-Vorschau.
 - Einladung per Link, QR-Code, Teilen, E-Mail, WhatsApp, Telegram und Signal-Vorbereitung.
-- Versions- und Cache-Buster auf 11.3.2 / 3.1.0.2 vereinheitlicht.
+- Versions- und Cache-Buster auf 11.3.3 / 3.1.0.3 vereinheitlicht.

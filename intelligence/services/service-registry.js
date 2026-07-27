@@ -1,6 +1,6 @@
 (function(){
   'use strict';
-  const VERSION='3.1.0.2-service-runtime';
+  const VERSION='3.1.0.3-service-runtime';
   const STATES=Object.freeze({REGISTERED:'registered',INITIALIZING:'initializing',READY:'ready',WARNING:'warning',OFFLINE:'offline',FAILED:'failed',DISABLED:'disabled',STOPPED:'stopped',DESTROYED:'destroyed'});
   const records=new Map();
   const now=()=>new Date().toISOString();
