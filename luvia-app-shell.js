@@ -101,8 +101,9 @@
 
     // Originale DOM-Knoten verschieben: Event Listener, IDs und bestehende
     // Modulskripte bleiben dadurch vollständig erhalten.
-    const dashboardNode=document.getElementById('luvia-dashboard');
-    if(dashboardNode)dashboard.querySelector('[data-screen-content="dashboard"]').appendChild(dashboardNode);
+    const dashboardHost=dashboard.querySelector('[data-screen-content="dashboard"]');
+    if(window.LuviaTripExperience?.renderDashboard)window.LuviaTripExperience.renderDashboard(dashboardHost,value);
+    else{const dashboardNode=document.getElementById('luvia-dashboard');if(dashboardNode)dashboardHost.appendChild(dashboardNode);}
 
     for(const record of collectModuleRoots()){
       const content=viewport.querySelector(`[data-screen-content="${CSS.escape(record.id)}"]`);
@@ -375,7 +376,7 @@
     const value=trip()||{};
     intro.querySelector('[data-intro-icon]').textContent=icons[id]||'✨';
     intro.querySelector('[data-intro-title]').textContent=titles[id]||id;
-    intro.querySelector('[data-intro-destination]').textContent=value.destination||value.tripName||'Unsere Reise';
+    intro.querySelector('[data-intro-destination]').textContent=(typeof value.destination==='object'?value.destination?.name:value.destination)||value.destinationName||value.tripName||'Unsere Reise';
     intro.style.setProperty('--intro-module-surface',moduleSurfaceColor(id));
     clearTimeout(introTimer);
     intro.hidden=false;
@@ -491,7 +492,7 @@
     hydrateModuleScreens();
     const ids=enabledIds();
     if(!ids.includes(active))active='dashboard';
-    applyDashboardPreferences(value);
+    if(window.LuviaTripExperience?.renderDashboard){const host=shell.querySelector('[data-screen-content="dashboard"]');window.LuviaTripExperience.renderDashboard(host,value)}else applyDashboardPreferences(value);
     document.documentElement.style.setProperty('--shell-accent',value.accent||'#e76f91');
     ids.filter(id=>id!=='dashboard').forEach(normalizeModuleAccent);
 
@@ -521,7 +522,7 @@
       const value=trip()||{};
       intro.querySelector('[data-intro-icon]').textContent=icons[id]||'✨';
       intro.querySelector('[data-intro-title]').textContent=titles[id]||id;
-      intro.querySelector('[data-intro-destination]').textContent=value.destination||value.tripName||'Unsere Reise';
+      intro.querySelector('[data-intro-destination]').textContent=(typeof value.destination==='object'?value.destination?.name:value.destination)||value.destinationName||value.tripName||'Unsere Reise';
       intro.style.setProperty('--intro-module-surface','rgba(255,255,255,.995)');
       intro.hidden=false;
       intro.setAttribute('aria-hidden','false');
