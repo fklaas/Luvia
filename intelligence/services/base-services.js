@@ -5,6 +5,45 @@
   const ready=status=>({state:R.states.READY,...status});
   const safeJson=value=>{try{return JSON.parse(JSON.stringify(value));}catch{return null;}};
   let pwaLoadPromise=null;
+
+  let recommendationLoadPromise=null;
+  function recommendationScriptUrl(relativePath){
+    const base=new URL(document.currentScript?.src||'services/base-services.js',document.baseURI);
+    return new URL('../../'+relativePath,base).href;
+  }
+  function loadScriptOnce(src,marker){
+    return new Promise((resolve,reject)=>{
+      const existing=document.querySelector(`script[data-${marker}],script[src="${src}"]`);
+      if(existing){
+        if(existing.dataset.loaded==='true'){resolve();return;}
+        existing.addEventListener('load',()=>resolve(),{once:true});
+        existing.addEventListener('error',()=>reject(new Error(`Script konnte nicht geladen werden: ${src}`)),{once:true});
+        setTimeout(()=>resolve(),300);
+        return;
+      }
+      const script=document.createElement('script');
+      script.src=src;
+      script.dataset[marker.replace(/-([a-z])/g,(_,c)=>c.toUpperCase())]='true';
+      script.onload=()=>{script.dataset.loaded='true';resolve();};
+      script.onerror=()=>reject(new Error(`Script konnte nicht geladen werden: ${src}`));
+      document.head.appendChild(script);
+    });
+  }
+  async function ensureRecommendationApi(){
+    if(recommendationLoadPromise)return recommendationLoadPromise;
+    recommendationLoadPromise=(async()=>{
+      if(!window.LuviaRecommendations){
+        await loadScriptOnce(recommendationScriptUrl('core/recommendations/recommendation-service.js?v=11.8.2'),'luvia-recommendation-service');
+      }
+      if(!window.LuviaRecommendations)throw new Error('Recommendation API konnte nicht initialisiert werden.');
+      const adapters=window.LuviaRecommendations.diagnostics?.().adapters||[];
+      if(!adapters.includes('restaurants')){
+        await loadScriptOnce(recommendationScriptUrl('core/recommendations/restaurant-recommendation-adapter.js?v=11.8.2'),'luvia-recommendation-adapter');
+      }
+      return window.LuviaRecommendations;
+    })().catch(error=>{recommendationLoadPromise=null;throw error;});
+    return recommendationLoadPromise;
+  }
   function pwaScriptUrl(){
     const base=new URL(document.currentScript?.src||'services/base-services.js',document.baseURI);
     return new URL('../pwa-service.js?v=11.6.3',base).href;
@@ -80,7 +119,7 @@
 
   R.register({name:'places',version:window.LuviaPlaces?.version||'2.11.2',description:'Zentrales Google Places Gateway für Text Search, Nearby Search, Autocomplete, Details, Fotos, Normalisierung und Cache.',dependencies:['backend','destination','events'],init(){if(!window.LuviaPlaces)throw new Error('LuviaPlaces API fehlt.');window.LuviaPlaces.init();},status(){const d=window.LuviaPlaces.diagnostics();return ready({backendAvailable:d.backendAvailable,destination:d.destination?.displayName||d.destination?.name||'',requests:d.metrics.requests,cacheHits:d.metrics.cacheHits,failures:d.metrics.failures});},diagnostics(){return window.LuviaPlaces.diagnostics();},async test(){return window.LuviaPlacesTest?.run?window.LuviaPlacesTest.run():window.LuviaPlaces.testContract();}});
 
-  R.register({name:'recommendations',version:window.LuviaRecommendations?.version||'3.6.0',description:'Modulübergreifende Smart Recommendation Engine mit Context Collector, Hard Constraints, erklärbaren Scores, Adapter Registry und Decision Tracking.',dependencies:['backend','places','trips','events'],init(){if(!window.LuviaRecommendations)throw new Error('Recommendation API fehlt.');},status(){const d=window.LuviaRecommendations.diagnostics();return ready({adapters:d.adapters.length,generated:d.metrics.generated,accepted:d.metrics.accepted,rejected:d.metrics.rejected});},diagnostics(){return window.LuviaRecommendations.diagnostics();},async test(){const results=await window.LuviaRecommendations.get({module:'restaurants',candidates:[{id:'console-contract-test',name:'Vegetarisches Rooftop',rating:4.7,distanceMeters:800,openNow:true,features:{servesVegetarianFood:true,reservable:true}}],persist:false,limit:1});return{ok:results.length===1&&Number.isFinite(results[0].score),message:'Recommendation Contract und Restaurant-Adapter geprüft.',checks:{api:Boolean(window.LuviaRecommendations),adapter:window.LuviaRecommendations.diagnostics().adapters.includes('restaurants'),score:Number.isFinite(results[0]?.score),explain:Boolean(window.LuviaRecommendations.explain(results[0]))}};}});
+  R.register({name:'recommendations',version:window.LuviaRecommendations?.version||'3.6.2',description:'Modulübergreifende Smart Recommendation Engine mit Context Collector, Hard Constraints, erklärbaren Scores, Adapter Registry und Decision Tracking.',dependencies:['backend','places','trips','events'],async init(){await ensureRecommendationApi();},status(){const api=window.LuviaRecommendations;if(!api)return{state:R.states.WARNING,reason:'Recommendation API wird geladen.'};const d=api.diagnostics?.()||{adapters:[],metrics:{}};return ready({adapters:d.adapters?.length||0,generated:d.metrics?.generated||0,accepted:d.metrics?.accepted||0,rejected:d.metrics?.rejected||0});},async diagnostics(){const api=await ensureRecommendationApi();return api.diagnostics();},async test(){const api=await ensureRecommendationApi();const results=await api.get({module:'restaurants',candidates:[{id:'console-contract-test',name:'Vegetarisches Rooftop',rating:4.7,distanceMeters:800,openNow:true,features:{servesVegetarianFood:true,reservable:true}}],persist:false,limit:1});const diagnostics=api.diagnostics();return{ok:results.length===1&&Number.isFinite(results[0].score),message:'Recommendation Contract, Runtime-API und Restaurant-Adapter geprüft.',checks:{api:Boolean(api),adapter:diagnostics.adapters.includes('restaurants'),score:Number.isFinite(results[0]?.score),explain:Boolean(api.explain(results[0]))}};}});
 
   R.register({name:'developer',version:'3.3.0',description:'Stellt Logs, Events und Service-Diagnosen für Entwickler bereit.',dependencies:['environment','data','trips','events','platform','pwa','backend','places'],status(){return ready({logs:window.LuviaKernelLogger?.diagnostics()?.entries||0,events:window.LuviaKernelEvents?.diagnostics()?.historyCount||0});},diagnostics(){return{logger:window.LuviaKernelLogger?.diagnostics(),events:window.LuviaKernelEvents?.diagnostics(),registryCount:R.list().length};},async test(){const token='service-test-'+Date.now();const received=[];const off=window.LuviaKernelEvents.on('developer.service.test',event=>received.push(event));const result=await window.LuviaKernelEvents.emit('developer.service.test',{token});off();window.LuviaKernelLogger.info('developer','Developer Service Selbsttest',{token});return{ok:received.length===1&&result.event?.payload?.token===token,message:'Event und Log wurden erzeugt.',checks:{eventReceived:received.length===1,eventPayload:result.event?.payload?.token===token,loggerAvailable:Boolean(window.LuviaKernelLogger)}};}});
 })();

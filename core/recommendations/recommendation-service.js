@@ -1,6 +1,6 @@
 (() => {
   'use strict';
-  const VERSION='3.6.0';
+  const VERSION='3.6.2';
   const adapters=new Map(), listeners=new Set(), cache=new Map();
   const state={generated:0,shown:0,accepted:0,rejected:0,expired:0,converted:0,invalidations:0,lastRunAt:null,lastError:null,lastContext:null,lastResult:null};
   const clone=v=>v==null?v:JSON.parse(JSON.stringify(v));
@@ -61,6 +61,7 @@
   ['luvia:travel-preferences-changed','luvia:travel-context-changed','luvia:trip-changed','luvia:restaurant-lifecycle-changed'].forEach(name=>window.addEventListener(name,e=>invalidate(name,e.detail||{})));
   const api=Object.freeze({version:VERSION,context,registerAdapter,get,explain,accept,reject,alternatives,bestTime,invalidate,subscribe,diagnostics});
   window.LuviaRecommendations=api;
-  window.LuviaServiceRegistry?.register?.({name:'recommendations',version:VERSION,description:'Modulübergreifende, erklärbare Smart Recommendation Engine.',dependencies:['backend','places','trips'],status(){return{state:window.LuviaServiceRegistry.states.READY,adapters:adapters.size,generated:state.generated}},diagnostics,test(){const c=context('places');return{ok:Boolean(c&&api.get&&api.explain),message:'Recommendation Contract, Context Collector und Adapter Registry sind verfügbar.',checks:{api:true,context:Boolean(c),adapters:adapters.size>=0}}}},{replace:true});
+  // Registration is owned by intelligence/services/base-services.js so the API can also be lazy-loaded safely.
+
   emit('service.ready',{version:VERSION});
 })();
