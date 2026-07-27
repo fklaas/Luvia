@@ -1,10 +1,10 @@
 (function(){
 'use strict';
-const VERSION='2.13.0-architecture-separation';
+const VERSION='3.0.2-core-health';
 const BASE_URL=new URL('./',document.baseURI);
 const SW_URL=new URL('sw.js',BASE_URL).toString();
 const SW_SCOPE=BASE_URL.pathname;
-const EXPECTED_CACHE='luvia-shell-v10.0.0';
+const EXPECTED_CACHE='luvia-shell-v11.2.0';
 const listeners=new Set();
 let registration=null,deferredPrompt=null,updateAvailable=false,lastUpdateCheck=null,lastError=null;
 const standalone=()=>matchMedia('(display-mode: standalone)').matches||navigator.standalone===true;

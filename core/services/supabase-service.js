@@ -10,7 +10,7 @@
     if(!config?.url || !(config.publishableKey || config.supabaseKey)) throw new Error('Supabase-Konfiguration fehlt.');
     client = factory(config.url, config.publishableKey || config.supabaseKey, {
       auth: { persistSession:true, autoRefreshToken:true, detectSessionInUrl:true },
-      global: { headers: { 'x-client-info':'luvia-core-app-integration/11.1.0' } }
+      global: { headers: { 'x-client-info':'luvia-core-health-destination/11.2.0' } }
     });
     window.ParisSupabaseClient = client;
     return client;
@@ -26,5 +26,5 @@
   }
   async function rpc(name,params={}){const c=await start();const result=await c.rpc(name,params);if(result.error)throw result.error;return result.data}
   function getClient(){return client}
-  window.LuviaSupabaseService=Object.freeze({version:'1.0.0',create,start,rpc,getClient});
+  window.LuviaSupabaseService=Object.freeze({version:'1.1.0',create,start,rpc,getClient});
 })();

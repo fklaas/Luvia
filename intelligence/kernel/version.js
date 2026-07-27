@@ -1,1 +1,1 @@
-window.LuviaKernelVersion=window.LuviaCoreVersion=Object.freeze({core:'2.13.0',build:'10.0.0',name:'Architecture Separation',channel:'production',builtAt:'2026-07-27T09:05:00+02:00'});
+window.LuviaKernelVersion=window.LuviaCoreVersion=Object.freeze({core:'3.0.2',build:'11.2.0',name:'Core Health & Destination',channel:'production',builtAt:'2026-07-27T12:00:00+02:00'});

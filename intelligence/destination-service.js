@@ -1,6 +1,6 @@
 (function(){
   'use strict';
-  const VERSION='2.12.3.1-destination-aware-search';
+  const VERSION='3.0.2-core-destination';
   const REGISTRY_KEY='luvia:destinations:v2.12.3.1';
   const CACHE_KEY='luvia:destination-cache:v2.12.3.1';
   const MIGRATION_KEY='luvia:destination-migration:v2.12.3.1';
@@ -41,6 +41,8 @@
   function tripRegistry(){return parse(localStorage.getItem(TRIP_REGISTRY_KEY),[])||[]}
   function identity(){return parse(localStorage.getItem(IDENTITY_KEY),{})||{}}
   function activeTrip(){
+    const canonical=window.LuviaTripStore?.snapshot?.().activeTrip||null;
+    if(canonical?.id||canonical?.tripId)return {...canonical,tripId:canonical.id||canonical.tripId};
     const direct=window.LuviaTripContext?.getActiveTrip?.()||null;
     if(direct?.tripId)return direct;
     const current=identity(),list=tripRegistry();
@@ -149,11 +151,19 @@
   async function ensureResolved(input,options={}){const destination=resolve(input,options);if(destination.center&&destination.countryCode&&!options.refresh)return destination;return resolveLocation(destination,options);}
   async function ensureActiveResolved(options={}){const active=getActive({refresh:true});if(!active?.isUsable)return active;try{return await ensureResolved(active,options)}catch{return clone(active)}}
   function persistActiveDestination(destination){
-    const tripId=destination?.tripId||identity()?.tripId;if(!tripId)return false;
+    const tripId=destination?.tripId||window.LuviaTripStore?.snapshot?.().activeTripId||identity()?.tripId;if(!tripId)return false;
+    const canonicalTrip=window.LuviaTripStore?.snapshot?.().trips?.find?.(trip=>trip.id===tripId||trip.tripId===tripId);
+    const model={
+      name:destination.name||'',formattedAddress:destination.displayName||destination.formattedAddress||destination.name||'',country:destination.country||'',countryCode:destination.countryCode||'',placeId:destination.placeId||'',
+      latitude:destination.center?.lat??destination.location?.latitude??null,longitude:destination.center?.lng??destination.location?.longitude??null,timezone:destination.timezone||'',provider:destination.provider||destination.source||'google-places'
+    };
+    if(canonicalTrip&&window.LuviaTripStore?.upsert){window.LuviaTripStore.upsert({...canonicalTrip,destination:model,destinationName:model.name,updatedAt:now()});}
     const trips=tripRegistry();let changed=false;
-    const next=trips.map(trip=>{if(trip?.tripId!==tripId)return trip;changed=true;return {...trip,destination:destination.name,destinationName:destination.name,destinationId:destination.id,destinationPlaceId:destination.placeId,destinationLat:destination.center?.lat??null,destinationLng:destination.center?.lng??null,destinationViewport:destination.viewport||null,country:destination.country,countryCode:destination.countryCode,timezone:destination.timezone,timezoneName:destination.timezoneName,timezoneStatus:destination.timezoneStatus,timezoneError:destination.timezoneError,languageCodes:destination.languageCodes,currency:destination.currency,locale:destination.locale,flagEmoji:destination.flagEmoji,searchRadiusMeters:destination.searchRadiusMeters,destinationProvider:destination.provider,destination_context:{...destination,validation:undefined,location:undefined}}});
-    if(changed){localStorage.setItem(TRIP_REGISTRY_KEY,JSON.stringify(next));window.LuviaTripContext?.refresh?.();document.dispatchEvent(new CustomEvent('luvia:trip-context-changed',{detail:{tripId,destination:destination.name}}));}
-    return changed;
+    const next=trips.map(trip=>{if((trip?.tripId||trip?.id)!==tripId)return trip;changed=true;return {...trip,destination:model.name,destinationModel:model,destinationName:model.name,destinationId:destination.id,destinationPlaceId:model.placeId,destinationLat:model.latitude,destinationLng:model.longitude,destinationViewport:destination.viewport||null,country:model.country,countryCode:model.countryCode,timezone:model.timezone,timezoneName:destination.timezoneName,timezoneStatus:destination.timezoneStatus,timezoneError:destination.timezoneError,languageCodes:destination.languageCodes,currency:destination.currency,locale:destination.locale,flagEmoji:destination.flagEmoji,searchRadiusMeters:destination.searchRadiusMeters,destinationProvider:model.provider,destination_context:{...destination,validation:undefined,location:undefined}}});
+    if(changed)localStorage.setItem(TRIP_REGISTRY_KEY,JSON.stringify(next));
+    window.LuviaLegacyParisMigrator?.mirror?.(window.LuviaTripStore?.snapshot?.()||{});
+    window.LuviaTripContext?.refresh?.();document.dispatchEvent(new CustomEvent('luvia:trip-context-changed',{detail:{tripId,destination:model.name}}));
+    return Boolean(changed||canonicalTrip);
   }
   function get(id){return clone(registry().find(item=>item.id===id)||cacheGet(id)||null)}
   function list(){return registry().map(clone)}
@@ -170,7 +180,7 @@
     if(!navigator.onLine||!window.LuviaData?.list)return {loaded:0,source:'local'};
     try{const result=await window.LuviaData.list('destinations',{scope:'global'});let loaded=0;(result.data||[]).forEach(row=>{try{register({id:row.id,name:row.name,country:row.country,countryCode:row.country_code,placeId:row.google_place_id,center:row.latitude!=null&&row.longitude!=null?{lat:row.latitude,lng:row.longitude}:null,viewport:row.viewport,timezone:row.timezone,timezoneName:row.timezone_name,languageCodes:row.language_codes,currency:row.currency,locale:row.locale,flagEmoji:row.flag_emoji,searchRadiusMeters:row.search_radius_meters,provider:row.provider,source:'database'},{source:'database'});loaded++}catch{}});return{loaded,source:result.source||'supabase'}}catch(error){state.lastError=error.message;return{loaded:0,source:'local',warning:error.message}}
   }
-  async function init(){if(state.initialized)return snapshot();migrateTrips();await loadRemoteRegistry();state.active=resolve(activeTrip());state.initialized=true;emit('ready',{destination:state.active});queueMicrotask(()=>ensureActiveResolved().catch(()=>{}));return snapshot()}
+  async function init(){if(state.initialized)return snapshot();migrateTrips();await loadRemoteRegistry();state.active=resolve(activeTrip());state.initialized=true;if(!state.tripSubscription&&window.LuviaTripStore?.subscribe){state.tripSubscription=window.LuviaTripStore.subscribe(()=>{state.active=resolve(activeTrip(),{refresh:true});emit('context-changed',{destination:state.active,source:'trip-store'});});}emit('ready',{destination:state.active});queueMicrotask(()=>ensureActiveResolved().catch(()=>{}));return snapshot()}
   function diagnostics(){const active=getActive();return{version:VERSION,status:state.initialized?'ready':'created',active,registryCount:registry().length,cacheCount:Object.keys(cache()).length,cacheHits:state.cacheHits,cacheMisses:state.cacheMisses,resolutions:state.resolutions,resolutionFailures:state.resolutionFailures,lastResolvedAt:state.lastResolvedAt,pendingResolutions:pending.size,lastMigration:state.lastMigration||parse(localStorage.getItem(MIGRATION_KEY),null),lastError:state.lastError}}
   function snapshot(){return diagnostics()}
   function subscribe(listener){if(typeof listener!=='function')return()=>{};listeners.add(listener);listener({type:'snapshot',at:now(),destination:getActive()});return()=>listeners.delete(listener)}

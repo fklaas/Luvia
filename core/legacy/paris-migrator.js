@@ -7,10 +7,14 @@
     const source=value&&typeof value==='object'?value:{};
     return Object.freeze({
       name:text(source.name,source.label,row.destination_name,row.destinationName,typeof value==='string'?value:'',row.location,row.city),
+      formattedAddress:text(source.formattedAddress,source.displayName,source.formatted_address,row.destination_formatted_address,row.formattedAddress),
       country:text(source.country,row.destination_country,row.destinationCountry,row.country),
+      countryCode:text(source.countryCode,source.country_code,row.destination_country_code,row.countryCode).toUpperCase(),
       placeId:text(source.placeId,source.place_id,row.destination_place_id,row.placeId),
-      latitude:Number.isFinite(Number(source.latitude??source.lat??row.destination_latitude??row.latitude))?Number(source.latitude??source.lat??row.destination_latitude??row.latitude):null,
-      longitude:Number.isFinite(Number(source.longitude??source.lng??row.destination_longitude??row.longitude))?Number(source.longitude??source.lng??row.destination_longitude??row.longitude):null
+      latitude:Number.isFinite(Number(source.latitude??source.lat??source.center?.lat??row.destination_latitude??row.latitude))?Number(source.latitude??source.lat??source.center?.lat??row.destination_latitude??row.latitude):null,
+      longitude:Number.isFinite(Number(source.longitude??source.lng??source.center?.lng??row.destination_longitude??row.longitude))?Number(source.longitude??source.lng??source.center?.lng??row.destination_longitude??row.longitude):null,
+      timezone:text(source.timezone,row.timezone),
+      provider:text(source.provider,source.source,row.destinationProvider,row.destination_provider)
     });
   }
   function normalize(row={}){

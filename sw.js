@@ -1,8 +1,8 @@
-const CACHE='luvia-shell-v11.1.0';
+const CACHE='luvia-shell-v11.2.0';
 const SCOPE=new URL(self.registration.scope);
 const scoped=path=>new URL(path.replace(/^\/+/,''),SCOPE).toString();
 const OFFLINE=scoped('offline.html');
-const APP_SHELL=['','index.html','offline.html','manifest.webmanifest','icon-192.png','icon-512.png','favicon.svg','favicon.ico','luvia-brand.css','core/storage/storage.js','legacy/paris/cloud-adapter.js','core/legacy/paris-migrator.js','core/trips/trip-store.js','core/trips/trip-creator.js','core/runtime/runtime.js','luvia-dashboard.css','luvia-app-shell.css','luvia-trip-context.js','luvia-app-state.js','app-gateway.js','luvia-entry.js','luvia-app-shell.js','modules/module-manager.css','modules/module-manager.js','modules/restaurants-v2/restaurant-module.css','modules/restaurants-v2/restaurant-module.js','modules/restaurants-v2/default.json','intelligence/environment.js','intelligence/platform.js','intelligence/destination-service.js','intelligence/destination-context.js','intelligence/backend-service.js','intelligence/places-service.js','intelligence/restaurant-contract.js','intelligence/pwa-service.js'].map(scoped);
+const APP_SHELL=['','index.html','offline.html','manifest.webmanifest','icon-192.png','icon-512.png','favicon.svg','favicon.ico','luvia-logo.svg','app/app-shell.css','app/app-shell.js','core/services/supabase-service.js','core/services/theme-service.js','core/storage/storage.js','core/legacy/paris-migrator.js','legacy/paris/cloud-adapter.js','core/trips/trip-store.js','core/trips/trip-creator.js','core/trips/trip-experience.js','core/runtime/runtime.js','core/modules/module-registry.js','modules/restaurants-v2/restaurant-module.css','modules/restaurants-v2/restaurant-module.js','intelligence/environment.js','intelligence/destination-service.js','intelligence/destination-context.js','intelligence/backend-service.js','intelligence/places-service.js','intelligence/restaurant-service.js','intelligence/pwa-service.js'].map(scoped);
 
 self.addEventListener('install',event=>{
   event.waitUntil((async()=>{

@@ -1,12 +1,12 @@
 {
-  "id": "/",
+  "id": "./",
   "name": "Luvia – Gemeinsam reisen",
   "short_name": "Luvia",
   "description": "Luvia verbindet gemeinsame Reiseplanung, Erlebnisse und Erinnerungen an einem Ort.",
   "lang": "de-DE",
   "dir": "ltr",
-  "start_url": "/?source=pwa",
-  "scope": "/",
+  "start_url": "./?source=pwa",
+  "scope": "./",
   "display": "standalone",
   "display_override": [
     "window-controls-overlay",
@@ -23,25 +23,25 @@
   ],
   "icons": [
     {
-      "src": "/icon-192.png",
+      "src": "icon-192.png",
       "sizes": "192x192",
       "type": "image/png",
       "purpose": "any"
     },
     {
-      "src": "/icon-192.png",
+      "src": "icon-192.png",
       "sizes": "192x192",
       "type": "image/png",
       "purpose": "maskable"
     },
     {
-      "src": "/icon-512.png",
+      "src": "icon-512.png",
       "sizes": "512x512",
       "type": "image/png",
       "purpose": "any"
     },
     {
-      "src": "/icon-512.png",
+      "src": "icon-512.png",
       "sizes": "512x512",
       "type": "image/png",
       "purpose": "maskable"
@@ -51,10 +51,10 @@
     {
       "name": "Luvia öffnen",
       "short_name": "Öffnen",
-      "url": "/?source=shortcut",
+      "url": "?source=shortcut",
       "icons": [
         {
-          "src": "/icon-192.png",
+          "src": "icon-192.png",
           "sizes": "192x192"
         }
       ]
@@ -62,10 +62,10 @@
     {
       "name": "Developer Console",
       "short_name": "Console",
-      "url": "/intelligence/console.html#pwa",
+      "url": "intelligence/console.html#pwa",
       "icons": [
         {
-          "src": "/icon-192.png",
+          "src": "icon-192.png",
           "sizes": "192x192"
         }
       ]
