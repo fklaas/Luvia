@@ -28,8 +28,8 @@
     "logHistory": 500
   },
   "release": {
-    "core": "3.0.2.12",
-    "build": "11.2.12",
+    "core": "3.0.2.13",
+    "build": "11.2.13",
     "name": "Architecture Reliability Gate",
     "channel": "production"
   },
@@ -40,8 +40,8 @@
     "githubPagesFallback": "https://fklaas.github.io/Luvia/"
   },
   "build": {
-    "core": "3.0.2.12",
-    "build": "11.2.12",
+    "core": "3.0.2.13",
+    "build": "11.2.13",
     "name": "Architecture Reliability Gate",
     "channel": "production",
     "builtAt": "2026-07-27T13:45:00+02:00"
@@ -62,7 +62,7 @@
     "destinationCacheDays": 7
   },
   "restaurantEntityPipeline": {
-    "contractVersion": "3.0.2.12",
+    "contractVersion": "3.0.2.13",
     "moduleKey": "restaurants",
     "providerManagedFields": true,
     "userManagedFields": true,

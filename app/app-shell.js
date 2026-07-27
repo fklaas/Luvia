@@ -38,6 +38,6 @@
   }
   async function bootstrap(){bootScreen();try{const client=await window.LuviaSupabaseService.start();window.LuviaTripStore.initialize();await window.LuviaDestination?.init?.();window.LuviaPWA?.register?.().catch(error=>console.warn('[LuviaPWA]',error));unsubscribeTrip?.();unsubscribeAuth?.();unsubscribeTrip=window.LuviaTripStore.subscribe(()=>{if(activeView==='restaurants'&&mountedRestaurant)return;render()});unsubscribeAuth=window.ParisAuth.onChange(state=>{const uid=state?.user?.id||null;if(state?.authenticated&&uid!==lastAuthUserId)hydrateForAuth(client,state).catch(error=>errorScreen(error));else render()});await hydrateForAuth(client,window.ParisAuth.getState())}catch(error){console.error('[LuviaApp]',error);errorScreen(error)}}
   function bind(){root.addEventListener('click',async e=>{if(e.target.closest('[data-retry]'))return bootstrap();if(e.target.closest('[data-create]'))return window.LuviaTripCreator.open();if(e.target.closest('[data-signout]'))return window.ParisAuth.signOut();if(e.target.closest('[data-invite]'))return window.LuviaTripExperience.openInvite(activeTrip());if(e.target.closest('[data-edit]'))return window.LuviaTripExperience.openEdit(activeTrip());const view=e.target.closest('[data-view]')?.dataset.view;if(view)return show(view)})}
-  window.LuviaApp=Object.freeze({version:'11.2.12',bootstrap,render,show});
+  window.LuviaApp=Object.freeze({version:'11.2.13',bootstrap,render,show});
   window.addEventListener('DOMContentLoaded',()=>{root=document.getElementById('app');bind();bootstrap()},{once:true});
 })();

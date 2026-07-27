@@ -33,15 +33,9 @@
       }
       const previousActive=state.activeTripId;
       const cachedTrips=[...state.trips];
-      // Eine unerwartet leere Cloud-Antwort darf einen bereits vorhandenen, gültigen
-      // Geräte-Cache nicht zerstören. Auf einem neuen Gerät bleibt die Liste korrekt leer.
-      if(!remote.length&&cachedTrips.length){
-        state.loaded=true;
-        state.activeTripId=cachedTrips.some(t=>t.id===previousActive)?previousActive:(cachedTrips[0]?.id||null);
-        persist();
-        console.warn('[LuviaTripStore] Cloud lieferte keine Reisen; vorhandener Cache bleibt bis zur nächsten erfolgreichen Hydration erhalten.');
-        return emit('remote-empty-cache-preserved');
-      }
+      // Eine erfolgreich geladene Cloud-Liste ist autoritativ – auch wenn sie leer ist.
+      // Nur ein echter Netzwerk-/RPC-Fehler darf den lokalen Offline-Cache erhalten.
+      // Damit verschwinden in Supabase gelöschte Reisen beim nächsten Hydrieren sofort.
       const cachedById=new Map(cachedTrips.map(t=>[t.id,t]));
       state.trips=remote.map(t=>mergeTrip(cachedById.get(t.id)||{},t));
       state.activeTripId=state.trips.some(t=>t.id===previousActive)?previousActive:(state.trips[0]?.id||null);
