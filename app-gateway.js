@@ -18,12 +18,14 @@
     setAppVisible();
     document.body.classList.add('app-gateway-locked');
     root.classList.add('app-gateway-locked');
-    gateway.hidden=false;
-    gateway.classList.remove('is-authenticated');
-    gateway.setAttribute('aria-hidden','false');
+    if(gateway){
+      gateway.hidden=false;
+      gateway.classList.remove('is-authenticated');
+      gateway.setAttribute('aria-hidden','false');
+    }
     window.LuviaAppState?.refresh?.();
     anonymousNote?.classList.toggle('is-visible',Boolean(state?.anonymous));
-    if(window.ParisAuthUI?.renderAuthForm&&!formRendered){
+    if(authHost&&window.ParisAuthUI?.renderAuthForm&&!formRendered){
       window.ParisAuthUI.renderAuthForm(authHost,'login');
       formRendered=true;
     }
@@ -33,9 +35,11 @@
     setAppVisible();
     document.body.classList.remove('app-gateway-locked');
     root.classList.remove('app-gateway-locked');
-    gateway.classList.add('is-authenticated');
-    gateway.hidden=true;
-    gateway.setAttribute('aria-hidden','true');
+    if(gateway){
+      gateway.classList.add('is-authenticated');
+      gateway.hidden=true;
+      gateway.setAttribute('aria-hidden','true');
+    }
     window.LuviaAppState?.refresh?.();
   }
   async function ensureClient(){

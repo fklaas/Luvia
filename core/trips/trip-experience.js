@@ -12,7 +12,7 @@
   function trip(){return window.LuviaTripStore?.snapshot?.().activeTrip||null}
   function canonical(input){
     const t=input||trip()||{}; const d=typeof t.destination==='object'?t.destination:{name:t.destination||t.destinationName||''};
-    return {...t,id:t.id||t.tripId,tripId:t.id||t.tripId,title:t.title||t.tripName||'Unsere Reise',tripName:t.title||t.tripName||'Unsere Reise',destination:{name:d.name||'',country:d.country||'',placeId:d.placeId||'',latitude:d.latitude??null,longitude:d.longitude??null},destinationName:d.name||'',modules:Array.isArray(t.modules)?t.modules:(Array.isArray(t.selectedModules)?t.selectedModules:[]),selectedModules:Array.isArray(t.modules)?t.modules:(Array.isArray(t.selectedModules)?t.selectedModules:[])};
+    return {...t,id:t.id||t.tripId,tripId:t.id||t.tripId,title:t.title||t.tripName||'Unsere Reise',tripName:t.title||t.tripName||'Unsere Reise',destination:{...d,name:d.name||'',formattedAddress:d.formattedAddress||'',country:d.country||'',countryCode:d.countryCode||'',placeId:d.placeId||'',latitude:d.latitude??null,longitude:d.longitude??null,timezone:d.timezone||'',provider:d.provider||''},destinationName:d.name||'',modules:Array.isArray(t.modules)?t.modules:(Array.isArray(t.selectedModules)?t.selectedModules:[]),selectedModules:Array.isArray(t.modules)?t.modules:(Array.isArray(t.selectedModules)?t.selectedModules:[])};
   }
   function close(){modal?.remove();modal=null}
   function ensureStyles(){if(document.getElementById('luviaTripExperienceStyles'))return;const s=document.createElement('style');s.id='luviaTripExperienceStyles';s.textContent=`

@@ -1,6 +1,6 @@
 (function(){
   'use strict';
-  const VERSION='3.0.2.8-gateway-auth-contract';
+  const VERSION='3.0.2.9-auth-refresh-retry';
   const DEFAULT_FUNCTION='luvia-gateway';
   const DEFAULT_TIMEOUT=12000;
   const ACTION_PATTERN=/^[a-z][a-z0-9]*(?:[._-][a-z0-9]+)*$/;
@@ -43,14 +43,22 @@
     return event;
   }
   function remember(entry){state.recent.unshift(sanitize(entry));state.recent=state.recent.slice(0,20);}
-  async function accessToken(){
+  function authClient(){
+    return window.ParisSupabaseClient||window.ParisCloud?.client||window.LuviaDatabaseFoundation?.client?.()||null;
+  }
+  async function accessToken({refresh=false}={}){
     try{
-      const authState=window.ParisAuth?.getState?.();
-      const direct=authState?.session?.access_token;
-      if(direct)return direct;
-      const client=window.LuviaDatabaseFoundation?.client?.();
+      const client=authClient();
+      if(refresh&&client?.auth?.refreshSession){
+        const refreshed=await client.auth.refreshSession();
+        const token=refreshed?.data?.session?.access_token;
+        if(token)return token;
+      }
       const result=await client?.auth?.getSession?.();
-      return result?.data?.session?.access_token||'';
+      const sessionToken=result?.data?.session?.access_token;
+      if(sessionToken)return sessionToken;
+      const authState=window.ParisAuth?.getState?.();
+      return authState?.session?.access_token||'';
     }catch{return '';}
   }
   function validateAction(action){
@@ -84,7 +92,13 @@
     if(token)headers.Authorization=`Bearer ${token}`;
     emit('request.started',{requestId,action:safeAction,authenticated:Boolean(token)});
     try{
-      const response=await fetch(`${cfg.functionsBase}/${cfg.functionName}`,{method:'POST',headers,body:JSON.stringify({action:safeAction,payload:sanitize(payload),context:{destinationId:window.LuviaDestination?.getActive?.()?.id||null,tripId:window.LuviaTripContext?.getSnapshot?.()?.tripId||null,clientVersion:VERSION,build:cfg.clientBuild}}),signal:controller.signal,cache:'no-store',credentials:'omit'});
+      const requestBody=JSON.stringify({action:safeAction,payload:sanitize(payload),context:{destinationId:window.LuviaDestination?.getActive?.()?.id||null,tripId:window.LuviaTripContext?.getSnapshot?.()?.tripId||null,clientVersion:VERSION,build:cfg.clientBuild}});
+      const send=()=>fetch(`${cfg.functionsBase}/${cfg.functionName}`,{method:'POST',headers,body:requestBody,signal:controller.signal,cache:'no-store',credentials:'omit'});
+      let response=await send();
+      if(response.status===401){
+        const refreshedToken=await accessToken({refresh:true});
+        if(refreshedToken){headers.Authorization=`Bearer ${refreshedToken}`;response=await send();}
+      }
       const body=await response.json().catch(()=>({ok:false,error:{code:'INVALID_RESPONSE',message:'Backend lieferte keine gültige JSON-Antwort.'}}));
       const responseRequestId=response.headers.get('x-luvia-request-id')||body?.meta?.requestId||requestId;
       if(!response.ok||body?.ok===false){
