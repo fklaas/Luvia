@@ -1,11 +1,11 @@
 (function(){
 'use strict';
-const VERSION='3.0.2.3-diagnostics-unified';
+const VERSION='3.0.2.4-diagnostics-unified';
 const SCRIPT_URL=new URL(document.currentScript?.src||'intelligence/pwa-service.js',document.baseURI);
 const APP_ROOT_URL=new URL('../',SCRIPT_URL);
 const SW_URL=new URL('sw.js',APP_ROOT_URL).toString();
 const SW_SCOPE=APP_ROOT_URL.pathname;
-const EXPECTED_CACHE='luvia-shell-v11.2.3';
+const EXPECTED_CACHE='luvia-shell-v11.2.4';
 const listeners=new Set();
 let registration=null,deferredPrompt=null,updateAvailable=false,lastUpdateCheck=null,lastError=null;
 const standalone=()=>matchMedia('(display-mode: standalone)').matches||navigator.standalone===true;

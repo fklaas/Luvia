@@ -55,10 +55,8 @@
     css(); const st=auth()?.getState?.()||{loading:true};
     if(st.loading){container.innerHTML='<div class="pc-card">Kontostatus wird geladen …</div>';return}
     if(!st.user){
-      container.innerHTML=`<div class="pc-head"><div><h2>Konto</h2><p>Melde dich an, um deine Reisen auf diesem Gerät zu öffnen.</p></div></div><div class="pc-card pa-stack"><div data-signed-out-auth></div><div class="pa-divider">oder</div><button class="pc-btn pa-guest" type="button" data-continue-anonymous>Ohne Konto fortfahren</button><div class="pa-muted">Dabei wird erst nach deiner ausdrücklichen Auswahl ein anonymes Konto angelegt.</div><div data-guest-message></div></div>`;
+      container.innerHTML=`<div class="pc-head"><div><h2>Konto</h2><p>Melde dich an, um deine Reisen auf diesem Gerät zu öffnen.</p></div></div><div class="pc-card pa-stack"><div data-signed-out-auth></div></div>`;
       renderAuthForm(container.querySelector('[data-signed-out-auth]'),'login');
-      const guestBox=container.querySelector('[data-guest-message]');
-      container.querySelector('[data-continue-anonymous]').onclick=async()=>{try{message(guestBox,'Anonymes Luvia-Konto wird vorbereitet …');await auth().continueAnonymously();message(guestBox,'Du nutzt die App jetzt ohne dauerhaftes Konto.');setTimeout(()=>location.reload(),500)}catch(err){message(guestBox,err.message||'Anonymes Fortfahren war nicht möglich.','error')}};
       return
     }
     if(st.anonymous){

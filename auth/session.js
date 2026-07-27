@@ -104,22 +104,6 @@
     await setFromSession(session, session ? 'ENSURE_SESSION' : 'SIGNED_OUT_SESSION');
     return session;
   }
-  async function continueAnonymously() {
-    const c = requireClient();
-    const current = await c.auth.getSession();
-    if (current.error) throw current.error;
-    if (current.data.session) {
-      setExplicitlySignedOut(false);
-      await setFromSession(current.data.session, 'ANONYMOUS_CONTINUE_EXISTING');
-      return current.data;
-    }
-    const result = await c.auth.signInAnonymously();
-    if (result.error) throw result.error;
-    setExplicitlySignedOut(false);
-    writePending(null);
-    await setFromSession(result.data.session, 'SIGNED_IN_ANONYMOUSLY');
-    return result.data;
-  }
   function requireClient() {
     if (!client) throw new Error('Authentifizierung ist noch nicht bereit.');
     return client;
@@ -280,7 +264,6 @@
   window.ParisAuth = {
     init,
     ensureInitialSession,
-    continueAnonymously,
     getState,
     onChange,
     signIn,

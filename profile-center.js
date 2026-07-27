@@ -92,7 +92,7 @@
       try{
         const client=window.ParisCloud?.client;
         if(t.cloud&&client){
-          const r=await client.rpc('paris_update_trip_details',{p_trip_id:t.tripId,p_trip_name:changes.tripName,p_destination:changes.destination,p_symbol:changes.symbol,p_accent:changes.accent,p_start_date:changes.startDate||null,p_end_date:changes.endDate||null});
+          const r=await client.rpc('luvia_update_trip_details',{p_trip_id:t.tripId,p_trip_name:changes.tripName,p_destination_context:(typeof changes.destination==='object'?changes.destination:{name:changes.destination||'',country:changes.country||''}),p_symbol:changes.symbol,p_accent:changes.accent,p_start_date:changes.startDate||null,p_end_date:changes.endDate||null});
           if(r.error&&!/function|does not exist|schema cache/i.test(r.error.message||''))throw r.error;
         }
       }catch(error){console.warn('Cloud-Reisedetails:',error.message)}

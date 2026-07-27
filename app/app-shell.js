@@ -1,6 +1,6 @@
 (() => {
   'use strict';
-  let root, activeView='dashboard', mountedRestaurant=false, unsubscribeTrip=null, unsubscribeAuth=null;
+  let root, activeView='dashboard', mountedRestaurant=false, unsubscribeTrip=null, unsubscribeAuth=null,authHydration=0,lastAuthUserId=null;
   const esc=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
   const snap=()=>window.LuviaTripStore.snapshot();
   const activeTrip=()=>snap().activeTrip;
@@ -23,8 +23,21 @@
   }
   function ready(){const t=activeTrip();if(!t)return noTrips();window.LuviaTheme?.apply?.(t);root.innerHTML=`<div class="lv-shell"><header class="lv-header"><span class="lv-logo"></span><div class="lv-trip"><strong>${esc(t.title||t.tripName||'Unsere Reise')}</strong><small>${esc(t.destination?.name||t.destinationName||'Reiseziel offen')}</small></div><span class="lv-spacer"></span><button class="lv-icon" data-invite>＋ <span class="lv-label">Einladen</span></button><button class="lv-icon" data-signout>↪ <span class="lv-label">Abmelden</span></button></header><main class="lv-stage" data-stage></main></div>`;show(activeView)}
   function render(){const auth=window.ParisAuth.getState();if(auth.loading)return bootScreen();if(!auth.authenticated)return signedOut();const trips=snap();if(!trips.loaded)return bootScreen('Reisen werden geladen …');if(!trips.hasTrips||!trips.hasActiveTrip)return noTrips();return ready()}
-  async function bootstrap(){bootScreen();try{const client=await window.LuviaSupabaseService.start();window.LuviaTripStore.initialize();await window.LuviaTripStore.loadRemote(client);window.LuviaRuntime.refresh();window.LuviaTheme?.apply?.(activeTrip());await window.LuviaDestination?.init?.();window.LuviaDestination?.refresh?.();window.LuviaPWA?.register?.().catch(error=>console.warn('[LuviaPWA]',error));unsubscribeTrip=window.LuviaTripStore.subscribe(()=>render());unsubscribeAuth=window.ParisAuth.onChange(()=>render());render()}catch(error){console.error('[LuviaApp]',error);errorScreen(error)}}
+  async function hydrateForAuth(client,authState){
+    const run=++authHydration;
+    if(!authState?.authenticated){lastAuthUserId=null;render();return}
+    const userId=authState.user?.id||null;
+    bootScreen('Reisen werden aus der Cloud geladen …');
+    await window.LuviaTripStore.loadRemote(client,{authoritative:true});
+    if(run!==authHydration)return;
+    lastAuthUserId=userId;
+    window.LuviaRuntime.refresh();
+    window.LuviaTheme?.apply?.(activeTrip());
+    window.LuviaDestination?.refresh?.();
+    render();
+  }
+  async function bootstrap(){bootScreen();try{const client=await window.LuviaSupabaseService.start();window.LuviaTripStore.initialize();await window.LuviaDestination?.init?.();window.LuviaPWA?.register?.().catch(error=>console.warn('[LuviaPWA]',error));unsubscribeTrip?.();unsubscribeAuth?.();unsubscribeTrip=window.LuviaTripStore.subscribe(()=>{if(activeView==='restaurants'&&mountedRestaurant)return;render()});unsubscribeAuth=window.ParisAuth.onChange(state=>{const uid=state?.user?.id||null;if(state?.authenticated&&uid!==lastAuthUserId)hydrateForAuth(client,state).catch(error=>errorScreen(error));else render()});await hydrateForAuth(client,window.ParisAuth.getState())}catch(error){console.error('[LuviaApp]',error);errorScreen(error)}}
   function bind(){root.addEventListener('click',async e=>{if(e.target.closest('[data-retry]'))return bootstrap();if(e.target.closest('[data-create]'))return window.LuviaTripCreator.open();if(e.target.closest('[data-signout]'))return window.ParisAuth.signOut();if(e.target.closest('[data-invite]'))return window.LuviaTripExperience.openInvite(activeTrip());if(e.target.closest('[data-edit]'))return window.LuviaTripExperience.openEdit(activeTrip());const view=e.target.closest('[data-view]')?.dataset.view;if(view)return show(view)})}
-  window.LuviaApp=Object.freeze({version:'11.2.0',bootstrap,render,show});
+  window.LuviaApp=Object.freeze({version:'11.2.4',bootstrap,render,show});
   window.addEventListener('DOMContentLoaded',()=>{root=document.getElementById('app');bind();bootstrap()},{once:true});
 })();
