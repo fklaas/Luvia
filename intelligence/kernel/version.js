@@ -1,1 +1,1 @@
-window.LuviaKernelVersion=window.LuviaCoreVersion=Object.freeze({core:'3.0.2.9',build:'11.2.9',name:'Cloud Auth & Destination Integrity',channel:'production',builtAt:'2026-07-27T14:40:00+02:00'});
+window.LuviaKernelVersion=window.LuviaCoreVersion=Object.freeze({core:'3.0.2.10',build:'11.2.10',name:'Stable Module Instance & Destination Preservation',channel:'production',builtAt:'2026-07-27T15:05:00+02:00'});

@@ -62,16 +62,17 @@
     const def=getCatalog().find(x=>x.id===id);if(!def)return null;
     let instance=instances.get(id);
     const roots=rootsFor(def);
-    if(!instance){instance={id,def,roots,mounted:false,revision:0,lastTripId:null,lastContentRef:null};instances.set(id,instance)}else instance.roots=roots;
+    if(!instance){instance={id,def,roots,mounted:false,revision:0,lastTripId:null,lastContentSignature:null};instances.set(id,instance)}else instance.roots=roots;
     const contentRef=trip?.moduleContent?.[id]||null;
-    const shouldRender=typeof def.render==='function' && (!instance.mounted || instance.lastTripId!==(trip?.tripId||null) || instance.lastContentRef!==contentRef);
+    let contentSignature='';try{contentSignature=JSON.stringify(contentRef||null)}catch{contentSignature=String(contentRef)}
+    const shouldRender=typeof def.render==='function' && (!instance.mounted || instance.lastTripId!==(trip?.tripId||null) || instance.lastContentSignature!==contentSignature);
     if(shouldRender){
       if(instance.mounted){try{def.unmount?.(instance,{manager:api})}catch(e){console.error('Luvia Modul unmount vor Render fehlgeschlagen:',id,e)}instance.mounted=false}
       try{def.render(instance,{trip,manager:api})}catch(e){console.error('Luvia Modul render fehlgeschlagen:',id,e)}
     }
     annotate(instance);applyContent(instance,trip);
     if(!instance.mounted){try{def.mount?.(instance,{trip,manager:api})}catch(e){console.error('Luvia Modul mount fehlgeschlagen:',id,e)}instance.mounted=true}
-    instance.lastTripId=trip?.tripId||null;instance.lastContentRef=contentRef;
+    instance.lastTripId=trip?.tripId||null;instance.lastContentSignature=contentSignature;
     instance.revision++;return instance;
   }
   function mountAll(trip=current()){getCatalog().forEach(def=>mountModule(def.id,trip));document.documentElement.classList.add('luvia-modules-v2-ready')}
@@ -88,7 +89,7 @@
   }
   async function pushCloud(tripId,patch){const client=window.LuviaSupabaseService?.getClient?.()||window.ParisSupabaseClient||window.ParisCloud?.client;if(!client||!tripId)return;try{const modules=Array.isArray(patch.selectedModules)?patch.selectedModules:[];const r=await client.rpc('luvia_set_trip_modules',{p_trip_id:tripId,p_modules:modules,p_settings:{...(patch.moduleSettings||{}),moduleContent:patch.moduleContent||undefined}});if(r.error)throw r.error}catch(error){console.info('Modulkonfiguration bleibt lokal:',error?.message||error)}}
   function saveTripPatch(tripId,patch){const stamp=new Date().toISOString();patch={...patch,moduleSettings:{...(patch.moduleSettings||{}),_updatedAt:stamp}};const existing=registry(),found=existing.some(t=>t?.tripId===tripId),base=current()?.tripId===tripId?current():{tripId};const list=found?existing.map(t=>t?.tripId===tripId?{...t,...patch}:t):[{...base,...patch},...existing];localStorage.setItem(REGISTRY_KEY,JSON.stringify(list));const cur=current();if(cur?.tripId===tripId){const next={...cur,...patch};localStorage.setItem(ID_KEY,JSON.stringify(next));window.dispatchEvent(new CustomEvent('luvia:trip-modules-changed',{detail:next}))}pushCloud(tripId,patch)}
-  function setModuleContent(moduleId,content,trip=current()){if(!trip?.tripId)return;const patch={moduleContent:{...(trip.moduleContent||{}),[moduleId]:{...(trip.moduleContent?.[moduleId]||{}),...content}}};const nextTrip={...trip,...patch};saveTripPatch(trip.tripId,patch);const instance=instances.get(moduleId);if(instance){instance.lastContentRef=null;mountModule(moduleId,nextTrip)}else mountModule(moduleId,nextTrip);}
+  function setModuleContent(moduleId,content,trip=current()){if(!trip?.tripId)return;const patch={moduleContent:{...(trip.moduleContent||{}),[moduleId]:{...(trip.moduleContent?.[moduleId]||{}),...content}}};const nextTrip={...trip,...patch};saveTripPatch(trip.tripId,patch);const instance=instances.get(moduleId);if(instance){instance.lastContentSignature=null;mountModule(moduleId,nextTrip)}else mountModule(moduleId,nextTrip);}
   function getModuleData(moduleId,trip=current()){const def=getCatalog().find(x=>x.id===moduleId);const stored=trip?.moduleContent?.[moduleId]?.data;const value=stored!=null?stored:(def?.defaults||{});return JSON.parse(JSON.stringify(value));}
   function setModuleData(moduleId,data,trip=current()){setModuleContent(moduleId,{data},trip);}
   function reconcileTrip(candidate=current()){const active=current()||{},incoming=candidate||{},sameTrip=!incoming.tripId||!active.tripId||incoming.tripId===active.tripId,base=sameTrip?{...active,...incoming}:{...incoming},activeModules=Array.isArray(active.selectedModules)?active.selectedModules:[],incomingModules=Array.isArray(incoming.selectedModules)?incoming.selectedModules:[];if(sameTrip&&activeModules.length&&!incomingModules.length)base.selectedModules=activeModules.slice();if(sameTrip&&active.moduleSettings&&Object.keys(active.moduleSettings).length&&(!incoming.moduleSettings||!Object.keys(incoming.moduleSettings).length))base.moduleSettings=active.moduleSettings;if(sameTrip&&active.moduleContent&&Object.keys(active.moduleContent).length&&(!incoming.moduleContent||!Object.keys(incoming.moduleContent).length))base.moduleContent=active.moduleContent;return base}

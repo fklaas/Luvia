@@ -19,7 +19,8 @@
   }
   function normalize(row={}){
     const id=text(row.id,row.tripId,row.trip_id);
-    const dest=destination(row.destination,row);
+    const structuredDestination=(row.destination&&typeof row.destination==='object')?row.destination:(row.destinationModel||row.destination_context||row.destinationContext||row.destination);
+    const dest=destination(structuredDestination,row);
     return {
       id,tripId:id,ownerId:text(row.ownerId,row.owner_id),title:text(row.title,row.tripName,row.trip_name)||'Unsere Reise',tripName:text(row.tripName,row.trip_name,row.title)||'Unsere Reise',
       destination:dest,destinationName:dest.name,joinCode:text(row.joinCode,row.join_code),memberName:text(row.memberName,row.member_name,localStorage.getItem(OLD.owner))||'Mitreisend',

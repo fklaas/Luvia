@@ -7,7 +7,7 @@
   let pwaLoadPromise=null;
   function pwaScriptUrl(){
     const base=new URL(document.currentScript?.src||'services/base-services.js',document.baseURI);
-    return new URL('../pwa-service.js?v=11.2.9',base).href;
+    return new URL('../pwa-service.js?v=11.2.10',base).href;
   }
   function ensurePwaApi(){
     if(window.LuviaPWA)return Promise.resolve(window.LuviaPWA);
