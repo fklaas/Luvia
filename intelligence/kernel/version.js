@@ -1,1 +1,1 @@
-window.LuviaKernelVersion=window.LuviaCoreVersion=Object.freeze({core:'3.7.0',build:'11.9.0',name:'Smart Recommendation Engine Complete Foundation',channel:'production',builtAt:'2026-07-27T22:30:00+02:00'});
+window.LuviaKernelVersion=window.LuviaCoreVersion=Object.freeze({core:'3.7.1',build:'11.9.1',name:'Restaurant Lifecycle Persistence Stability',channel:'production',builtAt:'2026-07-27T23:15:00+02:00'});

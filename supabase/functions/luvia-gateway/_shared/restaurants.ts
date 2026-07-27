@@ -15,7 +15,7 @@ function dbPlace(place:any){
 }
 
 export async function restaurantAction(action:string,payload:any,client:SupabaseClient){
-  if(action==='restaurant.health')return{data:{status:'ok',service:'restaurant-lifecycle',version:'3.5.1',metrics:{...metrics}}};
+  if(action==='restaurant.health')return{data:{status:'ok',service:'restaurant-lifecycle',version:'3.7.1',metrics:{...metrics}}};
   if(action==='restaurant.list'){
     const tripId=String(payload?.tripId||''); if(!tripId)throw Object.assign(new Error('Trip-ID fehlt.'),{code:'TRIP_ID_REQUIRED',status:400});
     const {data,error}=await client.rpc('luvia_list_restaurant_entities',{p_trip_id:tripId});
@@ -25,8 +25,15 @@ export async function restaurantAction(action:string,payload:any,client:Supabase
   if(action==='restaurant.lifecycle.update'){
     const tripId=String(payload?.tripId||''),tripPlaceId=String(payload?.tripPlaceId||''),status=String(payload?.status||'');
     if(!tripId||!tripPlaceId||!status)throw Object.assign(new Error('Trip-ID, Restaurant-Verknüpfung und Status werden benötigt.'),{code:'LIFECYCLE_INPUT_REQUIRED',status:400});
-    const {data,error}=await client.rpc('luvia_update_restaurant_lifecycle',{p_trip_id:tripId,p_trip_place_id:tripPlaceId,p_status:status,p_patch:payload?.patch||{}});
-    if(error)throw Object.assign(new Error(error.message||'Restaurantstatus konnte nicht gespeichert werden.'),{code:'LIFECYCLE_UPDATE_FAILED',status:400});
+    const rawPatch=payload?.patch&&typeof payload.patch==='object'?payload.patch:{};
+    const cleanPatch=Object.fromEntries(Object.entries(rawPatch).filter(([,value])=>value!==undefined&&value!==null&&value!==''));
+    const allowedReservationStatuses=new Set(['idea','requested','reserved','confirmed','cancelled','visited']);
+    if('reservationStatus' in cleanPatch&&!allowedReservationStatuses.has(String(cleanPatch.reservationStatus)))delete cleanPatch.reservationStatus;
+    const {data,error}=await client.rpc('luvia_update_restaurant_lifecycle',{p_trip_id:tripId,p_trip_place_id:tripPlaceId,p_status:status,p_patch:cleanPatch});
+    if(error){
+      const constraint=String(error.message||'').includes('restaurants_reservation_status_check');
+      throw Object.assign(new Error(constraint?'Der Reservierungsstatus war ungültig und wurde nicht gespeichert. Bitte erneut versuchen.':error.message||'Restaurantstatus konnte nicht gespeichert werden.'),{code:constraint?'RESERVATION_STATUS_INVALID':'LIFECYCLE_UPDATE_FAILED',status:400});
+    }
     return{data};
   }
   if(action==='restaurant.feedback'){
@@ -51,4 +58,4 @@ export async function restaurantAction(action:string,payload:any,client:Supabase
     return{data:{success:true,...data,providerPlace:place}};
   }catch(error){metrics.failures++;metrics.lastError={at:new Date().toISOString(),message:error instanceof Error?error.message:String(error)};throw error;}
 }
-export function restaurantDiagnostics(){return{version:'3.5.1',metrics:{...metrics}};}
+export function restaurantDiagnostics(){return{version:'3.7.1',metrics:{...metrics}};}

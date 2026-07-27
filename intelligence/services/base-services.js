@@ -33,12 +33,12 @@
     if(recommendationLoadPromise)return recommendationLoadPromise;
     recommendationLoadPromise=(async()=>{
       if(!window.LuviaRecommendations){
-        await loadScriptOnce(recommendationScriptUrl('core/recommendations/recommendation-service.js?v=11.9.0'),'luvia-recommendation-service');
+        await loadScriptOnce(recommendationScriptUrl('core/recommendations/recommendation-service.js?v=11.9.1'),'luvia-recommendation-service');
       }
       if(!window.LuviaRecommendations)throw new Error('Recommendation API konnte nicht initialisiert werden.');
       const adapters=window.LuviaRecommendations.diagnostics?.().adapters||[];
       if(!adapters.includes('restaurants')){
-        await loadScriptOnce(recommendationScriptUrl('core/recommendations/restaurant-recommendation-adapter.js?v=11.9.0'),'luvia-recommendation-adapter');
+        await loadScriptOnce(recommendationScriptUrl('core/recommendations/restaurant-recommendation-adapter.js?v=11.9.1'),'luvia-recommendation-adapter');
       }
       return window.LuviaRecommendations;
     })().catch(error=>{recommendationLoadPromise=null;throw error;});

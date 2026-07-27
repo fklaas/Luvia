@@ -1,4 +1,4 @@
-const CACHE='luvia-shell-v11.9.0';
+const CACHE='luvia-shell-v11.9.1';
 const SCOPE=new URL(self.registration.scope);
 const scoped=path=>new URL(path.replace(/^\/+/,''),SCOPE).toString();
 const OFFLINE=scoped('offline.html');
@@ -59,10 +59,10 @@ self.addEventListener('fetch',event=>{
         const response=await fetch(request,{cache:'no-store'});
         event.waitUntil(store(request,response));
         return response;
-      }catch{return await caches.match(request)}
+      }catch{return await caches.match(request)||new Response('',{status:503,statusText:'Offline'})}
     })());
     return;
   }
 
-  event.respondWith(caches.match(request).then(hit=>hit||fetch(request).then(response=>{event.waitUntil(store(request,response));return response})));
+  event.respondWith((async()=>{const hit=await caches.match(request);if(hit)return hit;try{const response=await fetch(request);event.waitUntil(store(request,response));return response}catch{return new Response('',{status:503,statusText:'Offline'})}})());
 });
