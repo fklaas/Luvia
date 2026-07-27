@@ -1,6 +1,6 @@
 (function(){
 'use strict';
-const VERSION='3.0.2.11-onboarding-autocomplete-isolation';
+const VERSION='3.0.2.12-onboarding-autocomplete-isolation';
 const listeners=new Set();
 const state={initialized:false,requests:0,successes:0,failures:0,cacheHits:0,lastRequestAt:null,lastSuccessAt:null,lastError:null,lastResult:null,recent:[]};
 const now=()=>new Date().toISOString();

@@ -1,1 +1,1 @@
-window.LuviaKernelVersion=window.LuviaCoreVersion=Object.freeze({core:'3.0.2.11',build:'11.2.11',name:'Cloud Trip Profile & Reliable Module Mount',channel:'production',builtAt:'2026-07-27T15:05:00+02:00'});
+window.LuviaKernelVersion=window.LuviaCoreVersion=Object.freeze({core:'3.0.2.12',build:'11.2.12',name:'Atomic Trip Ownership & Profile Creation',channel:'production',builtAt:'2026-07-27T15:05:00+02:00'});
