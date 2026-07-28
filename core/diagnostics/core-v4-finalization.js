@@ -1,7 +1,7 @@
 (() => {
   'use strict';
-  const VERSION='4.0.4.2';
-  const BUILD='13.0.4.2';
+  const VERSION='4.0.4.3';
+  const BUILD='13.0.4.3';
   const now=()=>new Date().toISOString();
   const safe=(fn,fallback=null)=>{try{return fn()}catch(error){return fallback??{error:error?.message||String(error)}}};
   const textBytes=value=>new TextEncoder().encode(String(value||'')).length;
@@ -18,7 +18,8 @@
   const adapterHealth=()=>safe(()=>window.LuviaPlaceRegistry?.diagnostics?.().adapters,[])||[];
   const visitTrace=()=>{const timeline=safe(()=>window.LuviaTimelineCore?.diagnostics?.(),{})||{},presence=safe(()=>window.LuviaPresenceVisitCore?.diagnostics?.(),{})||{};return{timeline,presence,states:['nearby','arrived','stay_detected','visited','left']};};
   const cacheAudit=()=>{const storage=listStorage(),invalid=storage.filter(x=>x.validJson===false);return{serviceWorkerController:Boolean(navigator.serviceWorker?.controller),online:navigator.onLine,entryCount:storage.length,largestEntries:storage.slice().sort((a,b)=>b.bytes-a.bytes).slice(0,20),totalBytes:storage.reduce((n,x)=>n+x.bytes,0),invalidEntries:invalid.slice(0,20),healthy:invalid.length===0};};
-  const performance=()=>{const nav=performance.getEntriesByType?.('navigation')?.[0];const services=safe(()=>window.LuviaServiceRegistry?.diagnostics?.(),{})||{};return{navigation:nav?{domInteractive:Math.round(nav.domInteractive),domContentLoaded:Math.round(nav.domContentLoadedEventEnd),load:Math.round(nav.loadEventEnd)}:null,serviceInitMs:(services.services||[]).map(s=>({name:s.name,initMs:s.metrics?.initMs??null})),resourceCount:performance.getEntriesByType?.('resource')?.length||0};};
+  const serviceSummary=()=>{const services=safe(()=>window.LuviaServiceRegistry?.list?.(),[])||[];return{version:window.LuviaServiceRegistry?.version||'unknown',status:'ready',count:services.length,ready:services.filter(x=>x.state==='ready').length,failed:services.filter(x=>x.state==='failed').length,startOrder:safe(()=>window.LuviaServiceRegistry?.order?.(),services.map(x=>x.name)),services};};
+  const performanceSnapshot=()=>{const nav=window.performance?.getEntriesByType?.('navigation')?.[0];const services=serviceSummary();return{navigation:nav?{domInteractive:Math.round(nav.domInteractive),domContentLoaded:Math.round(nav.domContentLoadedEventEnd),load:Math.round(nav.loadEventEnd)}:null,serviceInitMs:(services.services||[]).map(s=>({name:s.name,initMs:s.metrics?.initMs??null})),resourceCount:window.performance?.getEntriesByType?.('resource')?.length||0};};
   async function runSmokeTests(){
     const results=[];const test=(name,fn)=>{try{const detail=fn();const ok=typeof detail==='boolean'?detail:Boolean(detail?.ok??detail);results.push({name,ok,detail,at:now()})}catch(error){results.push({name,ok:false,error:error.message,at:now()})}};
     test('Kernel boot',()=>Boolean(window.LuviaKernel));
@@ -36,6 +37,7 @@
     try{sessionStorage.setItem('luvia.core4.smoke.latest',JSON.stringify(summary))}catch{}
     return summary;
   }
-  function snapshot(){const places=safe(()=>window.LuviaPlaceCore?.diagnostics?.(),{})||{},services=safe(()=>window.LuviaServiceRegistry?.diagnostics?.(),{})||{};return{version:VERSION,build:BUILD,status:'ready',generatedAt:now(),health:{kernel:Boolean(window.LuviaKernel),servicesReady:services.ready||0,servicesTotal:services.count||0,placeTypes:places.registry?.registeredTypes||0,adapters:places.registry?.registeredAdapters||0,scheduleEvents:window.LuviaScheduleIntelligence?.snapshot?.().events?.length||0,timelineEvents:window.LuviaTimelineCore?.diagnostics?.().eventCount||0},adapters:adapterHealth(),recommendations:recommendationTrace(),schedule:scheduleTrace(),visits:visitTrace(),compatibility:compatibilityAudit(),cache:cacheAudit(),performance:performance(),lastSmoke:safe(()=>JSON.parse(sessionStorage.getItem('luvia.core4.smoke.latest')||'null'),null)};}
-  window.LuviaCore4Diagnostics=Object.freeze({version:VERSION,build:BUILD,snapshot,runSmokeTests,recommendationTrace,scheduleTrace,visitTrace,adapterHealth,compatibilityAudit,cacheAudit,performance});
+  function healthSnapshot(){const registry=safe(()=>window.LuviaPlaceRegistry?.diagnostics?.(),{})||{},services=serviceSummary();return{version:VERSION,build:BUILD,status:'ready',generatedAt:now(),health:{kernel:Boolean(window.LuviaKernel),servicesReady:services.ready||0,servicesTotal:services.count||0,placeTypes:registry.registeredTypes||0,adapters:registry.registeredAdapters||0,scheduleEvents:window.LuviaScheduleIntelligence?.snapshot?.().events?.length||0,timelineEvents:window.LuviaTimelineCore?.diagnostics?.().eventCount||0}};}
+  function snapshot(){const base=healthSnapshot();return{...base,adapters:adapterHealth(),recommendations:recommendationTrace(),schedule:scheduleTrace(),visits:visitTrace(),compatibility:compatibilityAudit(),cache:cacheAudit(),performance:performanceSnapshot(),lastSmoke:safe(()=>JSON.parse(sessionStorage.getItem('luvia.core4.smoke.latest')||'null'),null)};}
+  window.LuviaCore4Diagnostics=Object.freeze({version:VERSION,build:BUILD,healthSnapshot,snapshot,runSmokeTests,recommendationTrace,scheduleTrace,visitTrace,adapterHealth,compatibilityAudit,cacheAudit,performance:performanceSnapshot});
 })();

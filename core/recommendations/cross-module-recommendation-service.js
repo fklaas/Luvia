@@ -1,6 +1,6 @@
 (() => {
   'use strict';
-  const VERSION='4.0.4.2';
+  const VERSION='4.0.4.3';
   const clone=v=>v==null?v:JSON.parse(JSON.stringify(v));
   const state={status:'ready',tripId:null,slots:{forYou:[],rightNow:[],nearby:[],onYourWay:[],next:[],alternative:[]},lastUpdatedAt:null,lastError:null};
   const tripId=()=>String(window.LuviaTripContext?.getActiveTrip?.()?.tripId||window.LuviaTripStore?.snapshot?.()?.activeTripId||'');
