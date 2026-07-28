@@ -1,6 +1,6 @@
 (() => {
   'use strict';
-  const VERSION='4.1.3.1';
+  const VERSION='4.1.3.2';
   const listeners=new Set();
   const STORAGE='luvia.schedule.v4';
   const state={loading:false,tripId:null,events:[],today:[],next:null,freeWindow:null,warnings:[],lastUpdatedAt:null,lastError:null};
@@ -21,6 +21,33 @@
     return {id:String(entry.tripPlaceId||entry.id||entry.providerPlaceId||''),entityType:'restaurant',title:entry.name||'Restaurant',date,time,startAt:start.toISOString(),endAt:new Date(start.getTime()+duration*60000).toISOString(),durationMinutes:duration,distanceMeters:Number.isFinite(Number(entry.distanceMeters))?Number(entry.distanceMeters):null,reservationStatus:entry.reservationStatus||'idea',lifecycleStatus:entry.lifecycleStatus||'saved',source:entry};
   }
   function sortEvents(events){return [...events].sort((a,b)=>new Date(a.startAt)-new Date(b.startAt))}
+
+  const cleanKey=value=>String(value||'').trim();
+  function eventIdentityKeys(event={}){
+    const source=event.source||{},raw=source.rawEntity||{},tripPlace=raw.tripPlace||source.tripPlace||{};
+    const keys=[event.id,event.placeId,event.providerPlaceId,event.tripPlaceId,source.id,source.placeId,source.providerPlaceId,source.tripPlaceId,tripPlace.id,raw.place?.id,raw.place?.providerPlaceId]
+      .map(cleanKey).filter(Boolean).map(value=>`id:${value}`);
+    const title=cleanKey(event.title||event.name||source.name).toLowerCase();
+    if(title)keys.push(`title:${String(event.entityType||'place')}:${title}`);
+    return new Set(keys);
+  }
+  function sameEventIdentity(a,b){
+    const left=eventIdentityKeys(a),right=eventIdentityKeys(b);
+    for(const key of left)if(right.has(key))return true;
+    return false;
+  }
+  function dedupeEvents(events){
+    const result=[];
+    for(const event of sortEvents(events)){
+      const index=result.findIndex(existing=>sameEventIdentity(existing,event));
+      if(index<0){result.push(event);continue;}
+      const current=result[index];
+      const currentRemote=Boolean(current.source?.rawEntity||current.source?.tripPlaceId);
+      const eventRemote=Boolean(event.source?.rawEntity||event.source?.tripPlaceId);
+      result[index]=eventRemote&&!currentRemote?event:{...current,...event,source:{...(current.source||{}),...(event.source||{})}};
+    }
+    return sortEvents(result);
+  }
   function windowBetween(a,b){if(!a||!b)return null;const start=new Date(a.endAt),end=new Date(b.startAt),minutes=Math.floor((end-start)/60000);return minutes>0?{startAt:start.toISOString(),endAt:end.toISOString(),minutes,label:`${formatTime(start)}–${formatTime(end)} Uhr`}:null}
   function analyze(place,events=state.events,options={}){
     const date=place?.date||place?.reservationDate||options.date||todayKey();
@@ -67,7 +94,7 @@
     const id=String(options.tripId||tripId());if(!id||!window.LuviaRestaurants?.list)return snapshot();if(state.loading)return snapshot();
     if(!options.force&&state.tripId===id&&state.lastUpdatedAt&&Date.now()-new Date(state.lastUpdatedAt).getTime()<30000)return snapshot();
     state.loading=true;state.tripId=id;emit();
-    try{const response=await window.LuviaRestaurants.list({tripId:id});const entries=(response?.data?.entities||[]).map(window.LuviaRestaurants.entityToEntry);const remote=entries.map(normalizeRestaurant).filter(Boolean),local=readLocal(id);const byId=new Map(remote.map(e=>[String(e.id),e]));local.forEach(e=>{if(!byId.has(String(e.id)))byId.set(String(e.id),e)});const events=sortEvents([...byId.values()]);writeLocal(id,events);const summary=buildSummary(events);Object.assign(state,{events,...summary,lastUpdatedAt:new Date().toISOString(),lastError:null});}
+    try{const response=await window.LuviaRestaurants.list({tripId:id});const entries=(response?.data?.entities||[]).map(window.LuviaRestaurants.entityToEntry);const remote=entries.map(normalizeRestaurant).filter(Boolean),local=readLocal(id);const events=dedupeEvents([...local,...remote]);writeLocal(id,events);const summary=buildSummary(events);Object.assign(state,{events,...summary,lastUpdatedAt:new Date().toISOString(),lastError:null});}
     catch(error){state.lastError=error?.message||String(error)}finally{state.loading=false;emit()}
     return snapshot();
   }
@@ -75,14 +102,14 @@
   function upsertRestaurant(entry){
     const normalized=normalizeRestaurant(entry);
     if(!normalized)return snapshot();
-    const events=sortEvents([...state.events.filter(e=>String(e.id)!==String(normalized.id)),normalized]);
+    const events=dedupeEvents([...state.events.filter(e=>!sameEventIdentity(e,normalized)),normalized]);
     const summary=buildSummary(events);
     Object.assign(state,{events,...summary,lastUpdatedAt:new Date().toISOString(),lastError:null,loading:false});
     const id=String(entry.tripId||state.tripId||tripId());if(id){state.tripId=id;writeLocal(id,events)}
     emit();
     return snapshot();
   }
-  function upsertEvent(event){if(!event?.date||!event?.time||!event?.title)return snapshot();const start=parseDateTime(event.date,event.time);if(!start)return snapshot();const normalized={id:String(event.id||event.placeId||crypto.randomUUID()),entityType:event.entityType||'place',title:event.title,date:event.date,time:event.time,startAt:start.toISOString(),endAt:event.endAt||new Date(start.getTime()+Number(event.durationMinutes||90)*60000).toISOString(),durationMinutes:Number(event.durationMinutes||90),source:event.source||event};const events=sortEvents([...state.events.filter(e=>String(e.id)!==String(normalized.id)),normalized]);const summary=buildSummary(events);Object.assign(state,{events,...summary,lastUpdatedAt:new Date().toISOString(),loading:false});const id=String(event.tripId||state.tripId||tripId());if(id){state.tripId=id;writeLocal(id,events)}emit();return snapshot()}
+  function upsertEvent(event){if(!event?.date||!event?.time||!event?.title)return snapshot();const start=parseDateTime(event.date,event.time);if(!start)return snapshot();const normalized={id:String(event.id||event.placeId||crypto.randomUUID()),entityType:event.entityType||'place',title:event.title,date:event.date,time:event.time,startAt:start.toISOString(),endAt:event.endAt||new Date(start.getTime()+Number(event.durationMinutes||90)*60000).toISOString(),durationMinutes:Number(event.durationMinutes||90),source:event.source||event};const events=dedupeEvents([...state.events.filter(e=>!sameEventIdentity(e,normalized)),normalized]);const summary=buildSummary(events);Object.assign(state,{events,...summary,lastUpdatedAt:new Date().toISOString(),loading:false});const id=String(event.tripId||state.tripId||tripId());if(id){state.tripId=id;writeLocal(id,events)}emit();return snapshot()}
   function removeEvent(id,options={}){const key=String(id||'');if(!key)return snapshot();const before=state.events.length;const events=state.events.filter(e=>String(e.id)!==key);if(events.length===before)return snapshot();const summary=buildSummary(events);Object.assign(state,{events,...summary,lastUpdatedAt:new Date().toISOString(),loading:false});const active=String(options.tripId||state.tripId||tripId());if(active){state.tripId=active;writeLocal(active,events)}emit();return snapshot()}
   function snapshot(){return clone(state)}
   function subscribe(fn){listeners.add(fn);return()=>listeners.delete(fn)}

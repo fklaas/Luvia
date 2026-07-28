@@ -1,6 +1,6 @@
 (() => {
 'use strict';
-const VERSION='4.1.3.1',KEY='luvia.cross-module.v4';
+const VERSION='4.1.3.2',KEY='luvia.cross-module.v4';
 const clone=v=>v==null?v:JSON.parse(JSON.stringify(v));
 const state={status:'ready',tripId:null,slots:{forYou:[],rightNow:[],nearby:[],onYourWay:[],next:[],alternative:[]},candidates:[],lastUpdatedAt:null,lastError:null,offline:false,freeWindowTrace:[]};
 const tripId=()=>String(window.LuviaTripContext?.getActiveTrip?.()?.tripId||window.LuviaTripStore?.snapshot?.()?.activeTripId||'');
@@ -20,7 +20,7 @@ function placeCategory(p){
 }
 function scheduledCategoryCounts(){
   const counts=new Map();
-  const events=window.LuviaScheduleIntelligence?.snapshot?.().today||[];
+  const schedule=window.LuviaScheduleIntelligence?.snapshot?.()||{};const todayKey=new Date().toISOString().slice(0,10);const events=(schedule.events||[]).filter(event=>event.date===todayKey);
   for(const event of events){
     const category=placeCategory({...event,...(event.source||{}),name:event.title||event.name});
     counts.set(category,(counts.get(category)||0)+1);
@@ -32,6 +32,8 @@ function categoryAllowed(place,selectedCounts,scheduledCounts){
   if(type!=='restaurant')return{ok:(selectedCounts.get(type)||0)<1,category,reason:'place-type-diversity'};
   const scheduledMeals=scheduledCounts.get('restaurant.meal')||0;
   const scheduledCafe=(scheduledCounts.get('restaurant.cafe')||0)+(scheduledCounts.get('restaurant.dessert')||0);
+  const scheduledFood=[...scheduledCounts.entries()].filter(([key])=>key.startsWith('restaurant.')).reduce((sum,[,value])=>sum+value,0);
+  if(scheduledFood>=2)return{ok:false,category,reason:'daily-food-place-limit-reached'};
   if(category==='restaurant.meal'&&scheduledMeals>=1)return{ok:false,category,reason:'daily-meal-restaurant-already-planned'};
   if((category==='restaurant.cafe'||category==='restaurant.dessert')&&scheduledCafe>=1)return{ok:false,category,reason:'daily-cafe-dessert-already-planned'};
   const cap=category==='restaurant.meal'?1:1;

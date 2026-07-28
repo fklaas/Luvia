@@ -28,26 +28,26 @@
     "logHistory": 500
   },
   "release": {
-    "core": "4.1.3.1",
-    "build": "13.1.3.1",
-    "name": "Live Day Companion",
+    "core": "4.1.3.2",
+    "build": "13.1.3.2",
+    "name": "Live Day Schedule Identity & Stable Suggestions",
     "channel": "production",
-    "builtAt": "2026-07-28T15:30:00+02:00"
+    "builtAt": "2026-07-28T16:30:00+02:00"
   },
   "deployment": {
     "canonicalHost": "myluvia.app",
     "wwwHost": "www.myluvia.app",
     "stagingHost": "staging.myluvia.app",
     "githubPagesFallback": "https://fklaas.github.io/Luvia/",
-    "build": "13.1.3.1"
+    "build": "13.1.3.2"
   },
   "build": {
-    "core": "4.1.3.1",
-    "build": "13.1.3.1",
-    "name": "Smart Free-Time Suggestions",
+    "core": "4.1.3.2",
+    "build": "13.1.3.2",
+    "name": "Live Day Schedule Identity & Stable Suggestions",
     "channel": "production",
     "releasedAt": "2026-07-28",
-    "builtAt": "2026-07-28T14:00:00+02:00"
+    "builtAt": "2026-07-28T16:30:00+02:00"
   },
   "backend": {
     "functionName": "luvia-gateway",
@@ -98,7 +98,7 @@
     "crossModuleRecommendations": "active"
   },
   "todayIntelligence": {
-    "version": "4.1.3.1",
+    "version": "4.1.3.2",
     "status": "active",
     "departure": true,
     "freeWindows": true,
@@ -108,7 +108,7 @@
     "globalGps": true,
     "offlineSync": true
   },
-  "coreVersion": "4.1.3.1",
-  "buildVersion": "13.1.3.1",
+  "coreVersion": "4.1.3.2",
+  "buildVersion": "13.1.3.2",
   "releaseName": "Live Day Companion Stability & Diversity Fix"
 }
