@@ -1,6 +1,6 @@
 (() => {
   'use strict';
-  const VERSION='4.1.0.1';
+  const VERSION='4.1.0.2';
   const listeners=new Set();
   const STORAGE='luvia.schedule.v4';
   const state={loading:false,tripId:null,events:[],today:[],next:null,freeWindow:null,warnings:[],lastUpdatedAt:null,lastError:null};

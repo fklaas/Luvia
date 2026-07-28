@@ -22,6 +22,12 @@ export async function restaurantAction(action:string,payload:any,client:Supabase
     if(error)throw Object.assign(new Error(error.message||'Restaurants konnten nicht geladen werden.'),{code:'RESTAURANT_LIST_FAILED',status:400});
     metrics.lists++; return{data:{entities:Array.isArray(data)?data:[]}};
   }
+  if(action==='restaurant.history'){
+    const tripId=String(payload?.tripId||''); if(!tripId)throw Object.assign(new Error('Trip-ID fehlt.'),{code:'TRIP_ID_REQUIRED',status:400});
+    const {data,error}=await client.rpc('luvia_list_archived_restaurant_entities',{p_trip_id:tripId});
+    if(error)throw Object.assign(new Error(error.message||'Restaurantverlauf konnte nicht geladen werden.'),{code:'RESTAURANT_HISTORY_FAILED',status:400});
+    return{data:{entities:Array.isArray(data)?data:[]}};
+  }
   if(action==='restaurant.lifecycle.update'){
     const tripId=String(payload?.tripId||''),tripPlaceId=String(payload?.tripPlaceId||''),status=String(payload?.status||'');
     if(!tripId||!tripPlaceId||!status)throw Object.assign(new Error('Trip-ID, Restaurant-Verknüpfung und Status werden benötigt.'),{code:'LIFECYCLE_INPUT_REQUIRED',status:400});
