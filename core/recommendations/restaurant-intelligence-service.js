@@ -1,6 +1,6 @@
 (() => {
   'use strict';
-  const VERSION='3.8.1';
+  const VERSION='3.9.0';
   const listeners=new Set();
   const state={loading:false,tripId:null,restaurants:[],primary:null,nearby:null,reservationMissing:null,departure:null,betterAlternative:null,lastUpdatedAt:null,lastError:null};
   const clone=v=>v==null?v:JSON.parse(JSON.stringify(v));
@@ -99,10 +99,11 @@
       return {...candidate,alternativeReason:reason};
     }).sort((a,b)=>(Number(b.matchScore)||0)-(Number(a.matchScore)||0)).slice(0,3);
     const score=Number(rec.score||place.matchScore||55),group=groupInsight(rec,score);
+    const schedule=window.LuviaScheduleIntelligence?.analyze?.({...place,recommendedVisitTime:best},window.LuviaScheduleIntelligence?.snapshot?.().events||[],context)||null;
     const cleanReasons=uniqueMessages(reasons,4);
     const warningKeys=new Set(uniqueMessages(warnings,4).map(messageKey));
     const cleanWarnings=uniqueMessages(warnings,4).filter(w=>!cleanReasons.some(r=>{const a=messageKey(r),b=messageKey(w);return a===b||[...new Set(a.split(' '))].filter(x=>x.length>3&&b.includes(x)).length>=2}));
-    return {...place,intelligence:{version:VERSION,score,distanceLabel:formatDistance(distance),openLabel:place.openNow===true?'Heute geöffnet':place.openNow===false?'Heute geschlossen':'Öffnungszeiten prüfen',bestTime:best,reservationHint:reservationHint(place),babyLabel:baby.label,budgetLabel:budget.label,walkMinutes:walk,driveMinutes:drive,groupMatch:rec.groupMatch||null,groupInsight:group,participantMatches:rec.groupMatch?.participants||[],reasons:cleanReasons,warnings:cleanWarnings,suggestions:suggestionLines(place,all),alternatives}};
+    return {...place,intelligence:{version:VERSION,score,distanceLabel:formatDistance(distance),openLabel:place.openNow===true?'Heute geöffnet':place.openNow===false?'Heute geschlossen':'Öffnungszeiten prüfen',bestTime:best,reservationHint:reservationHint(place),babyLabel:baby.label,budgetLabel:budget.label,walkMinutes:walk,driveMinutes:drive,groupMatch:rec.groupMatch||null,groupInsight:group,participantMatches:rec.groupMatch?.participants||[],reasons:cleanReasons,warnings:cleanWarnings,suggestions:uniqueMessages([...(schedule?.guidance||[]),...suggestionLines(place,all)],4),alternatives,schedule}};
   }
   async function enhance(candidates=[],context={}){return candidates.map(p=>enrich(p,candidates,context))}
   function emit(){const snap=snapshot();listeners.forEach(fn=>{try{fn(snap)}catch{}});window.dispatchEvent(new CustomEvent('luvia:restaurant-intelligence-changed',{detail:snap}))}
