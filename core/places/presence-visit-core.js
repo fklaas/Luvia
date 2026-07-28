@@ -1,6 +1,6 @@
 (function(){
 'use strict';
-const VERSION='4.0.3.5';
+const VERSION='4.0.4';
 const CONFIG=Object.freeze({nearbyMeters:150,arrivalMeters:80,leaveMeters:180,minStaySeconds:120,minSamples:3,maxAccuracyMeters:100});
 const KEY='luvia.place-visits.v4';let watchId=null,enabled=false,permission='unknown',lastPosition=null;const sessions=new Map();let visits=[];const metrics={positions:0,ignoredAccuracy:0,nearby:0,arrived:0,stayDetected:0,visited:0,left:0,manual:0,errors:0,lastError:null};
 const now=()=>new Date().toISOString();function load(){try{visits=JSON.parse(localStorage.getItem(KEY)||'[]');if(!Array.isArray(visits))visits=[];}catch{visits=[];}}function persist(){localStorage.setItem(KEY,JSON.stringify(visits.slice(-500)));}

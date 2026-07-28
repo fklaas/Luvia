@@ -1,6 +1,6 @@
 (() => {
   'use strict';
-  const VERSION='4.0.3.5';
+  const VERSION='4.0.4';
   const listeners=new Set();
   const STORAGE='luvia.schedule.v4';
   const state={loading:false,tripId:null,events:[],today:[],next:null,freeWindow:null,warnings:[],lastUpdatedAt:null,lastError:null};
@@ -83,9 +83,10 @@
     return snapshot();
   }
   function upsertEvent(event){if(!event?.date||!event?.time||!event?.title)return snapshot();const start=parseDateTime(event.date,event.time);if(!start)return snapshot();const normalized={id:String(event.id||event.placeId||crypto.randomUUID()),entityType:event.entityType||'place',title:event.title,date:event.date,time:event.time,startAt:start.toISOString(),endAt:event.endAt||new Date(start.getTime()+Number(event.durationMinutes||90)*60000).toISOString(),durationMinutes:Number(event.durationMinutes||90),source:event.source||event};const events=sortEvents([...state.events.filter(e=>String(e.id)!==String(normalized.id)),normalized]);const summary=buildSummary(events);Object.assign(state,{events,...summary,lastUpdatedAt:new Date().toISOString(),loading:false});const id=String(event.tripId||state.tripId||tripId());if(id){state.tripId=id;writeLocal(id,events)}emit();return snapshot()}
+  function removeEvent(id,options={}){const key=String(id||'');if(!key)return snapshot();const before=state.events.length;const events=state.events.filter(e=>String(e.id)!==key);if(events.length===before)return snapshot();const summary=buildSummary(events);Object.assign(state,{events,...summary,lastUpdatedAt:new Date().toISOString(),loading:false});const active=String(options.tripId||state.tripId||tripId());if(active){state.tripId=active;writeLocal(active,events)}emit();return snapshot()}
   function snapshot(){return clone(state)}
   function subscribe(fn){listeners.add(fn);return()=>listeners.delete(fn)}
-  const api=Object.freeze({version:VERSION,refresh,upsertRestaurant,upsertEvent,snapshot,subscribe,analyze,travelMinutes,diagnostics:()=>({version:VERSION,...snapshot()})});
+  const api=Object.freeze({version:VERSION,refresh,upsertRestaurant,upsertEvent,removeEvent,snapshot,subscribe,analyze,travelMinutes,diagnostics:()=>({version:VERSION,persistenceKey:STORAGE,...snapshot(),trace:(state.events||[]).map(e=>({id:e.id,entityType:e.entityType,date:e.date,time:e.time,startAt:e.startAt,source:Boolean(e.source)}))})});
   window.LuviaScheduleIntelligence=api;
   ['luvia:trip-changed','luvia:restaurant-lifecycle-changed','luvia:restaurants-v2-updated','luvia:travel-context-changed'].forEach(name=>window.addEventListener(name,()=>refresh().catch(()=>{})));
   if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',()=>refresh().catch(()=>{}),{once:true});else queueMicrotask(()=>refresh().catch(()=>{}));
