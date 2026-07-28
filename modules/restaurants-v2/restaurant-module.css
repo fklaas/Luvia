@@ -636,7 +636,7 @@
 .rv2-today-plan-remove{align-self:start;margin:8px;width:30px;height:30px;border:0;border-radius:999px;background:color-mix(in srgb,var(--rv2-accent,#55a6ad) 12%,white);color:#17384b;font-size:20px;line-height:1;cursor:pointer}
 .rv2-today-plan-remove:hover{background:color-mix(in srgb,var(--rv2-accent,#55a6ad) 24%,white);transform:scale(1.04)}
 
-/* Build 13.0.4.1.1: compact in-card schedule removal */
+/* Build 13.0.4.2.1: compact in-card schedule removal */
 .rv2-today-plan-item{position:relative;display:block;overflow:visible}
 .rv2-today-plan-open{display:grid;width:100%;padding:16px 48px 16px 16px;border-radius:18px;background:#fff}
 .rv2-today-plan-remove{position:absolute;top:9px;right:9px;z-index:2;margin:0;width:28px;height:28px;display:grid;place-items:center;padding:0;border:1px solid color-mix(in srgb,var(--rv2-accent,#55a6ad) 22%,#dce7e9);border-radius:999px;background:color-mix(in srgb,var(--rv2-accent,#55a6ad) 10%,#fff);box-shadow:0 6px 16px rgba(20,52,66,.10);font-size:18px}

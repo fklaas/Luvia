@@ -1,7 +1,7 @@
 (function(){
 'use strict';
 const MODULE_ID='restaurants';
-const MODULE_VERSION='4.0.4.1';
+const MODULE_VERSION='4.0.4.2';
 const DATA_URL='./modules/restaurants-v2/default.json';
 const DEMO_KEY='luviaRestaurantsV2Demo:';
 const DB_NAME='luviaRestaurantsV2Assets';
@@ -152,5 +152,5 @@ function installRestaurantRecovery(instance){
 function unmount(instance){instance.rv2Cleanup?.();instance.rv2DestinationCleanup?.();clearInterval(instance.rv2Timer);if(instance.rv2Recover){document.removeEventListener('visibilitychange',instance.rv2Recover);window.removeEventListener('focus',instance.rv2Recover);window.removeEventListener('pageshow',instance.rv2Recover);window.removeEventListener('luvia:screen-changed',instance.rv2Recover)}delete instance.rv2Cleanup;delete instance.rv2DestinationCleanup;delete instance.rv2Timer;delete instance.rv2Recover;delete instance.rv2RecoveryInstalled;if(instance.roots[0])delete instance.roots[0].dataset.rv2Mounted}
 window.LuviaRestaurantMatch=Object.freeze({calculate:calculateMatchScore,normalize:normalizeMatchScore,get:matchScore});
 window.LuviaRestaurantsV2={getData:trip=>modelFor(trip),openEditor:()=>{const i=window.LuviaModules?.instances?.get(MODULE_ID);if(i)editor(i)},resetDemo:trip=>localStorage.removeItem(demoKey(trip))};
-window.LuviaModules?.register({id:MODULE_ID,order:70,group:'Planung',icon:'🍽️',title:'Restaurants & Reservierungen',description:'Restaurant-Lebenszyklus mit persönlichem Workspace, Realtime-Synchronisation und Reisebuch-Vorbereitung.',selectors:['#restaurants-module'],version:'4.0.4.1',defaults:{},schema:{title:'Restaurants V4.0.4.1 · Core 4 Finalization',source:'modules/restaurants-v2/default.json',independent:true,generated:['destination context','weekday','maps search','countdown','discovery searches'],editable:['lifecycle','planning','reservation','preferences','rating','memory','travel book'],repeatable:'entries'},render:renderAsync,mount,unmount});
+window.LuviaModules?.register({id:MODULE_ID,order:70,group:'Planung',icon:'🍽️',title:'Restaurants & Reservierungen',description:'Restaurant-Lebenszyklus mit persönlichem Workspace, Realtime-Synchronisation und Reisebuch-Vorbereitung.',selectors:['#restaurants-module'],version:'4.0.4.2',defaults:{},schema:{title:'Restaurants V4.0.4.2 · Core 4 Finalization',source:'modules/restaurants-v2/default.json',independent:true,generated:['destination context','weekday','maps search','countdown','discovery searches'],editable:['lifecycle','planning','reservation','preferences','rating','memory','travel book'],repeatable:'entries'},render:renderAsync,mount,unmount});
 })();
