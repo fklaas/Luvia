@@ -1,6 +1,6 @@
 (() => {
 'use strict';
-const VERSION='4.1.3.12',KEY='luvia.cross-module.v4';
+const VERSION='4.1.3.13',KEY='luvia.cross-module.v4';
 const clone=v=>v==null?v:JSON.parse(JSON.stringify(v));
 const state={status:'ready',tripId:null,slots:{forYou:[],rightNow:[],nearby:[],onYourWay:[],next:[],alternative:[]},candidates:[],lastUpdatedAt:null,lastError:null,offline:false,freeWindowTrace:[]};
 const tripId=()=>String(window.LuviaTripContext?.getActiveTrip?.()?.tripId||window.LuviaTripStore?.snapshot?.()?.activeTripId||'');

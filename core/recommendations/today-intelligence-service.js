@@ -1,8 +1,7 @@
 (() => {
   'use strict';
 
-  const VERSION = '4.1.3.12';
-  const STORAGE_PREFIX = 'luvia.today.v4';
+  const VERSION = '4.1.3.13';
   const listeners = new Set();
   const clone = value => value == null ? value : JSON.parse(JSON.stringify(value));
   const pad = n => String(n).padStart(2, '0');
@@ -36,15 +35,9 @@
   });
   const state = initialState();
 
-  function storageKey(tripId, date) { return `${STORAGE_PREFIX}.${tripId}.${date}`; }
-  function readCached(tripId, date) {
-    if (!tripId) return null;
-    try { return JSON.parse(localStorage.getItem(storageKey(tripId, date)) || 'null'); } catch { return null; }
-  }
-  function writeCached(snapshot) {
-    if (!snapshot?.tripId) return;
-    try { localStorage.setItem(storageKey(snapshot.tripId, snapshot.date), JSON.stringify(snapshot)); } catch {}
-  }
+  const readCached=()=>null;
+  const writeCached=()=>{};
+
 
   function eventEnd(event) {
     return parse(event.endAt) || (parse(event.startAt) ? new Date(parse(event.startAt).getTime() + Number(event.durationMinutes || 90) * 60000) : null);
@@ -281,8 +274,6 @@
       return apply(build(options));
     } catch (error) {
       state.lastError = error?.message || String(error);
-      const cached = readCached(options.tripId || activeTripId(), options.date || dayKey(new Date()));
-      if (cached) return apply({ ...cached, sourceState: { ...(cached.sourceState || {}), offline: true, schedule: 'cached' }, lastError: state.lastError });
       emit();
       return clone(state);
     }

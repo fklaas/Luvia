@@ -1,0 +1,3 @@
+fix(core): make schedule and today data cloud authoritative
+
+Remove browser-domain caches from schedule, Today Intelligence and Live Day Companion; use canonical place identities, realtime cloud hydration and deterministic writes.
