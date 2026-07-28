@@ -1,7 +1,7 @@
 (() => {
   'use strict';
 
-  const VERSION = '4.1.3.8';
+  const VERSION = '4.1.3.9';
   const STORAGE_PREFIX = 'luvia.today.v4';
   const listeners = new Set();
   const clone = value => value == null ? value : JSON.parse(JSON.stringify(value));

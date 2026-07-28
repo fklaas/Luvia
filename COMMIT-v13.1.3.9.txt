@@ -1,0 +1,1 @@
+fix(restaurants): sync suggestions and add schedule reset

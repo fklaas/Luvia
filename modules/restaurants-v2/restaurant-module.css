@@ -657,3 +657,4 @@
 
 /* Build 13.1.3.2: the active trip accent wins over legacy module fallbacks. */
 #restaurants-module.luvia-restaurants-v2{--rv2-accent:var(--trip-accent)!important;--module-accent:var(--trip-accent)!important}.rv2-kicker,.rv2-eyebrow,.rv2-library-heading>div>span,.rv2-recommendation-head button{color:color-mix(in srgb,var(--trip-accent) 78%,#203142)!important}.rv2-action.primary,.rv2-search-submit,.rv2-plan-primary{background:var(--trip-accent)!important;color:var(--trip-accent-contrast,#203142)!important}
+.rv2-today-plan-head-actions{display:flex;align-items:flex-end;gap:.75rem;flex-wrap:wrap;justify-content:flex-end}.rv2-clear-schedule{border:0;background:transparent;color:var(--rv2-accent,var(--trip-accent,#7c4c5c));font:inherit;font-size:.78rem;padding:.15rem 0;cursor:pointer}.rv2-clear-schedule:hover{text-decoration:underline}.rv2-clear-schedule:disabled{opacity:.55;cursor:wait}
