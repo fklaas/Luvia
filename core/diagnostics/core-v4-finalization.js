@@ -1,6 +1,6 @@
 (() => {
   'use strict';
-  const VERSION='4.1.1';
+  const VERSION='4.1.1.1';
   const BUILD='13.1.0';
   const now=()=>new Date().toISOString();
   const safe=(fn,fallback=null)=>{try{return fn()}catch(error){return fallback??{error:error?.message||String(error)}}};
@@ -33,7 +33,7 @@
     test('Manual Visit contract',()=>({ok:typeof window.LuviaPlaceCore?.recordVisit==='function'&&typeof window.LuviaPresenceVisitCore?.confirmVisit==='function'}));
     test('Recommendation Slots',()=>({ok:['forYou','rightNow','nearby','onYourWay','next','alternative'].every(k=>Array.isArray(window.LuviaCrossModuleRecommendations?.diagnostics?.().slots?.[k]))}));
     test('Dashboard today data',()=>({ok:Array.isArray(window.LuviaScheduleIntelligence?.snapshot?.().today),count:window.LuviaScheduleIntelligence?.snapshot?.().today?.length||0}));
-    test('Today Intelligence',()=>{const d=window.LuviaTodayIntelligence?.diagnostics?.()||{};return{ok:d.version==='4.1.0.1'&&Array.isArray(d.freeWindows)&&Array.isArray(d.conflicts),status:d.status,current:d.current,next:d.next,events:d.events}});
+    test('Today Intelligence',()=>{const d=window.LuviaTodayIntelligence?.diagnostics?.()||{};return{ok:/^4\.1\.1(?:\.\d+)?$/.test(String(d.version||''))&&Array.isArray(d.freeWindows)&&Array.isArray(d.conflicts)&&['empty','upcoming','leave_soon','leave_now','late','current','completed','ready'].includes(String(d.status||'empty')),status:d.status,current:d.current,next:d.next,events:d.events}});
     const summary={ok:results.every(x=>x.ok),passed:results.filter(x=>x.ok).length,total:results.length,results,completedAt:now()};
     try{sessionStorage.setItem('luvia.core4.smoke.latest',JSON.stringify(summary))}catch{}
     return summary;
