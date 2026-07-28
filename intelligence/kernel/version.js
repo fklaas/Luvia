@@ -1,1 +1,1 @@
-window.LuviaKernelVersion=window.LuviaCoreVersion=Object.freeze({core:'3.9.2',build:'12.1.2',name:'Schedule Intelligence Diagnostics Stability',channel:'production',builtAt:'2026-07-27T23:59:00+02:00'});
+window.LuviaKernelVersion=window.LuviaCoreVersion=Object.freeze({core:'3.9.3',build:'12.1.3',name:'Schedule Intelligence Diagnostics Stability',channel:'production',builtAt:'2026-07-27T23:59:00+02:00'});
