@@ -48,3 +48,7 @@
 
 .lv-today-suggestion{font:inherit;text-align:left;color:inherit;cursor:pointer;width:100%;background:color-mix(in srgb,var(--lv-accent) 8%,#fff);border:1px solid color-mix(in srgb,var(--lv-accent) 15%,#e4eaed);padding:8px 10px;border-radius:12px}.lv-today-suggestion:hover{background:color-mix(in srgb,var(--lv-accent) 14%,#fff);border-color:color-mix(in srgb,var(--lv-accent) 36%,var(--lv-line))}.lv-today-suggestion:focus-visible{outline:3px solid color-mix(in srgb,var(--lv-accent) 24%,transparent);outline-offset:2px}
 [data-widget-id="today"]{transition:none!important}.lv-widget.is-live-refreshing,.lv-widget.is-live-settling{opacity:1!important;transform:none!important}
+
+/* Build 13.1.3.3: stable Today rendering and one-tap planning */
+[data-widget-id="today"], [data-widget-id="today"] * { animation: none !important; }
+.lv-today-suggestion{cursor:pointer;text-align:left;transition:background-color .12s ease,border-color .12s ease!important}.lv-today-suggestion:hover{background:color-mix(in srgb,var(--trip-accent) 10%,white)}.lv-today-suggestion.is-saving{opacity:.65;pointer-events:none}
