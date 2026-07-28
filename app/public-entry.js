@@ -1,7 +1,7 @@
 (() => {
   'use strict';
 
-  const VERSION = '13.3.0.1';
+  const VERSION = '13.3.0.2';
   const state = { slide: 'home', idea: null, direction: 1 };
   const slides = ['home', 'idea', 'auth', 'invite'];
   const ideas = [
@@ -19,7 +19,7 @@
   function brand() {
     return `<a class="lv-canvas-brand" href="/" aria-label="Luvia Startseite">
       <img src="luvia-logo.svg" alt="">
-      <span><strong>Luvia</strong><small>gemeinsam reisen</small></span>
+      <span><strong>Luvia</strong></span>
     </a>`;
   }
 
@@ -41,8 +41,8 @@
         <div class="lv-memory-cloud cloud-moments"><span class="cloud-icon">✦</span><strong>Momente, die bleiben</strong></div>
         <div class="lv-home-copy">
           <span class="lv-kicker">Eure Reise beginnt hier</span>
-          <h1 id="entry-title">Aus einer Idee wird<br><em>eure Geschichte.</em></h1>
-          <p>Luvia begleitet euch vom ersten Gedanken über die gemeinsame Planung bis zu all den Erinnerungen, die bleiben.</p>
+          <h1 id="entry-title">Aus einer Idee wird<br><em>eure Reise.</em></h1>
+          <p>Gemeinsam planen, unterwegs alles im Blick behalten und die schönsten Momente bewahren.</p>
           <div class="lv-home-actions">
             <button class="lv-primary-action" data-go="idea"><span>Reise beginnen</span><b aria-hidden="true">→</b></button>
             <button class="lv-quiet-action" data-go="invite">Ich wurde eingeladen</button>
@@ -151,7 +151,6 @@
       slide.classList.toggle('is-active', index === next);
       slide.setAttribute('aria-hidden', index === next ? 'false' : 'true');
     });
-    root.querySelector('[data-canvas-track]')?.style.setProperty('--slide-index', String(next));
     root.dataset.activeSlide = nextSlide;
     root.dataset.direction = state.direction > 0 ? 'forward' : 'back';
     root.querySelectorAll('.lv-slide-progress span').forEach((dot, index) => dot.classList.toggle('is-on', index <= Math.min(next, 2)));
