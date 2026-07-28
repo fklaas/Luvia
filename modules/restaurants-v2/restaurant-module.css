@@ -511,3 +511,61 @@
 .rv2-optional-details{margin-top:18px;border:1px solid #e7ebed;border-radius:18px;padding:14px}
 .rv2-optional-details summary{cursor:pointer;font-weight:800}
 @media(max-width:700px){#restaurants-module .rv2-discovery-title{display:block}.rv2-smart-pill{display:inline-block;margin-top:10px}#restaurants-module .rv2-search-box{grid-template-columns:auto minmax(0,1fr)}#restaurants-module .rv2-search-submit{grid-column:1/-1;width:100%}.rv2-compact-summary{display:block}.rv2-favorite-toggle{margin-top:12px;width:max-content}}
+
+/* Build 13.0.3.1 · Calm Restaurant Experience */
+#restaurants-module .rv2-shell{max-width:1220px;gap:20px}
+#restaurants-module .rv2-head-new{padding:4px 2px 0}
+#restaurants-module .rv2-head-new h2{font-size:clamp(1.9rem,3.4vw,3rem)}
+#restaurants-module .rv2-head-new p{max-width:680px}
+#restaurants-module .rv2-discovery-new{padding:clamp(18px,2.5vw,30px);border-radius:28px;box-shadow:0 18px 44px rgba(31,48,61,.06)}
+#restaurants-module .rv2-discovery-title{margin-bottom:14px}
+#restaurants-module .rv2-discovery-title h3{font-size:clamp(1.45rem,2.5vw,2.1rem)}
+#restaurants-module .rv2-search-box{grid-template-columns:auto minmax(0,1fr) auto;min-height:62px;padding:6px 7px 6px 18px;border-radius:20px;overflow:hidden}
+#restaurants-module .rv2-search-box input[name=query]{min-width:0;width:100%;font-size:1rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+#restaurants-module .rv2-search-submit{min-width:104px!important;min-height:48px;border-radius:15px!important}
+#restaurants-module .rv2-quick-row{padding-top:12px}
+#restaurants-module .rv2-quick-wrap{display:grid;gap:8px}
+#restaurants-module .rv2-quick-label{font-size:.72rem;text-transform:uppercase;letter-spacing:.1em;font-weight:800;color:#6b808d}
+#restaurants-module .rv2-discovery-actions{display:flex;gap:8px;overflow-x:auto;padding:2px 2px 6px;scrollbar-width:none}
+#restaurants-module .rv2-quick-chip{flex:0 0 auto;padding:9px 13px!important;border-radius:999px!important;box-shadow:none!important}
+#restaurants-module .rv2-filter-drawer{border:0;padding-top:6px}
+#restaurants-module .rv2-filter-drawer summary{width:max-content;padding:8px 0}
+#restaurants-module .rv2-search-options{margin-top:8px;padding:15px;border-radius:18px;background:#f7fafb}
+#restaurants-module .rv2-context-bar{margin:0;grid-column:1/-1;background:#fff}
+#restaurants-module .rv2-recommendation-head{margin:20px 0 10px}
+#restaurants-module .rv2-search-results{display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:12px}
+#restaurants-module .rv2-search-results .rv2-search-card{border-radius:20px;padding:16px;box-shadow:none;border:1px solid #e6ebee;background:#fff}
+#restaurants-module .rv2-search-results .rv2-search-card:hover{transform:translateY(-2px);box-shadow:0 14px 30px rgba(31,48,61,.08)}
+#restaurants-module .rv2-search-results .rv2-search-intel{display:flex;gap:5px;max-height:58px;overflow:hidden}
+#restaurants-module .rv2-search-results .rv2-search-intel em:nth-child(n+5){display:none}
+#restaurants-module .rv2-library{display:grid;gap:10px}
+#restaurants-module .rv2-library-heading{display:flex;justify-content:space-between;align-items:end;padding:4px 4px 2px}
+#restaurants-module .rv2-library-heading span{font-size:.72rem;letter-spacing:.11em;text-transform:uppercase;font-weight:800;color:#69818e}
+#restaurants-module .rv2-library-heading h3{margin:3px 0 0;font-size:1.35rem}
+#restaurants-module .rv2-library-heading small{color:#71828f}
+#restaurants-module .rv2-library-panel{border:1px solid #e5eaed;border-radius:22px;background:#fff;overflow:hidden}
+#restaurants-module .rv2-library-panel>summary{list-style:none;display:flex;justify-content:space-between;align-items:center;gap:16px;padding:17px 19px;cursor:pointer}
+#restaurants-module .rv2-library-panel>summary::-webkit-details-marker{display:none}
+#restaurants-module .rv2-library-panel>summary>span{display:flex;align-items:center;gap:12px;min-width:0}
+#restaurants-module .rv2-library-panel>summary i{display:grid;place-items:center;width:40px;height:40px;border-radius:14px;background:color-mix(in srgb,var(--rv2-accent) 9%,#fff);font-style:normal;color:var(--rv2-accent)}
+#restaurants-module .rv2-library-panel>summary strong,#restaurants-module .rv2-library-panel>summary small{display:block}
+#restaurants-module .rv2-library-panel>summary small{margin-top:2px;color:#748590}
+#restaurants-module .rv2-library-panel>summary b{display:grid;place-items:center;min-width:31px;height:31px;border-radius:999px;background:#f3f7f8;font-size:.78rem}
+#restaurants-module .rv2-library-panel[open]>summary{border-bottom:1px solid #edf0f2}
+#restaurants-module .rv2-library-content{padding:16px}
+#restaurants-module .rv2-library-empty{padding:18px;border-radius:16px;background:#f7fafb;color:#71828f}
+#restaurants-module .rv2-saved-grid{grid-template-columns:repeat(auto-fit,minmax(270px,1fr));gap:12px}
+#restaurants-module .rv2-saved-grid .rv2-card{padding:16px!important;border-radius:20px!important}
+#restaurants-module .rv2-saved-grid .luv-place-badges span:nth-child(n+5){display:none}
+@media(max-width:700px){
+  #restaurants-module .rv2-shell{gap:16px}
+  #restaurants-module .rv2-discovery-new{border-radius:22px;padding:17px}
+  #restaurants-module .rv2-smart-pill{display:none}
+  #restaurants-module .rv2-search-box{grid-template-columns:auto minmax(0,1fr);padding:7px 10px 7px 14px}
+  #restaurants-module .rv2-search-submit{grid-column:1/-1;width:100%;min-height:44px}
+  #restaurants-module .rv2-search-box input[name=query]{font-size:.95rem}
+  #restaurants-module .rv2-search-results{grid-template-columns:1fr}
+  #restaurants-module .rv2-library-heading{align-items:flex-start}
+  #restaurants-module .rv2-library-content{padding:12px}
+  #restaurants-module .rv2-favorite-list{grid-template-columns:1fr}
+}
