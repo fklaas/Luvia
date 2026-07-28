@@ -47,8 +47,12 @@ Deno.serve(async(req:Request)=>{
     const client=createClient(supabaseUrl,anonKey,{global:{headers:{Authorization:authorization}},auth:{persistSession:false}});
     userClient=client;
     const {data,error}=await client.auth.getUser();
-    if(error||!data.user)return errorResponse(401,'INVALID_SESSION','Sitzung ist ungültig oder abgelaufen.',id,cors);
-    userId=data.user.id;
+    if(error||!data.user){
+      // Public diagnostics must remain reachable even when the browser still
+      // carries an expired token. Protected actions continue to fail closed.
+      if(!PUBLIC_ACTIONS.has(action))return errorResponse(401,'INVALID_SESSION','Sitzung ist ungültig oder abgelaufen.',id,cors);
+      userClient=null;
+    }else userId=data.user.id;
   }
   if(!PUBLIC_ACTIONS.has(action)&&!userId)return errorResponse(401,'AUTH_REQUIRED','Für diese Aktion ist eine Anmeldung erforderlich.',id,cors);
 
@@ -57,7 +61,7 @@ Deno.serve(async(req:Request)=>{
     let data:unknown;
     switch(action){
       case 'system.health':
-        data={status:'ok',service:'luvia-gateway',version:'4.2.0',time:new Date().toISOString(),authenticated:Boolean(userId),places:placesDiagnostics(),restaurants:restaurantDiagnostics(),recommendations:recommendationDiagnostics()};
+        data={status:'ok',service:'luvia-gateway',version:'4.2.0.2',time:new Date().toISOString(),authenticated:Boolean(userId),places:placesDiagnostics(),restaurants:restaurantDiagnostics(),recommendations:recommendationDiagnostics()};
         break;
       default:
         if(PLACES_ACTIONS.has(action)){

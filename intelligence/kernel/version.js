@@ -1,1 +1,1 @@
-(() => {'use strict';window.LuviaKernelVersion=Object.freeze({core:'4.2.0.1',build:'13.2.0.1',name:'Cloud-Only Place Core Verification Fix',channel:'production',builtAt:'2026-07-28T19:30:00+02:00'});window.LuviaCoreVersion=window.LuviaKernelVersion;})();
+(() => {'use strict';window.LuviaKernelVersion=Object.freeze({core:'4.2.0.2',build:'13.2.0.2',name:'Universal Place Verification & Backend Stabilization',channel:'production',builtAt:'2026-07-28T20:15:00+02:00'});window.LuviaCoreVersion=window.LuviaKernelVersion;})();

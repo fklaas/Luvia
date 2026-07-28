@@ -1,6 +1,6 @@
 (() => {
 'use strict';
-const VERSION='4.2.0.1';
+const VERSION='4.2.0.2';
 const CONFIG={nearbyMeters:150,arrivalMeters:80,minStaySeconds:120,minSamples:3,leaveMeters:180,maxAccuracyMeters:100,maximumAge:15000,timeout:20000};
 const sessions=new Map();let visits=[],watchId=null,enabled=false,permission='unknown',lastPosition=null;
 const metrics={positions:0,ignoredAccuracy:0,nearby:0,arrived:0,stayDetected:0,visited:0,left:0,manual:0,errors:0,lastError:null,lastSyncAt:null};
@@ -33,5 +33,5 @@ async function confirmVisit(placeId,patch={}){const place=window.LuviaPlaceCore?
 async function flush(){for(const visit of visits){try{await persistVisit(visit)}catch(e){metrics.errors++;metrics.lastError=e.message}}return diagnostics()}
 async function init(){await hydrateVisits().catch(e=>{metrics.errors++;metrics.lastError=e.message;visits=[];});if(navigator.permissions?.query){try{permission=(await navigator.permissions.query({name:'geolocation'})).state}catch{permission='unknown'}}if(profileSetting()&&permission!=='denied')setTimeout(()=>start().catch(()=>{}),500);return diagnostics()}
 function diagnostics(){return{version:VERSION,cloudAuthoritative:true,localPersistence:false,status:'ready',global:true,preferenceEnabled:profileSetting(),enabled,permission,config:CONFIG,lastPosition,activeSessions:[...sessions.values()].map(clone),visits:visits.slice(-20),metrics:{...metrics},trackedPlaces:places().length,placeTypes:[...new Set(places().map(p=>p.primaryType))]}}
-window.LuviaPresenceVisitCore=Object.freeze({version:VERSION,init,start,stop,setGlobalEnabled,refreshLocation,flush,ingestPosition,confirmVisit,diagnostics,config:CONFIG});
+window.LuviaPresenceVisitCore=Object.freeze({version:VERSION,init,hydrateVisits,start,stop,setGlobalEnabled,refreshLocation,flush,ingestPosition,confirmVisit,diagnostics,config:CONFIG});
 })();

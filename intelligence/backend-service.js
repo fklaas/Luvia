@@ -1,6 +1,6 @@
 (function(){
   'use strict';
-  const VERSION='3.3.0-auth-refresh-retry';
+  const VERSION='3.3.1-public-health-fallback';
   const DEFAULT_FUNCTION='luvia-gateway';
   const DEFAULT_TIMEOUT=12000;
   const ACTION_PATTERN=/^[a-z][a-z0-9]*(?:[._-][a-z0-9]+)*$/;
@@ -98,6 +98,11 @@
       if(response.status===401){
         const refreshedToken=await accessToken({refresh:true});
         if(refreshedToken){headers.Authorization=`Bearer ${refreshedToken}`;response=await send();}
+        // A stale token must not make public health endpoints unavailable.
+        if(response.status===401&&['system.health','places.health'].includes(safeAction)){
+          delete headers.Authorization;
+          response=await send();
+        }
       }
       const body=await response.json().catch(()=>({ok:false,error:{code:'INVALID_RESPONSE',message:'Backend lieferte keine gültige JSON-Antwort.'}}));
       const responseRequestId=response.headers.get('x-luvia-request-id')||body?.meta?.requestId||requestId;
