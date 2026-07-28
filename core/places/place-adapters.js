@@ -1,6 +1,6 @@
 (function(){
 'use strict';
-const VERSION='4.2.0';
+const VERSION='4.2.0.1';
 const R=window.LuviaPlaceRegistry,D=window.LuviaPlaceDomain;
 function adapterFor(type){return Object.freeze({version:VERSION,type,normalize(raw,context={}){if(raw?.place&&raw?.tripPlace&&window.LuviaPlaceEntities)return window.LuviaPlaceEntities.entityToPlace(raw);return D.normalize(raw,{...context,primaryType:type,source:raw?.source||context.source||'google_places',capabilities:R.getCapabilities(type)});},status(){const provider=Boolean(window.LuviaPlaces?.textSearch),entities=Boolean(window.LuviaPlaceEntities?.list);return provider&&entities?{state:type==='restaurant'?'ready':'provider_ready',ready:true,sourceData:true,moduleVisible:type==='restaurant',reason:type==='restaurant'?'Universeller Place Core und Restaurant-Erweiterung sind verbunden.':'Provider- und Cloud-Datenquelle sind produktionsfähig; sichtbares Fachmodul folgt.'}:{state:'degraded',ready:false,sourceData:false,reason:'Places Gateway oder Place Entity Service ist nicht geladen.'};},async load(context={}){if(!window.LuviaPlaceEntities?.list)return[];const response=await window.LuviaPlaceEntities.list({tripId:context.tripId,type});return(response?.data?.entities||[]).map(x=>this.normalize(x,context));},search(options={}){return window.LuviaPlaceEntities.searchPlaces({...options,type});},import(providerPlaceId,options={}){return window.LuviaPlaceEntities.importPlace(providerPlaceId,{...options,type});}});}
 D.TYPES.forEach(type=>R.registerAdapter(type,adapterFor(type)));

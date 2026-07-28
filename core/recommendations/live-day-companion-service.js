@@ -1,14 +1,13 @@
 (() => {
   'use strict';
-  const VERSION='4.1.3.12', STORAGE='luvia.live-day.v1';
+  const VERSION='4.2.0.1';
   const listeners=new Set(), clone=v=>v==null?v:JSON.parse(JSON.stringify(v));
   const nowIso=()=>new Date().toISOString();
   const initial=()=>({version:VERSION,status:'day_open',generatedAt:null,lastStableAt:null,today:null,focus:null,gps:null,eta:null,risk:null,freeTime:null,rejectedSuggestions:[],sourceState:{today:'idle',gps:'inactive',online:navigator.onLine},lastError:null});
   const state=initial();
   const tripId=()=>String(window.LuviaTripContext?.getActiveTrip?.()?.tripId||window.LuviaTripStore?.snapshot?.()?.activeTripId||'');
-  const key=()=>`${STORAGE}.${tripId()}.${new Date().toISOString().slice(0,10)}`;
-  function cache(value){try{localStorage.setItem(key(),JSON.stringify(value))}catch{}}
-  function cached(){try{return JSON.parse(localStorage.getItem(key())||'null')}catch{return null}}
+  function cache(){return false}
+  function cached(){return null}
   function validSuggestion(item){const name=String(item?.name||item?.title||'').trim();const id=String(item?.id||item?.placeId||item?.providerPlaceId||'').trim();const type=String(item?.primaryType||item?.entityType||item?.type||'').trim();return Boolean(id&&type&&name&&!/^(unbenannter ort|unbekannter ort|unknown place)$/i.test(name));}
   function fallbackFor(minutes){if(minutes<20)return{title:'Kurze Pause',text:'Für einen weiteren Ort ist die Zeit zu knapp.'};if(minutes<=45)return{title:'Etwas Luft im Plan',text:'Die Zeit eignet sich für eine Pause oder einen kurzen Spaziergang.'};if(minutes<=90)return{title:'Zeit für eine entspannte Pause',text:'Aktuell passt kein weiterer fester Ort sinnvoll dazwischen.'};return{title:'Noch viel Zeit bis zum nächsten Programmpunkt',text:'Aktuell wurde kein zusätzlicher Ort gefunden, der wirklich gut in euren Plan passt.'};}
   function deriveStatus(today,presence){if(!navigator.onLine)return'offline';const session=(presence?.activeSessions||[])[0];if(session?.state==='arrived')return'arrived';if(session?.state==='stay_detected')return'staying';if(session?.state==='visited')return'visited';if(today?.status==='late')return'running_late';if(today?.status==='leave_now')return'leave_now';if(today?.status==='leave_soon')return'leave_soon';if(today?.status==='current')return'staying';if(today?.status==='completed')return'day_completed';if(today?.freeWindows?.length)return'free_window';if(today?.next)return'upcoming';return'day_open';}

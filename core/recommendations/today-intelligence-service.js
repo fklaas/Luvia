@@ -1,8 +1,7 @@
 (() => {
   'use strict';
 
-  const VERSION = '4.1.3.12';
-  const STORAGE_PREFIX = 'luvia.today.v4';
+  const VERSION = '4.2.0.1';
   const listeners = new Set();
   const clone = value => value == null ? value : JSON.parse(JSON.stringify(value));
   const pad = n => String(n).padStart(2, '0');
@@ -31,20 +30,13 @@
     actions: [],
     suggestions: [],
     locationContext: null,
-    sourceState: { schedule: 'idle', places: 'ready', presence: 'inactive', realtime: 'ready', offline: !navigator.onLine },
+    sourceState: { schedule: 'idle', places: 'ready', presence: 'inactive', realtime: 'ready', cloudAuthoritative: true, offline: !navigator.onLine },
     lastError: null
   });
   const state = initialState();
 
-  function storageKey(tripId, date) { return `${STORAGE_PREFIX}.${tripId}.${date}`; }
-  function readCached(tripId, date) {
-    if (!tripId) return null;
-    try { return JSON.parse(localStorage.getItem(storageKey(tripId, date)) || 'null'); } catch { return null; }
-  }
-  function writeCached(snapshot) {
-    if (!snapshot?.tripId) return;
-    try { localStorage.setItem(storageKey(snapshot.tripId, snapshot.date), JSON.stringify(snapshot)); } catch {}
-  }
+  function readCached(){ return null; }
+  function writeCached(){ return false; }
 
   function eventEnd(event) {
     return parse(event.endAt) || (parse(event.startAt) ? new Date(parse(event.startAt).getTime() + Number(event.durationMinutes || 90) * 60000) : null);
