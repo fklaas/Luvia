@@ -1,0 +1,10 @@
+(function(){
+'use strict';
+const VERSION='4.0.0';
+const R=window.LuviaPlaceRegistry,D=window.LuviaPlaceDomain;
+function baseAdapter(type){return Object.freeze({version:VERSION,type,normalize(raw,context={}){return D.normalize(raw,{...context,primaryType:type,source:context.source||'local',capabilities:R.getCapabilities(type)});},status(){return{state:'registered_without_source_data',ready:false,sourceData:false,reason:'Adapter-Vertrag ist produktionsfähig registriert; eine typbezogene Datenquelle folgt in einem späteren Build.'};},async load(){return[];}});}
+D.TYPES.filter(x=>x!=='restaurant').forEach(type=>R.registerAdapter(type,baseAdapter(type)));
+const restaurantAdapter=Object.freeze({version:VERSION,type:'restaurant',normalize(raw,context={}){const entry=raw?.tripPlace||raw?.place||raw?.restaurant?window.LuviaRestaurants?.entityToEntry?.(raw)||raw:raw;return D.normalize({...entry,id:entry.placeId||entry.id||entry.providerPlaceId,tripId:context.tripId||entry.tripId,primaryType:'restaurant',roles:[...(entry.roles||[]),...(entry.types||[]).filter(x=>D.TYPES.includes(x))],source:'restaurant_compatibility',sourceId:entry.providerPlaceId||entry.placeId,lifecycle:entry.lifecycleStatus||entry.lifecycle,metadata:{...(entry.metadata||{}),tripPlaceId:entry.tripPlaceId||null,restaurantCompatibility:true,rawEntity:entry.rawEntity||null},capabilities:R.getCapabilities('restaurant')});},status(){const api=window.LuviaRestaurants;return api?{state:'ready',ready:true,sourceData:true,compatibilityLayer:true}:{state:'degraded',ready:false,sourceData:false,compatibilityLayer:true,reason:'LuviaRestaurants API noch nicht geladen.'};},async load(context={}){if(!window.LuviaRestaurants?.list)return[];const response=await window.LuviaRestaurants.list({tripId:context.tripId});return(response?.data?.entities||[]).map(x=>restaurantAdapter.normalize(x,context));}});
+R.registerAdapter('restaurant',restaurantAdapter);
+window.LuviaPlaceAdapters=Object.freeze({version:VERSION,restaurant:restaurantAdapter});
+})();
