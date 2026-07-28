@@ -1,1 +1,1 @@
-(() => {'use strict';window.LuviaKernelVersion=Object.freeze({core: '4.1.3.6',build: '13.1.3.6',name: 'Live Day Schedule Identity & Stable Suggestions',channel:'production',builtAt:'2026-07-28T15:30:00+02:00'});window.LuviaCoreVersion=window.LuviaKernelVersion;})();
+(() => {'use strict';window.LuviaKernelVersion=Object.freeze({core: '4.1.3.7',build: '13.1.3.7',name: 'Schedule Permission & Stable Hydration',channel:'production',builtAt:'2026-07-28T15:30:00+02:00'});window.LuviaCoreVersion=window.LuviaKernelVersion;})();
