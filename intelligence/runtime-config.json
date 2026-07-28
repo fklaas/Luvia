@@ -28,9 +28,9 @@
     "logHistory": 500
   },
   "release": {
-    "core": "4.1.1.1",
-    "build": "13.1.1.1",
-    "name": "GPS Distance & Today Diagnostics Fix",
+    "core": "4.1.1.2",
+    "build": "13.1.1.2",
+    "name": "Today Suggestions, Visit Action & GPS-Only Distance",
     "channel": "production",
     "builtAt": "2026-07-28T14:00:00+02:00"
   },
@@ -39,12 +39,12 @@
     "wwwHost": "www.myluvia.app",
     "stagingHost": "staging.myluvia.app",
     "githubPagesFallback": "https://fklaas.github.io/Luvia/",
-    "build": "13.1.1.1"
+    "build": "13.1.1.2"
   },
   "build": {
-    "core": "4.1.1.1",
-    "build": "13.1.1.1",
-    "name": "GPS Distance & Today Diagnostics Fix",
+    "core": "4.1.1.2",
+    "build": "13.1.1.2",
+    "name": "Today Suggestions, Visit Action & GPS-Only Distance",
     "channel": "production",
     "releasedAt": "2026-07-28",
     "builtAt": "2026-07-28T14:00:00+02:00"
@@ -98,7 +98,7 @@
     "crossModuleRecommendations": "active"
   },
   "todayIntelligence": {
-    "version": "4.1.1.1",
+    "version": "4.1.1.2",
     "status": "active",
     "departure": true,
     "freeWindows": true,

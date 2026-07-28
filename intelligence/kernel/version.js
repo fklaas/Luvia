@@ -1,1 +1,1 @@
-(() => {'use strict';window.LuviaKernelVersion=Object.freeze({core: '4.1.1.1',build: '13.1.1.1',name: 'GPS Distance & Today Diagnostics Fix',channel:'production',builtAt:'2026-07-28T13:45:00+02:00'});window.LuviaCoreVersion=window.LuviaKernelVersion;})();
+(() => {'use strict';window.LuviaKernelVersion=Object.freeze({core: '4.1.1.2',build: '13.1.1.2',name: 'Today Suggestions, Visit Action & GPS-Only Distance',channel:'production',builtAt:'2026-07-28T13:45:00+02:00'});window.LuviaCoreVersion=window.LuviaKernelVersion;})();

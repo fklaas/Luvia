@@ -1,7 +1,7 @@
 (() => {
   'use strict';
 
-  const VERSION = '4.1.1.1';
+  const VERSION = '4.1.1.2';
   const STORAGE_PREFIX = 'luvia.today.v4';
   const listeners = new Set();
   const clone = value => value == null ? value : JSON.parse(JSON.stringify(value));
@@ -63,13 +63,27 @@
     return /baby|kind|children|family/.test(text) ? 5 : 0;
   }
 
+  function eventPlace(event) {
+    const ids=[event?.placeId,event?.source?.placeId,event?.source?.rawEntity?.place?.id,event?.id].filter(Boolean).map(String);
+    for(const id of ids){const place=window.LuviaPlaceCore?.getPlace?.(id);if(place)return place;}
+    const provider=String(event?.providerPlaceId||event?.source?.providerPlaceId||'');
+    const title=String(event?.title||'');
+    return (window.LuviaPlaceCore?.getPlaces?.({tripId:event?.tripId||activeTripId()})||[]).find(place=>
+      (provider&&String(place.sourceId||place.providerPlaceId||'')===provider)||(title&&place.name===title)
+    )||null;
+  }
+  function isVisitedEvent(event) {
+    const lifecycle=String(event?.lifecycleStatus||event?.source?.lifecycleStatus||eventPlace(event)?.lifecycle||'');
+    return ['visited','rated','memory','travel_book'].includes(lifecycle);
+  }
   function classifyEvents(events, now) {
     const current = events.find(event => {
+      if(isVisitedEvent(event))return false;
       const start = parse(event.startAt), end = eventEnd(event);
       return start && end && start <= now && now < end;
     }) || null;
-    const completed = events.filter(event => eventEnd(event) && eventEnd(event) <= now);
-    const upcoming = events.filter(event => parse(event.startAt) && parse(event.startAt) > now);
+    const completed = events.filter(event => isVisitedEvent(event)||(eventEnd(event) && eventEnd(event) <= now));
+    const upcoming = events.filter(event => !isVisitedEvent(event)&&parse(event.startAt) && parse(event.startAt) > now);
     return { current, completed, upcoming, next: upcoming[0] || null };
   }
 
@@ -187,6 +201,21 @@
     const conflictList = conflicts(events);
     const departure = departureAdvice(parts.next, now);
     const windows = freeWindows(events, now);
+    const suggestionPool = [];
+    for (const freeWindow of windows) {
+      const matches = window.LuviaCrossModuleRecommendations?.fitFreeWindow?.(freeWindow, 3) || [];
+      for (const match of matches) {
+        if (!match) continue;
+        suggestionPool.push({ ...match, freeWindow });
+      }
+    }
+    const seenSuggestions = new Set();
+    const suggestions = suggestionPool.filter(item => {
+      const key = String(item.id || item.placeId || item.providerPlaceId || item.name || item.title || '');
+      if (!key || seenSuggestions.has(key)) return false;
+      seenSuggestions.add(key);
+      return true;
+    }).slice(0, 4);
     const status = determineStatus(parts, departure);
     const sourceState = {
       schedule: schedule.lastError ? 'degraded' : 'ready',
@@ -212,13 +241,26 @@
       conflicts: conflictList,
       dayLoad: dayLoad(events, conflictList),
       actions: actionsFor(status, parts.current, parts.next, conflictList),
+      suggestions,
+      locationContext: window.LuviaPresenceVisitCore?.diagnostics?.() || null,
       sourceState,
       lastError: schedule.lastError || null
     };
     return snapshot;
   }
 
-  function apply(snapshot) { Object.assign(state, snapshot); writeCached(snapshot); emit(); return clone(state); }
+  function apply(snapshot) {
+    const schedule = window.LuviaScheduleIntelligence?.snapshot?.() || {};
+    const sameTrip = String(snapshot?.tripId || '') === String(state.tripId || '');
+    const transientEmpty = Boolean(schedule.loading && sameTrip && state.timeline?.length && !snapshot?.timeline?.length);
+    const nextSnapshot = transientEmpty
+      ? { ...state, generatedAt: snapshot?.generatedAt || nowIso(), sourceState: { ...(state.sourceState || {}), schedule: 'refreshing' } }
+      : snapshot;
+    Object.assign(state, nextSnapshot);
+    writeCached(state);
+    emit();
+    return clone(state);
+  }
   function emit() {
     const snapshot = clone(state);
     listeners.forEach(listener => { try { listener(snapshot); } catch {} });
@@ -254,6 +296,8 @@
       departureAdvice: state.departureAdvice,
       freeWindows: state.freeWindows,
       conflicts: state.conflicts,
+      suggestions: state.suggestions,
+      locationContext: state.locationContext,
       sourceState: state.sourceState,
       generatedAt: state.generatedAt,
       lastError: state.lastError,
