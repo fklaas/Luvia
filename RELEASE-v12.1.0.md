@@ -1,4 +1,4 @@
-# Luvia 12.1.0 · Core 3.9.0 – Schedule Intelligence
+# Luvia 12.1.1 · Core 3.9.0 – Schedule Intelligence
 
 ## Neu
 - Zentraler `LuviaScheduleIntelligence` Service für alle künftigen Reisemodule.

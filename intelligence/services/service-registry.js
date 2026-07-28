@@ -1,6 +1,6 @@
 (function(){
   'use strict';
-  const VERSION='3.3.0-service-runtime';
+  const VERSION='3.9.2-service-runtime';
   const STATES=Object.freeze({REGISTERED:'registered',INITIALIZING:'initializing',READY:'ready',WARNING:'warning',OFFLINE:'offline',FAILED:'failed',DISABLED:'disabled',STOPPED:'stopped',DESTROYED:'destroyed'});
   const records=new Map();
   const now=()=>new Date().toISOString();
@@ -11,10 +11,16 @@
     if(!def.name||typeof def.name!=='string')throw new Error('Service-Name fehlt.');
     ['init','start','stop','destroy','status','diagnostics','test'].forEach(key=>{if(def[key]!==undefined&&typeof def[key]!=='function')throw new Error(`${def.name}.${key} muss eine Funktion sein.`);});
   }
+  function normalizeDependencies(name,deps=[]){
+    const aliases={restaurants:'recommendations'};
+    return [...new Set(deps.map(dep=>aliases[dep]||dep).filter(dep=>dep&&dep!==name))];
+  }
   function register(def,options={}){
     validate(def);const name=def.name;
     if(records.has(name)&&options.replace!==true)throw new Error('Service bereits registriert: '+name);
-    const record={name,version:def.version||'1.0.0',description:def.description||'',dependencies:[...(def.dependencies||[])],optionalDependencies:[...(def.optionalDependencies||[])],service:def,state:STATES.REGISTERED,registeredAt:now(),initializedAt:null,startedAt:null,stoppedAt:null,destroyedAt:null,lastError:null,lastWarning:null,metrics:{initMs:null,startMs:null,testRuns:0,lastTestAt:null,lastTestMs:null}};
+    const normalizedDependencies=normalizeDependencies(name,def.dependencies||[]);
+    const normalizedOptionalDependencies=normalizeDependencies(name,def.optionalDependencies||[]);
+    const record={name,version:def.version||'1.0.0',description:def.description||'',dependencies:normalizedDependencies,optionalDependencies:normalizedOptionalDependencies,service:def,state:STATES.REGISTERED,registeredAt:now(),initializedAt:null,startedAt:null,stoppedAt:null,destroyedAt:null,lastError:null,lastWarning:null,metrics:{initMs:null,startMs:null,testRuns:0,lastTestAt:null,lastTestMs:null}};
     records.set(name,record);
     window.LuviaKernelLogger?.info('services','Service registriert',{name,version:record.version,dependencies:record.dependencies});
     window.LuviaKernelEvents?.emit('service.registered',{name,version:record.version,dependencies:record.dependencies});
@@ -41,7 +47,7 @@
   async function stop(name,context={}){const r=records.get(name);if(!r)return false;try{await r.service.stop?.({...context,registry:api});r.stoppedAt=now();setState(r,STATES.STOPPED);return true;}catch(error){setState(r,STATES.FAILED,{error:error.message});return false;}}
   async function destroy(name,context={}){const r=records.get(name);if(!r)return false;await stop(name,context);try{await r.service.destroy?.({...context,registry:api});r.destroyedAt=now();setState(r,STATES.DESTROYED);return true;}catch(error){setState(r,STATES.FAILED,{error:error.message});return false;}}
   async function runTest(name,context={}){const r=records.get(name);if(!r)throw new Error('Service nicht registriert: '+name);const started=performance.now();r.metrics.testRuns++;r.metrics.lastTestAt=now();try{const result=await r.service.test?.({...context,registry:api})||{ok:true,message:'Kein eigener Test erforderlich.'};r.metrics.lastTestMs=Math.round((performance.now()-started)*100)/100;window.LuviaKernelEvents?.emit('service.test.completed',{name,ok:result.ok!==false,durationMs:r.metrics.lastTestMs});return{service:name,ok:result.ok!==false,durationMs:r.metrics.lastTestMs,...result};}catch(error){r.metrics.lastTestMs=Math.round((performance.now()-started)*100)/100;window.LuviaKernelEvents?.emit('service.test.failed',{name,error:error.message});return{service:name,ok:false,durationMs:r.metrics.lastTestMs,message:error.message,error:error.stack||error.message};}}
-  async function diagnostics(name){if(name){const r=records.get(name);if(!r)return null;let detail={};try{detail=await r.service.diagnostics?.()||{};}catch(error){detail={error:error.message};}return{...publicRecord(r),detail};}const services=[];for(const r of records.values())services.push(await diagnostics(r.name));return{version:VERSION,status:'ready',count:services.length,ready:services.filter(x=>x.state===STATES.READY).length,failed:services.filter(x=>x.state===STATES.FAILED).length,startOrder:order(),services};}
+  async function diagnostics(name){if(name){const r=records.get(name);if(!r)return null;let detail={};try{detail=await r.service.diagnostics?.()||{};}catch(error){detail={error:error.message};}return{...publicRecord(r),detail};}const services=[];for(const r of records.values())services.push(await diagnostics(r.name));let startOrder=[];try{startOrder=order();}catch(error){startOrder=[...records.keys()];window.LuviaKernelLogger?.warn('services','Diagnose-Reihenfolge mit Fallback erstellt',{error:error.message});}return{version:VERSION,status:'ready',count:services.length,ready:services.filter(x=>x.state===STATES.READY).length,failed:services.filter(x=>x.state===STATES.FAILED).length,startOrder,services};}
   const api=Object.freeze({version:VERSION,states:STATES,register,get,record,has,list,order,init:initOne,startAll,stop,destroy,runTest,diagnostics});
   window.LuviaServiceRegistry=api;
 })();

@@ -1,4 +1,4 @@
-# Testplan 12.1.0
+# Testplan 12.1.1
 
 - Restaurant mit Datum und Uhrzeit planen.
 - Detailansicht öffnen: Abfahrtszeit, Wegzeit und Puffer müssen erscheinen.
