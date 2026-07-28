@@ -28,9 +28,9 @@
     "logHistory": 500
   },
   "release": {
-    "core": "4.0.0",
-    "build": "13.0.0",
-    "name": "Place Intelligence Foundation",
+    "core": "4.0.1",
+    "build": "13.0.1",
+    "name": "Unified Place UI",
     "channel": "production"
   },
   "deployment": {
@@ -40,9 +40,9 @@
     "githubPagesFallback": "https://fklaas.github.io/Luvia/"
   },
   "build": {
-    "core": "4.0.0",
-    "build": "13.0.0",
-    "name": "Place Intelligence Foundation",
+    "core": "4.0.1",
+    "build": "13.0.1",
+    "name": "Unified Place UI",
     "channel": "production",
     "releasedAt": "2026-07-28",
     "builtAt": "2026-07-28T21:00:00+02:00"
@@ -81,7 +81,7 @@
     "profileSchemaVersion": 5
   },
   "placeIntelligence": {
-    "version": "4.0.0",
+    "version": "4.0.1",
     "types": 11,
     "multiType": true,
     "restaurantCompatibility": true,
