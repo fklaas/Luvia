@@ -1,6 +1,6 @@
 (() => {
   'use strict';
-  const VERSION='4.1.1.2';
+  const VERSION='4.1.2';
   const BUILD='13.1.0';
   const now=()=>new Date().toISOString();
   const safe=(fn,fallback=null)=>{try{return fn()}catch(error){return fallback??{error:error?.message||String(error)}}};

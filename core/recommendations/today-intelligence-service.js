@@ -1,7 +1,7 @@
 (() => {
   'use strict';
 
-  const VERSION = '4.1.1.2';
+  const VERSION = '4.1.2';
   const STORAGE_PREFIX = 'luvia.today.v4';
   const listeners = new Set();
   const clone = value => value == null ? value : JSON.parse(JSON.stringify(value));
@@ -185,7 +185,7 @@
 
   function actionsFor(status, current, next, conflictsList) {
     if (status === 'empty') return [{ id: 'discover', label: 'Vorschläge ansehen', view: 'restaurants', primary: true }, { id: 'plan', label: 'Tagesplanung öffnen', view: 'restaurants' }];
-    if (status === 'current') return [{ id: 'open-current', label: 'Ort öffnen', view: current?.entityType === 'restaurant' ? 'restaurants' : 'dashboard', primary: true }, { id: 'visited', label: 'Als besucht markieren' }];
+    if (status === 'current') return [{ id: 'open-current', label: 'Ort öffnen', view: current?.entityType === 'restaurant' ? 'restaurants' : 'dashboard', primary: true }];
     if (status === 'late' || status === 'leave_now') return [{ id: 'navigate', label: 'Navigation starten', href: next?.source?.mapsUrl || null, primary: true }, { id: 'open-next', label: 'Ort öffnen', view: next?.entityType === 'restaurant' ? 'restaurants' : 'dashboard' }];
     if (conflictsList.some(item => item.severity === 'hard')) return [{ id: 'adjust', label: 'Plan anpassen', view: 'restaurants', primary: true }, { id: 'alternative', label: 'Alternative ansehen', view: 'restaurants' }];
     return [{ id: 'open-next', label: 'Nächsten Ort öffnen', view: next?.entityType === 'restaurant' ? 'restaurants' : 'dashboard', primary: true }, { id: 'plan', label: 'Tagesplanung öffnen', view: 'restaurants' }];
@@ -202,20 +202,27 @@
     const departure = departureAdvice(parts.next, now);
     const windows = freeWindows(events, now);
     const suggestionPool = [];
-    for (const freeWindow of windows) {
-      const matches = window.LuviaCrossModuleRecommendations?.fitFreeWindow?.(freeWindow, 3) || [];
+    const suggestionWindows = windows.map(freeWindow => {
+      const matches = window.LuviaCrossModuleRecommendations?.fitFreeWindow?.(freeWindow, 4) || [];
+      const unique = [];
+      const seen = new Set();
       for (const match of matches) {
-        if (!match) continue;
-        suggestionPool.push({ ...match, freeWindow });
+        const key = String(match?.id || match?.placeId || match?.providerPlaceId || match?.name || match?.title || '');
+        if (!key || seen.has(key)) continue;
+        seen.add(key);
+        const suggestion = { ...match, freeWindow };
+        unique.push(suggestion);
+        suggestionPool.push(suggestion);
       }
-    }
+      return { ...freeWindow, suggestions: unique.slice(0, 3) };
+    });
     const seenSuggestions = new Set();
     const suggestions = suggestionPool.filter(item => {
       const key = String(item.id || item.placeId || item.providerPlaceId || item.name || item.title || '');
       if (!key || seenSuggestions.has(key)) return false;
       seenSuggestions.add(key);
       return true;
-    }).slice(0, 4);
+    }).slice(0, 8);
     const status = determineStatus(parts, departure);
     const sourceState = {
       schedule: schedule.lastError ? 'degraded' : 'ready',
@@ -237,7 +244,7 @@
       completed: parts.completed,
       timeline: events.map(event => ({ ...event, icon: eventIcon(event), phase: parts.current?.id === event.id ? 'current' : parts.completed.some(item => item.id === event.id) ? 'completed' : 'upcoming' })),
       departureAdvice: departure,
-      freeWindows: windows,
+      freeWindows: suggestionWindows,
       conflicts: conflictList,
       dayLoad: dayLoad(events, conflictList),
       actions: actionsFor(status, parts.current, parts.next, conflictList),
@@ -308,6 +315,7 @@
         `Day load: ${state.dayLoad?.label || 'unknown'} (${state.dayLoad?.score || 0})`,
         `Departure: ${state.departureAdvice?.recommendedAt || 'not available'}`,
         `Free windows: ${state.freeWindows?.length || 0}`,
+        `Smart suggestions: ${state.suggestions?.length || 0}`,
         `Conflicts: ${state.conflicts?.length || 0}`
       ]
     };
