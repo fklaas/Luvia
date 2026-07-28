@@ -28,8 +28,8 @@
     "logHistory": 500
   },
   "release": {
-    "core": "4.1.3",
-    "build": "13.1.3",
+    "core": "4.1.3.1",
+    "build": "13.1.3.1",
     "name": "Live Day Companion",
     "channel": "production",
     "builtAt": "2026-07-28T15:30:00+02:00"
@@ -39,11 +39,11 @@
     "wwwHost": "www.myluvia.app",
     "stagingHost": "staging.myluvia.app",
     "githubPagesFallback": "https://fklaas.github.io/Luvia/",
-    "build": "13.1.3"
+    "build": "13.1.3.1"
   },
   "build": {
-    "core": "4.1.3",
-    "build": "13.1.3",
+    "core": "4.1.3.1",
+    "build": "13.1.3.1",
     "name": "Smart Free-Time Suggestions",
     "channel": "production",
     "releasedAt": "2026-07-28",
@@ -98,7 +98,7 @@
     "crossModuleRecommendations": "active"
   },
   "todayIntelligence": {
-    "version": "4.1.3",
+    "version": "4.1.3.1",
     "status": "active",
     "departure": true,
     "freeWindows": true,
@@ -108,7 +108,7 @@
     "globalGps": true,
     "offlineSync": true
   },
-  "coreVersion": "4.1.3",
-  "buildVersion": "13.1.3",
-  "releaseName": "Smart Free-Time Suggestions"
+  "coreVersion": "4.1.3.1",
+  "buildVersion": "13.1.3.1",
+  "releaseName": "Live Day Companion Stability & Diversity Fix"
 }

@@ -1,1 +1,1 @@
-(() => {'use strict';window.LuviaKernelVersion=Object.freeze({core: '4.1.3',build: '13.1.3',name: 'Live Day Companion',channel:'production',builtAt:'2026-07-28T15:30:00+02:00'});window.LuviaCoreVersion=window.LuviaKernelVersion;})();
+(() => {'use strict';window.LuviaKernelVersion=Object.freeze({core: '4.1.3.1',build: '13.1.3.1',name: 'Live Day Companion',channel:'production',builtAt:'2026-07-28T15:30:00+02:00'});window.LuviaCoreVersion=window.LuviaKernelVersion;})();
