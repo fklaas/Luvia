@@ -1,6 +1,6 @@
 (() => {
   'use strict';
-  const VERSION='4.1.3.4', STORAGE='luvia.live-day.v1';
+  const VERSION='4.1.3.5', STORAGE='luvia.live-day.v1';
   const listeners=new Set(), clone=v=>v==null?v:JSON.parse(JSON.stringify(v));
   const nowIso=()=>new Date().toISOString();
   const initial=()=>({version:VERSION,status:'day_open',generatedAt:null,lastStableAt:null,today:null,focus:null,gps:null,eta:null,risk:null,freeTime:null,rejectedSuggestions:[],sourceState:{today:'idle',gps:'inactive',online:navigator.onLine},lastError:null});

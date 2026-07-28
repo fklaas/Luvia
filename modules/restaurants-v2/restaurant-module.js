@@ -1,7 +1,7 @@
 (function(){
 'use strict';
 const MODULE_ID='restaurants';
-const MODULE_VERSION='4.1.3.4';
+const MODULE_VERSION='4.1.3.5';
 const DATA_URL='./modules/restaurants-v2/default.json';
 const DEMO_KEY='luviaRestaurantsV2Demo:';
 const DB_NAME='luviaRestaurantsV2Assets';
@@ -170,5 +170,5 @@ async function openPlaceFromExternal(payload={}){
 }
 window.addEventListener('luvia:open-place',event=>{if(event.detail?.type==='restaurant')openPlaceFromExternal(event.detail).catch(console.error)});
 window.LuviaRestaurantsV2={getData:trip=>modelFor(trip),openPlace:openPlaceFromExternal,openEditor:()=>{const i=window.LuviaModules?.instances?.get(MODULE_ID);if(i)editor(i)},resetDemo:trip=>localStorage.removeItem(demoKey(trip))};
-window.LuviaModules?.register({id:MODULE_ID,order:70,group:'Planung',icon:'🍽️',title:'Restaurants & Reservierungen',description:'Restaurant-Lebenszyklus mit persönlichem Workspace, Realtime-Synchronisation und Reisebuch-Vorbereitung.',selectors:['#restaurants-module'],version:'4.1.3.4',defaults:{},schema:{title:'Restaurants V4.1.3.4 · Stable Schedule Editing',source:'modules/restaurants-v2/default.json',independent:true,generated:['destination context','weekday','maps search','countdown','discovery searches'],editable:['lifecycle','planning','reservation','preferences','rating','memory','travel book'],repeatable:'entries'},render:renderAsync,mount,unmount});
+window.LuviaModules?.register({id:MODULE_ID,order:70,group:'Planung',icon:'🍽️',title:'Restaurants & Reservierungen',description:'Restaurant-Lebenszyklus mit persönlichem Workspace, Realtime-Synchronisation und Reisebuch-Vorbereitung.',selectors:['#restaurants-module'],version:'4.1.3.5',defaults:{},schema:{title:'Restaurants V4.1.3.5 · Stable Schedule Editing',source:'modules/restaurants-v2/default.json',independent:true,generated:['destination context','weekday','maps search','countdown','discovery searches'],editable:['lifecycle','planning','reservation','preferences','rating','memory','travel book'],repeatable:'entries'},render:renderAsync,mount,unmount});
 })();
