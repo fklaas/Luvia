@@ -1,1 +1,1 @@
-(() => {'use strict';window.LuviaKernelVersion=Object.freeze({core:'4.1.0',build:'13.1.0',name:'Today Intelligence',channel:'production',builtAt:'2026-07-28T12:30:00+02:00'});window.LuviaCoreVersion=window.LuviaKernelVersion;})();
+(() => {'use strict';window.LuviaKernelVersion=Object.freeze({core:'4.1.0.1',build:'13.1.0.1',name:'Today Place Navigation & Smooth Realtime',channel:'production',builtAt:'2026-07-28T13:15:00+02:00'});window.LuviaCoreVersion=window.LuviaKernelVersion;})();
