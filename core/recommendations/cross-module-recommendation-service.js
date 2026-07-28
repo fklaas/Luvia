@@ -1,39 +1,18 @@
 (() => {
-  'use strict';
-  const VERSION='4.1.0.2';
-  const clone=v=>v==null?v:JSON.parse(JSON.stringify(v));
-  const state={status:'ready',tripId:null,slots:{forYou:[],rightNow:[],nearby:[],onYourWay:[],next:[],alternative:[]},lastUpdatedAt:null,lastError:null};
-  const tripId=()=>String(window.LuviaTripContext?.getActiveTrip?.()?.tripId||window.LuviaTripStore?.snapshot?.()?.activeTripId||'');
-  function score(place){return Number(place?.intelligence?.score||place?.matchScore||0)}
-  function distance(place){return Number.isFinite(Number(place?.distanceMeters))?Number(place.distanceMeters):Infinity}
-  function build(restaurants=[]){
-    const ranked=[...restaurants].sort((a,b)=>score(b)-score(a));
-    const open=ranked.filter(x=>x.openNow!==false);
-    const nearby=[...open].sort((a,b)=>distance(a)-distance(b));
-    const schedule=window.LuviaScheduleIntelligence?.snapshot?.()||{};
-    state.slots={
-      forYou:ranked.slice(0,6),
-      rightNow:open.slice(0,6),
-      nearby:nearby.slice(0,6),
-      onYourWay:nearby.filter(x=>distance(x)<5000).slice(0,6),
-      next:schedule.next?ranked.filter(x=>String(x.id)!==String(schedule.next.id)).slice(0,4):ranked.slice(0,4),
-      alternative:ranked.slice(1,5)
-    };
-    state.lastUpdatedAt=new Date().toISOString();state.lastError=null;
-    window.dispatchEvent(new CustomEvent('luvia:cross-module-recommendations-changed',{detail:snapshot()}));
-    return snapshot();
-  }
-  async function refresh(options={}){
-    const id=String(options.tripId||tripId());state.tripId=id;
-    try{
-      const existing=window.LuviaRestaurantIntelligence?.snapshot?.()?.restaurants||[];
-      if(existing.length)return build(existing);
-      if(id&&window.LuviaRestaurants?.list){const r=await window.LuviaRestaurants.list({tripId:id});return build((r?.data?.entities||[]).map(window.LuviaRestaurants.entityToEntry).map(x=>window.LuviaRestaurantIntelligence?.enrich?.(x,[])||x));}
-      return build([]);
-    }catch(error){state.lastError=error?.message||String(error);return snapshot()}
-  }
-  function getSlot(name){return clone(state.slots[name]||[])}
-  function snapshot(){return clone(state)}
-  window.LuviaCrossModuleRecommendations=Object.freeze({version:VERSION,refresh,getSlot,snapshot,diagnostics:snapshot});
-  ['luvia:restaurant-intelligence-changed','luvia:schedule-intelligence-changed','luvia:restaurants-v2-updated','luvia:travel-context-changed'].forEach(name=>window.addEventListener(name,()=>refresh().catch(()=>{})));
+'use strict';
+const VERSION='4.1.1',KEY='luvia.cross-module.v4';
+const clone=v=>v==null?v:JSON.parse(JSON.stringify(v));
+const state={status:'ready',tripId:null,slots:{forYou:[],rightNow:[],nearby:[],onYourWay:[],next:[],alternative:[]},candidates:[],lastUpdatedAt:null,lastError:null,offline:false};
+const tripId=()=>String(window.LuviaTripContext?.getActiveTrip?.()?.tripId||window.LuviaTripStore?.snapshot?.()?.activeTripId||'');
+const score=p=>Number(p?.intelligence?.score??p?.matchScore??p?.metadata?.matchScore??0),dist=p=>Number.isFinite(Number(p?.distanceMeters))?Number(p.distanceMeters):Infinity;
+function normalizedPlaces(){const id=tripId();return (window.LuviaPlaceCore?.getPlaces?.({tripId:id})||[]).map(p=>({...p,matchScore:score(p),distanceMeters:Number(p.distanceMeters??p.metadata?.distanceMeters),openNow:p.openNow??p.metadata?.openNow,minimumVisitMinutes:Number(p.metadata?.minimumVisitMinutes||p.metadata?.recommendedDurationMinutes||45)}))}
+function rank(list){return [...list].sort((a,b)=>score(b)-score(a)||dist(a)-dist(b))}
+function build(input=[]){const all=rank(input.length?input:normalizedPlaces()).filter(p=>p.lifecycle!=='visited'&&p.lifecycle!=='memory');const open=all.filter(p=>p.openNow!==false),near=rank(open).sort((a,b)=>dist(a)-dist(b));const schedule=window.LuviaScheduleIntelligence?.snapshot?.()||{},last=window.LuviaPresenceVisitCore?.diagnostics?.()?.lastPosition;
+ state.candidates=all;state.slots={forYou:all.slice(0,8),rightNow:open.slice(0,8),nearby:near.slice(0,8),onYourWay:near.filter(p=>dist(p)<5000).slice(0,8),next:schedule.next?all.filter(p=>String(p.id)!==String(schedule.next.id)).slice(0,6):all.slice(0,6),alternative:all.slice(1,7)};state.lastUpdatedAt=new Date().toISOString();state.lastError=null;state.offline=!navigator.onLine;try{localStorage.setItem(KEY,JSON.stringify(state))}catch{};window.dispatchEvent(new CustomEvent('luvia:cross-module-recommendations-changed',{detail:snapshot()}));return snapshot()}
+async function hydrateRestaurants(){const id=tripId(),existing=window.LuviaRestaurantIntelligence?.snapshot?.()?.restaurants||[];if(existing.length)return existing;if(id&&window.LuviaRestaurants?.list){const r=await window.LuviaRestaurants.list({tripId:id});return (r?.data?.entities||[]).map(window.LuviaRestaurants.entityToEntry).map(x=>window.LuviaRestaurantIntelligence?.enrich?.(x,[])||x)}return[]}
+async function refresh(options={}){state.tripId=String(options.tripId||tripId());try{let places=normalizedPlaces();const restaurants=await hydrateRestaurants();const ids=new Set(places.map(p=>String(p.id)));for(const r of restaurants){const p=window.LuviaPlaceCore?.normalizePlace?.(r,{type:'restaurant'})||r;if(!ids.has(String(p.id))){places.push(p);ids.add(String(p.id))}}return build(places)}catch(e){state.lastError=e?.message||String(e);try{const cached=JSON.parse(localStorage.getItem(KEY)||'null');if(cached)Object.assign(state,cached,{offline:true,status:'cached'})}catch{}return snapshot()}}
+function fitFreeWindow(windowInfo,limit=4){const mins=Number(windowInfo?.minutes||0);return rank(state.candidates.filter(p=>p.openNow!==false&&Number(p.minimumVisitMinutes||45)+(Number.isFinite(dist(p))?Math.ceil(dist(p)/75):10)+10<=mins)).slice(0,limit).map(p=>({...clone(p),fit:{windowMinutes:mins,visitMinutes:Number(p.minimumVisitMinutes||45),reason:`Passt in euer freies Zeitfenster von ${mins} Minuten.`}}))}
+function getSlot(name){return clone(state.slots[name]||[])}function snapshot(){return clone(state)}
+window.LuviaCrossModuleRecommendations=Object.freeze({version:VERSION,refresh,build,getSlot,fitFreeWindow,snapshot,diagnostics:snapshot});
+['luvia:restaurant-intelligence-changed','luvia:schedule-intelligence-changed','luvia:restaurants-v2-updated','luvia:travel-context-changed','luvia:global-location-updated','luvia:place-visit-changed','online'].forEach(n=>window.addEventListener(n,()=>refresh().catch(()=>{})));window.addEventListener('offline',()=>{state.offline=true});
 })();

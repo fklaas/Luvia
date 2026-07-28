@@ -1,7 +1,7 @@
 (() => {
   'use strict';
 
-  const VERSION = '4.1.0.2';
+  const VERSION = '4.1.1';
   const STORAGE_PREFIX = 'luvia.today.v4';
   const listeners = new Set();
   const clone = value => value == null ? value : JSON.parse(JSON.stringify(value));
@@ -29,6 +29,8 @@
     conflicts: [],
     dayLoad: { level: 'very_relaxed', score: 0, reasons: [] },
     actions: [],
+    suggestions: [],
+    locationContext: null,
     sourceState: { schedule: 'idle', places: 'ready', presence: 'inactive', realtime: 'ready', offline: !navigator.onLine },
     lastError: null
   });
@@ -283,7 +285,7 @@
     getDepartureAdvice: () => clone(state.departureAdvice)
   });
 
-  ['luvia:schedule-intelligence-changed', 'luvia:timeline-event-created', 'luvia:place-visit-changed', 'luvia:trip-changed', 'online', 'offline']
+  ['luvia:schedule-intelligence-changed','luvia:cross-module-recommendations-changed','luvia:global-location-updated', 'luvia:timeline-event-created', 'luvia:place-visit-changed', 'luvia:trip-changed', 'online', 'offline']
     .forEach(name => window.addEventListener(name, () => apply(build({ refreshSchedule: false }))));
   setInterval(() => apply(build({ refreshSchedule: false })), 60000);
 })();

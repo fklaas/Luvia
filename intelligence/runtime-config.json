@@ -28,25 +28,26 @@
     "logHistory": 500
   },
   "release": {
-    "core": "4.1.0.2",
-    "build": "13.1.0.2",
-    "name": "Today Intelligence",
+    "core": "4.1.1",
+    "build": "13.1.1",
+    "name": "Global Context Intelligence",
     "channel": "production",
-    "builtAt": "2026-07-28T12:30:00+02:00"
+    "builtAt": "2026-07-28T14:00:00+02:00"
   },
   "deployment": {
     "canonicalHost": "myluvia.app",
     "wwwHost": "www.myluvia.app",
     "stagingHost": "staging.myluvia.app",
-    "githubPagesFallback": "https://fklaas.github.io/Luvia/"
+    "githubPagesFallback": "https://fklaas.github.io/Luvia/",
+    "build": "13.1.1"
   },
   "build": {
-    "core": "4.1.0.2",
-    "build": "13.1.0.2",
-    "name": "Today Intelligence",
+    "core": "4.1.1",
+    "build": "13.1.1",
+    "name": "Global Context Intelligence",
     "channel": "production",
     "releasedAt": "2026-07-28",
-    "builtAt": "2026-07-28T12:30:00+02:00"
+    "builtAt": "2026-07-28T14:00:00+02:00"
   },
   "backend": {
     "functionName": "luvia-gateway",
@@ -97,11 +98,14 @@
     "crossModuleRecommendations": "active"
   },
   "todayIntelligence": {
-    "version": "4.1.0.2",
+    "version": "4.1.1",
     "status": "active",
     "departure": true,
     "freeWindows": true,
     "conflicts": true,
-    "dashboard": true
+    "dashboard": true,
+    "recommendationIntegration": true,
+    "globalGps": true,
+    "offlineSync": true
   }
 }

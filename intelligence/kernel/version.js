@@ -1,1 +1,1 @@
-(() => {'use strict';window.LuviaKernelVersion=Object.freeze({core:'4.1.0.2',build:'13.1.0.2',name:'Today Navigation & Restaurant History',channel:'production',builtAt:'2026-07-28T13:15:00+02:00'});window.LuviaCoreVersion=window.LuviaKernelVersion;})();
+(() => {'use strict';window.LuviaKernelVersion=Object.freeze({core: '4.1.1',build: '13.1.1',name: 'Global Context Intelligence',channel:'production',builtAt:'2026-07-28T13:15:00+02:00'});window.LuviaCoreVersion=window.LuviaKernelVersion;})();
