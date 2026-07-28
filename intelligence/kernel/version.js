@@ -1,1 +1,1 @@
-(() => {'use strict';window.LuviaKernelVersion=Object.freeze({core:'4.3.0',build:'13.3.0',name:'Guided Journey Entry',channel:'production',builtAt:'2026-07-28T21:30:00+02:00'});window.LuviaCoreVersion=window.LuviaKernelVersion;})();
+(() => {'use strict';window.LuviaKernelVersion=Object.freeze({core:'4.3.0.1',build:'13.3.0.1',name:'Guided Journey Canvas Refinement',channel:'production',builtAt:'2026-07-28T22:15:00+02:00'});window.LuviaCoreVersion=window.LuviaKernelVersion;})();

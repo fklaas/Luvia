@@ -1,49 +1,230 @@
 (() => {
   'use strict';
-  const state={idea:null,dialog:null};
-  const esc=value=>String(value??'').replace(/[&<>"']/g,char=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[char]));
-  const ideas=[
-    ['place','An einen bestimmten Ort'],
-    ['weekend','An ein freies Wochenende'],
-    ['sun','An Sonne und Meer'],
-    ['family','An eine Familienreise'],
-    ['open','Ich weiß es noch nicht genau']
+
+  const VERSION = '13.3.0.1';
+  const state = { slide: 'home', idea: null, direction: 1 };
+  const slides = ['home', 'idea', 'auth', 'invite'];
+  const ideas = [
+    ['place', 'Ein bestimmter Ort', '📍'],
+    ['weekend', 'Ein freies Wochenende', '✨'],
+    ['sun', 'Sonne und Meer', '☀️'],
+    ['family', 'Zeit mit der Familie', '♡'],
+    ['open', 'Noch ganz offen', '⋯']
   ];
-  function page(){return `<main class="lv-entry" data-entry-root>
-    <nav class="lv-entry-nav" aria-label="Hauptnavigation">
-      <a class="lv-entry-brand" href="/" aria-label="Luvia Startseite"><img src="luvia-logo.svg" alt=""><span>Luvia</span></a>
-      <div class="lv-entry-navlinks"><button class="lv-entry-navbutton" data-entry-scroll="story">So funktioniert es</button><button class="lv-entry-navbutton" data-entry-invite>Einladung</button><button class="lv-entry-navbutton is-primary" data-entry-login>Anmelden</button></div>
-    </nav>
-    <section class="lv-entry-hero" aria-labelledby="entry-title">
-      <span class="lv-thought t1">Vielleicht Paris?</span><span class="lv-thought t2">Ein Wochenende am Meer</span><span class="lv-thought t3">Nur wir drei</span><span class="lv-thought t4">Momente festhalten</span><span class="lv-thought t5">Schön essen gehen</span><span class="lv-thought t6">Unser nächstes Abenteuer</span>
-      <div class="lv-entry-hero-copy"><span class="lv-entry-eyebrow">Von der ersten Idee bis zur Erinnerung</span><h1 id="entry-title">Wohin führt euch eure nächste Geschichte?</h1><p class="lv-entry-lead">Luvia begleitet euch von der ersten Reiseidee über die gemeinsame Planung bis zu den Erinnerungen, die bleiben.</p><div class="lv-entry-actions"><button class="lv-entry-cta is-main" data-entry-start>Reise beginnen</button><button class="lv-entry-cta is-soft" data-entry-invite>Ich wurde eingeladen</button></div><p class="lv-entry-login-note">Bereits bei Luvia? <button class="lv-entry-inline" data-entry-login>Anmelden</button></p></div>
-      <span class="lv-entry-scroll">Entdecken</span>
-    </section>
-    <section class="lv-entry-section" id="story"><div class="lv-entry-section-head"><span class="lv-entry-kicker">Eine Reise entsteht nicht auf einmal</span><h2>Erst ein Gedanke. Dann euer Plan. Später eure Geschichte.</h2><p>Luvia lässt euch klein anfangen und wächst mit jeder Entscheidung. Ohne komplizierte Formulare und ohne dass schon alles feststehen muss.</p></div><div class="lv-story-grid"><article class="lv-story-card"><span class="lv-story-number">01</span><h3>Eine Idee festhalten</h3><p>Vielleicht ein Ort, ein freies Wochenende oder nur das Gefühl, gemeinsam raus zu wollen.</p></article><article class="lv-story-card"><span class="lv-story-number">02</span><h3>Gemeinsam planen</h3><p>Unterkunft, Lieblingsorte, Wege und kleine Wünsche finden nach und nach ihren Platz.</p></article><article class="lv-story-card"><span class="lv-story-number">03</span><h3>Erinnerungen bewahren</h3><p>Aus Fotos, Orten und besonderen Momenten entsteht eure persönliche Reisegeschichte.</p></article></div></section>
-    <section class="lv-entry-section"><div class="lv-entry-section-head"><span class="lv-entry-kicker">Ein Begleiter für die ganze Reise</span><h2>Genau der nächste Schritt. Nicht alles auf einmal.</h2><p>Luvia führt euch sanft durch die Reise, bleibt aber offen für euren ganz eigenen Ablauf.</p></div><div class="lv-journey-line"><div class="lv-journey-step"><span class="lv-journey-dot"></span><strong>Idee</strong><small>Einen Gedanken festhalten</small></div><div class="lv-journey-step"><span class="lv-journey-dot"></span><strong>Planen</strong><small>Entscheidungen gemeinsam treffen</small></div><div class="lv-journey-step"><span class="lv-journey-dot"></span><strong>Entdecken</strong><small>Passende Orte und Möglichkeiten finden</small></div><div class="lv-journey-step"><span class="lv-journey-dot"></span><strong>Erleben</strong><small>Den Tag entspannt begleiten lassen</small></div><div class="lv-journey-step"><span class="lv-journey-dot"></span><strong>Erinnern</strong><small>Die Geschichte weiterleben lassen</small></div></div></section>
-    <section class="lv-entry-final"><span class="lv-entry-kicker">Eure Reise wartet</span><h2>Vielleicht beginnt eure nächste Geschichte genau hier.</h2><p class="lv-entry-lead">Noch ist es nur ein Gedanke. Lass uns etwas daraus machen.</p><div class="lv-entry-actions"><button class="lv-entry-cta is-main" data-entry-start>Neue Reise beginnen</button><button class="lv-entry-cta is-soft" data-entry-login>Bei Luvia anmelden</button></div></section>
-    <footer class="lv-entry-footer"><strong>Luvia</strong><span>Gemeinsam reisen. Für immer erinnern.</span><span>Build 13.3.0</span></footer>
-    <div data-entry-dialog></div>
-  </main>`}
-  function ideaDialog(){return `<div class="lv-entry-dialog" role="dialog" aria-modal="true" aria-labelledby="flow-title"><section class="lv-entry-panel"><button class="lv-entry-close" data-entry-close aria-label="Schließen">×</button><div class="lv-flow-head"><small>Der erste Gedanke</small><h2 id="flow-title">Woran denkst du gerade?</h2><p>Du musst noch nichts fertig geplant haben. Wähle einfach das, was deiner Reiseidee gerade am nächsten kommt.</p></div><div class="lv-thought-options">${ideas.map(([value,label])=>`<button class="lv-thought-option" data-entry-idea="${value}" data-label="${esc(label)}">${esc(label)}</button>`).join('')}</div><form class="lv-flow-write" data-entry-free><input name="idea" maxlength="120" placeholder="Oder schreib deinen Gedanken auf …" aria-label="Eigene Reiseidee"><button>Festhalten</button></form></section></div>`}
-  function authDialog(mode='register'){const idea=state.idea?.label;return `<div class="lv-entry-dialog" role="dialog" aria-modal="true" aria-labelledby="auth-title"><section class="lv-entry-panel"><button class="lv-entry-close" data-entry-close aria-label="Schließen">×</button>${mode==='register'?'<button class="lv-entry-back" data-entry-back>← Zurück zum Gedanken</button>':''}<div class="lv-flow-head"><small>${mode==='register'?'Deine Idee festhalten':'Willkommen zurück'}</small><h2 id="auth-title">${mode==='register'?'Lass uns daraus eure Reise machen.':'Schön, dass du wieder da bist.'}</h2><p>${mode==='register'?'Erstelle jetzt dein Konto. Im nächsten Schritt wird aus deinem Gedanken eine echte Luvia-Reise.':'Melde dich an und setze eure Reise dort fort, wo ihr aufgehört habt.'}</p></div>${idea&&mode==='register'?`<div class="lv-flow-summary"><span>${esc(idea)}</span><small>bleibt für diesen Einstieg vorgemerkt</small></div>`:''}<div class="lv-auth-entry" data-entry-auth></div></section></div>`}
-  function setDialog(root,html){const host=root.querySelector('[data-entry-dialog]');if(!host)return;host.innerHTML=html||'';if(html){document.body.style.overflow='hidden';requestAnimationFrame(()=>host.querySelector('button,input')?.focus())}else document.body.style.overflow=''}
-  function openIdea(root){state.dialog='idea';setDialog(root,ideaDialog())}
-  function openAuth(root,mode){state.dialog=mode;setDialog(root,authDialog(mode));window.ParisAuthUI?.renderAuthForm?.(root.querySelector('[data-entry-auth]'),mode)}
-  function selectIdea(root,value,label){state.idea={value,label,createdAt:new Date().toISOString()};window.LuviaGuidedJourneyEntry?.emit?.();openAuth(root,'register')}
-  function render(root){root.innerHTML=page();root.dataset.entryMounted='true';if(root.dataset.entryBound==='true')return;root.dataset.entryBound='true';root.addEventListener('click',event=>{
-      const target=event.target.closest('button,a');if(!target)return;
-      if(target.matches('[data-entry-start]')){event.preventDefault();openIdea(root)}
-      else if(target.matches('[data-entry-login]')){event.preventDefault();openAuth(root,'login')}
-      else if(target.matches('[data-entry-invite]')){event.preventDefault();window.LuviaJoinFlow?.openCodeEntry?.()}
-      else if(target.matches('[data-entry-close]')){event.preventDefault();state.dialog=null;setDialog(root,'')}
-      else if(target.matches('[data-entry-back]')){event.preventDefault();openIdea(root)}
-      else if(target.matches('[data-entry-idea]')){event.preventDefault();selectIdea(root,target.dataset.entryIdea,target.dataset.label)}
-      else if(target.matches('[data-entry-scroll]')){event.preventDefault();document.getElementById(target.dataset.entryScroll)?.scrollIntoView({behavior:'smooth'})}
-    });
-    root.addEventListener('submit',event=>{const form=event.target.closest('[data-entry-free]');if(!form)return;event.preventDefault();const value=String(new FormData(form).get('idea')||'').trim();if(value)selectIdea(root,'custom',value);else form.querySelector('input')?.focus()});
+
+  const esc = value => String(value ?? '').replace(/[&<>"']/g, char => ({
+    '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'
+  }[char]));
+
+  function brand() {
+    return `<a class="lv-canvas-brand" href="/" aria-label="Luvia Startseite">
+      <img src="luvia-logo.svg" alt="">
+      <span><strong>Luvia</strong><small>gemeinsam reisen</small></span>
+    </a>`;
   }
-  function emit(){window.dispatchEvent(new CustomEvent('luvia:guided-entry-idea',{detail:snapshot()}))}
-  function snapshot(){return Object.freeze({version:'13.3.0',idea:state.idea?{...state.idea}:null,dialog:state.dialog,persistence:'memory-until-auth'})}
-  window.LuviaGuidedJourneyEntry=Object.freeze({version:'13.3.0',render,openIdea,openAuth,snapshot,emit});
+
+  function ambient() {
+    return `<div class="lv-ambient" aria-hidden="true">
+      <span class="lv-orb lv-orb-a"></span><span class="lv-orb lv-orb-b"></span><span class="lv-orb lv-orb-c"></span>
+      <span class="lv-spark lv-spark-a">✦</span><span class="lv-spark lv-spark-b">✧</span><span class="lv-spark lv-spark-c">✦</span>
+    </div>`;
+  }
+
+  function homeSlide() {
+    return `<section class="lv-canvas-slide lv-home-slide" data-slide="home" aria-labelledby="entry-title">
+      ${ambient()}
+      <header class="lv-canvas-header">${brand()}<button class="lv-top-login" data-go="auth" data-auth-mode="login">Anmelden</button></header>
+      <div class="lv-home-stage">
+        <div class="lv-memory-cloud cloud-paris"><span class="cloud-icon">⌁</span><strong>Vielleicht Paris?</strong><small>ein erster Gedanke</small></div>
+        <div class="lv-memory-cloud cloud-sea"><span class="cloud-icon">☀</span><strong>Ein Wochenende am Meer</strong></div>
+        <div class="lv-memory-cloud cloud-us"><span class="cloud-icon">♡</span><strong>Nur wir</strong><small>und ganz viel Zeit</small></div>
+        <div class="lv-memory-cloud cloud-moments"><span class="cloud-icon">✦</span><strong>Momente, die bleiben</strong></div>
+        <div class="lv-home-copy">
+          <span class="lv-kicker">Eure Reise beginnt hier</span>
+          <h1 id="entry-title">Aus einer Idee wird<br><em>eure Geschichte.</em></h1>
+          <p>Luvia begleitet euch vom ersten Gedanken über die gemeinsame Planung bis zu all den Erinnerungen, die bleiben.</p>
+          <div class="lv-home-actions">
+            <button class="lv-primary-action" data-go="idea"><span>Reise beginnen</span><b aria-hidden="true">→</b></button>
+            <button class="lv-quiet-action" data-go="invite">Ich wurde eingeladen</button>
+          </div>
+        </div>
+        <div class="lv-story-ribbon" aria-label="Luvia begleitet den gesamten Reiseweg">
+          <span><b>01</b> Idee</span><i></i><span><b>02</b> Planen</span><i></i><span><b>03</b> Erleben</span><i></i><span><b>04</b> Erinnern</span>
+        </div>
+      </div>
+      <footer class="lv-canvas-footer"><span>myluvia.app</span><span>Für Reisen, die sich nach euch anfühlen.</span></footer>
+    </section>`;
+  }
+
+  function ideaSlide() {
+    return `<section class="lv-canvas-slide lv-flow-slide" data-slide="idea" aria-labelledby="idea-title">
+      ${ambient()}
+      <header class="lv-canvas-header">${brand()}<button class="lv-icon-button" data-go="home" aria-label="Zurück zur Startseite">×</button></header>
+      <div class="lv-flow-layout">
+        <aside class="lv-flow-aside">
+          <span class="lv-step-mark">01</span>
+          <p>Noch muss nichts feststehen.</p>
+          <div class="lv-route-sketch" aria-hidden="true"><span></span><i></i><span></span></div>
+        </aside>
+        <div class="lv-flow-main">
+          <span class="lv-kicker">Der erste Gedanke</span>
+          <h2 id="idea-title">Woran denkst du<br>gerade?</h2>
+          <p class="lv-flow-intro">Wähle einfach das Gefühl, das deiner Reiseidee gerade am nächsten kommt.</p>
+          <div class="lv-idea-clouds">
+            ${ideas.map(([value, label, icon], index) => `<button class="lv-idea-cloud cloud-${index + 1}" data-idea="${value}" data-label="${esc(label)}"><span>${icon}</span><strong>${esc(label)}</strong></button>`).join('')}
+          </div>
+          <form class="lv-free-thought" data-free-idea>
+            <label for="lvIdeaInput">Oder schreib deinen Gedanken auf</label>
+            <div><input id="lvIdeaInput" name="idea" maxlength="120" autocomplete="off" placeholder="Zum Beispiel: Im Herbst nach Amsterdam …"><button aria-label="Gedanken übernehmen">→</button></div>
+          </form>
+        </div>
+      </div>
+      <button class="lv-back-link" data-go="home">← Zurück</button>
+    </section>`;
+  }
+
+  function authSlide() {
+    const register = state.idea !== null;
+    return `<section class="lv-canvas-slide lv-auth-slide" data-slide="auth" aria-labelledby="auth-title">
+      ${ambient()}
+      <header class="lv-canvas-header">${brand()}<button class="lv-icon-button" data-go="home" aria-label="Zurück zur Startseite">×</button></header>
+      <div class="lv-auth-layout">
+        <div class="lv-auth-story">
+          <span class="lv-step-mark">${register ? '02' : 'Willkommen'}</span>
+          <span class="lv-kicker">${register ? 'Deine Idee festhalten' : 'Schön, dass du wieder da bist'}</span>
+          <h2 id="auth-title">${register ? 'Lass uns daraus<br><em>eine Reise machen.</em>' : 'Eure Reise<br><em>wartet schon.</em>'}</h2>
+          <p>${register ? 'Erstelle dein Konto. Dein erster Gedanke bleibt während dieses Einstiegs bei dir und wird im nächsten Schritt zu einer echten Luvia-Reise.' : 'Melde dich an und setze genau dort weiter, wo eure Geschichte zuletzt stehen geblieben ist.'}</p>
+          ${register ? `<div class="lv-idea-keepsake"><span>✦</span><div><small>Dein erster Gedanke</small><strong>${esc(state.idea.label)}</strong></div></div>` : `<button class="lv-switch-mode" data-go="idea">Noch keine Reise? Jetzt beginnen →</button>`}
+        </div>
+        <div class="lv-auth-card"><div class="lv-auth-host" data-entry-auth></div></div>
+      </div>
+      <button class="lv-back-link" data-go="${register ? 'idea' : 'home'}">← Zurück</button>
+    </section>`;
+  }
+
+  function inviteSlide() {
+    return `<section class="lv-canvas-slide lv-invite-slide" data-slide="invite" aria-labelledby="invite-title">
+      ${ambient()}
+      <header class="lv-canvas-header">${brand()}<button class="lv-icon-button" data-go="home" aria-label="Zurück zur Startseite">×</button></header>
+      <div class="lv-invite-layout">
+        <div class="lv-invite-visual" aria-hidden="true"><div class="lv-ticket"><span>LU VIA</span><strong>YOU'RE INVITED</strong><small>Gemeinsam beginnt es schöner.</small><i></i></div></div>
+        <div class="lv-invite-copy">
+          <span class="lv-kicker">Du wurdest eingeladen</span>
+          <h2 id="invite-title">Eine Reise<br>wartet auf dich.</h2>
+          <p>Gib den Einladungscode ein. Luvia bringt dich anschließend direkt zu eurer gemeinsamen Reise.</p>
+          <form class="lv-invite-form" data-invite-form>
+            <label for="lvInviteCode">Einladungscode</label>
+            <div><input id="lvInviteCode" name="code" maxlength="12" autocomplete="one-time-code" inputmode="text" placeholder="LUVIA-2026"><button>Weiter →</button></div>
+            <small data-invite-message></small>
+          </form>
+          <button class="lv-switch-mode" data-go="auth" data-auth-mode="login">Stattdessen anmelden</button>
+        </div>
+      </div>
+      <button class="lv-back-link" data-go="home">← Zurück</button>
+    </section>`;
+  }
+
+  function page() {
+    return `<main class="lv-entry-canvas" data-entry-root>
+      <div class="lv-canvas-track" data-canvas-track>${homeSlide()}${ideaSlide()}${authSlide()}${inviteSlide()}</div>
+      <div class="lv-slide-progress" aria-hidden="true"><span></span><span></span><span></span></div>
+    </main>`;
+  }
+
+  function currentIndex() { return Math.max(0, slides.indexOf(state.slide)); }
+
+  function refreshAuth(root) {
+    const host = root.querySelector('[data-slide="auth"] [data-entry-auth]');
+    if (!host) return;
+    host.innerHTML = '';
+    window.ParisAuthUI?.renderAuthForm?.(host, state.idea ? 'register' : 'login');
+  }
+
+  function update(root, nextSlide, options = {}) {
+    const previous = currentIndex();
+    const next = Math.max(0, slides.indexOf(nextSlide));
+    state.direction = next >= previous ? 1 : -1;
+    state.slide = nextSlide;
+    if (nextSlide === 'auth' && options.mode === 'login') state.idea = null;
+
+    root.querySelectorAll('[data-slide]').forEach((slide, index) => {
+      slide.classList.toggle('is-active', index === next);
+      slide.setAttribute('aria-hidden', index === next ? 'false' : 'true');
+    });
+    root.querySelector('[data-canvas-track]')?.style.setProperty('--slide-index', String(next));
+    root.dataset.activeSlide = nextSlide;
+    root.dataset.direction = state.direction > 0 ? 'forward' : 'back';
+    root.querySelectorAll('.lv-slide-progress span').forEach((dot, index) => dot.classList.toggle('is-on', index <= Math.min(next, 2)));
+    if (nextSlide === 'auth') requestAnimationFrame(() => refreshAuth(root));
+    requestAnimationFrame(() => root.querySelector(`[data-slide="${nextSlide}"] h1, [data-slide="${nextSlide}"] h2, [data-slide="${nextSlide}"] input, [data-slide="${nextSlide}"] button`)?.focus?.({ preventScroll: true }));
+  }
+
+  function selectIdea(root, value, label) {
+    state.idea = { value, label, createdAt: new Date().toISOString() };
+    emit();
+    update(root, 'auth');
+  }
+
+  function handleInvite(form) {
+    const message = form.querySelector('[data-invite-message]');
+    const code = String(new FormData(form).get('code') || '').trim().toUpperCase().replace(/[^A-Z0-9]/g, '').slice(0, 12);
+    if (!code) {
+      if (message) message.textContent = 'Bitte gib deinen Einladungscode ein.';
+      form.querySelector('input')?.focus();
+      return;
+    }
+    const url = new URL(location.href);
+    url.searchParams.set('join', code);
+    location.assign(url.toString());
+  }
+
+  function render(root) {
+    root.innerHTML = page();
+    root.dataset.entryMounted = 'true';
+    document.documentElement.classList.add('lv-entry-active');
+    document.body.classList.add('lv-entry-active');
+    update(root, 'home');
+
+    if (root.dataset.entryBound === 'true') return;
+    root.dataset.entryBound = 'true';
+    root.addEventListener('click', event => {
+      const target = event.target.closest('button,a');
+      if (!target) return;
+      const go = target.dataset.go;
+      if (go) {
+        event.preventDefault();
+        update(root, go, { mode: target.dataset.authMode });
+        return;
+      }
+      if (target.matches('[data-idea]')) {
+        event.preventDefault();
+        selectIdea(root, target.dataset.idea, target.dataset.label);
+      }
+    });
+    root.addEventListener('submit', event => {
+      const free = event.target.closest('[data-free-idea]');
+      if (free) {
+        event.preventDefault();
+        const value = String(new FormData(free).get('idea') || '').trim();
+        if (value) selectIdea(root, 'custom', value);
+        else free.querySelector('input')?.focus();
+        return;
+      }
+      const invite = event.target.closest('[data-invite-form]');
+      if (invite) {
+        event.preventDefault();
+        handleInvite(invite);
+      }
+    });
+    window.addEventListener('keydown', event => {
+      if (event.key === 'Escape' && state.slide !== 'home') update(root, state.slide === 'auth' && state.idea ? 'idea' : 'home');
+    });
+  }
+
+  function openIdea(root) { update(root, 'idea'); }
+  function openAuth(root, mode = 'login') { update(root, 'auth', { mode }); }
+  function emit() { window.dispatchEvent(new CustomEvent('luvia:guided-entry-idea', { detail: snapshot() })); }
+  function snapshot() { return Object.freeze({ version: VERSION, slide: state.slide, idea: state.idea ? { ...state.idea } : null, persistence: 'memory-until-auth' }); }
+
+  window.LuviaGuidedJourneyEntry = Object.freeze({ version: VERSION, render, openIdea, openAuth, snapshot, emit });
 })();
