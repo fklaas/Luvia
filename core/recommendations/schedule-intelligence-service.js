@@ -1,7 +1,8 @@
 (() => {
   'use strict';
-  const VERSION='4.0.3.3';
+  const VERSION='4.0.3.4';
   const listeners=new Set();
+  const STORAGE='luvia.schedule.v4';
   const state={loading:false,tripId:null,events:[],today:[],next:null,freeWindow:null,warnings:[],lastUpdatedAt:null,lastError:null};
   const clone=v=>v==null?v:JSON.parse(JSON.stringify(v));
   const pad=n=>String(n).padStart(2,'0');
@@ -10,6 +11,8 @@
   const parseDateTime=(date,time)=>{if(!date||!time)return null;const d=new Date(`${date}T${time}:00`);return Number.isNaN(d.getTime())?null:d};
   const formatTime=d=>d?`${pad(d.getHours())}:${pad(d.getMinutes())}`:null;
   const tripId=()=>String(window.LuviaTripContext?.getActiveTrip?.()?.tripId||window.LuviaTripStore?.snapshot?.()?.activeTripId||'');
+  const readLocal=id=>{try{return JSON.parse(localStorage.getItem(`${STORAGE}.${id}`)||'[]')}catch{return[]}};
+  const writeLocal=(id,events)=>{try{localStorage.setItem(`${STORAGE}.${id}`,JSON.stringify(events))}catch{}};
   const travelMinutes=(distance,mode)=>window.LuviaRestaurantIntelligence?.minutesFor?.(distance,mode)||((Number(distance)>2000)?Math.max(5,Math.ceil(Number(distance)/420)+3):Math.max(1,Math.ceil(Number(distance)/75)));
   function normalizeRestaurant(entry){
     const date=entry.date||entry.plannedDate||entry.rawEntity?.tripPlace?.planned_date||entry.reservationDate||null,time=entry.time||entry.plannedTime||entry.rawEntity?.tripPlace?.planned_time||entry.reservationTime||entry.recommendedVisitTime||null;
@@ -64,7 +67,7 @@
     const id=String(options.tripId||tripId());if(!id||!window.LuviaRestaurants?.list)return snapshot();if(state.loading)return snapshot();
     if(!options.force&&state.tripId===id&&state.lastUpdatedAt&&Date.now()-new Date(state.lastUpdatedAt).getTime()<30000)return snapshot();
     state.loading=true;state.tripId=id;emit();
-    try{const response=await window.LuviaRestaurants.list({tripId:id});const entries=(response?.data?.entities||[]).map(window.LuviaRestaurants.entityToEntry);const events=sortEvents(entries.map(normalizeRestaurant).filter(Boolean));const summary=buildSummary(events);Object.assign(state,{events,...summary,lastUpdatedAt:new Date().toISOString(),lastError:null});}
+    try{const response=await window.LuviaRestaurants.list({tripId:id});const entries=(response?.data?.entities||[]).map(window.LuviaRestaurants.entityToEntry);const remote=entries.map(normalizeRestaurant).filter(Boolean),local=readLocal(id);const byId=new Map(remote.map(e=>[String(e.id),e]));local.forEach(e=>{if(!byId.has(String(e.id)))byId.set(String(e.id),e)});const events=sortEvents([...byId.values()]);writeLocal(id,events);const summary=buildSummary(events);Object.assign(state,{events,...summary,lastUpdatedAt:new Date().toISOString(),lastError:null});}
     catch(error){state.lastError=error?.message||String(error)}finally{state.loading=false;emit()}
     return snapshot();
   }
@@ -75,12 +78,14 @@
     const events=sortEvents([...state.events.filter(e=>String(e.id)!==String(normalized.id)),normalized]);
     const summary=buildSummary(events);
     Object.assign(state,{events,...summary,lastUpdatedAt:new Date().toISOString(),lastError:null,loading:false});
+    const id=String(entry.tripId||state.tripId||tripId());if(id){state.tripId=id;writeLocal(id,events)}
     emit();
     return snapshot();
   }
+  function upsertEvent(event){if(!event?.date||!event?.time||!event?.title)return snapshot();const start=parseDateTime(event.date,event.time);if(!start)return snapshot();const normalized={id:String(event.id||event.placeId||crypto.randomUUID()),entityType:event.entityType||'place',title:event.title,date:event.date,time:event.time,startAt:start.toISOString(),endAt:event.endAt||new Date(start.getTime()+Number(event.durationMinutes||90)*60000).toISOString(),durationMinutes:Number(event.durationMinutes||90),source:event.source||event};const events=sortEvents([...state.events.filter(e=>String(e.id)!==String(normalized.id)),normalized]);const summary=buildSummary(events);Object.assign(state,{events,...summary,lastUpdatedAt:new Date().toISOString(),loading:false});const id=String(event.tripId||state.tripId||tripId());if(id){state.tripId=id;writeLocal(id,events)}emit();return snapshot()}
   function snapshot(){return clone(state)}
   function subscribe(fn){listeners.add(fn);return()=>listeners.delete(fn)}
-  const api=Object.freeze({version:VERSION,refresh,upsertRestaurant,snapshot,subscribe,analyze,travelMinutes,diagnostics:()=>({version:VERSION,...snapshot()})});
+  const api=Object.freeze({version:VERSION,refresh,upsertRestaurant,upsertEvent,snapshot,subscribe,analyze,travelMinutes,diagnostics:()=>({version:VERSION,...snapshot()})});
   window.LuviaScheduleIntelligence=api;
   ['luvia:trip-changed','luvia:restaurant-lifecycle-changed','luvia:restaurants-v2-updated','luvia:travel-context-changed'].forEach(name=>window.addEventListener(name,()=>refresh().catch(()=>{})));
   if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',()=>refresh().catch(()=>{}),{once:true});else queueMicrotask(()=>refresh().catch(()=>{}));
