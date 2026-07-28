@@ -37,9 +37,6 @@
     if(!tripId||!payload.date||!payload.time)return;{const [h,m]=payload.time.split(':').map(Number),d=new Date(2000,0,1,h||0,m||0);d.setMinutes(Math.ceil(d.getMinutes()/5)*5,0,0);payload.time=d.toLocaleTimeString('de-DE',{hour:'2-digit',minute:'2-digit'});}
     element.disabled=true;const old=element.innerHTML;element.classList.add('is-saving');
     try{
-      const provisionalId=payload.tripPlaceId||payload.placeId||payload.providerPlaceId||`suggestion:${payload.type}:${String(payload.title||'ort').toLowerCase().replace(/[^a-z0-9]+/g,'-')}`;
-      window.LuviaScheduleIntelligence?.upsertEvent?.({id:provisionalId,sourceKey:provisionalId,tripId,entityType:payload.type||'place',title:payload.title||'Ort',date:payload.date,time:payload.time,durationMinutes:Number(payload.durationMinutes||45),placeId:payload.placeId||null,tripPlaceId:payload.tripPlaceId||null,providerPlaceId:payload.providerPlaceId||null,lifecycleStatus:'planned',source:{suggestion:true,optimistic:true}});
-      await window.LuviaScheduleIntelligence?.waitForPersistence?.();
       if(payload.type==='restaurant'){
         let entry=null;
         if(window.LuviaRestaurants?.list){const response=await window.LuviaRestaurants.list({tripId});const entries=(response?.data?.entities||[]).map(window.LuviaRestaurants.entityToEntry);entry=entries.find(item=>String(item.tripPlaceId||'')===String(payload.tripPlaceId||'')||String(item.placeId||'')===String(payload.placeId||'')||String(item.providerPlaceId||'')===String(payload.providerPlaceId||'')||(payload.title&&item.name===payload.title));}
@@ -52,7 +49,7 @@
         const stableName=payload.title||entry.name;
         const saved=await window.LuviaRestaurants.updateLifecycle(entry.tripPlaceId,'planned',{plannedDate:payload.date,plannedTime:payload.time,reservationStatus:entry.reservationStatus||'idea',metadata:{scheduledFrom:'today-free-window',displayName:stableName,expectedDurationMinutes:Number(payload.durationMinutes||45)}},{tripId});
         const savedEntity=saved?.data?.tripPlace?saved.data:null;const savedEntry=savedEntity?window.LuviaRestaurants.entityToEntry(savedEntity):entry;
-        await window.LuviaScheduleIntelligence?.upsertRestaurantAsync?.({...savedEntry,name:stableName,date:payload.date,time:payload.time,plannedDate:payload.date,plannedTime:payload.time,lifecycleStatus:'planned',metadata:{...(savedEntry.metadata||{}),expectedDurationMinutes:Number(payload.durationMinutes||45)},tripId});
+        await window.LuviaScheduleIntelligence?.upsertRestaurantAsync?.({...savedEntry,name:stableName,date:payload.date,time:payload.time,plannedDate:payload.date,plannedTime:payload.time,lifecycleStatus:'planned',metadata:{...(savedEntry.metadata||{}),expectedDurationMinutes:Number(payload.durationMinutes||45)},source:{...(savedEntry.source||{}),suggestion:true,persistedRestaurant:true},tripId});
         await window.LuviaScheduleIntelligence?.waitForPersistence?.();
       }else{
         window.dispatchEvent(new CustomEvent('luvia:plan-place-suggestion',{detail:{...payload,tripId}}));

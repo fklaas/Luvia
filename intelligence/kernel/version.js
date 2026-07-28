@@ -1,1 +1,1 @@
-(() => {'use strict';window.LuviaKernelVersion=Object.freeze({core:'4.1.3.10',build:'13.1.3.10',name:'Route-Aware Restaurant Planning',channel:'production',builtAt:'2026-07-28T17:45:00+02:00'});window.LuviaCoreVersion=window.LuviaKernelVersion;})();
+(() => {'use strict';window.LuviaKernelVersion=Object.freeze({core:'4.1.3.11',build:'13.1.3.11',name:'Route-Aware Restaurant Planning',channel:'production',builtAt:'2026-07-28T17:45:00+02:00'});window.LuviaCoreVersion=window.LuviaKernelVersion;})();

@@ -1,6 +1,6 @@
 (() => {
 'use strict';
-const VERSION='4.1.3.10',KEY='luvia.cross-module.v4';
+const VERSION='4.1.3.11',KEY='luvia.cross-module.v4';
 const clone=v=>v==null?v:JSON.parse(JSON.stringify(v));
 const state={status:'ready',tripId:null,slots:{forYou:[],rightNow:[],nearby:[],onYourWay:[],next:[],alternative:[]},candidates:[],lastUpdatedAt:null,lastError:null,offline:false,freeWindowTrace:[]};
 const tripId=()=>String(window.LuviaTripContext?.getActiveTrip?.()?.tripId||window.LuviaTripStore?.snapshot?.()?.activeTripId||'');
@@ -47,10 +47,15 @@ async function hydrateRestaurants(){const id=tripId(),existing=window.LuviaResta
 async function refresh(options={}){state.tripId=String(options.tripId||tripId());try{let places=normalizedPlaces();const restaurants=await hydrateRestaurants();const ids=new Set(places.map(p=>String(p.id)));for(const r of restaurants){const p=window.LuviaPlaceCore?.normalizePlace?.(r,{type:'restaurant'})||r;if(!ids.has(String(p.id))){places.push(p);ids.add(String(p.id))}}return build(places)}catch(e){state.lastError=e?.message||String(e);try{const cached=JSON.parse(localStorage.getItem(KEY)||'null');if(cached)Object.assign(state,cached,{offline:true,status:'cached'})}catch{}return snapshot()}}
 function fitFreeWindow(windowInfo,limit=4){
   const mins=Math.max(0,Number(windowInfo?.minutes||0)),trace=[],scheduledCounts=scheduledCategoryCounts();
+  const scheduledEvents=window.LuviaScheduleIntelligence?.snapshot?.()?.events||[];
+  const scheduledKeys=new Set(scheduledEvents.flatMap(event=>[event.id,event.placeId,event.tripPlaceId,event.providerPlaceId,event.source?.placeId,event.source?.tripPlaceId,event.source?.providerPlaceId].filter(Boolean).map(String)));
+  const scheduledTitles=new Set(scheduledEvents.map(event=>String(event.title||'').trim().toLowerCase()).filter(Boolean));
   const eligible=state.candidates.filter(place=>{
     const travel=travelMinutes(place),visit=visitMinutes(place),transition=10,required=(travel??15)+visit+transition,remaining=mins-required;
-    const baseAccepted=place.openNow!==false&&remaining>=0&&!['visited','memory','rated','travel_book'].includes(String(place.lifecycle||''));
-    trace.push({id:place.id||place.placeId||place.name,name:place.name||place.title,type:place.primaryType||place.entityType,category:placeCategory(place),windowMinutes:mins,travelMinutes:travel,visitMinutes:visit,transitionMinutes:transition,requiredMinutes:required,remainingMinutes:remaining,accepted:baseAccepted,reason:place.openNow===false?'geschlossen':remaining<0?'zu wenig Zeit':baseAccepted?'zeitlich passend':'bereits besucht'});
+    const placeKeys=[place.id,place.placeId,place.tripPlaceId,place.providerPlaceId,place.sourceId,place.source?.id].filter(Boolean).map(String);
+    const alreadyScheduled=placeKeys.some(key=>scheduledKeys.has(key))||scheduledTitles.has(String(place.name||place.title||'').trim().toLowerCase());
+    const baseAccepted=!alreadyScheduled&&place.openNow!==false&&remaining>=0&&!['planned','reserved','visited','memory','rated','travel_book'].includes(String(place.lifecycle||''));
+    trace.push({id:place.id||place.placeId||place.name,name:place.name||place.title,type:place.primaryType||place.entityType,category:placeCategory(place),windowMinutes:mins,travelMinutes:travel,visitMinutes:visit,transitionMinutes:transition,requiredMinutes:required,remainingMinutes:remaining,accepted:baseAccepted,reason:alreadyScheduled?'bereits eingeplant':place.openNow===false?'geschlossen':remaining<0?'zu wenig Zeit':baseAccepted?'zeitlich passend':'bereits besucht'});
     return baseAccepted;
   }).map(place=>{
     const travel=travelMinutes(place),visit=visitMinutes(place),required=(travel??15)+visit+10,remaining=mins-required;
