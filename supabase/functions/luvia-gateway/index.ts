@@ -11,7 +11,7 @@ type GatewayBody={action?:string;payload?:unknown;context?:Record<string,unknown
 const ACTION_PATTERN=/^[a-z][a-z0-9]*(?:[._-][a-z0-9]+)*$/;
 const PUBLIC_ACTIONS=new Set(['system.health','places.health']);
 const PLACES_ACTIONS=new Set(['destination.resolve','places.health','places.text-search','places.nearby-search','places.autocomplete','places.details','places.photo']);
-const RESTAURANT_ACTIONS=new Set(['restaurant.health','restaurant.list','restaurant.import','restaurant.lifecycle.update','restaurant.feedback']);
+const RESTAURANT_ACTIONS=new Set(['restaurant.health','restaurant.list','restaurant.import','restaurant.lifecycle.update','restaurant.feedback','restaurant.remove','restaurant.clear']);
 const RECOMMENDATION_ACTIONS=new Set(['recommendation.health','recommendation.store','recommendation.event','recommendation.decision','recommendation.list','recommendation.events','recommendation.learning.reset']);
 
 Deno.serve(async(req:Request)=>{

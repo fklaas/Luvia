@@ -36,6 +36,20 @@ export async function restaurantAction(action:string,payload:any,client:Supabase
     }
     return{data};
   }
+  if(action==='restaurant.remove'){
+    const tripId=String(payload?.tripId||''),tripPlaceId=String(payload?.tripPlaceId||'');
+    if(!tripId||!tripPlaceId)throw Object.assign(new Error('Trip-ID und Restaurant-Verknüpfung werden benötigt.'),{code:'REMOVE_INPUT_REQUIRED',status:400});
+    const {data,error}=await client.rpc('luvia_remove_restaurant_from_trip',{p_trip_id:tripId,p_trip_place_id:tripPlaceId});
+    if(error)throw Object.assign(new Error(error.message||'Restaurant konnte nicht entfernt werden.'),{code:'RESTAURANT_REMOVE_FAILED',status:400});
+    return{data:{removed:Boolean(data)}};
+  }
+  if(action==='restaurant.clear'){
+    const tripId=String(payload?.tripId||''),scope=String(payload?.scope||'saved');
+    if(!tripId||!['saved','favorites'].includes(scope))throw Object.assign(new Error('Trip-ID oder Löschbereich ist ungültig.'),{code:'CLEAR_INPUT_REQUIRED',status:400});
+    const {data,error}=await client.rpc('luvia_clear_restaurants',{p_trip_id:tripId,p_scope:scope});
+    if(error)throw Object.assign(new Error(error.message||'Restaurants konnten nicht entfernt werden.'),{code:'RESTAURANT_CLEAR_FAILED',status:400});
+    return{data:{affected:Number(data||0),scope}};
+  }
   if(action==='restaurant.feedback'){
     const tripId=String(payload?.tripId||'');if(!tripId)throw Object.assign(new Error('Trip-ID fehlt.'),{code:'TRIP_ID_REQUIRED',status:400});
     const {data,error}=await client.rpc('luvia_record_place_recommendation_feedback',{p_trip_id:tripId,p_place_id:payload?.placeId||null,p_provider_place_id:payload?.providerPlaceId||null,p_decision:payload?.decision||'shown',p_match_score:payload?.matchScore??null,p_reasons:payload?.reasons||[],p_context:payload?.context||{}});

@@ -620,3 +620,12 @@
 .rv2-today-plan{margin:0 0 20px;padding:20px 22px;border-radius:26px;border:1px solid color-mix(in srgb,var(--rv2-accent,#4da0a8) 24%,#dbe8ea);background:linear-gradient(135deg,color-mix(in srgb,var(--rv2-accent,#4da0a8) 14%,#fff),#fff);box-shadow:0 14px 35px color-mix(in srgb,var(--rv2-accent,#4da0a8) 10%,transparent)}
 .rv2-today-plan-head{display:flex;justify-content:space-between;gap:16px;align-items:end}.rv2-today-plan span,.rv2-today-plan-head>div>span{font-size:.72rem;font-weight:900;letter-spacing:.12em;text-transform:uppercase;color:var(--rv2-accent,#4da0a8)}.rv2-today-plan h3{margin:5px 0 0;color:#17354d}.rv2-today-plan p{margin:7px 0 0;color:#6f8390}.rv2-today-plan-list{display:flex;gap:10px;flex-wrap:wrap;margin-top:16px}.rv2-today-plan-list button{display:grid;gap:3px;min-width:180px;padding:13px 15px;border:0;border-radius:16px;text-align:left;background:#fff;box-shadow:0 8px 22px rgba(18,52,70,.08);color:#17354d}.rv2-today-plan-list button strong{font-size:1rem}.rv2-today-plan-list button span{font-size:.86rem;letter-spacing:0;text-transform:none;color:#607786}
 @media(max-width:680px){.rv2-card-media{height:104px}.rv2-today-plan{padding:17px}.rv2-today-plan-list{display:grid}.rv2-today-plan-list button{width:100%}}
+
+/* Build 13.0.3.5 – collection management */
+#restaurants-module .rv2-library-summary-actions{display:flex;align-items:center;gap:10px;margin-left:auto}
+#restaurants-module .rv2-clear-all{border:0;background:transparent;color:#9b4352;font:inherit;font-size:.78rem;font-weight:750;padding:7px 9px;border-radius:10px;cursor:pointer}
+#restaurants-module .rv2-clear-all:hover{background:#fff1f3}
+#restaurants-module .rv2-saved-item{position:relative;display:grid;gap:8px;min-width:0}
+#restaurants-module .rv2-remove-saved{width:100%;border:1px solid #ead8dc;background:#fff;color:#973e4d;border-radius:13px;padding:10px 12px;font-weight:750;cursor:pointer}
+#restaurants-module .rv2-remove-saved:hover{background:#fff4f5}
+@media(max-width:620px){#restaurants-module .rv2-library-panel>summary{align-items:flex-start}.rv2-library-summary-actions{flex-direction:column-reverse!important;align-items:flex-end!important}.rv2-clear-all{font-size:.72rem!important;padding:4px!important}}
