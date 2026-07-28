@@ -1,7 +1,7 @@
 (() => {
   'use strict';
-  const VERSION='4.0.4.6';
-  const BUILD='13.0.4.6';
+  const VERSION='4.1.0';
+  const BUILD='13.1.0';
   const now=()=>new Date().toISOString();
   const safe=(fn,fallback=null)=>{try{return fn()}catch(error){return fallback??{error:error?.message||String(error)}}};
   const textBytes=value=>new TextEncoder().encode(String(value||'')).length;
@@ -23,7 +23,7 @@
   async function runSmokeTests(){
     const results=[];const test=(name,fn)=>{try{const detail=fn();const ok=typeof detail==='boolean'?detail:Boolean(detail?.ok??detail);results.push({name,ok,detail,at:now()})}catch(error){results.push({name,ok:false,error:error.message,at:now()})}};
     test('Kernel boot',()=>Boolean(window.LuviaKernel));
-    test('Service registry',()=>{const services=window.LuviaServiceRegistry?.list?.()||[];const ready=services.filter(item=>item.state==='ready').length;const failed=services.filter(item=>item.state==='failed').length;return{ok:services.length>=23&&ready===services.length&&failed===0,count:services.length,ready,failed,mode:window.LUVIA_DIAGNOSTICS_MODE===true?'diagnostics':'app'}});
+    test('Service registry',()=>{const services=window.LuviaServiceRegistry?.list?.()||[];const ready=services.filter(item=>item.state==='ready').length;const failed=services.filter(item=>item.state==='failed').length;return{ok:services.length>=24&&ready===services.length&&failed===0,count:services.length,ready,failed,mode:window.LUVIA_DIAGNOSTICS_MODE===true?'diagnostics':'app'}});
     test('11 Place Types',()=>({ok:(window.LuviaPlaceRegistry?.diagnostics?.().registeredTypes||0)===11,value:window.LuviaPlaceRegistry?.diagnostics?.().registeredTypes}));
     test('11 Adapters',()=>({ok:(window.LuviaPlaceRegistry?.diagnostics?.().registeredAdapters||0)===11,value:window.LuviaPlaceRegistry?.diagnostics?.().registeredAdapters}));
     test('Restaurant Adapter',()=>{const status=window.LuviaPlaceRegistry?.status?.('restaurant')||window.LuviaPlaceRegistry?.diagnostics?.().adapters?.find(item=>item.key==='restaurant')||{};return{ok:status.state==='ready',state:status.state||'unknown',reason:status.reason||null}});
@@ -33,11 +33,12 @@
     test('Manual Visit contract',()=>({ok:typeof window.LuviaPlaceCore?.recordVisit==='function'&&typeof window.LuviaPresenceVisitCore?.confirmVisit==='function'}));
     test('Recommendation Slots',()=>({ok:['forYou','rightNow','nearby','onYourWay','next','alternative'].every(k=>Array.isArray(window.LuviaCrossModuleRecommendations?.diagnostics?.().slots?.[k]))}));
     test('Dashboard today data',()=>({ok:Array.isArray(window.LuviaScheduleIntelligence?.snapshot?.().today),count:window.LuviaScheduleIntelligence?.snapshot?.().today?.length||0}));
+    test('Today Intelligence',()=>{const d=window.LuviaTodayIntelligence?.diagnostics?.()||{};return{ok:d.version==='4.1.0'&&Array.isArray(d.freeWindows)&&Array.isArray(d.conflicts),status:d.status,current:d.current,next:d.next,events:d.events}});
     const summary={ok:results.every(x=>x.ok),passed:results.filter(x=>x.ok).length,total:results.length,results,completedAt:now()};
     try{sessionStorage.setItem('luvia.core4.smoke.latest',JSON.stringify(summary))}catch{}
     return summary;
   }
-  function healthSnapshot(){const registry=safe(()=>window.LuviaPlaceRegistry?.diagnostics?.(),{})||{},services=serviceSummary();return{version:VERSION,build:BUILD,status:'ready',generatedAt:now(),health:{kernel:Boolean(window.LuviaKernel),servicesReady:services.ready||0,servicesTotal:services.count||0,placeTypes:registry.registeredTypes||0,adapters:registry.registeredAdapters||0,scheduleEvents:window.LuviaScheduleIntelligence?.snapshot?.().events?.length||0,timelineEvents:window.LuviaTimelineCore?.diagnostics?.().eventCount||0}};}
+  function healthSnapshot(){const registry=safe(()=>window.LuviaPlaceRegistry?.diagnostics?.(),{})||{},services=serviceSummary();return{version:VERSION,build:BUILD,status:'ready',generatedAt:now(),health:{kernel:Boolean(window.LuviaKernel),servicesReady:services.ready||0,servicesTotal:services.count||0,placeTypes:registry.registeredTypes||0,adapters:registry.registeredAdapters||0,scheduleEvents:window.LuviaScheduleIntelligence?.snapshot?.().events?.length||0,timelineEvents:window.LuviaTimelineCore?.diagnostics?.().eventCount||0,todayStatus:window.LuviaTodayIntelligence?.getStatus?.()||'unavailable',todayConflicts:window.LuviaTodayIntelligence?.getConflicts?.()?.length||0}};}
   function snapshot(){const base=healthSnapshot();return{...base,adapters:adapterHealth(),recommendations:recommendationTrace(),schedule:scheduleTrace(),visits:visitTrace(),compatibility:compatibilityAudit(),cache:cacheAudit(),performance:performanceSnapshot(),lastSmoke:safe(()=>JSON.parse(sessionStorage.getItem('luvia.core4.smoke.latest')||'null'),null)};}
   window.LuviaCore4Diagnostics=Object.freeze({version:VERSION,build:BUILD,healthSnapshot,snapshot,runSmokeTests,recommendationTrace,scheduleTrace,visitTrace,adapterHealth,compatibilityAudit,cacheAudit,performance:performanceSnapshot});
 })();

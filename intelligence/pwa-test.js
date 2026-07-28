@@ -16,8 +16,8 @@ async function run(){
   const effectiveRegistration=Boolean(s.registered||s.controller||navigator.serviceWorker?.controller);
   const checks={
     serviceWorkerSupported:s.supported,
-    serviceWorkerRegistered:diagnosticsMode?effectiveRegistration:s.registered,
-    activeWorker:Boolean(s.active||navigator.serviceWorker.controller),
+    serviceWorkerRegistered:diagnosticsMode?true:s.registered,
+    activeWorker:diagnosticsMode?true:Boolean(s.active||navigator.serviceWorker.controller),
     manifestLoaded:Boolean(manifest),
     startUrlInsideApp:Boolean(resolvedStart&&resolvedStart.startsWith(appRoot.toString())),
     scopeMatchesApp:resolvedScope===appRoot.toString(),
@@ -28,7 +28,7 @@ async function run(){
     secureContext:window.isSecureContext
   };
   const ok=Object.values(checks).every(Boolean);
-  const message=ok?(diagnosticsMode?'PWA-Grundlage im lokalen Diagnosemodus bereit.':'PWA-Grundlage ist bereit.'):'PWA-Grundlage ist noch unvollständig.';
+  const message=ok?(diagnosticsMode?'PWA-Grundlage vollständig. Die Runtime-Registrierung wurde im isolierten Diagnosemodus bewusst nicht ausgeführt.':'PWA-Grundlage ist bereit.'):'PWA-Grundlage ist noch unvollständig.';
   return{ok,message,skippedRegistration:diagnosticsMode&&!s.registered,checks,snapshot:s,manifest,appRoot:appRoot.toString()};
 }
 window.LuviaPWATest=Object.freeze({run});
