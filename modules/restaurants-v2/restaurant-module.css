@@ -569,3 +569,23 @@
   #restaurants-module .rv2-library-content{padding:12px}
   #restaurants-module .rv2-favorite-list{grid-template-columns:1fr}
 }
+
+
+/* Build 13.0.3.2 – Native Restaurant Experience repair */
+#restaurants-module{--rv2-glow:color-mix(in srgb,var(--rv2-accent,#a23d63) 14%,transparent)}
+#restaurants-module .rv2-shell{background:radial-gradient(circle at 8% 0,var(--rv2-glow),transparent 32%),linear-gradient(180deg,color-mix(in srgb,var(--rv2-accent) 4%,#fff),#fff 38%);border-radius:30px;padding:clamp(14px,2.4vw,28px)}
+#restaurants-module .rv2-head-new{padding:8px 6px 20px}
+#restaurants-module .rv2-discovery-new{background:linear-gradient(145deg,color-mix(in srgb,var(--rv2-accent) 8%,#fff),#fff 64%);border:1px solid color-mix(in srgb,var(--rv2-accent) 18%,#e5eaed);box-shadow:0 18px 50px rgba(31,47,59,.07);border-radius:28px}
+#restaurants-module .rv2-search-box{display:grid!important;grid-template-columns:24px minmax(0,1fr) auto!important;align-items:center!important;gap:10px!important;padding:8px 8px 8px 16px!important;background:#fff!important;border:1px solid color-mix(in srgb,var(--rv2-accent) 17%,#e2e7ea)!important;border-radius:20px!important;box-shadow:0 10px 28px rgba(33,48,60,.06)!important}
+#restaurants-module .rv2-search-box input{display:block!important;min-width:0!important;width:100%!important;border:0!important;outline:0!important;background:transparent!important;padding:12px 4px!important;font-size:1rem!important;color:var(--rv2-ink)!important;text-overflow:ellipsis!important}
+#restaurants-module .rv2-search-submit{width:auto!important;min-width:108px!important;max-width:150px!important;min-height:44px!important;padding:10px 18px!important;border-radius:14px!important;justify-self:end!important;box-shadow:none!important;background:color-mix(in srgb,var(--rv2-accent) 15%,#fff)!important}
+#restaurants-module .rv2-search-results{display:grid!important;grid-template-columns:repeat(auto-fit,minmax(min(100%,285px),1fr))!important;gap:16px!important;align-items:stretch!important}
+#restaurants-module .rv2-search-results .luvia-place-card,#restaurants-module .rv2-search-card{display:flex!important;flex-direction:column!important;min-width:0!important;width:100%!important;max-width:none!important;overflow:hidden!important;padding:18px!important;border-radius:24px!important;background:linear-gradient(160deg,#fff,color-mix(in srgb,var(--rv2-accent) 5%,#fff))!important;border:1px solid color-mix(in srgb,var(--rv2-accent) 16%,#e4e9ec)!important;box-shadow:0 14px 36px rgba(31,46,58,.07)!important}
+#restaurants-module .rv2-search-results .luvia-place-card *{min-width:0!important;max-width:100%!important;overflow-wrap:anywhere!important;word-break:normal!important}
+#restaurants-module .rv2-search-results .luvia-place-card h3,#restaurants-module .rv2-search-results .luvia-place-card h4{font-size:1.08rem!important;line-height:1.25!important;margin:0!important}
+#restaurants-module .rv2-search-results .luvia-place-card [class*=badge],#restaurants-module .rv2-search-results .luvia-place-card [class*=pill]{white-space:normal!important;height:auto!important;line-height:1.25!important}
+#restaurants-module .rv2-search-card-actions{display:grid!important;grid-template-columns:1fr 1fr!important;gap:9px!important;margin-top:auto!important;padding-top:14px!important}
+#restaurants-module .rv2-search-card-actions button{width:100%!important;min-width:0!important;white-space:normal!important}
+#restaurants-module .rv2-library{margin-top:20px;padding:18px;border-radius:26px;background:color-mix(in srgb,var(--rv2-accent) 4%,#fff);border:1px solid color-mix(in srgb,var(--rv2-accent) 13%,#e7ebee)}
+#restaurants-module details.rv2-library-group{border-radius:20px!important;background:#fff!important}
+@media(max-width:680px){#restaurants-module .rv2-shell{padding:12px;border-radius:22px}#restaurants-module .rv2-search-box{grid-template-columns:22px minmax(0,1fr)!important;padding:8px 12px!important}#restaurants-module .rv2-search-submit{grid-column:1/-1!important;width:100%!important;max-width:none!important;justify-self:stretch!important}#restaurants-module .rv2-search-results{grid-template-columns:1fr!important}#restaurants-module .rv2-search-card-actions{grid-template-columns:1fr!important}}

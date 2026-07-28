@@ -28,9 +28,9 @@
     "logHistory": 500
   },
   "release": {
-    "core": "4.0.3.1",
-    "build": "13.0.3.1",
-    "name": "Restaurant Experience Rework",
+    "core": "4.0.3.2",
+    "build": "13.0.3.2",
+    "name": "Native Restaurant Experience",
     "channel": "production",
     "builtAt": "2026-07-28T23:30:00+02:00"
   },
@@ -41,9 +41,9 @@
     "githubPagesFallback": "https://fklaas.github.io/Luvia/"
   },
   "build": {
-    "core": "4.0.3.1",
-    "build": "13.0.3.1",
-    "name": "Restaurant Experience Rework",
+    "core": "4.0.3.2",
+    "build": "13.0.3.2",
+    "name": "Native Restaurant Experience",
     "channel": "production",
     "releasedAt": "2026-07-28",
     "builtAt": "2026-07-28T23:30:00+02:00"
@@ -82,7 +82,7 @@
     "profileSchemaVersion": 5
   },
   "placeIntelligence": {
-    "version": "4.0.3.1",
+    "version": "4.0.3.2",
     "types": 11,
     "multiType": true,
     "restaurantCompatibility": true,
