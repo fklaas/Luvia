@@ -1,6 +1,6 @@
 (() => {
   'use strict';
-  const VERSION='4.1.3.11';
+  const VERSION='4.1.3.12';
   const listeners=new Set();
   const STORAGE='luvia.schedule.v4';
   const LAST_TRIP_STORAGE=`${STORAGE}.lastTripId`;
@@ -153,6 +153,22 @@
     return snapshot();
   }
   async function upsertRestaurantAsync(entry){upsertRestaurant(entry);await waitForPersistence();return snapshot()}
+  async function updateRestaurantTime(identity,changes={}){
+    const existing=state.events.find(event=>sameEventIdentity(event,identity||{}));
+    if(!existing)throw new Error('Der Tagesplaneintrag konnte nicht gefunden werden.');
+    const date=changes.date||changes.plannedDate||existing.date;
+    const time=changes.time||changes.plannedTime||existing.time;
+    const start=parseDateTime(date,time);
+    if(!start)throw new Error('Datum oder Uhrzeit ist ungültig.');
+    const updated={...existing,...changes,date,time,startAt:start.toISOString(),endAt:new Date(start.getTime()+Number(changes.durationMinutes||existing.durationMinutes||90)*60000).toISOString(),source:{...(existing.source||{}),...(changes.source||{}),optimistic:true}};
+    const events=dedupeEvents([...state.events.filter(event=>!sameEventIdentity(event,existing)),updated]);
+    const summary=buildSummary(events);
+    Object.assign(state,{events,...summary,lastUpdatedAt:new Date().toISOString(),lastError:null,loading:false});
+    const id=String(changes.tripId||state.tripId||tripId());
+    if(id){state.tripId=id;writeLocal(id,events);clearMatchingTombstones(id,updated);await persistEvent(id,updated)}
+    emit();
+    return clone(updated);
+  }
   function upsertEvent(event){if(!event?.date||!event?.time||!event?.title)return snapshot();const start=parseDateTime(event.date,event.time);if(!start)return snapshot();const normalized={id:String(event.id||event.sourceKey||event.tripPlaceId||event.placeId||event.providerPlaceId||crypto.randomUUID()),entityType:event.entityType||'place',title:event.title,date:event.date,time:event.time,startAt:start.toISOString(),endAt:event.endAt||new Date(start.getTime()+Number(event.durationMinutes||90)*60000).toISOString(),durationMinutes:Number(event.durationMinutes||90),lifecycleStatus:event.lifecycleStatus||'planned',placeId:event.placeId||null,tripPlaceId:event.tripPlaceId||null,providerPlaceId:event.providerPlaceId||null,source:{...(event.source||event),optimistic:true}};const events=dedupeEvents([...state.events.filter(e=>!sameEventIdentity(e,normalized)),normalized]);const summary=buildSummary(events);Object.assign(state,{events,...summary,hydrated:true,lastUpdatedAt:new Date().toISOString(),loading:false});const id=String(event.tripId||state.tripId||tripId());if(id){state.tripId=id;clearMatchingTombstones(id,normalized);writeLocal(id,events);persistEvent(id,normalized).catch(()=>{})}emit();return snapshot()}
   function removeByIdentity(event,options={}){
     if(!event)return snapshot();
@@ -190,7 +206,7 @@
   function snapshot(){return clone(state)}
   function subscribe(fn){listeners.add(fn);return()=>listeners.delete(fn)}
   const hydrateActiveLocal=()=>{const id=tripId()||lastTripId();if(!id)return;const local=readLocal(id),events=dedupeEvents(local),summary=buildSummary(events);if(state.tripId!==id||(!state.events.length&&events.length)){Object.assign(state,{tripId:id,events,...summary,hydrated:true,persistence:events.length?'local':'pending'});emit()}};
-  const api=Object.freeze({version:VERSION,refresh,hydrateLocal:hydrateActiveLocal,upsertRestaurant,upsertRestaurantAsync,upsertEvent,removeEvent,removeByIdentity,clearByType,waitForPersistence,snapshot,subscribe,analyze,travelMinutes,diagnostics:()=>({version:VERSION,persistenceKey:STORAGE,...snapshot(),trace:(state.events||[]).map(e=>({id:e.id,entityType:e.entityType,date:e.date,time:e.time,startAt:e.startAt,source:Boolean(e.source)}))})});
+  const api=Object.freeze({version:VERSION,refresh,hydrateLocal:hydrateActiveLocal,upsertRestaurant,upsertRestaurantAsync,updateRestaurantTime,upsertEvent,removeEvent,removeByIdentity,clearByType,waitForPersistence,snapshot,subscribe,analyze,travelMinutes,diagnostics:()=>({version:VERSION,persistenceKey:STORAGE,...snapshot(),trace:(state.events||[]).map(e=>({id:e.id,entityType:e.entityType,date:e.date,time:e.time,startAt:e.startAt,source:Boolean(e.source)}))})});
   window.LuviaScheduleIntelligence=api;
   window.addEventListener('luvia:trip-changed',()=>{hydrateActiveLocal();refresh({force:true}).catch(()=>{})});
   ['luvia:restaurant-lifecycle-changed','luvia:restaurant-imported','luvia:restaurants-v2-updated','luvia:travel-context-changed','luvia:auth-changed'].forEach(name=>window.addEventListener(name,()=>refresh().catch(()=>{})));

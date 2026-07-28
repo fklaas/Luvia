@@ -18,8 +18,8 @@ index.html
 intelligence/console.html
 intelligence/test.html
 sw.js
-RELEASE-v13.1.3.11.md
-DEPLOYMENT-v13.1.3.11.md
-TEST-v13.1.3.11.md
-COMMIT-v13.1.3.11.txt
-CHANGED-FILES-v13.1.3.11.txt
+RELEASE-v13.1.3.12.md
+DEPLOYMENT-v13.1.3.12.md
+TEST-v13.1.3.12.md
+COMMIT-v13.1.3.12.txt
+CHANGED-FILES-v13.1.3.12.txt

@@ -1,4 +1,4 @@
-# Test 13.1.3.11
+# Test 13.1.3.12
 
 1. Einen Today-Vorschlag übernehmen. Erwartet: kein 409/23503 und kein Hinweis auf einen alten Restaurant-Eintrag.
 2. Restaurantmodul öffnen. Erwartet: übernommener Termin erscheint unter Restaurantmomente.
