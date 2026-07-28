@@ -26,7 +26,7 @@ export async function restaurantAction(action:string,payload:any,client:Supabase
     const tripId=String(payload?.tripId||''),tripPlaceId=String(payload?.tripPlaceId||''),status=String(payload?.status||'');
     if(!tripId||!tripPlaceId||!status)throw Object.assign(new Error('Trip-ID, Restaurant-Verknüpfung und Status werden benötigt.'),{code:'LIFECYCLE_INPUT_REQUIRED',status:400});
     const rawPatch=payload?.patch&&typeof payload.patch==='object'?payload.patch:{};
-    const cleanPatch=Object.fromEntries(Object.entries(rawPatch).filter(([,value])=>value!==undefined&&value!==null&&value!==''));
+    const cleanPatch=Object.fromEntries(Object.entries(rawPatch).filter(([,value])=>value!==undefined&&value!==null));
     const allowedReservationStatuses=new Set(['idea','requested','reserved','confirmed','cancelled','visited']);
     if('reservationStatus' in cleanPatch&&!allowedReservationStatuses.has(String(cleanPatch.reservationStatus)))delete cleanPatch.reservationStatus;
     const {data,error}=await client.rpc('luvia_update_restaurant_lifecycle',{p_trip_id:tripId,p_trip_place_id:tripPlaceId,p_status:status,p_patch:cleanPatch});

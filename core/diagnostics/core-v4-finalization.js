@@ -1,7 +1,7 @@
 (() => {
   'use strict';
-  const VERSION='4.0.4';
-  const BUILD='13.0.4';
+  const VERSION='4.0.4.1';
+  const BUILD='13.0.4.1';
   const now=()=>new Date().toISOString();
   const safe=(fn,fallback=null)=>{try{return fn()}catch(error){return fallback??{error:error?.message||String(error)}}};
   const listStorage=()=>{const rows=[];for(let i=0;i<localStorage.length;i++){const key=localStorage.key(i),value=localStorage.getItem(key)||'';if(key?.startsWith('luvia.'))rows.push({key,bytes:new Blob([value]).size,validJson:safe(()=>{JSON.parse(value);return true},false)})}return rows};

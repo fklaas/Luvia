@@ -1,6 +1,6 @@
 (function(){
 'use strict';
-const VERSION='4.0.4';
+const VERSION='4.0.4.1';
 const KEY='luvia.timeline.v4';
 let events=[];let realtime=null;const metrics={created:0,synced:0,queued:0,failed:0,lastError:null};
 const now=()=>new Date().toISOString();
