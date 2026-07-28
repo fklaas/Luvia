@@ -1,6 +1,6 @@
 (() => {
   'use strict';
-  const VERSION='3.9.0';
+  const VERSION='3.9.1';
   const listeners=new Set();
   const state={loading:false,tripId:null,events:[],today:[],next:null,freeWindow:null,warnings:[],lastUpdatedAt:null,lastError:null};
   const clone=v=>v==null?v:JSON.parse(JSON.stringify(v));

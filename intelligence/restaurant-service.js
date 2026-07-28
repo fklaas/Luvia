@@ -1,6 +1,6 @@
 (function(){
 'use strict';
-const VERSION='3.9.0-schedule-intelligence';
+const VERSION='3.9.1-schedule-intelligence';
 const state={searches:0,imports:0,lists:0,lifecycleUpdates:0,feedback:0,successes:0,failures:0,lastImport:null,lastError:null};
 const clean=v=>String(v??'').trim();
 function tripId(input){return clean(input||window.LuviaTripContext?.getActiveTrip?.()?.tripId||window.LuviaTripContext?.getSnapshot?.()?.tripId||'');}
