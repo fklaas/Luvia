@@ -1,4 +1,4 @@
-# Test 13.1.3.12
+# Test 13.2.0
 
 1. Geplanten Restauranttermin öffnen.
 2. Uhrzeit ändern und speichern.

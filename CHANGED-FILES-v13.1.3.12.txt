@@ -1,11 +1,11 @@
 CHANGED-FILES-v13.1.3.11.txt
-COMMIT-v13.1.3.12.txt
+COMMIT-v13.2.0.txt
 DEPLOYMENT-v13.1.3.11.md
-DEPLOYMENT-v13.1.3.12.md
+DEPLOYMENT-v13.2.0.md
 RELEASE-v13.1.3.11.md
-RELEASE-v13.1.3.12.md
+RELEASE-v13.2.0.md
 TEST-v13.1.3.11.md
-TEST-v13.1.3.12.md
+TEST-v13.2.0.md
 core/diagnostics/core-v4-finalization.js
 core/places/place-core.js
 core/places/place-ui.js

@@ -1,4 +1,4 @@
-# Deployment 13.1.3.12
+# Deployment 13.2.0
 
 Keine neue SQL-Migration, keine Edge-Function-Änderung und keine neuen Secrets.
 

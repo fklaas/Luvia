@@ -1,4 +1,4 @@
-# Luvia Core 4.1.3.12 / Build 13.1.3.12
+# Luvia Core 4.1.3.12 / Build 13.2.0
 
 ## Timeline Time Update Consistency
 

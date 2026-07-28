@@ -1,7 +1,7 @@
 (() => {
   'use strict';
-  const VERSION='4.1.3.13';
-  const BUILD='13.1.3.13';
+  const VERSION='4.1.3.12';
+  const BUILD='13.2.0';
   const now=()=>new Date().toISOString();
   const safe=(fn,fallback=null)=>{try{return fn()}catch(error){return fallback??{error:error?.message||String(error)}}};
   const textBytes=value=>new TextEncoder().encode(String(value||'')).length;

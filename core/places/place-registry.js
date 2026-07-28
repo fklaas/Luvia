@@ -1,6 +1,6 @@
 (function(){
 'use strict';
-const VERSION='4.0.0';
+const VERSION='4.2.0';
 const types=new Map(),adapters=new Map(),errors=[];
 const D=()=>window.LuviaPlaceDomain;
 const base=['recommendations','nearby','alternatives','timeline','visit_detection','notes','photos','favorites','ratings','memories','realtime','offline'];
