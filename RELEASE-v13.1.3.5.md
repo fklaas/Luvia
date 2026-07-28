@@ -1,4 +1,4 @@
-# Luvia 13.1.3.5 — Deterministic Schedule Hydration
+# Luvia 13.1.3.6 — Deterministic Schedule Hydration
 
 - Persistent schedule is hydrated immediately from local storage and deterministically reconciled with Supabase.
 - Persisted universal schedule events are authoritative over stale restaurant planning fields.

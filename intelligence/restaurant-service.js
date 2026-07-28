@@ -1,6 +1,6 @@
 (function(){
 'use strict';
-const VERSION='4.1.3.5-stable-schedule-name';
+const VERSION='4.1.3.6-stable-schedule-name';
 const state={searches:0,imports:0,lists:0,lifecycleUpdates:0,feedback:0,successes:0,failures:0,lastImport:null,lastError:null};
 const clean=v=>String(v??'').trim();
 function tripId(input){return clean(input||window.LuviaTripContext?.getActiveTrip?.()?.tripId||window.LuviaTripContext?.getSnapshot?.()?.tripId||'');}
