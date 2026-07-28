@@ -87,7 +87,7 @@
     const started=performance.now();
     state.requests++;state.lastRequestAt=now();state.lastRequestId=requestId;
     const token=await accessToken();
-    const headers={'Content-Type':'application/json','Accept':'application/json','X-Luvia-Request-Id':requestId,'X-Luvia-Client-Version':VERSION,'X-Luvia-Build':cfg.clientBuild};
+    const headers={'Content-Type':'application/json','Accept':'application/json'};
     if(cfg.publishableKey)headers.apikey=cfg.publishableKey;
     if(token)headers.Authorization=`Bearer ${token}`;
     emit('request.started',{requestId,action:safeAction,authenticated:Boolean(token)});

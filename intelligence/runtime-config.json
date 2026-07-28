@@ -28,9 +28,9 @@
     "logHistory": 500
   },
   "release": {
-    "core": "4.0.4.3",
-    "build": "13.0.4.3",
-    "name": "Diagnostics Recursion & Schedule Removal Fix",
+    "core": "4.0.4.5",
+    "build": "13.0.4.5",
+    "name": "Diagnostics Local Boot Isolation",
     "channel": "production",
     "builtAt": "2026-07-28T23:30:00+02:00"
   },
@@ -41,9 +41,9 @@
     "githubPagesFallback": "https://fklaas.github.io/Luvia/"
   },
   "build": {
-    "core": "4.0.4.3",
-    "build": "13.0.4.3",
-    "name": "Diagnostics Recursion & Schedule Removal Fix",
+    "core": "4.0.4.5",
+    "build": "13.0.4.5",
+    "name": "Diagnostics Local Boot Isolation",
     "channel": "production",
     "releasedAt": "2026-07-28",
     "builtAt": "2026-07-28T23:30:00+02:00"
@@ -82,7 +82,7 @@
     "profileSchemaVersion": 5
   },
   "placeIntelligence": {
-    "version": "4.0.4.3",
+    "version": "4.0.4.5",
     "types": 11,
     "multiType": true,
     "restaurantCompatibility": true,
