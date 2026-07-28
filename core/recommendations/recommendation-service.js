@@ -1,6 +1,6 @@
 (() => {
   'use strict';
-  const VERSION='3.9.1';
+  const VERSION='3.9.1.1';
   const RULE_VERSION='restaurant-intelligence-1';
   const adapters=new Map(), providers=new Map(), contextSources=new Map(), constraints=new Map(), listeners=new Set(), cache=new Map();
   const DEFAULT_SETTINGS={enabled:true,personalization:true,useLocation:true,learning:true,debug:false,maxDistanceMeters:30000,minimumScore:0};
@@ -108,7 +108,7 @@
   async function alternatives(recOrId,options={}){const rec=find(recOrId);if(!rec)throw new Error('RECOMMENDATION_NOT_FOUND');const adapter=adapters.get(rec.module);if(adapter?.createAlternatives)return adapter.createAlternatives(rec,await collectContext(rec.module,{tripId:rec.tripId}),options);const all=await get({module:rec.module,tripId:rec.tripId,candidates:options.candidates||[],persist:false,includeBlocked:false,limit:Math.max(4,options.limit||3)});return all.filter(x=>x.entityId!==rec.entityId).slice(0,options.limit||3)}
   async function bestTime(input={}){const module=input.module||`${input.entityType||'place'}s`,adapter=adapters.get(module),ctx=await collectContext(module,input);if(adapter?.bestTime)return adapter.bestTime(input,ctx);const date=input.date||ctx.travel?.today;return{date,time:input.preferredTime||'18:30',confidence:'medium',reasons:['Passt in das gewählte Zeitfenster.'],context:{availableMinutes:ctx.availableMinutes||null}}}
   async function persistBatch(items){if(!items.length)return null;return backend('recommendation.store',{recommendations:items.map(r=>({id:r.id,tripId:r.tripId,module:r.module,entityType:r.entityType,entityId:r.entityId,recommendationType:r.recommendationType,candidateSource:r.candidateSource,score:r.score,scoreComponents:r.scoreComponents,reasons:r.reasons,warnings:r.warnings,constraints:r.constraints,groupMatch:r.groupMatch,suggestedDate:r.suggestedDate,suggestedTime:r.suggestedTime,expiresAt:r.expiresAt,status:r.status,ruleVersion:r.ruleVersion,contextSnapshot:r.contextSnapshot}))})}
-  async function backend(action,payload){if(!window.LuviaBackend?.request)return null;return window.LuviaBackend.request(action,payload)}
+  async function backend(action,payload){if(!window.LuviaBackend?.request)return null;const blockedUntil=backendCooldown.get(action)||0;if(blockedUntil>Date.now())return null;try{return await window.LuviaBackend.request(action,payload)}catch(error){if(/400|BAD_REQUEST|ACTION_NOT_FOUND|unknown/i.test(String(error?.message||error)))backendCooldown.set(action,Date.now()+60000);throw error}}
   function invalidate(reason='manual',scope={}){state.invalidations++;if(scope.module||scope.tripId){for(const key of [...cache.keys()])if((!scope.module||key.includes(`:${scope.module}:`))&&(!scope.tripId||key.startsWith(scope.tripId+':')))cache.delete(key)}else cache.clear();emit('invalidated',{reason,scope})}
   function configure(patch={}){settings={...settings,...patch};localStorage.setItem('luvia.recommendations.settings.v1',JSON.stringify(settings));invalidate('settings.changed');emit('settings.changed',{settings:clone(settings)});return clone(settings)}
   function resetLearning(){state.lastEvents=[];state.lastDecision=null;backend('recommendation.learning.reset',{tripId:tripId()}).catch(()=>{});emit('learning.reset',{});return true}
