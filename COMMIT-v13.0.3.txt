@@ -1,0 +1,4 @@
+feat(recommendations): deliver contextual place discovery and refreshed restaurant experience
+
+Add deterministic cross-module recommendation slots, automatic restaurant discovery,
+a compact Luvia workspace, actionable favorites and live dashboard schedule updates.

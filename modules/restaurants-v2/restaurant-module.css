@@ -463,3 +463,51 @@
 .rv2-schedule-card>div>span{display:block;font-size:10px;font-weight:900;letter-spacing:.09em;text-transform:uppercase;color:var(--rv2-accent)}.rv2-schedule-card h3{margin:6px 0 4px;color:#263f54}.rv2-schedule-card p,.rv2-schedule-card small{color:#748695}.rv2-schedule-facts{display:grid;gap:7px;align-content:center}.rv2-schedule-facts small{display:block}.rv2-schedule-warning,.rv2-schedule-ok{grid-column:1/-1;padding:10px 12px;border-radius:13px;font-weight:700}.rv2-schedule-warning{background:#fff3f1;color:#a94d55}.rv2-schedule-ok{background:#eef9f4;color:#36745f}.rv2-schedule-card.has-conflict{border-color:#efc5c2;background:#fffaf8}
 .lv-schedule-list{display:grid;gap:9px;margin-top:12px}.lv-schedule-list>div{display:flex;gap:9px;padding:9px 0;border-bottom:1px solid var(--lv-line)}.lv-schedule-list>div:last-child{border-bottom:0}.lv-schedule-list>div>span{font-size:18px}.lv-schedule-list strong,.lv-schedule-list small{display:block}.lv-schedule-list small{margin-top:2px;color:var(--lv-muted)}.lv-schedule-list .is-warning small{color:#a94d55}
 @media(max-width:760px){.rv2-schedule-card{grid-template-columns:1fr}}
+
+/* Build 13.0.3 visual refresh */
+
+#restaurants-module .rv2-shell{max-width:1440px;margin:auto;display:grid;gap:24px}
+#restaurants-module .rv2-head-new{padding:8px 6px 0;background:transparent;border:0;box-shadow:none}
+#restaurants-module .rv2-head-new h2{font-size:clamp(2rem,4vw,3.4rem);letter-spacing:-.055em;line-height:1.02;margin:.35rem 0}
+#restaurants-module .rv2-discovery-new{border:1px solid color-mix(in srgb,var(--rv2-accent) 13%,#e5e7eb);background:linear-gradient(145deg,#fff 0%,color-mix(in srgb,var(--rv2-accent) 5%,#fff) 100%);border-radius:32px;padding:clamp(20px,3vw,38px);box-shadow:0 22px 55px rgba(31,48,61,.07)}
+#restaurants-module .rv2-discovery-title{display:flex;justify-content:space-between;gap:20px;align-items:flex-start;margin-bottom:18px}
+#restaurants-module .rv2-discovery-title h3{font-size:clamp(1.6rem,2.8vw,2.5rem);margin:0 0 6px;letter-spacing:-.04em}
+#restaurants-module .rv2-smart-pill{white-space:nowrap;padding:9px 13px;border-radius:999px;background:color-mix(in srgb,var(--rv2-accent) 10%,#fff);font-weight:700;font-size:.82rem}
+#restaurants-module .rv2-entity-search-new{display:block!important}
+#restaurants-module .rv2-search-box{display:grid;grid-template-columns:auto minmax(0,1fr) auto;align-items:center;gap:10px;background:#fff;border:1px solid #e4e9ec;border-radius:22px;padding:7px 8px 7px 16px;box-shadow:0 12px 30px rgba(31,48,61,.06)}
+#restaurants-module .rv2-search-box>span{font-size:1.4rem;opacity:.55}
+#restaurants-module .rv2-search-box input[name=query]{border:0!important;box-shadow:none!important;min-height:48px!important;padding:0 6px!important}
+#restaurants-module .rv2-search-submit{border-radius:16px!important;min-width:120px!important}
+#restaurants-module .rv2-quick-row{overflow-x:auto;padding:14px 2px 4px;scrollbar-width:none}
+#restaurants-module .rv2-filter-drawer{margin-top:12px;border-top:1px solid #edf0f2;padding-top:10px}
+#restaurants-module .rv2-filter-drawer summary{cursor:pointer;font-weight:700;color:#587080}
+#restaurants-module .rv2-recommendation-head{display:flex;justify-content:space-between;align-items:end;margin:26px 0 12px}
+#restaurants-module .rv2-recommendation-head span,#restaurants-module .rv2-section-heading span{font-size:.72rem;letter-spacing:.12em;text-transform:uppercase;color:#64818d;font-weight:800}
+#restaurants-module .rv2-recommendation-head h4{font-size:1.35rem;margin:4px 0 0}
+#restaurants-module .rv2-recommendation-head button{border:0;background:transparent;color:var(--rv2-accent);font-weight:800;cursor:pointer}
+#restaurants-module .rv2-favorites-new,#restaurants-module .rv2-saved-section{background:#fff;border:1px solid #e7ebed;border-radius:28px;padding:clamp(18px,2.4vw,28px)}
+#restaurants-module .rv2-section-heading{display:flex;justify-content:space-between;gap:16px;align-items:flex-start;margin-bottom:18px}
+#restaurants-module .rv2-section-heading h3{font-size:1.65rem;margin:4px 0}
+#restaurants-module .rv2-section-heading p{margin:0;color:#71828f}
+#restaurants-module .rv2-favorite-list{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:12px}
+#restaurants-module .rv2-favorite-card{display:grid;grid-template-columns:auto minmax(0,1fr);gap:12px;padding:15px;border:1px solid #e7ebed;border-radius:20px;background:linear-gradient(135deg,#fff,#fafcfc);cursor:pointer;transition:.18s ease}
+#restaurants-module .rv2-favorite-card:hover{transform:translateY(-2px);box-shadow:0 14px 30px rgba(31,48,61,.08)}
+#restaurants-module .rv2-favorite-icon{width:42px;height:42px;border-radius:14px;display:grid;place-items:center;background:color-mix(in srgb,var(--rv2-accent) 8%,#fff)}
+#restaurants-module .rv2-favorite-copy{min-width:0}
+#restaurants-module .rv2-favorite-copy strong,#restaurants-module .rv2-favorite-copy small{display:block}
+#restaurants-module .rv2-favorite-copy small{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;color:#7b8b96;margin-top:4px}
+#restaurants-module .rv2-favorite-actions{grid-column:1/-1;display:flex;gap:8px}
+#restaurants-module .rv2-favorite-actions button{border:1px solid #e1e6e9;background:#fff;border-radius:12px;padding:8px 12px;font-weight:700}
+#restaurants-module .rv2-favorite-actions .danger{color:#9b4962}
+#restaurants-module .rv2-saved-section .rv2-grid{grid-template-columns:repeat(auto-fit,minmax(310px,1fr));gap:16px}
+.rv2-workspace-compact{max-width:860px!important}
+.rv2-workspace-compact .rv2-workspace-head{background:linear-gradient(135deg,#f5fbfb,#fff)}
+.rv2-compact-summary{display:flex;align-items:center;justify-content:space-between;gap:16px;padding:18px 28px;border-bottom:1px solid #edf0f2}
+.rv2-favorite-toggle{display:flex;align-items:center;gap:8px;padding:10px 14px;border-radius:999px;background:#fff;border:1px solid #e4e9ec;cursor:pointer}
+.rv2-favorite-toggle input{display:none}.rv2-favorite-toggle span{font-size:1.25rem}
+.rv2-favorite-toggle:has(input:checked){background:color-mix(in srgb,var(--rv2-accent) 9%,#fff);border-color:color-mix(in srgb,var(--rv2-accent) 25%,#ddd)}
+.rv2-workspace-compact .rv2-workspace-body{padding:24px 28px}
+.rv2-compact-section{display:block!important}
+.rv2-optional-details{margin-top:18px;border:1px solid #e7ebed;border-radius:18px;padding:14px}
+.rv2-optional-details summary{cursor:pointer;font-weight:800}
+@media(max-width:700px){#restaurants-module .rv2-discovery-title{display:block}.rv2-smart-pill{display:inline-block;margin-top:10px}#restaurants-module .rv2-search-box{grid-template-columns:auto minmax(0,1fr)}#restaurants-module .rv2-search-submit{grid-column:1/-1;width:100%}.rv2-compact-summary{display:block}.rv2-favorite-toggle{margin-top:12px;width:max-content}}

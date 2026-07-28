@@ -17,7 +17,7 @@
     "native": false,
     "places": true,
     "ai": false,
-    "recommendations": false,
+    "recommendations": true,
     "mediaV2": false,
     "automation": false,
     "pwaFoundation": true,
@@ -28,9 +28,9 @@
     "logHistory": 500
   },
   "release": {
-    "core": "4.0.2.1",
-    "build": "13.0.2.1",
-    "name": "Place Migration Completion",
+    "core": "4.0.3",
+    "build": "13.0.3",
+    "name": "Cross-Module Recommendations",
     "channel": "production",
     "builtAt": "2026-07-28T23:30:00+02:00"
   },
@@ -41,9 +41,9 @@
     "githubPagesFallback": "https://fklaas.github.io/Luvia/"
   },
   "build": {
-    "core": "4.0.2.1",
-    "build": "13.0.2.1",
-    "name": "Place Migration Completion",
+    "core": "4.0.3",
+    "build": "13.0.3",
+    "name": "Cross-Module Recommendations",
     "channel": "production",
     "releasedAt": "2026-07-28",
     "builtAt": "2026-07-28T23:30:00+02:00"
@@ -82,7 +82,7 @@
     "profileSchemaVersion": 5
   },
   "placeIntelligence": {
-    "version": "4.0.2.1",
+    "version": "4.0.3",
     "types": 11,
     "multiType": true,
     "restaurantCompatibility": true,
@@ -93,6 +93,7 @@
       "arrivalMeters": 80,
       "minStaySeconds": 120,
       "leaveMeters": 180
-    }
+    },
+    "crossModuleRecommendations": "active"
   }
 }
