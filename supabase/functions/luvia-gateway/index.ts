@@ -7,6 +7,7 @@ import { placesAction, placesDiagnostics } from './_shared/places.ts';
 import { restaurantAction, restaurantDiagnostics } from './_shared/restaurants.ts';
 import { recommendationAction, recommendationDiagnostics } from './_shared/recommendations.ts';
 import { scheduleAction } from './_shared/schedule.ts';
+import { routesAction } from './_shared/routes.ts';
 
 type GatewayBody={action?:string;payload?:unknown;context?:Record<string,unknown>};
 const ACTION_PATTERN=/^[a-z][a-z0-9]*(?:[._-][a-z0-9]+)*$/;
@@ -14,6 +15,7 @@ const PUBLIC_ACTIONS=new Set(['system.health','places.health']);
 const PLACES_ACTIONS=new Set(['destination.resolve','places.health','places.text-search','places.nearby-search','places.autocomplete','places.details','places.photo']);
 const RESTAURANT_ACTIONS=new Set(['restaurant.health','restaurant.list','restaurant.history','restaurant.import','restaurant.lifecycle.update','restaurant.feedback','restaurant.remove','restaurant.clear']);
 const SCHEDULE_ACTIONS=new Set(['schedule.list','schedule.upsert','schedule.delete']);
+const ROUTES_ACTIONS=new Set(['routes.compute']);
 const RECOMMENDATION_ACTIONS=new Set(['recommendation.health','recommendation.store','recommendation.event','recommendation.decision','recommendation.list','recommendation.events','recommendation.learning.reset']);
 
 Deno.serve(async(req:Request)=>{
@@ -31,7 +33,7 @@ Deno.serve(async(req:Request)=>{
 
   const forwarded=req.headers.get('x-forwarded-for')?.split(',')[0]?.trim();
   const clientKey=forwarded||req.headers.get('cf-connecting-ip')||'unknown';
-  const rate=enforceRateLimit(`${clientKey}:${action}`,action==='system.health'?60:PLACES_ACTIONS.has(action)?45:RESTAURANT_ACTIONS.has(action)?30:SCHEDULE_ACTIONS.has(action)?60:RECOMMENDATION_ACTIONS.has(action)?60:30,60_000);
+  const rate=enforceRateLimit(`${clientKey}:${action}`,action==='system.health'?60:PLACES_ACTIONS.has(action)?45:RESTAURANT_ACTIONS.has(action)?30:SCHEDULE_ACTIONS.has(action)?60:ROUTES_ACTIONS.has(action)?40:RECOMMENDATION_ACTIONS.has(action)?60:30,60_000);
   if(!rate.allowed)return errorResponse(429,'RATE_LIMITED','Zu viele Anfragen.',id,{...cors,'Retry-After':String(rate.retryAfter)});
 
   const supabaseUrl=Deno.env.get('SUPABASE_URL')||'';
@@ -53,7 +55,7 @@ Deno.serve(async(req:Request)=>{
     let data:unknown;
     switch(action){
       case 'system.health':
-        data={status:'ok',service:'luvia-gateway',version:'3.7.1',time:new Date().toISOString(),authenticated:Boolean(userId),places:placesDiagnostics(),restaurants:restaurantDiagnostics(),recommendations:recommendationDiagnostics()};
+        data={status:'ok',service:'luvia-gateway',version:'3.7.2',time:new Date().toISOString(),authenticated:Boolean(userId),places:placesDiagnostics(),restaurants:restaurantDiagnostics(),recommendations:recommendationDiagnostics()};
         break;
       default:
         if(PLACES_ACTIONS.has(action)){
@@ -75,6 +77,7 @@ Deno.serve(async(req:Request)=>{
           const durationMs=Math.round((performance.now()-started)*100)/100;
           return jsonResponse(200,{ok:true,data:schedule.data,meta:{requestId:id,action,durationMs}},cors);
         }
+        if(ROUTES_ACTIONS.has(action)){const routes=await routesAction(action,body.payload||{});const durationMs=Math.round((performance.now()-started)*100)/100;return jsonResponse(200,{ok:true,data:routes.data,meta:{requestId:id,action,durationMs}},cors);}
         if(RECOMMENDATION_ACTIONS.has(action)){
           if(!userClient) return errorResponse(401,'AUTH_REQUIRED','Für diese Aktion ist eine Anmeldung erforderlich.',id,cors);
           const recommendations=await recommendationAction(action,body.payload||{},userClient);

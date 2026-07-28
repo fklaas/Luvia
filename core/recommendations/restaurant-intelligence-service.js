@@ -1,6 +1,6 @@
 (() => {
   'use strict';
-  const VERSION='3.9.1';
+  const VERSION='4.1.3.10';
   const listeners=new Set();
   const state={loading:false,tripId:null,restaurants:[],primary:null,nearby:null,reservationMissing:null,departure:null,betterAlternative:null,lastUpdatedAt:null,lastError:null};
   const clone=v=>v==null?v:JSON.parse(JSON.stringify(v));
@@ -8,7 +8,7 @@
   const tripId=()=>String(window.LuviaTripContext?.getActiveTrip?.()?.tripId||window.LuviaTripStore?.snapshot?.()?.activeTripId||'');
   const meters=v=>Number.isFinite(Number(v))?Number(v):null;
   const formatDistance=v=>{const n=meters(v);if(n==null)return null;return n<1000?`${Math.round(n)} m`:`${(n/1000).toFixed(1).replace('.',',')} km`};
-  const minutesFor=(distance,mode='walk')=>{const n=meters(distance);if(n==null)return null;return Math.max(1,Math.ceil(n/(mode==='drive'?420:75))+(mode==='drive'?3:0))};
+  const minutesFor=(distance,mode='walk')=>{const n=meters(distance);if(n==null)return null;const metersPerMinute=mode==='drive'?700:80;return Math.max(1,Math.ceil(n/metersPerMinute)+(mode==='drive'?4:0))};
   const timeString=d=>`${String(d.getHours()).padStart(2,'0')}:${String(d.getMinutes()).padStart(2,'0')}`;
   const normalizeTime=value=>/^([01]\d|2[0-3]):[0-5]\d$/.test(String(value||''))?String(value):null;
   const messageKey=value=>String(value||'').toLowerCase().replace(/[äÄ]/g,'ae').replace(/[öÖ]/g,'oe').replace(/[üÜ]/g,'ue').replace(/ß/g,'ss').replace(/[^a-z0-9]+/g,' ').trim();
@@ -39,12 +39,35 @@
     return {score:groupScore,label:'Gruppen-Match',detail:`${evaluated} Profile wurden fair gewichtet. Schwächere Einzelmatches zählen bewusst stärker als ein einfacher Durchschnitt.`,complete:evaluated>=known,evaluated,known};
   }
 
+  function restaurantKind(place){
+    const text=[place?.name,place?.primaryType,...(place?.types||[])].join(' ').toLowerCase();
+    if(/breakfast|frühstück|bakery|bäckerei|cafe|café|coffee/.test(text))return'cafe';
+    if(/ice cream|eis|gelato|dessert|konditorei/.test(text))return'dessert';
+    if(/bar|pub|cocktail|wine/.test(text))return'bar';
+    return'meal';
+  }
+  function openingIntervals(place,date=new Date()){
+    const periods=place?.openingHours?.periods||place?.raw?.currentOpeningHours?.periods||place?.raw?.regularOpeningHours?.periods||[];
+    const day=date.getDay(),out=[];
+    for(const period of periods){const open=period?.open,close=period?.close;if(!open||Number(open.day)!==day)continue;const from=Number(open.hour||0)*60+Number(open.minute||0);let to=close?Number(close.hour||0)*60+Number(close.minute||0):1440;if(close&&Number(close.day)!==day)to=1440;out.push([from,to]);}
+    return out;
+  }
   function bestVisitTime(place,context={}){
     const explicit=normalizeTime(place?.recommendedVisitTime||place?.time||place?.reservationTime);
     if(explicit)return explicit;
-    const current=now(),hour=current.getHours();
-    if(context.intent==='now'||hour>=17)return hour<18?'18:15':hour<20?timeString(new Date(current.getTime()+45*60000)):'20:15';
-    return '18:45';
+    const date=context.date?new Date(`${context.date}T12:00:00`):now();
+    const kind=restaurantKind(place);
+    const targets=kind==='cafe'?[570,900]:kind==='dessert'?[930,990]:kind==='bar'?[1230,1290]:[750,1110,1230];
+    const intervals=openingIntervals(place,date);
+    const nowMinutes=date.toDateString()===now().toDateString()?now().getHours()*60+now().getMinutes()+30:0;
+    const candidates=targets.filter(x=>x>=nowMinutes).concat(targets);
+    let chosen=candidates[0]||1110;
+    if(intervals.length){
+      const valid=candidates.find(target=>intervals.some(([from,to])=>target>=from&&target<to-30));
+      if(valid!=null)chosen=valid;else{const [from,to]=intervals[0];chosen=Math.min(Math.max(from+30,nowMinutes),Math.max(from,to-45));}
+    }
+    chosen=Math.ceil(chosen/5)*5;
+    return `${String(Math.floor(chosen/60)%24).padStart(2,'0')}:${String(chosen%60).padStart(2,'0')}`;
   }
   function reservationHint(place){
     if(place?.reservationStatus==='confirmed'||place?.reservationStatus==='reserved'||place?.lifecycleStatus==='reserved')return 'Reservierung bestätigt';
@@ -78,7 +101,7 @@
   }
   function enrich(place,all=[],context={}){
     const rec=place?.recommendation||{};
-    const distance=meters(place?.distanceMeters),walk=minutesFor(distance,'walk'),drive=minutesFor(distance,'drive');
+    const distance=meters(place?.distanceMeters),walk=Number(place?.route?.walk?.durationMinutes)||minutesFor(distance,'walk'),drive=Number(place?.route?.drive?.durationMinutes)||minutesFor(distance,'drive');
     const baby=babyFit(place),budget=budgetFit(place),best=rec.suggestedTime||bestVisitTime(place,context);
     const reasons=[...(rec.reasons||[])];
     if(distance!=null&&distance<=1500)reasons.push('Sehr gut von eurem aktuellen Standort erreichbar.');
@@ -103,7 +126,7 @@
     const cleanReasons=uniqueMessages(reasons,4);
     const warningKeys=new Set(uniqueMessages(warnings,4).map(messageKey));
     const cleanWarnings=uniqueMessages(warnings,4).filter(w=>!cleanReasons.some(r=>{const a=messageKey(r),b=messageKey(w);return a===b||[...new Set(a.split(' '))].filter(x=>x.length>3&&b.includes(x)).length>=2}));
-    return {...place,intelligence:{version:VERSION,score,distanceLabel:formatDistance(distance),openLabel:place.openNow===true?'Heute geöffnet':place.openNow===false?'Heute geschlossen':'Öffnungszeiten prüfen',bestTime:best,reservationHint:reservationHint(place),babyLabel:baby.label,budgetLabel:budget.label,walkMinutes:walk,driveMinutes:drive,groupMatch:rec.groupMatch||null,groupInsight:group,participantMatches:rec.groupMatch?.participants||[],reasons:cleanReasons,warnings:cleanWarnings,suggestions:uniqueMessages([...(schedule?.guidance||[]),...suggestionLines(place,all)],4),alternatives,schedule}};
+    return {...place,intelligence:{version:VERSION,score,distanceLabel:formatDistance(distance),openLabel:place.openNow===true?'Heute geöffnet':place.openNow===false?'Heute geschlossen':'Öffnungszeiten prüfen',bestTime:best,bestTimeReason:place?.popularTimes?'Aus aktueller Auslastung abgeleitet':'Aus Öffnungszeiten, Restauranttyp und Tagesplan berechnet',reservationHint:reservationHint(place),babyLabel:baby.label,budgetLabel:budget.label,walkMinutes:walk,driveMinutes:drive,groupMatch:rec.groupMatch||null,groupInsight:group,participantMatches:rec.groupMatch?.participants||[],reasons:cleanReasons,warnings:cleanWarnings,suggestions:uniqueMessages([...(schedule?.guidance||[]),...suggestionLines(place,all)],4),alternatives,schedule}};
   }
   async function enhance(candidates=[],context={}){return candidates.map(p=>enrich(p,candidates,context))}
   function emit(){const snap=snapshot();listeners.forEach(fn=>{try{fn(snap)}catch{}});window.dispatchEvent(new CustomEvent('luvia:restaurant-intelligence-changed',{detail:snap}))}

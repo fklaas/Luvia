@@ -1,6 +1,6 @@
 (() => {
   'use strict';
-  const VERSION='4.1.3.9';
+  const VERSION='4.1.3.10';
   const listeners=new Set();
   const STORAGE='luvia.schedule.v4';
   const LAST_TRIP_STORAGE=`${STORAGE}.lastTripId`;
@@ -77,7 +77,7 @@
   function windowBetween(a,b){if(!a||!b)return null;const start=new Date(a.endAt),end=new Date(b.startAt),minutes=Math.floor((end-start)/60000);return minutes>0?{startAt:start.toISOString(),endAt:end.toISOString(),minutes,label:`${formatTime(start)}–${formatTime(end)} Uhr`}:null}
   function analyze(place,events=state.events,options={}){
     const date=place?.date||place?.reservationDate||options.date||todayKey();
-    const time=place?.time||place?.reservationTime||place?.recommendedVisitTime||place?.intelligence?.bestTime||options.time||'18:45';
+    const time=place?.time||place?.reservationTime||place?.recommendedVisitTime||place?.intelligence?.bestTime||options.time||null;
     const visit=parseDateTime(date,time);
     const distance=Number.isFinite(Number(place?.distanceMeters))?Number(place.distanceMeters):null;
     const mode=distance!=null&&distance>2000?'drive':'walk';

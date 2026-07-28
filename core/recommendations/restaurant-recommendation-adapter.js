@@ -29,12 +29,12 @@
       if(!expensive||!/low|spar|günstig/.test(budget)){components.push({key:'restaurant.budget',score:6,max:7,label:'Budgetstil'});reasons.push('Passt zu eurem Budgetstil.')}else warnings.push('Das Preisniveau liegt über eurem bevorzugten Budget.');
       if(distance!=null&&distance<=1500){components.push({key:'restaurant.route',score:5,max:5,label:'Direkt erreichbar'});reasons.push('Liegt direkt auf eurem Weg beziehungsweise in eurer Nähe.')}
       if(place?.openNow===false)warnings.push('Aktuell geschlossen – Alternativen sollten geprüft werden.');
-      const preferred=place?.recommendedVisitTime||'18:45';
+      const preferred=place?.recommendedVisitTime||place?.intelligence?.bestTime||null;
       return{entityType:'restaurant',components,reasons,warnings,suggestedDate:ctx.travel?.today||null,suggestedTime:preferred};
     },
     bestTime(input,ctx){
       const distance=number(input.candidate?.distanceMeters),walk=distance==null?null:Math.max(1,Math.ceil(distance/75));
-      const preferred=input.preferredTime||input.candidate?.recommendedVisitTime||'18:45';
+      const preferred=input.preferredTime||input.candidate?.recommendedVisitTime||input.candidate?.intelligence?.bestTime||null;
       const reasons=['Passt zu eurem typischen Abend-Zeitfenster.'];
       if(distance!=null&&distance<2000)reasons.push('Der Weg vom aktuellen Standort bleibt kurz.');
       if(input.candidate?.openNow===true)reasons.push('Die Öffnungszeiten sind kompatibel.');
