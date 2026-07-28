@@ -1,0 +1,5 @@
+feat(core): add timeline and gps visit detection
+
+Introduce canonical timeline events, opt-in GPS presence tracking, stay validation,
+pass-by protection, automatic visited lifecycle transitions, offline persistence,
+realtime synchronization and visit diagnostics.

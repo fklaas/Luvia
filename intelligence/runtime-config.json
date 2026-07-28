@@ -28,10 +28,11 @@
     "logHistory": 500
   },
   "release": {
-    "core": "4.0.1",
-    "build": "13.0.1",
-    "name": "Unified Place UI",
-    "channel": "production"
+    "core": "4.0.2",
+    "build": "13.0.2",
+    "name": "Timeline & GPS Visit Detection",
+    "channel": "production",
+    "builtAt": "2026-07-28T23:30:00+02:00"
   },
   "deployment": {
     "canonicalHost": "myluvia.app",
@@ -40,12 +41,12 @@
     "githubPagesFallback": "https://fklaas.github.io/Luvia/"
   },
   "build": {
-    "core": "4.0.1",
-    "build": "13.0.1",
-    "name": "Unified Place UI",
+    "core": "4.0.2",
+    "build": "13.0.2",
+    "name": "Timeline & GPS Visit Detection",
     "channel": "production",
     "releasedAt": "2026-07-28",
-    "builtAt": "2026-07-28T21:00:00+02:00"
+    "builtAt": "2026-07-28T23:30:00+02:00"
   },
   "backend": {
     "functionName": "luvia-gateway",
@@ -81,10 +82,17 @@
     "profileSchemaVersion": 5
   },
   "placeIntelligence": {
-    "version": "4.0.1",
+    "version": "4.0.2",
     "types": 11,
     "multiType": true,
     "restaurantCompatibility": true,
-    "visitDetection": "prepared"
+    "visitDetection": "active",
+    "timeline": "active",
+    "geofenceThresholds": {
+      "nearbyMeters": 150,
+      "arrivalMeters": 80,
+      "minStaySeconds": 120,
+      "leaveMeters": 180
+    }
   }
 }
