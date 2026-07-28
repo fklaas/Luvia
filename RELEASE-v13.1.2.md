@@ -1,4 +1,4 @@
-# Luvia 13.1.2 – Smart Free-Time Suggestions
+# Luvia 13.1.3 – Smart Free-Time Suggestions
 
 - deterministische Kandidatenprüfung pro freiem Zeitfenster
 - GPS-Wegzeit, Aufenthaltsdauer, Puffer, Öffnungsstatus und Lifecycle berücksichtigt

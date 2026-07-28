@@ -1,7 +1,7 @@
 (() => {
   'use strict';
 
-  const VERSION = '4.1.2';
+  const VERSION = '4.1.3';
   const STORAGE_PREFIX = 'luvia.today.v4';
   const listeners = new Set();
   const clone = value => value == null ? value : JSON.parse(JSON.stringify(value));
@@ -207,8 +207,10 @@
       const unique = [];
       const seen = new Set();
       for (const match of matches) {
-        const key = String(match?.id || match?.placeId || match?.providerPlaceId || match?.name || match?.title || '');
-        if (!key || seen.has(key)) continue;
+        const displayName=String(match?.name||match?.title||'').trim();
+        const displayType=String(match?.primaryType||match?.entityType||match?.type||'').trim();
+        const key = String(match?.id || match?.placeId || match?.providerPlaceId || '');
+        if (!key || !displayType || !displayName || /^(unbenannter ort|unbekannter ort|unknown place)$/i.test(displayName) || seen.has(key)) continue;
         seen.add(key);
         const suggestion = { ...match, freeWindow };
         unique.push(suggestion);
