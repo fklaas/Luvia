@@ -12,9 +12,11 @@ async function run(){
   try{const r=await fetch(rootUrl('offline.html'),{cache:'no-store'});offline=r.ok}catch{}
   const resolvedStart=manifest?new URL(manifest.start_url||'./',manifestUrl).toString():'';
   const resolvedScope=manifest?new URL(manifest.scope||'./',manifestUrl).toString():'';
+  const diagnosticsMode=window.LUVIA_DIAGNOSTICS_MODE===true;
+  const effectiveRegistration=Boolean(s.registered||s.controller||navigator.serviceWorker?.controller);
   const checks={
     serviceWorkerSupported:s.supported,
-    serviceWorkerRegistered:s.registered,
+    serviceWorkerRegistered:diagnosticsMode?effectiveRegistration:s.registered,
     activeWorker:Boolean(s.active||navigator.serviceWorker.controller),
     manifestLoaded:Boolean(manifest),
     startUrlInsideApp:Boolean(resolvedStart&&resolvedStart.startsWith(appRoot.toString())),
@@ -25,7 +27,9 @@ async function run(){
     offlineShell:offline,
     secureContext:window.isSecureContext
   };
-  return{ok:Object.values(checks).every(Boolean),message:Object.values(checks).every(Boolean)?'PWA-Grundlage ist bereit.':'PWA-Grundlage ist noch unvollständig.',checks,snapshot:s,manifest,appRoot:appRoot.toString()};
+  const ok=Object.values(checks).every(Boolean);
+  const message=ok?(diagnosticsMode?'PWA-Grundlage im lokalen Diagnosemodus bereit.':'PWA-Grundlage ist bereit.'):'PWA-Grundlage ist noch unvollständig.';
+  return{ok,message,skippedRegistration:diagnosticsMode&&!s.registered,checks,snapshot:s,manifest,appRoot:appRoot.toString()};
 }
 window.LuviaPWATest=Object.freeze({run});
 })();

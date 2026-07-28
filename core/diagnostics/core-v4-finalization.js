@@ -1,7 +1,7 @@
 (() => {
   'use strict';
-  const VERSION='4.0.4.5';
-  const BUILD='13.0.4.5';
+  const VERSION='4.0.4.6';
+  const BUILD='13.0.4.6';
   const now=()=>new Date().toISOString();
   const safe=(fn,fallback=null)=>{try{return fn()}catch(error){return fallback??{error:error?.message||String(error)}}};
   const textBytes=value=>new TextEncoder().encode(String(value||'')).length;
@@ -23,10 +23,10 @@
   async function runSmokeTests(){
     const results=[];const test=(name,fn)=>{try{const detail=fn();const ok=typeof detail==='boolean'?detail:Boolean(detail?.ok??detail);results.push({name,ok,detail,at:now()})}catch(error){results.push({name,ok:false,error:error.message,at:now()})}};
     test('Kernel boot',()=>Boolean(window.LuviaKernel));
-    test('Service registry',()=>{const d=window.LuviaServiceRegistry?.diagnostics?.()||{};return{ok:d.count>=23&&d.ready===d.count,count:d.count,ready:d.ready}});
+    test('Service registry',()=>{const services=window.LuviaServiceRegistry?.list?.()||[];const ready=services.filter(item=>item.state==='ready').length;const failed=services.filter(item=>item.state==='failed').length;return{ok:services.length>=23&&ready===services.length&&failed===0,count:services.length,ready,failed,mode:window.LUVIA_DIAGNOSTICS_MODE===true?'diagnostics':'app'}});
     test('11 Place Types',()=>({ok:(window.LuviaPlaceRegistry?.diagnostics?.().registeredTypes||0)===11,value:window.LuviaPlaceRegistry?.diagnostics?.().registeredTypes}));
     test('11 Adapters',()=>({ok:(window.LuviaPlaceRegistry?.diagnostics?.().registeredAdapters||0)===11,value:window.LuviaPlaceRegistry?.diagnostics?.().registeredAdapters}));
-    test('Restaurant Adapter',()=>({ok:window.LuviaPlaceRegistry?.getAdapter?.('restaurant')?.state==='ready',state:window.LuviaPlaceRegistry?.getAdapter?.('restaurant')?.state}));
+    test('Restaurant Adapter',()=>{const status=window.LuviaPlaceRegistry?.status?.('restaurant')||window.LuviaPlaceRegistry?.diagnostics?.().adapters?.find(item=>item.key==='restaurant')||{};return{ok:status.state==='ready',state:status.state||'unknown',reason:status.reason||null}});
     test('Place UI',()=>({ok:window.LuviaPlaceUI?.diagnostics?.().status==='ready',detail:window.LuviaPlaceUI?.diagnostics?.()}));
     test('Schedule contract',()=>({ok:['upsertEvent','removeEvent','snapshot','analyze'].every(k=>typeof window.LuviaScheduleIntelligence?.[k]==='function')}));
     test('Timeline contract',()=>({ok:['record','list','diagnostics'].every(k=>typeof window.LuviaTimelineCore?.[k]==='function')}));
