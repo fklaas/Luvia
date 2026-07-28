@@ -1,6 +1,6 @@
 (function(){
 'use strict';
-const VERSION='4.2.0.3';
+const VERSION='4.3.0';
 let events=[];let realtime=null;let activeTripId=null;const metrics={created:0,loaded:0,synced:0,failed:0,lastError:null};
 const now=()=>new Date().toISOString();
 const id=()=>{try{return crypto.randomUUID();}catch{return`timeline-${Date.now()}-${Math.random().toString(36).slice(2)}`;}};
