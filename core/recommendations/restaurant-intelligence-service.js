@@ -1,6 +1,6 @@
 (() => {
   'use strict';
-  const VERSION='4.1.3.12';
+  const VERSION='4.2.0.3';
   const listeners=new Set();
   const state={loading:false,tripId:null,restaurants:[],primary:null,nearby:null,reservationMissing:null,departure:null,betterAlternative:null,lastUpdatedAt:null,lastError:null};
   const clone=v=>v==null?v:JSON.parse(JSON.stringify(v));
