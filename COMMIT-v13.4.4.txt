@@ -1,0 +1,1 @@
+refactor(places): enforce single-source place fields and live planning shell
