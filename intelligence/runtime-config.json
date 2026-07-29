@@ -28,8 +28,8 @@
     "logHistory": 500
   },
   "release": {
-    "core": "4.4.6.5",
-    "build": "13.4.6.5",
+    "core": "4.5.0",
+    "build": "13.5.0",
     "name": "Warm Ambient Dashboard & Compact Timeline",
     "channel": "production",
     "builtAt": "2026-07-29T15:09:00+02:00"
@@ -39,11 +39,11 @@
     "wwwHost": "www.myluvia.app",
     "stagingHost": "staging.myluvia.app",
     "githubPagesFallback": "https://fklaas.github.io/Luvia/",
-    "build": "13.4.6.5"
+    "build": "13.5.0"
   },
   "build": {
-    "core": "4.4.6.5",
-    "build": "13.4.6.5",
+    "core": "4.5.0",
+    "build": "13.5.0",
     "name": "Warm Ambient Dashboard & Compact Timeline",
     "channel": "production",
     "releasedAt": "2026-07-29",
