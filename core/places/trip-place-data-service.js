@@ -1,6 +1,6 @@
 (() => {
 'use strict';
-const VERSION='4.4.6.2';
+const VERSION='4.6.3';
 let state={tripId:null,loading:false,records:[],lastUpdatedAt:null,lastError:null};
 let channel=null; const listeners=new Set();
 const clone=v=>v==null?v:JSON.parse(JSON.stringify(v));
@@ -45,7 +45,7 @@ function dateEntries(type=null){
  for(const r of state.records){
   if(type&&r.place_type!==type)continue;
   const contract=window.LuviaPlaceTypeContracts?.get?.(r.place_type);
-  const defs=(contract?.fields||[]).filter(f=>['start','end','point'].includes(f.timelineRole)).map(f=>({key:f.key,kind:f.timelineRole==='start'?'check_in':f.timelineRole==='end'?'check_out':'planned',label:f.label||'Place'}));
+  const pointLabel=r.place_type==='restaurant'?'Restaurant':r.place_type==='attraction'?'Sehenswürdigkeit':r.place_type==='photo_spot'?'Fotospot':(contract?.identity?.label||'Place');const defs=(contract?.fields||[]).filter(f=>['start','end','point'].includes(f.timelineRole)).map(f=>({key:f.key,kind:f.timelineRole==='start'?'check_in':f.timelineRole==='end'?'check_out':'planned',label:f.timelineRole==='point'?pointLabel:(f.label||pointLabel)}));
   const merged=[...defs];for(const [key,[kind,label]] of Object.entries(legacyLabels[r.place_type]||{}))if(!merged.some(x=>x.key===key))merged.push({key,kind,label});
   for(const d of merged){const value=r.fields?.[d.key];if(!value)continue;out.push({id:`tpd:${r.trip_place_id}:${d.key}`,dataKey:d.key,tripId:r.trip_id,tripPlaceId:r.trip_place_id,placeId:r.place_id,placeType:r.place_type,kind:d.kind,title:`${d.label} · ${r.place?.name||r.fields?.place_name||'Place'}`,startAt:value,fields:r.fields,record:r})}
  }

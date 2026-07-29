@@ -6,7 +6,7 @@
   const emit=(next,detail={})=>{phase=next;document.documentElement.dataset.luviaBoot=next;window.dispatchEvent(new CustomEvent('luvia:boot-phase',{detail:{phase:next,...detail}}));};
   function splash(){return document.getElementById('luviaBootSplash')}
   function begin(){if(window.__LUVIA_BOOT_DONE__||phase!=='idle')return;startedAt=performance.now();document.documentElement.classList.add('lv-booting');emit('splash');}
-  async function finish(){if(phase==='ready'||phase==='revealing')return;const remaining=Math.max(0,MIN_SPLASH_MS-(performance.now()-startedAt));if(remaining)await delay(remaining);const node=splash();emit('revealing');document.documentElement.classList.add('lv-boot-revealing');node?.setAttribute('aria-hidden','true');await delay(520);node?.remove();window.__LUVIA_BOOT_DONE__=true;document.documentElement.classList.remove('lv-booting','lv-boot-revealing');emit('ready',{snapshot});}
+  async function finish(){if(phase==='ready'||phase==='revealing')return;const remaining=Math.max(0,MIN_SPLASH_MS-(performance.now()-startedAt));if(remaining)await delay(remaining);const node=splash();emit('revealing');document.documentElement.classList.add('lv-boot-revealing');node?.setAttribute('aria-hidden','true');await delay(620);node?.remove();window.__LUVIA_BOOT_DONE__=true;document.documentElement.classList.remove('lv-booting','lv-boot-revealing');emit('ready',{snapshot});}
   function chooseActiveTrip(){
     const trips=window.LuviaTripStore.snapshot().trips;
     const profile=window.LuviaProfileService.snapshot().profile||{};
@@ -48,5 +48,5 @@
     return bootPromise;
   }
   function reset(){if(window.__LUVIA_BOOT_DONE__)return;bootPromise=null;snapshot=null;phase='idle';}
-  window.LuviaBootCoordinator=Object.freeze({version:'1.2.0',boot,reveal:finish,reset,get phase(){return phase},get snapshot(){return snapshot},get booting(){return !['ready','failed','idle'].includes(phase)}});
+  window.LuviaBootCoordinator=Object.freeze({version:'1.3.0',boot,reveal:finish,reset,get phase(){return phase},get snapshot(){return snapshot},get booting(){return !['ready','failed','idle'].includes(phase)}});
 })();
