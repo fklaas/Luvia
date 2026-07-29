@@ -1,7 +1,7 @@
 (() => {
 'use strict';
 const VERSION='4.2.0.2';
-const CONFIG={nearbyMeters:150,arrivalMeters:80,minStaySeconds:120,minSamples:3,leaveMeters:180,maxAccuracyMeters:100,maximumAge:15000,timeout:20000};
+const CONFIG={nearbyMeters:150,arrivalMeters:80,minStaySeconds:300,minSamples:3,leaveMeters:180,maxAccuracyMeters:100,maximumAge:15000,timeout:20000};
 const sessions=new Map();let visits=[],watchId=null,enabled=false,permission='unknown',lastPosition=null;
 const metrics={positions:0,ignoredAccuracy:0,nearby:0,arrived:0,stayDetected:0,visited:0,left:0,manual:0,errors:0,lastError:null,lastSyncAt:null};
 const now=()=>new Date().toISOString(),clone=v=>v==null?v:JSON.parse(JSON.stringify(v));

@@ -1,0 +1,14 @@
+core/places/timeline-core.js
+core/dashboard/dashboard-widget-registry.js
+app/app-shell.js
+app/app-shell.css
+modules/accommodations/accommodation-module.js
+core/places/presence-visit-core.js
+core/places/place-detail-service.js
+supabase/migrations/20260729_031_core_v4_4_1_universal_place_schedule_timeline.sql
+supabase/migrations/20260729_032_core_v5_0_0_cloud_timeline_feed.sql
+index.html
+RELEASE-v13.4.2.md
+DEPLOYMENT-v13.4.2.md
+COMMIT-v13.4.2.txt
+CHANGED-FILES-v13.4.2.txt
