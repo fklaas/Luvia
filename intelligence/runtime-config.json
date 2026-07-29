@@ -28,26 +28,26 @@
     "logHistory": 500
   },
   "release": {
-    "core": "4.3.2",
-    "build": "13.3.2",
-    "name": "Stay Core & Accommodation Data Foundation",
+    "core": "4.3.3.1",
+    "build": "13.3.3.1",
+    "name": "Universal Place Detail & Intelligence Contract",
     "channel": "production",
-    "builtAt": "2026-07-28T17:45:00+02:00"
+    "builtAt": "2026-07-29T10:20:00+02:00"
   },
   "deployment": {
     "canonicalHost": "myluvia.app",
     "wwwHost": "www.myluvia.app",
     "stagingHost": "staging.myluvia.app",
     "githubPagesFallback": "https://fklaas.github.io/Luvia/",
-    "build": "13.3.2"
+    "build": "13.3.3.1"
   },
   "build": {
-    "core": "4.3.2",
-    "build": "13.3.2",
-    "name": "Stay Core & Accommodation Data Foundation",
+    "core": "4.3.3.1",
+    "build": "13.3.3.1",
+    "name": "Universal Place Detail & Intelligence Contract",
     "channel": "production",
     "releasedAt": "2026-07-28",
-    "builtAt": "2026-07-28T17:45:00+02:00"
+    "builtAt": "2026-07-29T10:20:00+02:00"
   },
   "backend": {
     "functionName": "luvia-gateway",
