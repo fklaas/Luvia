@@ -28,11 +28,11 @@
     "logHistory": 500
   },
   "release": {
-    "core": "4.5.0",
-    "build": "13.5.0",
-    "name": "Warm Ambient Dashboard & Compact Timeline",
+    "core": "4.5.1.1",
+    "build": "13.5.1.1",
+    "name": "Compact Place Cards & Places Hub Navigation Fix",
     "channel": "production",
-    "builtAt": "2026-07-29T15:09:00+02:00"
+    "builtAt": "2026-07-29T16:01:00+02:00"
   },
   "deployment": {
     "canonicalHost": "myluvia.app",

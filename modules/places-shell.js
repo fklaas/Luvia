@@ -1,5 +1,5 @@
 (()=>{'use strict';
-const VERSION='4.3.3';
+const VERSION='4.5.1.1';
 const PLACE_MODULES={restaurants:{type:'restaurant',title:'Restaurants',icon:'🍽️',description:'Genuss, Cafés und besondere Restaurantmomente entdecken.',host:'restaurants-module'},accommodations:{type:'accommodation',title:'Unterkünfte',icon:'🏨',description:'Hotels, Apartments und besondere Unterkünfte finden.',host:'accommodations-module'}};
 let state={root:null,trip:null,active:null,mounted:null};
 const esc=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
@@ -7,9 +7,10 @@ function enabled(){const ids=window.LuviaModuleRegistry?.enabledForTrip?.(state.
 function tile(id){const m=PLACE_MODULES[id];return `<button class="places-hub-tile" data-place-module="${id}"><span class="places-hub-icon">${m.icon}</span><span><strong>${esc(m.title)}</strong><small>${esc(m.description)}</small></span><b>Öffnen →</b></button>`}
 function renderHub(){state.active=null;state.root.innerHTML=`<section class="places-hub"><header><span class="rv2-kicker">Luvia Places</span><h1>Was möchtet ihr entdecken?</h1><p>Alle Orte eurer Reise nutzen dieselbe Suche, dieselben Place-Karten und denselben intelligenten Core.</p></header><div class="places-hub-grid">${enabled().map(tile).join('')||'<div class="places-hub-empty">Für diese Reise ist noch kein Places-Bereich aktiviert.</div>'}</div></section>`;bind()}
 async function open(id,payload){if(!PLACE_MODULES[id]||!enabled().includes(id))return renderHub();if(state.mounted&&state.mounted!==id)await window.LuviaModules?.unmountModule?.(state.mounted);state.active=id;state.mounted=id;const m=PLACE_MODULES[id];state.root.innerHTML=`<section class="places-experience is-switching"><button class="places-back" data-places-back>← Zurück zur Place-Auswahl</button><div id="${m.host}"></div></section>`;requestAnimationFrame(()=>state.root.querySelector('.places-experience')?.classList.remove('is-switching'));await window.LuviaModules.mountModule(id,state.trip);if(payload)requestAnimationFrame(()=>window.dispatchEvent(new CustomEvent('luvia:open-place',{detail:payload})));bind()}
-function bind(){state.root.querySelectorAll('[data-place-module]').forEach(b=>b.onclick=()=>open(b.dataset.placeModule));state.root.querySelector('[data-places-back]')?.addEventListener('click',async()=>{if(state.mounted)await window.LuviaModules?.unmountModule?.(state.mounted);state.mounted=null;renderHub()})}
+async function showHub(){if(!state.root)return false;if(state.mounted)await window.LuviaModules?.unmountModule?.(state.mounted);state.mounted=null;renderHub();return true}
+function bind(){state.root.querySelectorAll('[data-place-module]').forEach(b=>b.onclick=()=>open(b.dataset.placeModule));state.root.querySelector('[data-places-back]')?.addEventListener('click',showHub)}
 async function mount(root,trip,options={}){state.root=root;state.trip=trip;const requested=options.moduleId||null;if(requested&&enabled().includes(requested))await open(requested,options.payload);else renderHub()}
 async function unmount(){if(state.mounted)await window.LuviaModules?.unmountModule?.(state.mounted);state={root:null,trip:null,active:null,mounted:null}}
 function openPlace(payload={}){const id=payload.type==='restaurant'?'restaurants':payload.type==='accommodation'?'accommodations':null;return id?open(id,payload):false}
-window.LuviaPlacesShell=Object.freeze({version:VERSION,mount,unmount,open,openPlace,active:()=>state.active});
+window.LuviaPlacesShell=Object.freeze({version:VERSION,mount,unmount,open,openPlace,showHub,active:()=>state.active});
 })();
