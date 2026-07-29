@@ -13,61 +13,61 @@
   <link rel="icon" href="luvia-logo.svg">
   <link rel="manifest" href="manifest.webmanifest">
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700&display=swap">
-  <link rel="stylesheet" href="app/app-shell.css?v=13.5.4">
-  <link rel="stylesheet" href="app/public-entry.css?v=13.5.4">
-  <link rel="stylesheet" href="core/places/place-ui.css?v=13.5.4">
-  <link rel="stylesheet" href="modules/restaurants-v2/restaurant-module.css?v=13.5.4">
-  <link rel="stylesheet" href="modules/accommodations/accommodation-module.css?v=13.5.4">
-  <link rel="stylesheet" href="modules/places-shell.css?v=13.5.4">
-  <link rel="stylesheet" href="core/profiles/profile-foundation.css?v=13.5.4">
-  <link rel="stylesheet" href="core/design/design-system-v3.css?v=13.5.4">
+  <link rel="stylesheet" href="app/app-shell.css?v=13.5.5">
+  <link rel="stylesheet" href="app/public-entry.css?v=13.5.5">
+  <link rel="stylesheet" href="core/places/place-ui.css?v=13.5.5">
+  <link rel="stylesheet" href="modules/restaurants-v2/restaurant-module.css?v=13.5.5">
+  <link rel="stylesheet" href="modules/accommodations/accommodation-module.css?v=13.5.5">
+  <link rel="stylesheet" href="modules/places-shell.css?v=13.5.5">
+  <link rel="stylesheet" href="core/profiles/profile-foundation.css?v=13.5.5">
+  <link rel="stylesheet" href="core/design/design-system-v3.css?v=13.5.5">
 </head>
 <body>
   <div id="luviaBootSplash" class="lv-start-splash" role="status" aria-live="polite"><div class="lv-start-splash__inner"><img src="luvia-logo.svg" alt="" class="lv-start-splash__logo"><strong>Luvia</strong><span>Gemeinsam reisen. Für immer erinnern.</span></div></div>
   <div id="app" class="lv-root" aria-busy="true"></div>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-  <script src="intelligence/environment.js?v=13.5.4"></script>
-  <script src="auth/config.js?v=13.5.4"></script>
-  <script src="auth/session.js?v=13.5.4"></script>
-  <script src="auth/ui.js?v=13.5.4"></script>
-  <script src="core/services/supabase-service.js?v=13.5.4"></script>
-  <script src="core/services/theme-service.js?v=13.5.4"></script>
-  <script src="intelligence/pwa-service.js?v=13.5.4" data-luvia-pwa-service="app"></script>
-  <script src="core/storage/storage.js?v=13.5.4"></script>
-  <script src="core/legacy/paris-migrator.js?v=13.5.4"></script>
-  <script src="legacy/paris/cloud-adapter.js?v=13.5.4"></script>
-  <script src="core/trips/trip-store.js?v=13.5.4"></script>
-  <script src="core/modules/module-registry.js?v=13.5.4"></script>
-  <script src="core/dashboard/dashboard-widget-registry.js?v=13.5.4"></script>
-  <script src="core/collaboration/collaboration-service.js?v=13.5.4"></script>
-  <script src="core/profiles/profile-service.js?v=13.5.4"></script>
-  <script src="core/preferences/travel-preferences-service.js?v=13.5.4"></script>
-  <script src="core/runtime/runtime.js?v=13.5.4"></script>
-  <script src="luvia-trip-context.js?v=13.5.4"></script>
-  <script src="luvia-app-state.js?v=13.5.4"></script>
-  <script src="app-gateway.js?v=13.5.4"></script>
-  <script src="intelligence/destination-service.js?v=13.5.4"></script>
-  <script src="intelligence/destination-context.js?v=13.5.4"></script>
-  <script src="intelligence/backend-service.js?v=13.5.4"></script>
-  <script src="intelligence/places-service.js?v=13.5.4"></script><script src="intelligence/place-entity-service.js?v=13.5.4"></script><script src="core/places/place-domain.js?v=13.5.4"></script><script src="core/places/place-type-contract.js?v=13.5.4"></script><script src="core/places/place-type-definitions.js?v=13.5.4"></script><script src="core/places/place-registry.js?v=13.5.4"></script><script src="core/places/place-adapters.js?v=13.5.4"></script><script src="core/places/place-core.js?v=13.5.4"></script><script src="core/places/trip-place-data-service.js?v=13.5.4"></script><script src="core/places/place-collection-service.js?v=13.5.4"></script><script src="core/places/timeline-core.js?v=13.5.4"></script><script src="core/places/presence-visit-core.js?v=13.5.4"></script><script src="core/places/place-ui-contract.js?v=13.5.4"></script><script src="core/places/place-provider-fields.js?v=13.5.4"></script><script src="core/places/place-ui-actions.js?v=13.5.4"></script><script src="core/places/place-ui-states.js?v=13.5.4"></script><script src="core/places/place-ui.js?v=13.5.4"></script><script src="core/places/place-experience-shell.js?v=13.5.4"></script><script src="core/places/place-intelligence-service.js?v=13.5.4"></script><script src="core/places/place-detail-service.js?v=13.5.4"></script><script src="core/places/place-conformance-service.js?v=13.5.4"></script>
-  <script src="core/context/travel-context-service.js?v=13.5.4"></script>
-  <script src="core/recommendations/recommendation-service.js?v=13.5.4"></script>
-  <script src="core/recommendations/restaurant-recommendation-adapter.js?v=13.5.4"></script>
-  <script src="intelligence/restaurant-service.js?v=13.5.4"></script>
-  <script src="core/recommendations/schedule-intelligence-service.js?v=13.5.4"></script><script src="core/recommendations/today-intelligence-service.js?v=13.5.4"></script><script src="core/recommendations/live-day-companion-service.js?v=13.5.4"></script>
-  <script src="core/recommendations/restaurant-intelligence-service.js?v=13.5.4"></script><script src="core/recommendations/cross-module-recommendation-service.js?v=13.5.4"></script><script src="core/diagnostics/core-v4-finalization.js?v=13.5.4"></script><script src="core/diagnostics/cloud-only-place-verification.js?v=13.5.4"></script>
-  <script src="modules/module-manager.js?v=13.5.4"></script>
-  <script src="modules/restaurants-v2/restaurant-module.js?v=13.5.4"></script>
-  <script src="modules/accommodations/accommodation-module.js?v=13.5.4"></script>
-  <script src="modules/places-shell.js?v=13.5.4"></script>
-  <script src="core/trips/trip-creator.js?v=13.5.4"></script>
-  <script src="core/ui/ui-kit.js?v=13.5.4"></script>
-  <script src="core/ui/ui-manager.js?v=13.5.4"></script>
-  <script src="core/trips/trip-experience.js?v=13.5.4"></script>
-  <script src="core/trips/join-flow.js?v=13.5.4"></script>
-  <script src="core/profiles/profile-foundation.js?v=13.5.4"></script>
-  <script src="app/public-entry.js?v=13.5.4"></script>
-  <script src="core/runtime/boot-coordinator.js?v=13.5.4"></script>
-  <script src="app/app-shell.js?v=13.5.4"></script>
+  <script src="intelligence/environment.js?v=13.5.5"></script>
+  <script src="auth/config.js?v=13.5.5"></script>
+  <script src="auth/session.js?v=13.5.5"></script>
+  <script src="auth/ui.js?v=13.5.5"></script>
+  <script src="core/services/supabase-service.js?v=13.5.5"></script>
+  <script src="core/services/theme-service.js?v=13.5.5"></script>
+  <script src="intelligence/pwa-service.js?v=13.5.5" data-luvia-pwa-service="app"></script>
+  <script src="core/storage/storage.js?v=13.5.5"></script>
+  <script src="core/legacy/paris-migrator.js?v=13.5.5"></script>
+  <script src="legacy/paris/cloud-adapter.js?v=13.5.5"></script>
+  <script src="core/trips/trip-store.js?v=13.5.5"></script>
+  <script src="core/modules/module-registry.js?v=13.5.5"></script>
+  <script src="core/dashboard/dashboard-widget-registry.js?v=13.5.5"></script>
+  <script src="core/collaboration/collaboration-service.js?v=13.5.5"></script>
+  <script src="core/profiles/profile-service.js?v=13.5.5"></script>
+  <script src="core/preferences/travel-preferences-service.js?v=13.5.5"></script>
+  <script src="core/runtime/runtime.js?v=13.5.5"></script>
+  <script src="luvia-trip-context.js?v=13.5.5"></script>
+  <script src="luvia-app-state.js?v=13.5.5"></script>
+  <script src="app-gateway.js?v=13.5.5"></script>
+  <script src="intelligence/destination-service.js?v=13.5.5"></script>
+  <script src="intelligence/destination-context.js?v=13.5.5"></script>
+  <script src="intelligence/backend-service.js?v=13.5.5"></script>
+  <script src="intelligence/places-service.js?v=13.5.5"></script><script src="intelligence/place-entity-service.js?v=13.5.5"></script><script src="core/places/place-domain.js?v=13.5.5"></script><script src="core/places/place-type-contract.js?v=13.5.5"></script><script src="core/places/place-type-definitions.js?v=13.5.5"></script><script src="core/places/place-registry.js?v=13.5.5"></script><script src="core/places/place-adapters.js?v=13.5.5"></script><script src="core/places/place-core.js?v=13.5.5"></script><script src="core/places/trip-place-data-service.js?v=13.5.5"></script><script src="core/places/place-collection-service.js?v=13.5.5"></script><script src="core/places/timeline-core.js?v=13.5.5"></script><script src="core/places/presence-visit-core.js?v=13.5.5"></script><script src="core/places/place-ui-contract.js?v=13.5.5"></script><script src="core/places/place-provider-fields.js?v=13.5.5"></script><script src="core/places/place-ui-actions.js?v=13.5.5"></script><script src="core/places/place-ui-states.js?v=13.5.5"></script><script src="core/places/place-ui.js?v=13.5.5"></script><script src="core/places/place-experience-shell.js?v=13.5.5"></script><script src="core/places/place-intelligence-service.js?v=13.5.5"></script><script src="core/places/place-detail-service.js?v=13.5.5"></script><script src="core/places/place-conformance-service.js?v=13.5.5"></script>
+  <script src="core/context/travel-context-service.js?v=13.5.5"></script>
+  <script src="core/recommendations/recommendation-service.js?v=13.5.5"></script>
+  <script src="core/recommendations/restaurant-recommendation-adapter.js?v=13.5.5"></script>
+  <script src="intelligence/restaurant-service.js?v=13.5.5"></script>
+  <script src="core/recommendations/schedule-intelligence-service.js?v=13.5.5"></script><script src="core/recommendations/today-intelligence-service.js?v=13.5.5"></script><script src="core/recommendations/live-day-companion-service.js?v=13.5.5"></script>
+  <script src="core/recommendations/restaurant-intelligence-service.js?v=13.5.5"></script><script src="core/recommendations/cross-module-recommendation-service.js?v=13.5.5"></script><script src="core/diagnostics/core-v4-finalization.js?v=13.5.5"></script><script src="core/diagnostics/cloud-only-place-verification.js?v=13.5.5"></script>
+  <script src="modules/module-manager.js?v=13.5.5"></script>
+  <script src="modules/restaurants-v2/restaurant-module.js?v=13.5.5"></script>
+  <script src="modules/accommodations/accommodation-module.js?v=13.5.5"></script>
+  <script src="modules/places-shell.js?v=13.5.5"></script>
+  <script src="core/trips/trip-creator.js?v=13.5.5"></script>
+  <script src="core/ui/ui-kit.js?v=13.5.5"></script>
+  <script src="core/ui/ui-manager.js?v=13.5.5"></script>
+  <script src="core/trips/trip-experience.js?v=13.5.5"></script>
+  <script src="core/trips/join-flow.js?v=13.5.5"></script>
+  <script src="core/profiles/profile-foundation.js?v=13.5.5"></script>
+  <script src="app/public-entry.js?v=13.5.5"></script>
+  <script src="core/runtime/boot-coordinator.js?v=13.5.5"></script>
+  <script src="app/app-shell.js?v=13.5.5"></script>
 </body>
 </html>
