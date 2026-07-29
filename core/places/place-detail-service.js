@@ -1,6 +1,6 @@
 (function(){
 'use strict';
-const VERSION='4.4.3';
+const VERSION='4.5.0.1';
 const adapters=new Map();let current=null;
 const esc=v=>window.LuviaPlaceExperience?.esc?.(v)||String(v??'');
 const LABELS={discovered:'Entdeckt',idea:'Entdeckt',saved:'Favorisiert',favorite:'Favorisiert',planned:'Geplant',reserved:'Reserviert',selected:'Ausgewählt',booked:'Gebucht',checked_in:'Eingecheckt',checked_out:'Ausgecheckt',visited:'Besucht',rated:'Bewertet',rejected:'Verworfen',archived:'Archiviert'};
@@ -18,5 +18,7 @@ function registerAdapter(t,a){adapters.set(t,a);return a}
 async function openExperience(t,s={},c={}){const a=adapters.get(t);if(!a)throw new Error(`No place detail adapter registered for ${t}`);const o=openLoading({typeLabel:a.label||t});const m=await a.load(s,c);update(o,m);await a.bind?.(o,m,c);return o}
 function diagnostics(){return{version:VERSION,status:'ready',adapters:[...adapters.keys()],contract:['single-overlay','progressive-loading','restaurant-derived-renderer','lifecycle','schedule','participants','suggestions','alternatives','capabilities','gps-only-distance']}}
 window.addEventListener('luvia:place-detail-committed',()=>close());
-window.LuviaPlaceDetail=Object.freeze({version:VERSION,open,openLoading,update,openExperience,registerAdapter,close,lifecycle,diagnostics});
+const api=Object.freeze({version:VERSION,open,openLoading,update,openExperience,registerAdapter,close,lifecycle,diagnostics});
+window.LuviaPlaceDetail=api;
+window.LuviaPlaceDetails=api;
 })();
