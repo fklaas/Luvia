@@ -695,3 +695,9 @@
 .lv-day-entry-actions button{appearance:none!important;border:0!important;background:transparent!important;padding:0!important;color:var(--trip-accent,#668fd1)!important;font:600 12px/1.25 inherit!important;white-space:nowrap!important;cursor:pointer!important;width:auto!important;max-width:none!important}
 .lv-time-fields{display:grid;grid-template-columns:1fr 1fr;gap:14px}
 @media(max-width:640px){.lv-time-fields{grid-template-columns:1fr}.rv2-today-plan-item-actions{gap:8px}.lv-day-entry-actions{gap:8px!important}}
+
+
+/* Build 13.4.4.1 – dashboard timeline actions follow the global shell */
+.lv-timeline-modal .lv-day-entry-actions{grid-column:3!important;display:flex!important;align-items:center!important;justify-content:flex-start!important;gap:14px!important;width:100%!important;margin:7px 0 14px!important;padding:0 16px!important;flex-wrap:nowrap!important}
+.lv-timeline-modal .lv-day-entry-actions button{width:auto!important;max-width:none!important;white-space:nowrap!important;word-break:normal!important;overflow-wrap:normal!important;font-size:11px!important}
+@media(max-width:640px){.lv-timeline-modal .lv-day-entry-actions{grid-column:3!important;gap:8px 12px!important;padding:0 12px!important;flex-wrap:wrap!important}}
