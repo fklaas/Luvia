@@ -1,6 +1,6 @@
 (() => {
 'use strict';
-const VERSION='5.3.3';
+const VERSION='5.3.4';
 const calendarVisibleByTrip=new Map();
 let state={tripId:null,loading:false,hydrated:false,entries:[],days:[],lastUpdatedAt:null,lastError:null,members:{},places:{}};
 let channels=[];const listeners=new Set();

@@ -9,9 +9,13 @@
   let formRendered=false;
   let entering=false;
   let wasAuthenticated=false;
+  const splashStartedAt=performance.now();
+  let splashReleaseTimer=0;
 
   function setAppVisible(){
-    root.classList.remove('auth-booting');
+    clearTimeout(splashReleaseTimer);
+    const wait=Math.max(0,2400-(performance.now()-splashStartedAt));
+    splashReleaseTimer=setTimeout(()=>root.classList.remove('auth-booting'),wait);
   }
   function showGateway(state){
     resolved=true;
