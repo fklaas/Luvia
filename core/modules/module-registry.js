@@ -1,6 +1,7 @@
 (() => {
   'use strict';
   const entries=[
+    {id:'accommodations',title:'Unterkünfte',longTitle:'Unterkünfte & Aufenthalt',icon:'🏨',description:'Unterkünfte suchen, speichern sowie Check-in und Check-out verwalten.',status:'available',defaultEnabled:false,order:5},
     {id:'restaurants',title:'Restaurants',longTitle:'Restaurants & Reservierungen',icon:'🍽️',description:'Restaurants entdecken, speichern und Reservierungen planen.',status:'available',defaultEnabled:true,order:10},
     {id:'maps',title:'Karten',longTitle:'Karten & gespeicherte Orte',icon:'🗺️',description:'Orte, Wege und Reiseziele auf einer gemeinsamen Karte.',status:'planned',defaultEnabled:false,order:20},
     {id:'weather',title:'Wetter',longTitle:'Wetter & Tageshinweise',icon:'☀️',description:'Wetter am Reiseziel und passende Hinweise für eure Tage.',status:'planned',defaultEnabled:false,order:30},
@@ -20,5 +21,5 @@
   function get(id){return catalog.get(id)||null}
   function isEnabled(trip,id){return enabledForTrip(trip).includes(id)}
   function updateTripModules(trip,ids){const modules=normalize(ids);return {...trip,modules,selectedModules:modules,updatedAt:new Date().toISOString()}}
-  window.LuviaModuleRegistry=Object.freeze({version:'4.0.0',list,get,normalize,enabledForTrip,isEnabled,updateTripModules});
+  window.LuviaModuleRegistry=Object.freeze({version:'4.3.1',list,get,normalize,enabledForTrip,isEnabled,updateTripModules});
 })();

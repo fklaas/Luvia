@@ -28,9 +28,9 @@
     "logHistory": 500
   },
   "release": {
-    "core": "4.3.0.4",
-    "build": "13.3.0.4",
-    "name": "Route-Aware Restaurant Planning",
+    "core": "4.3.1",
+    "build": "13.3.1",
+    "name": "Stay Core & Accommodation Data Foundation",
     "channel": "production",
     "builtAt": "2026-07-28T17:45:00+02:00"
   },
@@ -39,12 +39,12 @@
     "wwwHost": "www.myluvia.app",
     "stagingHost": "staging.myluvia.app",
     "githubPagesFallback": "https://fklaas.github.io/Luvia/",
-    "build": "13.3.0.4"
+    "build": "13.3.1"
   },
   "build": {
-    "core": "4.3.0.4",
-    "build": "13.3.0.4",
-    "name": "Route-Aware Restaurant Planning",
+    "core": "4.3.1",
+    "build": "13.3.1",
+    "name": "Stay Core & Accommodation Data Foundation",
     "channel": "production",
     "releasedAt": "2026-07-28",
     "builtAt": "2026-07-28T17:45:00+02:00"
@@ -98,7 +98,7 @@
     "crossModuleRecommendations": "active"
   },
   "todayIntelligence": {
-    "version": "4.3.0.4",
+    "version": "4.3.1",
     "status": "active",
     "departure": true,
     "freeWindows": true,
@@ -108,7 +108,7 @@
     "globalGps": true,
     "offlineSync": true
   },
-  "coreVersion": "4.3.0.4",
-  "buildVersion": "13.3.0.4",
-  "releaseName": "Route-Aware Restaurant Planning"
+  "coreVersion": "4.3.1",
+  "buildVersion": "13.3.1",
+  "releaseName": "Stay Core & Accommodation Data Foundation"
 }
