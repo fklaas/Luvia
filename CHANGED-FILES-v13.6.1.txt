@@ -15,6 +15,6 @@ modules/accommodations/accommodation-module.js
 index.html
 service-worker.js
 app/app-shell.css
-RELEASE-v13.6.1.md
-DEPLOYMENT-v13.6.1.md
-COMMIT-v13.6.1.txt
+RELEASE-v13.6.2.md
+DEPLOYMENT-v13.6.2.md
+COMMIT-v13.6.2.txt

@@ -1,4 +1,4 @@
-# Testplan 13.6.1
+# Testplan 13.6.2
 
 1. App im Light- und Dark-Mode starten: Splash genau einmal, danach zuletzt aktive Cloud-Reise.
 2. Places-Hub neu laden: Unterkünfte, Restaurants sowie Sehenswürdigkeiten & Aktivitäten sichtbar.

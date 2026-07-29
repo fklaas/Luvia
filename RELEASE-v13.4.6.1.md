@@ -1,4 +1,4 @@
-# Luvia 13.4.6.1 – Favorites-Only Place Shell
+# Luvia 13.4.6.2 – Favorites-Only Place Shell
 
 ## Änderungen
 - Die universelle Places-Sammlung zeigt ausschließlich Favoriten. Separate Bereiche für gespeicherte Places und Verlauf wurden aus der aktiven Place-Shell entfernt.

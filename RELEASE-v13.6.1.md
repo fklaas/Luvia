@@ -1,4 +1,4 @@
-# Luvia 13.6.1 / Core 4.6.1 — Global Place Core Alignment
+# Luvia 13.6.2 / Core 4.6.2 — Global Place Core Alignment
 
 - Unterkünfte, Restaurants und Sehenswürdigkeiten sind für jede Reise verbindliche Core-Place-Module und verschwinden nach einem Reload nicht mehr.
 - Sehenswürdigkeiten verwenden dieselbe globale Place-UI wie Restaurants und Unterkünfte.

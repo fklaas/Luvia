@@ -1,6 +1,6 @@
 (() => {
 'use strict';
-const VERSION='4.4.6.1';
+const VERSION='4.4.6.2';
 let state={tripId:null,loading:false,records:[],lastUpdatedAt:null,lastError:null};
 let channel=null; const listeners=new Set();
 const clone=v=>v==null?v:JSON.parse(JSON.stringify(v));
@@ -39,25 +39,15 @@ async function remove(tripPlaceId,{tripId:id=tripId()}={}){
  const {error}=await db().from('trip_place_data').delete().eq('trip_id',id).eq('trip_place_id',tripPlaceId);
  if(error)throw error; await hydrate(id); return true;
 }
-const dateDefs={
- accommodation:[
-  {key:'check_in_at',kind:'check_in',label:'Check-in'},
-  {key:'check_out_at',kind:'check_out',label:'Check-out'}
- ],
- restaurant:[
-  {key:'planned_at',kind:'planned',label:'Restaurant'},
-  {key:'reservation_at',kind:'reserved',label:'Reservierung'}
- ]
-};
+const legacyLabels={restaurant:{planned_at:['planned','Restaurant'],reservation_at:['reserved','Reservierung']},accommodation:{check_in_at:['check_in','Check-in'],check_out_at:['check_out','Check-out']}};
 function dateEntries(type=null){
  const out=[];
  for(const r of state.records){
   if(type&&r.place_type!==type)continue;
-  const defs=dateDefs[r.place_type]||[];
-  for(const d of defs){
-   const value=r.fields?.[d.key]; if(!value)continue;
-   out.push({id:`tpd:${r.trip_place_id}:${d.key}`,dataKey:d.key,tripId:r.trip_id,tripPlaceId:r.trip_place_id,placeId:r.place_id,placeType:r.place_type,kind:d.kind,title:`${d.label} · ${r.place?.name||r.fields?.place_name||'Place'}`,startAt:value,fields:r.fields,record:r});
-  }
+  const contract=window.LuviaPlaceTypeContracts?.get?.(r.place_type);
+  const defs=(contract?.fields||[]).filter(f=>['start','end','point'].includes(f.timelineRole)).map(f=>({key:f.key,kind:f.timelineRole==='start'?'check_in':f.timelineRole==='end'?'check_out':'planned',label:f.label||'Place'}));
+  const merged=[...defs];for(const [key,[kind,label]] of Object.entries(legacyLabels[r.place_type]||{}))if(!merged.some(x=>x.key===key))merged.push({key,kind,label});
+  for(const d of merged){const value=r.fields?.[d.key];if(!value)continue;out.push({id:`tpd:${r.trip_place_id}:${d.key}`,dataKey:d.key,tripId:r.trip_id,tripPlaceId:r.trip_place_id,placeId:r.place_id,placeType:r.place_type,kind:d.kind,title:`${d.label} · ${r.place?.name||r.fields?.place_name||'Place'}`,startAt:value,fields:r.fields,record:r})}
  }
  return out.sort((a,b)=>new Date(a.startAt)-new Date(b.startAt));
 }
