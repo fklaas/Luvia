@@ -1,6 +1,6 @@
 (function(){
 'use strict';
-const VERSION='4.5.1.2';
+const VERSION='4.5.1.3';
 const esc=v=>window.LuviaPlaceExperience?.esc?.(v)||String(v??'');
 const defs=[
  ['primaryTypeDisplayName','Kategorie','🏷️'],['formattedAddress','Adresse','📍'],['nationalPhoneNumber','Telefon','📞'],['internationalPhoneNumber','Telefon international','☎️'],['websiteUri','Website','🌐'],['googleMapsUri','Google Maps','🗺️'],['rating','Bewertung','⭐'],['userRatingCount','Bewertungen','💬'],['priceLevel','Preisniveau','💶'],['businessStatus','Geschäftsstatus','ℹ️'],['utcOffsetMinutes','Zeitzone','🕒'],['allowsDogs','Hunde erlaubt','🐕'],['goodForChildren','Für Kinder geeignet','👶'],['goodForGroups','Für Gruppen geeignet','👥'],['restroom','WC vorhanden','🚻'],['outdoorSeating','Außenplätze','🌤️'],['reservable','Reservierbar','🗓️'],['takeout','Mitnahme','🥡'],['delivery','Lieferung','🚲'],['dineIn','Vor Ort','🍽️'],['servesBreakfast','Frühstück','🥐'],['servesLunch','Mittagessen','☀️'],['servesDinner','Abendessen','🌙'],['servesVegetarianFood','Vegetarische Auswahl','🌱'],['servesBeer','Bier','🍺'],['servesWine','Wein','🍷'],['servesCocktails','Cocktails','🍸'],['liveMusic','Live-Musik','🎵'],['curbsidePickup','Abholung am Fahrzeug','🚗']

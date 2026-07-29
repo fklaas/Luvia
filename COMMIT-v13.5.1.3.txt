@@ -1,0 +1,1 @@
+fix(places): close card facts detail actions alternatives and hub navigation

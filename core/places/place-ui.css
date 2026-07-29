@@ -4,7 +4,7 @@
 .luv-place-assessment{display:grid;grid-template-columns:1fr 1fr;gap:12px}.luv-place-assessment article{padding:17px;border-radius:19px;background:#f8fafb;border:1px solid #edf0f2}.luv-place-assessment span{font-weight:900;color:var(--luv-place-ink)}.luv-place-assessment ul{margin:10px 0 0;padding-left:18px;color:#4d606e}.luv-place-assessment p{color:#4d606e}.luv-place-assessment .has-warning{background:#fff8f4}
 @media(max-width:640px){.luv-place-card{padding:16px;border-radius:22px}.luv-place-card-head{grid-template-columns:auto minmax(0,1fr)}.luv-place-lifecycle{grid-column:1/-1;width:max-content}.luv-place-assessment{grid-template-columns:1fr}}
 
-/* Core 4.5.1.2 — global Place UI contract */
+/* Core 4.5.1.3 — global Place UI contract */
 :root{--place-surface:#fff;--place-surface-raised:#fff;--place-surface-muted:#f7f9fa;--place-border:var(--luv-place-line);--place-radius-card:24px;--place-radius-overlay:28px;--place-card-padding:18px;--place-control-height:44px;--place-gap-sm:8px;--place-gap-md:14px;--place-gap-lg:22px;--place-shadow-card:0 12px 34px rgba(31,50,67,.08);--place-shadow-overlay:0 28px 80px rgba(20,39,55,.18);--place-accent:var(--luv-place-accent);--place-accent-soft:var(--luv-place-soft)}
 .luv-place-card{background:var(--place-surface);border-color:var(--place-border);border-radius:var(--place-radius-card);padding:var(--place-card-padding);box-shadow:var(--place-shadow-card)}
 .luv-place-fact-slots{display:flex;flex-wrap:wrap;gap:var(--place-gap-sm)}
@@ -15,3 +15,7 @@
 .luv-place-state{display:flex;align-items:center;gap:10px;padding:14px 16px;border:1px dashed var(--place-border);border-radius:16px;background:var(--place-surface-muted);color:var(--luv-place-muted)}.luv-place-state p{margin:0}
 .luv-place-alternatives{display:block!important}
 @media(max-width:640px){.luv-place-provider-details>div{grid-template-columns:1fr}.luv-place-provider-row{align-items:flex-start}.luv-place-card{--place-card-padding:16px;--place-radius-card:22px}}
+
+/* Core 4.5.1.3 — final Place UI behavior closure */
+:is(#restaurants-module,#accommodations-module) .luv-place-actions button[data-import],:is(#restaurants-module,#accommodations-module) .luv-place-actions button[data-favorite],:is(#restaurants-module,#accommodations-module) .luv-place-actions button[data-rv2-import]{background:var(--place-accent,var(--rv2-accent,var(--lv-accent)))!important;color:#fff!important;border-color:var(--place-accent,var(--rv2-accent,var(--lv-accent)))!important}
+.luv-place-alternative{width:100%;display:flex;align-items:center;justify-content:space-between;gap:16px;text-align:left;padding:15px 14px;border:1px solid var(--place-border,#dfe7ea);border-radius:var(--place-radius-card,16px);background:var(--place-surface,#fff);color:var(--luv-place-ink,#17364b);cursor:pointer;font:inherit}.luv-place-alternative span{display:grid;gap:4px}.luv-place-alternative strong{font-size:1rem}.luv-place-alternative small{color:var(--luv-place-muted,#71808b)}.luv-place-alternative b{color:var(--place-accent,var(--rv2-accent,var(--lv-accent)));white-space:nowrap}.luv-place-alternative:hover,.luv-place-alternative:focus-visible{background:var(--place-accent-soft,var(--luv-place-soft));border-color:color-mix(in srgb,var(--place-accent,var(--rv2-accent,var(--lv-accent))) 35%,var(--place-border,#dfe7ea));outline:none}
