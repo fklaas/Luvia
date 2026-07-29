@@ -96,7 +96,7 @@
   .lv-day-entry-actions button{font-size:11px}
 }
 
-/* Build 13.4.5 – stable view lifecycle across tabs and data refreshes */
+/* Build 13.4.6 – stable view lifecycle across tabs and data refreshes */
 .lv-view-host{min-height:calc(100dvh - 170px)}
 .lv-module-intro{min-height:calc(100dvh - 170px)}
 @media(max-width:720px){.lv-view-host,.lv-module-intro{min-height:calc(100dvh - 150px)}}

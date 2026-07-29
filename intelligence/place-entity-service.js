@@ -1,6 +1,6 @@
 (function(){
 'use strict';
-const VERSION='4.3.2';
+const VERSION='4.4.6';
 const TYPES=['restaurant','accommodation','attraction','photo_spot','activity','shopping','nature','family','mobility','transit','custom'];
 const TYPE_TO_GOOGLE={restaurant:'restaurant',accommodation:'lodging',attraction:'tourist_attraction',photo_spot:'tourist_attraction',activity:'amusement_center',shopping:'shopping_mall',nature:'park',family:'amusement_park',mobility:'parking',transit:'transit_station',custom:''};
 const clean=v=>String(v??'').trim();
@@ -11,7 +11,7 @@ function defaultQuery(type){return({restaurant:'Restaurants',accommodation:'Hote
 function deriveRoles(primaryType,googleTypes=[]){const roles=[];const set=new Set(googleTypes);if(set.has('park')&&primaryType!=='nature')roles.push('nature');if((set.has('amusement_park')||set.has('zoo'))&&primaryType!=='family')roles.push('family');if(set.has('tourist_attraction')&&primaryType!=='attraction')roles.push('attraction');if(set.has('shopping_mall')&&primaryType!=='shopping')roles.push('shopping');return [...new Set(roles)];}
 async function importPlace(providerPlaceId,options={}){const id=tripId(options.tripId),type=assertType(options.type||options.primaryType||'custom');if(!id)throw new Error('Aktive Reise hat keine gültige Trip-ID.');const response=await window.LuviaBackend.request('place.import',{tripId:id,providerPlaceId:clean(providerPlaceId).replace(/^places\//,''),primaryType:type,roles:options.roles||[],languageCode:options.languageCode||'de',regionCode:options.regionCode||window.LuviaPlaces?.activeDestination?.()?.countryCode||'DE',tripPlace:options.tripPlace||{},extension:options.extension||{}});window.dispatchEvent(new CustomEvent('luvia:place-imported',{detail:response.data}));return response;}
 async function list(options={}){const id=tripId(options.tripId);if(!id)return{ok:true,data:{entities:[]}};return window.LuviaBackend.request('place.list',{tripId:id,primaryType:options.type||options.primaryType||null,role:options.role||null,status:options.status||null});}
-async function updateLifecycle(tripPlaceId,status,patch={},options={}){const id=tripId(options.tripId);return window.LuviaBackend.request('place.lifecycle.update',{tripId:id,tripPlaceId,status,patch});}
+async function updateLifecycle(tripPlaceId,status,patch={},options={}){const id=tripId(options.tripId);const normalized=window.LuviaPlaceCollections?.normalizeStatus?.(status)||({favorited:'favorite',dismissed:'rejected',memory:'visited',travel_book:'visited'}[status]||status||'idea');return window.LuviaBackend.request('place.lifecycle.update',{tripId:id,tripPlaceId,status:normalized,patch});}
 async function remove(tripPlaceId,options={}){return window.LuviaBackend.request('place.remove',{tripId:tripId(options.tripId),tripPlaceId});}
 async function updateAccommodation(options={}){const id=tripId(options.tripId);if(!id)throw new Error('Aktive Reise hat keine gültige Trip-ID.');const response=await window.LuviaBackend.request('place.accommodation.update',{tripId:id,tripPlaceId:clean(options.tripPlaceId),status:options.status||'saved',accommodation:options.accommodation||{}});window.dispatchEvent(new CustomEvent('luvia:accommodation-updated',{detail:response.data}));return response;}
 async function health(){return window.LuviaBackend.request('place.health',{});}

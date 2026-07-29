@@ -1,0 +1,1 @@
+refactor(places): centralize favorites collections and live planning
