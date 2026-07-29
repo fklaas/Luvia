@@ -1,9 +1,10 @@
-/* Accommodation uses the universal restaurant-led Places design contract. */
-#accommodations-module.luvia-restaurants-v2{position:relative;overflow:visible}
-#accommodations-module .stay-empty{grid-column:1/-1;padding:32px;text-align:center;border-radius:20px;background:rgba(255,255,255,.7);color:#6f7883}
-#accommodations-module .stay-form{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
-#accommodations-module .stay-form label{display:grid;gap:6px;font-weight:750;color:#34465a}
-#accommodations-module .stay-form input,#accommodations-module .stay-form textarea{width:100%;box-sizing:border-box;border:1px solid #dce3e8;border-radius:13px;padding:11px;font:inherit;background:#fff}
+/* Build 13.3.3: accommodations consume the restaurant design contract without a parallel visual system. */
+#accommodations-module .stay-form{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px;margin:14px 0 18px}
+#accommodations-module .stay-form label{display:grid;gap:7px;font-size:.78rem;font-weight:800;color:#536b79}
+#accommodations-module .stay-form input,#accommodations-module .stay-form textarea{width:100%;min-height:46px;border:1px solid var(--rv2-line,#dce5e9);border-radius:14px;padding:11px 13px;background:#fff;color:var(--rv2-ink,#263744);font:inherit;box-sizing:border-box}
+#accommodations-module .stay-form textarea{min-height:92px;resize:vertical}
 #accommodations-module .stay-form .wide{grid-column:1/-1}
-#accommodations-module .stay-form .check{display:flex;align-items:center;gap:8px}.stay-form .check input{width:auto}
-@media(max-width:720px){#accommodations-module .stay-form{grid-template-columns:1fr}#accommodations-module .stay-form .wide{grid-column:auto}}
+#accommodations-module .stay-form .check{display:flex;align-items:center;gap:10px;padding:12px 14px;border-radius:14px;background:var(--rv2-soft,#f6f8f9)}
+#accommodations-module .stay-form .check input{width:18px;min-height:18px}
+#accommodations-module .rv2-stay-section{margin-top:18px;padding:20px;border:1px solid var(--rv2-line,#dce5e9);border-radius:22px;background:#fff}
+@media(max-width:680px){#accommodations-module .stay-form{grid-template-columns:1fr}#accommodations-module .stay-form .wide{grid-column:1}}
