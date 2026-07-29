@@ -14,7 +14,7 @@ type GatewayBody={action?:string;payload?:unknown;context?:Record<string,unknown
 const ACTION_PATTERN=/^[a-z][a-z0-9]*(?:[._-][a-z0-9]+)*$/;
 const PUBLIC_ACTIONS=new Set(['system.health','places.health']);
 const PLACES_ACTIONS=new Set(['destination.resolve','places.health','places.text-search','places.nearby-search','places.autocomplete','places.details','places.photo']);
-const PLACE_ENTITY_ACTIONS=new Set(['place.health','place.list','place.import','place.lifecycle.update','place.remove']);
+const PLACE_ENTITY_ACTIONS=new Set(['place.health','place.list','place.import','place.lifecycle.update','place.accommodation.update','place.remove']);
 const RESTAURANT_ACTIONS=new Set(['restaurant.health','restaurant.list','restaurant.history','restaurant.import','restaurant.lifecycle.update','restaurant.feedback','restaurant.remove','restaurant.clear']);
 const SCHEDULE_ACTIONS=new Set(['schedule.list','schedule.upsert','schedule.delete']);
 const ROUTES_ACTIONS=new Set(['routes.compute']);
@@ -61,7 +61,7 @@ Deno.serve(async(req:Request)=>{
     let data:unknown;
     switch(action){
       case 'system.health':
-        data={status:'ok',service:'luvia-gateway',version:'4.2.0.2',time:new Date().toISOString(),authenticated:Boolean(userId),places:placesDiagnostics(),restaurants:restaurantDiagnostics(),recommendations:recommendationDiagnostics()};
+        data={status:'ok',service:'luvia-gateway',version:'4.3.1',time:new Date().toISOString(),authenticated:Boolean(userId),places:placesDiagnostics(),restaurants:restaurantDiagnostics(),recommendations:recommendationDiagnostics()};
         break;
       default:
         if(PLACES_ACTIONS.has(action)){

@@ -1,6 +1,6 @@
 (function(){
 'use strict';
-const VERSION='4.2.0.1';
+const VERSION='4.3.1';
 const TYPES=['restaurant','accommodation','attraction','photo_spot','activity','shopping','nature','family','mobility','transit','custom'];
 const TYPE_TO_GOOGLE={restaurant:'restaurant',accommodation:'lodging',attraction:'tourist_attraction',photo_spot:'tourist_attraction',activity:'amusement_center',shopping:'shopping_mall',nature:'park',family:'amusement_park',mobility:'parking',transit:'transit_station',custom:''};
 const clean=v=>String(v??'').trim();
@@ -13,7 +13,8 @@ async function importPlace(providerPlaceId,options={}){const id=tripId(options.t
 async function list(options={}){const id=tripId(options.tripId);if(!id)return{ok:true,data:{entities:[]}};return window.LuviaBackend.request('place.list',{tripId:id,primaryType:options.type||options.primaryType||null,role:options.role||null,status:options.status||null});}
 async function updateLifecycle(tripPlaceId,status,patch={},options={}){const id=tripId(options.tripId);return window.LuviaBackend.request('place.lifecycle.update',{tripId:id,tripPlaceId,status,patch});}
 async function remove(tripPlaceId,options={}){return window.LuviaBackend.request('place.remove',{tripId:tripId(options.tripId),tripPlaceId});}
+async function updateAccommodation(options={}){const id=tripId(options.tripId);if(!id)throw new Error('Aktive Reise hat keine gültige Trip-ID.');const response=await window.LuviaBackend.request('place.accommodation.update',{tripId:id,tripPlaceId:clean(options.tripPlaceId),status:options.status||'saved',accommodation:options.accommodation||{}});window.dispatchEvent(new CustomEvent('luvia:accommodation-updated',{detail:response.data}));return response;}
 async function health(){return window.LuviaBackend.request('place.health',{});}
 function entityToPlace(entity){const p=entity?.place||{},tp=entity?.tripPlace||{};return window.LuviaPlaceDomain.normalize({id:p.id,tripId:tp.trip_id,primaryType:p.primary_type||'custom',roles:p.roles||[],name:tp.custom_name||p.name,address:p.address,latitude:p.latitude,longitude:p.longitude,source:p.source||'google_places',sourceId:p.source_id||p.provider_place_id,lifecycle:tp.lifecycle_status||tp.status||'saved',metadata:{tripPlaceId:tp.id,providerPlaceId:p.provider_place_id,plannedDate:tp.planned_date,plannedTime:tp.planned_time,isFavorite:tp.is_favorite,place:p,tripPlace:tp,extension:entity.extension||null}});}
-window.LuviaPlaceEntities=Object.freeze({version:VERSION,TYPES,searchPlaces,importPlace,list,updateLifecycle,remove,health,entityToPlace,deriveRoles});
+window.LuviaPlaceEntities=Object.freeze({version:VERSION,TYPES,searchPlaces,importPlace,list,updateLifecycle,updateAccommodation,remove,health,entityToPlace,deriveRoles});
 })();

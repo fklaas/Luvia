@@ -1,0 +1,1 @@
+fix(stay): persist module selection and unify navigation transitions

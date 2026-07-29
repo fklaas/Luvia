@@ -1,0 +1,16 @@
+Luvia 13.3.1.1 – neue und geänderte Dateien
+
+app/app-shell.js
+app/app-shell.css
+legacy/paris/cloud-adapter.js
+modules/accommodations/accommodation-module.js
+core/modules/module-registry.js
+intelligence/kernel/version.js
+intelligence/runtime-config.json
+index.html
+sw.js
+RELEASE-v13.3.1.1.md
+DEPLOYMENT-v13.3.1.1.md
+TEST-v13.3.1.1.md
+COMMIT-v13.3.1.1.txt
+CHANGED-FILES-v13.3.1.1.txt

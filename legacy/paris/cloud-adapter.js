@@ -5,10 +5,17 @@
   async function listTrips(client){
     const response=await requireClient(client).rpc('paris_list_my_trips');
     if(response.error)throw response.error;
-    return (response.data||[]).map(row=>{
+    return Promise.all((response.data||[]).map(async row=>{
       const destination=parseJson(row.destination_context);
-      return {...row,destination:{...destination,name:destination.name||row.destination_name||row.destination||'',country:destination.country||row.destination_country||'',countryCode:destination.countryCode||row.destination_country_code||'',placeId:destination.placeId||row.destination_place_id||'',formattedAddress:destination.formattedAddress||row.destination_formatted_address||'',latitude:destination.latitude??row.destination_latitude??null,longitude:destination.longitude??row.destination_longitude??null}};
-    });
+      let moduleConfig=null;
+      try{
+        const moduleResponse=await requireClient(client).rpc('luvia_get_trip_modules',{p_trip_id:row.trip_id||row.id});
+        if(!moduleResponse.error)moduleConfig=Array.isArray(moduleResponse.data)?moduleResponse.data[0]:moduleResponse.data;
+      }catch(error){console.warn('[LuviaCloudAdapter] Modulkonfiguration konnte nicht geladen werden.',error)}
+      const modules=Array.isArray(moduleConfig?.modules)?moduleConfig.modules:(Array.isArray(row.modules)?row.modules:[]);
+      const moduleSettings=moduleConfig?.settings&&typeof moduleConfig.settings==='object'?moduleConfig.settings:(row.module_settings||{});
+      return {...row,modules,selectedModules:modules,moduleSettings,destination:{...destination,name:destination.name||row.destination_name||row.destination||'',country:destination.country||row.destination_country||'',countryCode:destination.countryCode||row.destination_country_code||'',placeId:destination.placeId||row.destination_place_id||'',formattedAddress:destination.formattedAddress||row.destination_formatted_address||'',latitude:destination.latitude??row.destination_latitude??null,longitude:destination.longitude??row.destination_longitude??null}};
+    }));
   }
 
   async function saveProfile(client,trip){
