@@ -143,3 +143,36 @@ body::after{content:"☁   ✦   ☁";right:4vw;top:15vh;font-size:clamp(25px,3v
   .lv-calendar-day{min-height:88px;padding:9px;border-radius:18px}
 }
 @media(prefers-reduced-motion:reduce){body::before,body::after,.lv-shell::before{animation:none!important}}
+
+
+/* Build 13.4.6.4: richer travel-memory ambience and calmer hero */
+html,body{
+  background:
+    radial-gradient(circle at 10% 14%,color-mix(in srgb,var(--trip-accent) 18%,transparent) 0 12%,transparent 34%),
+    radial-gradient(circle at 92% 8%,color-mix(in srgb,var(--trip-accent) 11%,#ffd6bc) 0 8%,transparent 28%),
+    radial-gradient(circle at 78% 78%,color-mix(in srgb,var(--trip-accent) 12%,#ffe9d8) 0 10%,transparent 32%),
+    linear-gradient(145deg,color-mix(in srgb,var(--trip-accent) 9%,#fff8f3),#fffaf7 44%,color-mix(in srgb,var(--trip-accent) 12%,#fff2ea));
+}
+.lv-hero{
+  background:linear-gradient(135deg,color-mix(in srgb,var(--trip-accent) 8%,var(--lv-surface-elevated)),color-mix(in srgb,var(--trip-accent) 2%,var(--lv-surface-elevated)) 58%,var(--lv-surface-elevated))!important;
+}
+.lv-ambient-memories{position:fixed;inset:0;z-index:0;pointer-events:none;overflow:hidden;opacity:.72}
+.lv-ambient-item{position:absolute;display:grid;place-items:center;color:color-mix(in srgb,var(--trip-accent) 58%,#a66d58);opacity:.11;filter:saturate(.75);font-family:Georgia,serif;line-height:1;will-change:transform;animation:lv-memory-float 24s ease-in-out infinite alternate}
+.lv-ambient-passport{left:4%;top:48%;font-size:30px;animation-delay:-3s}
+.lv-ambient-camera{left:24%;top:18%;font-size:25px;border:2px solid currentColor;border-radius:8px;width:38px;height:30px;animation-delay:-9s}
+.lv-ambient-heart{left:37%;bottom:16%;font-size:44px;animation-delay:-13s}
+.lv-ambient-pin{right:34%;top:31%;font-size:34px;animation-delay:-6s}
+.lv-ambient-ticket{right:20%;bottom:24%;font-size:46px;transform:rotate(15deg);animation-delay:-17s}
+.lv-ambient-route{left:57%;top:68%;font-size:54px;letter-spacing:.2em;animation-delay:-11s}
+.lv-ambient-sun{right:8%;top:43%;font-size:38px;animation-delay:-4s}
+.lv-ambient-cloud{left:13%;bottom:8%;font-size:48px;animation-delay:-15s}
+.lv-ambient-star{right:46%;top:10%;font-size:28px;animation-delay:-20s}
+@keyframes lv-memory-float{from{transform:translate3d(-5px,7px,0) rotate(-3deg)}to{transform:translate3d(18px,-16px,0) rotate(5deg)}}
+@media(max-width:760px){
+  .lv-ambient-memories{opacity:.5}
+  .lv-ambient-camera,.lv-ambient-route,.lv-ambient-ticket{display:none}
+  .lv-ambient-heart{left:72%;bottom:18%;font-size:30px}
+  .lv-ambient-pin{right:9%;top:34%;font-size:25px}
+  .lv-ambient-cloud{left:5%;bottom:12%;font-size:34px}
+}
+@media(prefers-reduced-motion:reduce){.lv-ambient-item{animation:none!important}}
