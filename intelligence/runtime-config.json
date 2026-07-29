@@ -28,11 +28,11 @@
     "logHistory": 500
   },
   "release": {
-    "core": "4.5.1.4",
-    "build": "13.5.1.4",
-    "name": "Place UI Behavior Closure",
+    "core": "4.5.2",
+    "build": "13.5.2",
+    "name": "Global Place Collection & Instant Detail Performance",
     "channel": "production",
-    "builtAt": "2026-07-29T17:03:00+02:00"
+    "builtAt": "2026-07-29T17:30:00+02:00"
   },
   "deployment": {
     "canonicalHost": "myluvia.app",

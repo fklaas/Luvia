@@ -1,0 +1,9 @@
+core/places/place-detail-service.js
+core/places/timeline-core.js
+modules/restaurants-v2/restaurant-module.js
+modules/accommodations/accommodation-module.js
+app/app-shell.css
+index.html
+app/app-shell.js
+sw.js
+config/runtime.json
