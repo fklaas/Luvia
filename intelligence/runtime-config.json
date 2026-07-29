@@ -28,8 +28,8 @@
     "logHistory": 500
   },
   "release": {
-    "core": "4.5.2.1",
-    "build": "13.5.2.1",
+    "core": "4.5.2.2",
+    "build": "13.5.2.2",
     "name": "Global Place Collection & Instant Detail Performance",
     "channel": "production",
     "builtAt": "2026-07-29T17:30:00+02:00"

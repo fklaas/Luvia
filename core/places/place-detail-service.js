@@ -1,7 +1,7 @@
 (function(){
 'use strict';
-const VERSION='4.5.2.1';
-const adapters=new Map();const detailCache=new Map();const detailInflight=new Map();let current=null;
+const VERSION='4.5.2.2';
+const adapters=new Map();const detailCache=new Map();const detailInflight=new Map();const photoCache=new Map();const photoInflight=new Map();let current=null;
 const esc=v=>window.LuviaPlaceExperience?.esc?.(v)||String(v??'');
 const LABELS={discovered:'Entdeckt',idea:'Entdeckt',saved:'Favorisiert',favorite:'Favorisiert',planned:'Geplant',reserved:'Reserviert',selected:'Ausgewählt',booked:'Gebucht',checked_in:'Eingecheckt',checked_out:'Ausgecheckt',visited:'Besucht',rated:'Bewertet',rejected:'Verworfen',archived:'Archiviert'};
 
@@ -13,7 +13,14 @@ async function fetchDetails(id,options={}){
  const task=Promise.resolve(window.LuviaPlaces.details(id,options)).then(value=>{detailCache.set(key,{at:Date.now(),value});detailInflight.delete(key);return value}).catch(error=>{detailInflight.delete(key);throw error});
  detailInflight.set(key,task);return task;
 }
-function prefetch(ids=[],options={}){return Promise.allSettled([...new Set(ids.filter(Boolean))].slice(0,6).map(id=>fetchDetails(id,options)))}
+async function resolvePhoto(photo,options={}){
+ const name=String(photo?.name||photo||'');if(!name)return null;const key=`${name}|${Number(options.maxWidthPx||1200)}|${Number(options.maxHeightPx||900)}`;
+ if(photoCache.has(key))return photoCache.get(key);if(photoInflight.has(key))return photoInflight.get(key);
+ const task=Promise.resolve(window.LuviaPlaces.photo(name,{maxWidthPx:Number(options.maxWidthPx||1200),maxHeightPx:Number(options.maxHeightPx||900)})).then(r=>{const value=r?.data?.photoUri?{uri:r.data.photoUri,attribution:photo?.authorAttributions?.[0]?.displayName||''}:null;photoInflight.delete(key);if(value)photoCache.set(key,value);return value}).catch(error=>{photoInflight.delete(key);throw error});
+ photoInflight.set(key,task);return task;
+}
+async function prepare(id,options={}){const response=await fetchDetails(id,options),place=response?.data?.place||{},limit=Math.max(1,Math.min(6,Number(options.photoLimit||3)));const photos=(await Promise.allSettled((place.photos||[]).slice(0,limit).map(photo=>resolvePhoto(photo,options)))).map(x=>x.status==='fulfilled'?x.value:null).filter(Boolean);return{response,place,photos}}
+function prefetch(ids=[],options={}){return Promise.allSettled([...new Set(ids.filter(Boolean))].slice(0,6).map(id=>prepare(id,{...options,photoLimit:1})))}
 
 function close(){if(current?.close)current.close();current=null}
 function openLoading(c={}){close();const b=window.LuviaPlaceExperience.openOverlay(`<article class="rv2-experience luv-place-detail is-loading" role="dialog" aria-modal="true"><button class="rv2-experience-close" data-close-place aria-label="Schließen">×</button><div class="rv2-experience-loading"><span></span><strong>${esc(c.typeLabel||'Place')}-Erlebnis wird geladen …</strong></div></article>`);current={backdrop:b.node,node:b.node.querySelector('.rv2-experience'),close:b.close};return current}
@@ -29,7 +36,7 @@ function registerAdapter(t,a){adapters.set(t,a);return a}
 async function openExperience(t,s={},c={}){const a=adapters.get(t);if(!a)throw new Error(`No place detail adapter registered for ${t}`);const o=openLoading({typeLabel:a.label||t});const m=await a.load(s,c);update(o,m);await a.bind?.(o,m,c);return o}
 function diagnostics(){return{version:VERSION,status:'ready',adapters:[...adapters.keys()],contract:['single-overlay','progressive-loading','restaurant-derived-renderer','lifecycle','schedule','provider-details','recommendation','considerations','alternatives','hidden-intelligence-slots','capabilities','gps-only-distance']}}
 window.addEventListener('luvia:place-detail-committed',()=>close());
-const api=Object.freeze({version:VERSION,open,openLoading,update,openExperience,registerAdapter,close,lifecycle,fetchDetails,prefetch,diagnostics});
+const api=Object.freeze({version:VERSION,open,openLoading,update,openExperience,registerAdapter,close,lifecycle,fetchDetails,resolvePhoto,prepare,prefetch,diagnostics});
 window.LuviaPlaceDetail=api;
 window.LuviaPlaceDetails=api;
 })();
