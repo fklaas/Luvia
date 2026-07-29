@@ -1,1 +1,1 @@
-(() => {'use strict';window.LuviaKernelVersion=Object.freeze({core:'4.3.1.1',build:'13.3.1.1',name:'Stay Navigation Persistence & Global Module Transition',channel:'production',builtAt:'2026-07-29T08:13:00+02:00'});window.LuviaCoreVersion=window.LuviaKernelVersion;})();
+(() => {'use strict';window.LuviaKernelVersion=Object.freeze({core:'4.3.1',build:'13.3.1',name:'Guided Journey Contrast & Cloud Cohesion',channel:'production',builtAt:'2026-07-28T22:15:00+02:00'});window.LuviaCoreVersion=window.LuviaKernelVersion;})();
