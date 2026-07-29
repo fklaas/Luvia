@@ -1,4 +1,4 @@
-# Luvia Build 13.5.1.1 — Compact Place Cards & Places Hub Navigation Fix
+# Luvia Build 13.5.1.2 — Compact Place Cards & Places Hub Navigation Fix
 
 ## Änderungen
 
@@ -9,6 +9,6 @@
 
 ## Versionen
 
-- App Build: 13.5.1.1
-- Core: 4.5.1.1
-- PWA Cache: luvia-shell-v13.5.1.1
+- App Build: 13.5.1.2
+- Core: 4.5.1.2
+- PWA Cache: luvia-shell-v13.5.1.2
