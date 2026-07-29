@@ -178,3 +178,7 @@ html,body{
 @media(prefers-reduced-motion:reduce){.lv-ambient-item{animation:none!important}}
 
 .luv-place-load-more{display:block;width:min(520px,calc(100% - 24px));min-height:56px;margin:24px auto 4px;border:1px solid color-mix(in srgb,var(--trip-accent) 46%,var(--lv-line));border-radius:18px;background:color-mix(in srgb,var(--trip-accent) 12%,white);color:var(--lv-text);font-weight:800;font-size:15px;cursor:pointer;transition:transform .16s ease,background .16s ease}.luv-place-load-more:hover{transform:translateY(-2px);background:color-mix(in srgb,var(--trip-accent) 18%,white)}.luv-place-load-more:active{transform:scale(.99)}
+
+/* Build 13.5.2.3: instant timeline place opening */
+.lv-day-entry-actions [data-open-entry].is-opening{opacity:.72;cursor:progress;pointer-events:none}
+.lv-day-place.is-opening{opacity:.82}

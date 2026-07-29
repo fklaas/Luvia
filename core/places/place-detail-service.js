@@ -1,6 +1,6 @@
 (function(){
 'use strict';
-const VERSION='4.5.2.2';
+const VERSION='4.5.2.3';
 const adapters=new Map();const detailCache=new Map();const detailInflight=new Map();const photoCache=new Map();const photoInflight=new Map();let current=null;
 const esc=v=>window.LuviaPlaceExperience?.esc?.(v)||String(v??'');
 const LABELS={discovered:'Entdeckt',idea:'Entdeckt',saved:'Favorisiert',favorite:'Favorisiert',planned:'Geplant',reserved:'Reserviert',selected:'Ausgewählt',booked:'Gebucht',checked_in:'Eingecheckt',checked_out:'Ausgecheckt',visited:'Besucht',rated:'Bewertet',rejected:'Verworfen',archived:'Archiviert'};
@@ -19,7 +19,17 @@ async function resolvePhoto(photo,options={}){
  const task=Promise.resolve(window.LuviaPlaces.photo(name,{maxWidthPx:Number(options.maxWidthPx||1200),maxHeightPx:Number(options.maxHeightPx||900)})).then(r=>{const value=r?.data?.photoUri?{uri:r.data.photoUri,attribution:photo?.authorAttributions?.[0]?.displayName||''}:null;photoInflight.delete(key);if(value)photoCache.set(key,value);return value}).catch(error=>{photoInflight.delete(key);throw error});
  photoInflight.set(key,task);return task;
 }
-async function prepare(id,options={}){const response=await fetchDetails(id,options),place=response?.data?.place||{},limit=Math.max(1,Math.min(6,Number(options.photoLimit||3)));const photos=(await Promise.allSettled((place.photos||[]).slice(0,limit).map(photo=>resolvePhoto(photo,options)))).map(x=>x.status==='fulfilled'?x.value:null).filter(Boolean);return{response,place,photos}}
+async function prepare(id,options={}){
+ const seed=options.seedPlace||{};
+ const limit=Math.max(1,Math.min(6,Number(options.photoLimit||3)));
+ const seedPhotoTask=Promise.allSettled((seed.photos||[]).slice(0,limit).map(photo=>resolvePhoto(photo,options)));
+ const response=await fetchDetails(id,options),place={...seed,...(response?.data?.place||{})};
+ const seedPhotos=(await seedPhotoTask).map(x=>x.status==='fulfilled'?x.value:null).filter(Boolean);
+ const remaining=Math.max(0,limit-seedPhotos.length);
+ const extra=remaining?(await Promise.allSettled((place.photos||[]).slice(0,limit).map(photo=>resolvePhoto(photo,options)))).map(x=>x.status==='fulfilled'?x.value:null).filter(Boolean):[];
+ const photos=[...seedPhotos,...extra].filter((x,i,a)=>x?.uri&&a.findIndex(y=>y?.uri===x.uri)===i).slice(0,limit);
+ return{response,place,photos}
+}
 function prefetch(ids=[],options={}){return Promise.allSettled([...new Set(ids.filter(Boolean))].slice(0,6).map(id=>prepare(id,{...options,photoLimit:1})))}
 
 function close(){if(current?.close)current.close();current=null}

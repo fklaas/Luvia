@@ -1,5 +1,5 @@
 (()=>{'use strict';
-const VERSION='4.5.1.5';
+const VERSION='4.5.2.3';
 const PLACE_MODULES={restaurants:{type:'restaurant',title:'Restaurants',icon:'🍽️',description:'Genuss, Cafés und besondere Restaurantmomente entdecken.',host:'restaurants-module'},accommodations:{type:'accommodation',title:'Unterkünfte',icon:'🏨',description:'Hotels, Apartments und besondere Unterkünfte finden.',host:'accommodations-module'}};
 let state={root:null,trip:null,active:null,mounted:null};
 const esc=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
