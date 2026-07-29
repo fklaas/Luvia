@@ -1,5 +1,5 @@
 /* Luvia Restaurants V2 – vollständig datengetrieben */
-:is(#restaurants-module,#accommodations-module).luvia-restaurants-v2{position:relative;overflow:visible}
+:is(#restaurants-module,#accommodations-module,#attractions-module).luvia-restaurants-v2{position:relative;overflow:visible}
 .rv2-shell{display:grid;gap:20px}
 .rv2-head{display:flex;gap:18px;align-items:flex-start;justify-content:space-between}
 .rv2-head-copy{min-width:0}
@@ -39,7 +39,7 @@
 .rv2-entity-search{display:flex;gap:10px;margin-top:16px}.rv2-entity-search input{min-width:0;flex:1;border:1px solid rgba(89,42,58,.18);border-radius:14px;padding:12px 14px;background:#fff;font:inherit}.rv2-entity-search button,.rv2-discovery-actions button{border:0;border-radius:14px;padding:11px 14px;font:inherit;font-weight:700;cursor:pointer;background:#a8375b;color:#fff}.rv2-discovery-actions button{background:#fff;color:#7b2948;border:1px solid rgba(123,41,72,.15)}.rv2-search-status{min-height:22px;margin-top:10px;font-size:.86rem;color:#785d67}.rv2-search-results{display:grid;gap:10px;margin-top:8px}.rv2-search-card{display:flex;align-items:center;justify-content:space-between;gap:14px;padding:13px;border-radius:16px;background:rgba(255,255,255,.78);border:1px solid rgba(89,42,58,.1)}.rv2-search-card>div{display:grid;gap:3px;min-width:0}.rv2-search-card span,.rv2-search-card small{color:#705c63;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.rv2-search-card button{border:0;border-radius:12px;padding:10px 12px;background:#171318;color:#fff;font-weight:700;cursor:pointer;white-space:nowrap}.rv2-search-card button:disabled{opacity:.58;cursor:default}@media(max-width:680px){.rv2-entity-search,.rv2-search-card{align-items:stretch;flex-direction:column}.rv2-search-card button{width:100%}}
 
 /* Core V2.12.3 maintenance – stable full-width Restaurant Experience */
-:is(#restaurants-module,#accommodations-module).luvia-restaurants-v2,.rv2-shell,.rv2-discovery,.rv2-discovery>div,.rv2-search-results,.rv2-grid{min-width:0;width:100%;box-sizing:border-box}
+:is(#restaurants-module,#accommodations-module,#attractions-module).luvia-restaurants-v2,.rv2-shell,.rv2-discovery,.rv2-discovery>div,.rv2-search-results,.rv2-grid{min-width:0;width:100%;box-sizing:border-box}
 .rv2-search-card{min-width:0}
 @media(min-width:721px){.rv2-discovery-actions{grid-column:1/-1}.rv2-discovery-actions button{flex:0 1 auto}}
 
@@ -59,69 +59,69 @@
 
 
 /* v9.22.2 · Core 2.12.4.2 — branded result cards and authoritative trip accent */
-:is(#restaurants-module,#accommodations-module).luvia-restaurants-v2{--rv2-accent:var(--module-accent,var(--trip-accent,#a23d63))}
-:is(#restaurants-module,#accommodations-module) .rv2-search-results{gap:14px}
-:is(#restaurants-module,#accommodations-module) .rv2-search-card{display:grid!important;grid-template-columns:minmax(0,1fr) auto;align-items:center;gap:14px;padding:16px!important;border-radius:22px!important;background:linear-gradient(145deg,#fff,color-mix(in srgb,var(--rv2-accent) 5%,#fff))!important;border:1px solid color-mix(in srgb,var(--rv2-accent) 18%,#e7e1e4)!important;box-shadow:0 12px 32px color-mix(in srgb,var(--rv2-accent) 9%,rgba(38,35,42,.08))!important;overflow:visible!important}
-:is(#restaurants-module,#accommodations-module) .rv2-search-card>.rv2-search-main{display:grid!important;grid-template-columns:52px minmax(0,1fr) 64px!important;align-items:center!important;gap:14px!important;width:100%!important;min-width:0!important;padding:0!important;border:0!important;border-radius:0!important;background:transparent!important;color:#241f25!important;box-shadow:none!important;text-align:left!important}
-:is(#restaurants-module,#accommodations-module) .rv2-search-card>.rv2-search-main:hover{transform:none!important;background:transparent!important}
-:is(#restaurants-module,#accommodations-module) .rv2-search-icon{width:52px;height:52px;border-radius:17px;background:color-mix(in srgb,var(--rv2-accent) 12%,#fff);border:1px solid color-mix(in srgb,var(--rv2-accent) 18%,transparent)}
-:is(#restaurants-module,#accommodations-module) .rv2-search-copy strong{font:800 1.05rem/1.25 var(--lv-font-body,Manrope,system-ui,sans-serif);color:#263b4d!important}
-:is(#restaurants-module,#accommodations-module) .rv2-search-copy>span:not(.rv2-result-tags){font-size:.84rem;color:#73808a!important}
-:is(#restaurants-module,#accommodations-module) .rv2-search-copy small{font-size:.75rem;color:#596a77!important;font-weight:800}
-:is(#restaurants-module,#accommodations-module) .rv2-result-tags em{background:color-mix(in srgb,var(--rv2-accent) 9%,#fff)!important;color:color-mix(in srgb,var(--rv2-accent) 72%,#334b5d)!important;border:1px solid color-mix(in srgb,var(--rv2-accent) 13%,transparent)}
-:is(#restaurants-module,#accommodations-module) .rv2-fit-mini{background:linear-gradient(145deg,color-mix(in srgb,var(--rv2-accent) 92%,#fff),color-mix(in srgb,var(--rv2-accent) 68%,#30485c))!important;color:var(--luvia-accent-contrast,#fff)!important;box-shadow:0 10px 24px color-mix(in srgb,var(--rv2-accent) 23%,transparent)}
-:is(#restaurants-module,#accommodations-module) .rv2-search-card-actions{display:flex!important;justify-content:flex-end!important;align-items:center!important;gap:8px!important;padding:0!important}
-:is(#restaurants-module,#accommodations-module) .rv2-search-card-actions button{min-height:42px!important;padding:10px 14px!important;border-radius:13px!important;font-weight:700!important;white-space:nowrap!important}
-:is(#restaurants-module,#accommodations-module) .rv2-search-card-actions .rv2-detail-button{background:color-mix(in srgb,var(--rv2-accent) 10%,#fff)!important;color:color-mix(in srgb,var(--rv2-accent) 78%,#294357)!important;border:1px solid color-mix(in srgb,var(--rv2-accent) 20%,transparent)!important}
-:is(#restaurants-module,#accommodations-module) .rv2-search-card-actions button[data-rv2-import]{background:linear-gradient(135deg,color-mix(in srgb,var(--rv2-accent) 92%,#fff),color-mix(in srgb,var(--rv2-accent) 72%,#40566a))!important;color:var(--luvia-accent-contrast,#fff)!important;border:0!important;box-shadow:0 9px 20px color-mix(in srgb,var(--rv2-accent) 20%,transparent)!important}
-:is(#restaurants-module,#accommodations-module) .rv2-discovery-kicker,:is(#restaurants-module,#accommodations-module) .rv2-eyebrow,:is(#restaurants-module,#accommodations-module) .rv2-detail-kicker{color:color-mix(in srgb,var(--rv2-accent) 82%,#334b5d)!important}
-:is(#restaurants-module,#accommodations-module) .rv2-search-submit,:is(#restaurants-module,#accommodations-module) .rv2-quick-chip.active{background:linear-gradient(135deg,color-mix(in srgb,var(--rv2-accent) 92%,#fff),color-mix(in srgb,var(--rv2-accent) 72%,#40566a))!important;color:var(--luvia-accent-contrast,#fff)!important}
-:is(#restaurants-module,#accommodations-module) .rv2-match,:is(#restaurants-module,#accommodations-module) .rv2-fit-mini{background:linear-gradient(145deg,color-mix(in srgb,var(--rv2-accent) 92%,#fff),color-mix(in srgb,var(--rv2-accent) 68%,#30485c))!important}
-:is(#restaurants-module,#accommodations-module) .rv2-trip-integration{background:linear-gradient(135deg,color-mix(in srgb,var(--rv2-accent) 45%,#1f2933),color-mix(in srgb,var(--rv2-accent) 25%,#15191f))!important}
-@media(max-width:860px){:is(#restaurants-module,#accommodations-module) .rv2-search-card{grid-template-columns:1fr!important}:is(#restaurants-module,#accommodations-module) .rv2-search-card-actions{justify-content:stretch!important}:is(#restaurants-module,#accommodations-module) .rv2-search-card-actions button{flex:1!important}}
-@media(max-width:560px){:is(#restaurants-module,#accommodations-module) .rv2-search-card>.rv2-search-main{grid-template-columns:46px minmax(0,1fr)!important}:is(#restaurants-module,#accommodations-module) .rv2-fit-mini{display:none!important}:is(#restaurants-module,#accommodations-module) .rv2-search-copy>span:not(.rv2-result-tags),:is(#restaurants-module,#accommodations-module) .rv2-search-copy small{white-space:normal!important}:is(#restaurants-module,#accommodations-module) .rv2-search-card-actions{display:grid!important;grid-template-columns:1fr 1fr!important}}
+:is(#restaurants-module,#accommodations-module,#attractions-module).luvia-restaurants-v2{--rv2-accent:var(--module-accent,var(--trip-accent,#a23d63))}
+:is(#restaurants-module,#accommodations-module,#attractions-module) .rv2-search-results{gap:14px}
+:is(#restaurants-module,#accommodations-module,#attractions-module) .rv2-search-card{display:grid!important;grid-template-columns:minmax(0,1fr) auto;align-items:center;gap:14px;padding:16px!important;border-radius:22px!important;background:linear-gradient(145deg,#fff,color-mix(in srgb,var(--rv2-accent) 5%,#fff))!important;border:1px solid color-mix(in srgb,var(--rv2-accent) 18%,#e7e1e4)!important;box-shadow:0 12px 32px color-mix(in srgb,var(--rv2-accent) 9%,rgba(38,35,42,.08))!important;overflow:visible!important}
+:is(#restaurants-module,#accommodations-module,#attractions-module) .rv2-search-card>.rv2-search-main{display:grid!important;grid-template-columns:52px minmax(0,1fr) 64px!important;align-items:center!important;gap:14px!important;width:100%!important;min-width:0!important;padding:0!important;border:0!important;border-radius:0!important;background:transparent!important;color:#241f25!important;box-shadow:none!important;text-align:left!important}
+:is(#restaurants-module,#accommodations-module,#attractions-module) .rv2-search-card>.rv2-search-main:hover{transform:none!important;background:transparent!important}
+:is(#restaurants-module,#accommodations-module,#attractions-module) .rv2-search-icon{width:52px;height:52px;border-radius:17px;background:color-mix(in srgb,var(--rv2-accent) 12%,#fff);border:1px solid color-mix(in srgb,var(--rv2-accent) 18%,transparent)}
+:is(#restaurants-module,#accommodations-module,#attractions-module) .rv2-search-copy strong{font:800 1.05rem/1.25 var(--lv-font-body,Manrope,system-ui,sans-serif);color:#263b4d!important}
+:is(#restaurants-module,#accommodations-module,#attractions-module) .rv2-search-copy>span:not(.rv2-result-tags){font-size:.84rem;color:#73808a!important}
+:is(#restaurants-module,#accommodations-module,#attractions-module) .rv2-search-copy small{font-size:.75rem;color:#596a77!important;font-weight:800}
+:is(#restaurants-module,#accommodations-module,#attractions-module) .rv2-result-tags em{background:color-mix(in srgb,var(--rv2-accent) 9%,#fff)!important;color:color-mix(in srgb,var(--rv2-accent) 72%,#334b5d)!important;border:1px solid color-mix(in srgb,var(--rv2-accent) 13%,transparent)}
+:is(#restaurants-module,#accommodations-module,#attractions-module) .rv2-fit-mini{background:linear-gradient(145deg,color-mix(in srgb,var(--rv2-accent) 92%,#fff),color-mix(in srgb,var(--rv2-accent) 68%,#30485c))!important;color:var(--luvia-accent-contrast,#fff)!important;box-shadow:0 10px 24px color-mix(in srgb,var(--rv2-accent) 23%,transparent)}
+:is(#restaurants-module,#accommodations-module,#attractions-module) .rv2-search-card-actions{display:flex!important;justify-content:flex-end!important;align-items:center!important;gap:8px!important;padding:0!important}
+:is(#restaurants-module,#accommodations-module,#attractions-module) .rv2-search-card-actions button{min-height:42px!important;padding:10px 14px!important;border-radius:13px!important;font-weight:700!important;white-space:nowrap!important}
+:is(#restaurants-module,#accommodations-module,#attractions-module) .rv2-search-card-actions .rv2-detail-button{background:color-mix(in srgb,var(--rv2-accent) 10%,#fff)!important;color:color-mix(in srgb,var(--rv2-accent) 78%,#294357)!important;border:1px solid color-mix(in srgb,var(--rv2-accent) 20%,transparent)!important}
+:is(#restaurants-module,#accommodations-module,#attractions-module) .rv2-search-card-actions button[data-rv2-import]{background:linear-gradient(135deg,color-mix(in srgb,var(--rv2-accent) 92%,#fff),color-mix(in srgb,var(--rv2-accent) 72%,#40566a))!important;color:var(--luvia-accent-contrast,#fff)!important;border:0!important;box-shadow:0 9px 20px color-mix(in srgb,var(--rv2-accent) 20%,transparent)!important}
+:is(#restaurants-module,#accommodations-module,#attractions-module) .rv2-discovery-kicker,:is(#restaurants-module,#accommodations-module,#attractions-module) .rv2-eyebrow,:is(#restaurants-module,#accommodations-module,#attractions-module) .rv2-detail-kicker{color:color-mix(in srgb,var(--rv2-accent) 82%,#334b5d)!important}
+:is(#restaurants-module,#accommodations-module,#attractions-module) .rv2-search-submit,:is(#restaurants-module,#accommodations-module,#attractions-module) .rv2-quick-chip.active{background:linear-gradient(135deg,color-mix(in srgb,var(--rv2-accent) 92%,#fff),color-mix(in srgb,var(--rv2-accent) 72%,#40566a))!important;color:var(--luvia-accent-contrast,#fff)!important}
+:is(#restaurants-module,#accommodations-module,#attractions-module) .rv2-match,:is(#restaurants-module,#accommodations-module,#attractions-module) .rv2-fit-mini{background:linear-gradient(145deg,color-mix(in srgb,var(--rv2-accent) 92%,#fff),color-mix(in srgb,var(--rv2-accent) 68%,#30485c))!important}
+:is(#restaurants-module,#accommodations-module,#attractions-module) .rv2-trip-integration{background:linear-gradient(135deg,color-mix(in srgb,var(--rv2-accent) 45%,#1f2933),color-mix(in srgb,var(--rv2-accent) 25%,#15191f))!important}
+@media(max-width:860px){:is(#restaurants-module,#accommodations-module,#attractions-module) .rv2-search-card{grid-template-columns:1fr!important}:is(#restaurants-module,#accommodations-module,#attractions-module) .rv2-search-card-actions{justify-content:stretch!important}:is(#restaurants-module,#accommodations-module,#attractions-module) .rv2-search-card-actions button{flex:1!important}}
+@media(max-width:560px){:is(#restaurants-module,#accommodations-module,#attractions-module) .rv2-search-card>.rv2-search-main{grid-template-columns:46px minmax(0,1fr)!important}:is(#restaurants-module,#accommodations-module,#attractions-module) .rv2-fit-mini{display:none!important}:is(#restaurants-module,#accommodations-module,#attractions-module) .rv2-search-copy>span:not(.rv2-result-tags),:is(#restaurants-module,#accommodations-module,#attractions-module) .rv2-search-copy small{white-space:normal!important}:is(#restaurants-module,#accommodations-module,#attractions-module) .rv2-search-card-actions{display:grid!important;grid-template-columns:1fr 1fr!important}}
 
 
 /* v9.22.3 · Core 2.12.4.3 — accent-safe controls and favorites */
-:is(#restaurants-module,#accommodations-module) .rv2-search-submit,:is(#restaurants-module,#accommodations-module) .rv2-quick-chip,:is(#restaurants-module,#accommodations-module) .rv2-search-card-actions button,:is(#restaurants-module,#accommodations-module) .rv2-trip-buttons button{background:#fff!important;color:#263b4d!important;border:1px solid color-mix(in srgb,var(--rv2-accent) 30%,#d9dfe4)!important;box-shadow:0 7px 18px rgba(40,53,63,.08)!important;position:relative!important}
-:is(#restaurants-module,#accommodations-module) .rv2-search-submit::after,:is(#restaurants-module,#accommodations-module) .rv2-quick-chip.active::after,:is(#restaurants-module,#accommodations-module) .rv2-search-card-actions button[data-rv2-import]::after{content:'';position:absolute;left:12px;right:12px;bottom:5px;height:3px;border-radius:99px;background:var(--rv2-accent)}
-:is(#restaurants-module,#accommodations-module) .rv2-search-submit{padding-left:22px!important;padding-right:22px!important}
-:is(#restaurants-module,#accommodations-module) .rv2-quick-chip.active{background:#fff!important;color:#263b4d!important;border-color:var(--rv2-accent)!important;box-shadow:0 0 0 3px color-mix(in srgb,var(--rv2-accent) 13%,transparent)!important}
-:is(#restaurants-module,#accommodations-module) .rv2-search-card-actions .rv2-detail-button,:is(#restaurants-module,#accommodations-module) .rv2-search-card-actions button[data-rv2-import]{background:#fff!important;color:#263b4d!important}
-:is(#restaurants-module,#accommodations-module) .rv2-fit-mini,:is(#restaurants-module,#accommodations-module) .rv2-match{background:#fff!important;color:#263b4d!important;border:5px solid color-mix(in srgb,var(--rv2-accent) 72%,#fff)!important;box-shadow:0 10px 24px rgba(40,53,63,.12)!important}
-:is(#restaurants-module,#accommodations-module) .rv2-fit-mini small,:is(#restaurants-module,#accommodations-module) .rv2-match span{color:#637381!important}
-:is(#restaurants-module,#accommodations-module) .rv2-trip-integration{background:#20262d!important;border-top:5px solid var(--rv2-accent)!important}
-:is(#restaurants-module,#accommodations-module) .rv2-trip-buttons button{background:#fff!important;color:#263b4d!important}
+:is(#restaurants-module,#accommodations-module,#attractions-module) .rv2-search-submit,:is(#restaurants-module,#accommodations-module,#attractions-module) .rv2-quick-chip,:is(#restaurants-module,#accommodations-module,#attractions-module) .rv2-search-card-actions button,:is(#restaurants-module,#accommodations-module,#attractions-module) .rv2-trip-buttons button{background:#fff!important;color:#263b4d!important;border:1px solid color-mix(in srgb,var(--rv2-accent) 30%,#d9dfe4)!important;box-shadow:0 7px 18px rgba(40,53,63,.08)!important;position:relative!important}
+:is(#restaurants-module,#accommodations-module,#attractions-module) .rv2-search-submit::after,:is(#restaurants-module,#accommodations-module,#attractions-module) .rv2-quick-chip.active::after,:is(#restaurants-module,#accommodations-module,#attractions-module) .rv2-search-card-actions button[data-rv2-import]::after{content:'';position:absolute;left:12px;right:12px;bottom:5px;height:3px;border-radius:99px;background:var(--rv2-accent)}
+:is(#restaurants-module,#accommodations-module,#attractions-module) .rv2-search-submit{padding-left:22px!important;padding-right:22px!important}
+:is(#restaurants-module,#accommodations-module,#attractions-module) .rv2-quick-chip.active{background:#fff!important;color:#263b4d!important;border-color:var(--rv2-accent)!important;box-shadow:0 0 0 3px color-mix(in srgb,var(--rv2-accent) 13%,transparent)!important}
+:is(#restaurants-module,#accommodations-module,#attractions-module) .rv2-search-card-actions .rv2-detail-button,:is(#restaurants-module,#accommodations-module,#attractions-module) .rv2-search-card-actions button[data-rv2-import]{background:#fff!important;color:#263b4d!important}
+:is(#restaurants-module,#accommodations-module,#attractions-module) .rv2-fit-mini,:is(#restaurants-module,#accommodations-module,#attractions-module) .rv2-match{background:#fff!important;color:#263b4d!important;border:5px solid color-mix(in srgb,var(--rv2-accent) 72%,#fff)!important;box-shadow:0 10px 24px rgba(40,53,63,.12)!important}
+:is(#restaurants-module,#accommodations-module,#attractions-module) .rv2-fit-mini small,:is(#restaurants-module,#accommodations-module,#attractions-module) .rv2-match span{color:#637381!important}
+:is(#restaurants-module,#accommodations-module,#attractions-module) .rv2-trip-integration{background:#20262d!important;border-top:5px solid var(--rv2-accent)!important}
+:is(#restaurants-module,#accommodations-module,#attractions-module) .rv2-trip-buttons button{background:#fff!important;color:#263b4d!important}
 .rv2-favorites{margin:16px 0;padding:18px;border-radius:22px;background:linear-gradient(145deg,#fff,color-mix(in srgb,var(--rv2-accent) 4%,#fff));border:1px solid color-mix(in srgb,var(--rv2-accent) 18%,#e4e8eb)}
 .rv2-section-heading{display:flex;align-items:center;justify-content:space-between;gap:15px;margin-bottom:12px}.rv2-section-heading span{font-size:.7rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:color-mix(in srgb,var(--rv2-accent) 78%,#334b5d)}.rv2-section-heading h3{margin:3px 0 0;color:#263b4d}.rv2-section-heading>strong{display:grid;place-items:center;min-width:38px;height:38px;border-radius:50%;background:#fff;border:3px solid var(--rv2-accent);color:#263b4d}.rv2-favorite-list{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:10px}.rv2-favorite-list article{display:grid;grid-template-columns:auto minmax(0,1fr) auto;align-items:center;gap:10px;padding:12px;border-radius:16px;background:#fff;border:1px solid #eceff1}.rv2-favorite-list article>span{font-size:1.35rem}.rv2-favorite-list article div{display:grid;min-width:0}.rv2-favorite-list article small{color:#72808a;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.rv2-favorite-list article a{color:#263b4d;font-weight:700;text-decoration:none;border-bottom:3px solid var(--rv2-accent);padding:6px}
 
 
 /* v9.22.4 · Core 2.12.4.4 — Restaurant Experience Final Polish */
-:is(#restaurants-module,#accommodations-module).luvia-restaurants-v2{--rv2-accent:var(--module-accent,var(--trip-accent,#7b5fce));--rv2-ink:#253342;--rv2-muted:#6f7c87;--rv2-line:color-mix(in srgb,var(--rv2-accent) 15%,#dfe5e9);--rv2-soft:color-mix(in srgb,var(--rv2-accent) 7%,#fff);--rv2-focus:color-mix(in srgb,var(--rv2-accent) 24%,transparent)}
-:is(#restaurants-module,#accommodations-module) .rv2-entity-search{display:grid!important;grid-template-columns:minmax(0,1fr) auto!important;gap:10px!important;align-items:center!important}
-:is(#restaurants-module,#accommodations-module) .rv2-entity-search>input{min-width:0!important;width:100%!important;display:block!important}
-:is(#restaurants-module,#accommodations-module) .rv2-search-submit,:is(#restaurants-module,#accommodations-module) .rv2-quick-chip,:is(#restaurants-module,#accommodations-module) .rv2-search-card-actions button,:is(#restaurants-module,#accommodations-module) .rv2-trip-buttons button,:is(#restaurants-module,#accommodations-module) .rv2-detail-links a{border:1px solid var(--rv2-line)!important;background:var(--rv2-soft)!important;color:var(--rv2-ink)!important;border-radius:16px!important;box-shadow:0 8px 22px rgba(35,49,61,.07)!important;text-decoration:none!important;transition:transform .18s ease,box-shadow .18s ease,background .18s ease,border-color .18s ease!important}
-:is(#restaurants-module,#accommodations-module) .rv2-search-submit::after,:is(#restaurants-module,#accommodations-module) .rv2-quick-chip.active::after,:is(#restaurants-module,#accommodations-module) .rv2-search-card-actions button[data-rv2-import]::after{display:none!important;content:none!important}
-:is(#restaurants-module,#accommodations-module) .rv2-search-submit:hover,:is(#restaurants-module,#accommodations-module) .rv2-quick-chip:hover,:is(#restaurants-module,#accommodations-module) .rv2-search-card-actions button:hover,:is(#restaurants-module,#accommodations-module) .rv2-trip-buttons button:hover,:is(#restaurants-module,#accommodations-module) .rv2-detail-links a:hover{transform:translateY(-1px)!important;box-shadow:0 12px 28px rgba(35,49,61,.11)!important;background:color-mix(in srgb,var(--rv2-accent) 11%,#fff)!important}
-:is(#restaurants-module,#accommodations-module) .rv2-search-submit:active,:is(#restaurants-module,#accommodations-module) .rv2-quick-chip:active,:is(#restaurants-module,#accommodations-module) .rv2-search-card-actions button:active,:is(#restaurants-module,#accommodations-module) .rv2-trip-buttons button:active,:is(#restaurants-module,#accommodations-module) .rv2-detail-links a:active{transform:scale(.985)!important}
-:is(#restaurants-module,#accommodations-module) :is(button,a,input,select):focus-visible{outline:0!important;box-shadow:0 0 0 4px var(--rv2-focus),0 10px 24px rgba(35,49,61,.09)!important}
-:is(#restaurants-module,#accommodations-module) .rv2-search-submit,:is(#restaurants-module,#accommodations-module) .rv2-search-card-actions button[data-rv2-import]{background:color-mix(in srgb,var(--rv2-accent) 14%,#fff)!important;border-color:color-mix(in srgb,var(--rv2-accent) 26%,#dfe5e9)!important}
-:is(#restaurants-module,#accommodations-module) .rv2-quick-chip.active{background:color-mix(in srgb,var(--rv2-accent) 15%,#fff)!important;border-color:color-mix(in srgb,var(--rv2-accent) 38%,#dfe5e9)!important;box-shadow:0 0 0 3px var(--rv2-focus),0 9px 24px rgba(35,49,61,.08)!important}
-:is(#restaurants-module,#accommodations-module) .rv2-search-card{grid-template-columns:minmax(0,1fr) auto!important;gap:18px!important;padding:19px!important;border-radius:26px!important;background:linear-gradient(145deg,#fff,var(--rv2-soft))!important;border:1px solid var(--rv2-line)!important;box-shadow:0 14px 36px rgba(35,49,61,.08)!important}
-:is(#restaurants-module,#accommodations-module) .rv2-search-card>.rv2-search-main{grid-template-columns:54px minmax(0,1fr) 58px!important;gap:16px!important}
-:is(#restaurants-module,#accommodations-module) .rv2-search-icon{width:54px!important;height:54px!important;border-radius:19px!important;border:0!important;background:color-mix(in srgb,var(--rv2-accent) 11%,#fff)!important;box-shadow:inset 0 0 0 1px var(--rv2-line)!important}
-:is(#restaurants-module,#accommodations-module) .rv2-search-copy{gap:4px!important}
-:is(#restaurants-module,#accommodations-module) .rv2-search-copy strong{font-size:1.03rem!important;color:var(--rv2-ink)!important}
-:is(#restaurants-module,#accommodations-module) .rv2-search-copy>span:not(.rv2-result-tags){color:var(--rv2-muted)!important;line-height:1.35!important}
-:is(#restaurants-module,#accommodations-module) .rv2-search-copy small{color:#556672!important;font-weight:750!important}
-:is(#restaurants-module,#accommodations-module) .rv2-result-tags{gap:6px!important;margin-top:3px!important}
-:is(#restaurants-module,#accommodations-module) .rv2-result-tags em,:is(#restaurants-module,#accommodations-module) .rv2-experience-tags span{padding:6px 9px!important;border-radius:999px!important;background:color-mix(in srgb,var(--rv2-accent) 7%,#fff)!important;color:#4f5f6b!important;border:1px solid color-mix(in srgb,var(--rv2-accent) 12%,#e6eaed)!important;font-size:.72rem!important;font-style:normal!important;font-weight:800!important}
-:is(#restaurants-module,#accommodations-module) .rv2-fit-mini,:is(#restaurants-module,#accommodations-module) .rv2-match{background:#fff!important;color:var(--rv2-ink)!important;border:1px solid color-mix(in srgb,var(--rv2-accent) 32%,#dce3e8)!important;box-shadow:0 9px 24px rgba(35,49,61,.10)!important;position:relative!important;overflow:hidden!important}
-:is(#restaurants-module,#accommodations-module) .rv2-fit-mini::before,:is(#restaurants-module,#accommodations-module) .rv2-match::before{content:'';position:absolute;inset:0;border-radius:inherit;box-shadow:inset 0 0 0 4px color-mix(in srgb,var(--rv2-accent) 12%,transparent);pointer-events:none}
-:is(#restaurants-module,#accommodations-module) .rv2-fit-mini{width:58px!important;height:58px!important;border-radius:20px!important;font-size:.87rem!important}
-:is(#restaurants-module,#accommodations-module) .rv2-fit-mini small,:is(#restaurants-module,#accommodations-module) .rv2-match span{color:var(--rv2-muted)!important}
-:is(#restaurants-module,#accommodations-module) .rv2-search-card-actions{gap:9px!important}
-:is(#restaurants-module,#accommodations-module) .rv2-search-card-actions button{min-height:44px!important;padding:10px 15px!important}
+:is(#restaurants-module,#accommodations-module,#attractions-module).luvia-restaurants-v2{--rv2-accent:var(--module-accent,var(--trip-accent,#7b5fce));--rv2-ink:#253342;--rv2-muted:#6f7c87;--rv2-line:color-mix(in srgb,var(--rv2-accent) 15%,#dfe5e9);--rv2-soft:color-mix(in srgb,var(--rv2-accent) 7%,#fff);--rv2-focus:color-mix(in srgb,var(--rv2-accent) 24%,transparent)}
+:is(#restaurants-module,#accommodations-module,#attractions-module) .rv2-entity-search{display:grid!important;grid-template-columns:minmax(0,1fr) auto!important;gap:10px!important;align-items:center!important}
+:is(#restaurants-module,#accommodations-module,#attractions-module) .rv2-entity-search>input{min-width:0!important;width:100%!important;display:block!important}
+:is(#restaurants-module,#accommodations-module,#attractions-module) .rv2-search-submit,:is(#restaurants-module,#accommodations-module,#attractions-module) .rv2-quick-chip,:is(#restaurants-module,#accommodations-module,#attractions-module) .rv2-search-card-actions button,:is(#restaurants-module,#accommodations-module,#attractions-module) .rv2-trip-buttons button,:is(#restaurants-module,#accommodations-module,#attractions-module) .rv2-detail-links a{border:1px solid var(--rv2-line)!important;background:var(--rv2-soft)!important;color:var(--rv2-ink)!important;border-radius:16px!important;box-shadow:0 8px 22px rgba(35,49,61,.07)!important;text-decoration:none!important;transition:transform .18s ease,box-shadow .18s ease,background .18s ease,border-color .18s ease!important}
+:is(#restaurants-module,#accommodations-module,#attractions-module) .rv2-search-submit::after,:is(#restaurants-module,#accommodations-module,#attractions-module) .rv2-quick-chip.active::after,:is(#restaurants-module,#accommodations-module,#attractions-module) .rv2-search-card-actions button[data-rv2-import]::after{display:none!important;content:none!important}
+:is(#restaurants-module,#accommodations-module,#attractions-module) .rv2-search-submit:hover,:is(#restaurants-module,#accommodations-module,#attractions-module) .rv2-quick-chip:hover,:is(#restaurants-module,#accommodations-module,#attractions-module) .rv2-search-card-actions button:hover,:is(#restaurants-module,#accommodations-module,#attractions-module) .rv2-trip-buttons button:hover,:is(#restaurants-module,#accommodations-module,#attractions-module) .rv2-detail-links a:hover{transform:translateY(-1px)!important;box-shadow:0 12px 28px rgba(35,49,61,.11)!important;background:color-mix(in srgb,var(--rv2-accent) 11%,#fff)!important}
+:is(#restaurants-module,#accommodations-module,#attractions-module) .rv2-search-submit:active,:is(#restaurants-module,#accommodations-module,#attractions-module) .rv2-quick-chip:active,:is(#restaurants-module,#accommodations-module,#attractions-module) .rv2-search-card-actions button:active,:is(#restaurants-module,#accommodations-module,#attractions-module) .rv2-trip-buttons button:active,:is(#restaurants-module,#accommodations-module,#attractions-module) .rv2-detail-links a:active{transform:scale(.985)!important}
+:is(#restaurants-module,#accommodations-module,#attractions-module) :is(button,a,input,select):focus-visible{outline:0!important;box-shadow:0 0 0 4px var(--rv2-focus),0 10px 24px rgba(35,49,61,.09)!important}
+:is(#restaurants-module,#accommodations-module,#attractions-module) .rv2-search-submit,:is(#restaurants-module,#accommodations-module,#attractions-module) .rv2-search-card-actions button[data-rv2-import]{background:color-mix(in srgb,var(--rv2-accent) 14%,#fff)!important;border-color:color-mix(in srgb,var(--rv2-accent) 26%,#dfe5e9)!important}
+:is(#restaurants-module,#accommodations-module,#attractions-module) .rv2-quick-chip.active{background:color-mix(in srgb,var(--rv2-accent) 15%,#fff)!important;border-color:color-mix(in srgb,var(--rv2-accent) 38%,#dfe5e9)!important;box-shadow:0 0 0 3px var(--rv2-focus),0 9px 24px rgba(35,49,61,.08)!important}
+:is(#restaurants-module,#accommodations-module,#attractions-module) .rv2-search-card{grid-template-columns:minmax(0,1fr) auto!important;gap:18px!important;padding:19px!important;border-radius:26px!important;background:linear-gradient(145deg,#fff,var(--rv2-soft))!important;border:1px solid var(--rv2-line)!important;box-shadow:0 14px 36px rgba(35,49,61,.08)!important}
+:is(#restaurants-module,#accommodations-module,#attractions-module) .rv2-search-card>.rv2-search-main{grid-template-columns:54px minmax(0,1fr) 58px!important;gap:16px!important}
+:is(#restaurants-module,#accommodations-module,#attractions-module) .rv2-search-icon{width:54px!important;height:54px!important;border-radius:19px!important;border:0!important;background:color-mix(in srgb,var(--rv2-accent) 11%,#fff)!important;box-shadow:inset 0 0 0 1px var(--rv2-line)!important}
+:is(#restaurants-module,#accommodations-module,#attractions-module) .rv2-search-copy{gap:4px!important}
+:is(#restaurants-module,#accommodations-module,#attractions-module) .rv2-search-copy strong{font-size:1.03rem!important;color:var(--rv2-ink)!important}
+:is(#restaurants-module,#accommodations-module,#attractions-module) .rv2-search-copy>span:not(.rv2-result-tags){color:var(--rv2-muted)!important;line-height:1.35!important}
+:is(#restaurants-module,#accommodations-module,#attractions-module) .rv2-search-copy small{color:#556672!important;font-weight:750!important}
+:is(#restaurants-module,#accommodations-module,#attractions-module) .rv2-result-tags{gap:6px!important;margin-top:3px!important}
+:is(#restaurants-module,#accommodations-module,#attractions-module) .rv2-result-tags em,:is(#restaurants-module,#accommodations-module,#attractions-module) .rv2-experience-tags span{padding:6px 9px!important;border-radius:999px!important;background:color-mix(in srgb,var(--rv2-accent) 7%,#fff)!important;color:#4f5f6b!important;border:1px solid color-mix(in srgb,var(--rv2-accent) 12%,#e6eaed)!important;font-size:.72rem!important;font-style:normal!important;font-weight:800!important}
+:is(#restaurants-module,#accommodations-module,#attractions-module) .rv2-fit-mini,:is(#restaurants-module,#accommodations-module,#attractions-module) .rv2-match{background:#fff!important;color:var(--rv2-ink)!important;border:1px solid color-mix(in srgb,var(--rv2-accent) 32%,#dce3e8)!important;box-shadow:0 9px 24px rgba(35,49,61,.10)!important;position:relative!important;overflow:hidden!important}
+:is(#restaurants-module,#accommodations-module,#attractions-module) .rv2-fit-mini::before,:is(#restaurants-module,#accommodations-module,#attractions-module) .rv2-match::before{content:'';position:absolute;inset:0;border-radius:inherit;box-shadow:inset 0 0 0 4px color-mix(in srgb,var(--rv2-accent) 12%,transparent);pointer-events:none}
+:is(#restaurants-module,#accommodations-module,#attractions-module) .rv2-fit-mini{width:58px!important;height:58px!important;border-radius:20px!important;font-size:.87rem!important}
+:is(#restaurants-module,#accommodations-module,#attractions-module) .rv2-fit-mini small,:is(#restaurants-module,#accommodations-module,#attractions-module) .rv2-match span{color:var(--rv2-muted)!important}
+:is(#restaurants-module,#accommodations-module,#attractions-module) .rv2-search-card-actions{gap:9px!important}
+:is(#restaurants-module,#accommodations-module,#attractions-module) .rv2-search-card-actions button{min-height:44px!important;padding:10px 15px!important}
 .rv2-experience{width:min(980px,calc(100vw - 32px))!important;border-radius:30px!important;box-shadow:0 30px 90px rgba(18,23,29,.28)!important;background:#fff!important}
 .rv2-hero-gallery{grid-template-columns:minmax(0,1.7fr) minmax(180px,.8fr)!important;grid-template-rows:210px 210px!important;gap:6px!important;min-height:426px!important;background:#edf0f2!important}
 .rv2-gallery-photo.primary{grid-row:1/3!important}.rv2-gallery-photo:nth-child(n+4){display:none!important}
@@ -137,14 +137,14 @@
 .rv2-experience-close{background:rgba(255,255,255,.96)!important;color:#273745!important;box-shadow:0 8px 24px rgba(25,33,40,.15)!important}
 .rv2-favorite-list article a{border-bottom:0!important;background:var(--rv2-soft)!important;border:1px solid var(--rv2-line)!important;border-radius:13px!important;padding:7px 10px!important}
 @media(max-width:760px){
- :is(#restaurants-module,#accommodations-module) .rv2-discovery{padding:15px!important;overflow:visible!important}
- :is(#restaurants-module,#accommodations-module) .rv2-entity-search{display:grid!important;grid-template-columns:minmax(0,1fr) auto!important;gap:8px!important}
- :is(#restaurants-module,#accommodations-module) .rv2-entity-search>input{grid-column:1!important;display:block!important;visibility:visible!important;opacity:1!important;min-height:46px!important}
- :is(#restaurants-module,#accommodations-module) .rv2-search-submit{grid-column:2!important;display:inline-flex!important;visibility:visible!important;opacity:1!important;min-width:88px!important;min-height:46px!important;padding:10px 14px!important}
- :is(#restaurants-module,#accommodations-module) .rv2-search-options{grid-column:1/-1!important;display:grid!important;grid-template-columns:1fr 1fr!important}
- :is(#restaurants-module,#accommodations-module) .rv2-search-card{grid-template-columns:1fr!important;padding:16px!important;border-radius:22px!important}
- :is(#restaurants-module,#accommodations-module) .rv2-search-card>.rv2-search-main{grid-template-columns:48px minmax(0,1fr) 54px!important;gap:11px!important}
- :is(#restaurants-module,#accommodations-module) .rv2-fit-mini{display:grid!important;width:54px!important;height:54px!important;border-radius:18px!important}
+ :is(#restaurants-module,#accommodations-module,#attractions-module) .rv2-discovery{padding:15px!important;overflow:visible!important}
+ :is(#restaurants-module,#accommodations-module,#attractions-module) .rv2-entity-search{display:grid!important;grid-template-columns:minmax(0,1fr) auto!important;gap:8px!important}
+ :is(#restaurants-module,#accommodations-module,#attractions-module) .rv2-entity-search>input{grid-column:1!important;display:block!important;visibility:visible!important;opacity:1!important;min-height:46px!important}
+ :is(#restaurants-module,#accommodations-module,#attractions-module) .rv2-search-submit{grid-column:2!important;display:inline-flex!important;visibility:visible!important;opacity:1!important;min-width:88px!important;min-height:46px!important;padding:10px 14px!important}
+ :is(#restaurants-module,#accommodations-module,#attractions-module) .rv2-search-options{grid-column:1/-1!important;display:grid!important;grid-template-columns:1fr 1fr!important}
+ :is(#restaurants-module,#accommodations-module,#attractions-module) .rv2-search-card{grid-template-columns:1fr!important;padding:16px!important;border-radius:22px!important}
+ :is(#restaurants-module,#accommodations-module,#attractions-module) .rv2-search-card>.rv2-search-main{grid-template-columns:48px minmax(0,1fr) 54px!important;gap:11px!important}
+ :is(#restaurants-module,#accommodations-module,#attractions-module) .rv2-fit-mini{display:grid!important;width:54px!important;height:54px!important;border-radius:18px!important}
  .rv2-experience{width:100%!important;border-radius:26px 26px 0 0!important}
  .rv2-hero-gallery{grid-template-columns:1.5fr 1fr!important;grid-template-rows:145px 145px!important;min-height:296px!important}
  .rv2-experience-body{padding:22px 16px 28px!important}
@@ -155,28 +155,28 @@
  .rv2-trip-buttons{display:grid!important;grid-template-columns:1fr 1fr!important}
 }
 @media(max-width:430px){
- :is(#restaurants-module,#accommodations-module) .rv2-entity-search{grid-template-columns:1fr!important}
- :is(#restaurants-module,#accommodations-module) .rv2-entity-search>input,:is(#restaurants-module,#accommodations-module) .rv2-search-submit{grid-column:1!important;width:100%!important}
- :is(#restaurants-module,#accommodations-module) .rv2-search-options{grid-template-columns:1fr!important}
- :is(#restaurants-module,#accommodations-module) .rv2-search-card>.rv2-search-main{grid-template-columns:44px minmax(0,1fr)!important}
- :is(#restaurants-module,#accommodations-module) .rv2-fit-mini{grid-column:1/-1!important;width:auto!important;height:auto!important;aspect-ratio:auto!important;display:flex!important;justify-content:center!important;gap:5px!important;border-radius:14px!important;padding:8px 10px!important}
+ :is(#restaurants-module,#accommodations-module,#attractions-module) .rv2-entity-search{grid-template-columns:1fr!important}
+ :is(#restaurants-module,#accommodations-module,#attractions-module) .rv2-entity-search>input,:is(#restaurants-module,#accommodations-module,#attractions-module) .rv2-search-submit{grid-column:1!important;width:100%!important}
+ :is(#restaurants-module,#accommodations-module,#attractions-module) .rv2-search-options{grid-template-columns:1fr!important}
+ :is(#restaurants-module,#accommodations-module,#attractions-module) .rv2-search-card>.rv2-search-main{grid-template-columns:44px minmax(0,1fr)!important}
+ :is(#restaurants-module,#accommodations-module,#attractions-module) .rv2-fit-mini{grid-column:1/-1!important;width:auto!important;height:auto!important;aspect-ratio:auto!important;display:flex!important;justify-content:center!important;gap:5px!important;border-radius:14px!important;padding:8px 10px!important}
 }
 
 /* Core V2.12.4.5 – Responsive Detail & Mobile Search Fix
    Final authority layer: deliberately scoped to the Restaurants V2 module. */
-:is(#restaurants-module,#accommodations-module).luvia-restaurants-v2,
-:is(#restaurants-module,#accommodations-module).luvia-restaurants-v2 .rv2-shell,
-:is(#restaurants-module,#accommodations-module).luvia-restaurants-v2 .rv2-discovery,
-:is(#restaurants-module,#accommodations-module).luvia-restaurants-v2 .rv2-discovery-copy{
+:is(#restaurants-module,#accommodations-module,#attractions-module).luvia-restaurants-v2,
+:is(#restaurants-module,#accommodations-module,#attractions-module).luvia-restaurants-v2 .rv2-shell,
+:is(#restaurants-module,#accommodations-module,#attractions-module).luvia-restaurants-v2 .rv2-discovery,
+:is(#restaurants-module,#accommodations-module,#attractions-module).luvia-restaurants-v2 .rv2-discovery-copy{
   min-width:0!important;
   width:100%!important;
   max-width:100%!important;
   box-sizing:border-box!important;
 }
-:is(#restaurants-module,#accommodations-module).luvia-restaurants-v2{overflow-x:clip!important}
+:is(#restaurants-module,#accommodations-module,#attractions-module).luvia-restaurants-v2{overflow-x:clip!important}
 
 /* Soft, accent-safe action language */
-:is(#restaurants-module,#accommodations-module){
+:is(#restaurants-module,#accommodations-module,#attractions-module){
   --rv2-surface:#fff;
   --rv2-surface-soft:color-mix(in srgb,var(--rv2-accent,var(--module-accent,#a23d63)) 6%,#fff);
   --rv2-surface-active:color-mix(in srgb,var(--rv2-accent,var(--module-accent,#a23d63)) 13%,#fff);
@@ -184,11 +184,11 @@
   --rv2-shadow-soft:0 10px 28px rgba(29,42,53,.075);
   --rv2-shadow-hover:0 15px 34px rgba(29,42,53,.115);
 }
-:is(#restaurants-module,#accommodations-module) .rv2-search-submit,
-:is(#restaurants-module,#accommodations-module) .rv2-quick-chip,
-:is(#restaurants-module,#accommodations-module) .rv2-search-card-actions button,
-:is(#restaurants-module,#accommodations-module) .rv2-detail-links a,
-:is(#restaurants-module,#accommodations-module) .rv2-trip-buttons button{
+:is(#restaurants-module,#accommodations-module,#attractions-module) .rv2-search-submit,
+:is(#restaurants-module,#accommodations-module,#attractions-module) .rv2-quick-chip,
+:is(#restaurants-module,#accommodations-module,#attractions-module) .rv2-search-card-actions button,
+:is(#restaurants-module,#accommodations-module,#attractions-module) .rv2-detail-links a,
+:is(#restaurants-module,#accommodations-module,#attractions-module) .rv2-trip-buttons button{
   border:1px solid transparent!important;
   border-radius:16px!important;
   background:var(--rv2-surface-soft)!important;
@@ -197,34 +197,34 @@
   text-decoration:none!important;
   transition:transform .18s ease,box-shadow .18s ease,background .18s ease,border-color .18s ease!important;
 }
-:is(#restaurants-module,#accommodations-module) .rv2-search-submit,
-:is(#restaurants-module,#accommodations-module) .rv2-search-card-actions button[data-rv2-import],
-:is(#restaurants-module,#accommodations-module) .rv2-quick-chip.active{
+:is(#restaurants-module,#accommodations-module,#attractions-module) .rv2-search-submit,
+:is(#restaurants-module,#accommodations-module,#attractions-module) .rv2-search-card-actions button[data-rv2-import],
+:is(#restaurants-module,#accommodations-module,#attractions-module) .rv2-quick-chip.active{
   background:var(--rv2-surface-active)!important;
   border-color:var(--rv2-border-soft)!important;
   color:#1f303d!important;
 }
-:is(#restaurants-module,#accommodations-module) .rv2-search-submit:hover,
-:is(#restaurants-module,#accommodations-module) .rv2-quick-chip:hover,
-:is(#restaurants-module,#accommodations-module) .rv2-search-card-actions button:hover,
-:is(#restaurants-module,#accommodations-module) .rv2-detail-links a:hover,
-:is(#restaurants-module,#accommodations-module) .rv2-trip-buttons button:hover{
+:is(#restaurants-module,#accommodations-module,#attractions-module) .rv2-search-submit:hover,
+:is(#restaurants-module,#accommodations-module,#attractions-module) .rv2-quick-chip:hover,
+:is(#restaurants-module,#accommodations-module,#attractions-module) .rv2-search-card-actions button:hover,
+:is(#restaurants-module,#accommodations-module,#attractions-module) .rv2-detail-links a:hover,
+:is(#restaurants-module,#accommodations-module,#attractions-module) .rv2-trip-buttons button:hover{
   transform:translateY(-1px)!important;
   background:color-mix(in srgb,var(--rv2-accent,var(--module-accent,#a23d63)) 10%,#fff)!important;
   border-color:var(--rv2-border-soft)!important;
   box-shadow:var(--rv2-shadow-hover)!important;
 }
-:is(#restaurants-module,#accommodations-module) .rv2-search-submit:focus-visible,
-:is(#restaurants-module,#accommodations-module) .rv2-quick-chip:focus-visible,
-:is(#restaurants-module,#accommodations-module) .rv2-search-card-actions button:focus-visible,
-:is(#restaurants-module,#accommodations-module) .rv2-detail-links a:focus-visible,
-:is(#restaurants-module,#accommodations-module) .rv2-trip-buttons button:focus-visible{
+:is(#restaurants-module,#accommodations-module,#attractions-module) .rv2-search-submit:focus-visible,
+:is(#restaurants-module,#accommodations-module,#attractions-module) .rv2-quick-chip:focus-visible,
+:is(#restaurants-module,#accommodations-module,#attractions-module) .rv2-search-card-actions button:focus-visible,
+:is(#restaurants-module,#accommodations-module,#attractions-module) .rv2-detail-links a:focus-visible,
+:is(#restaurants-module,#accommodations-module,#attractions-module) .rv2-trip-buttons button:focus-visible{
   outline:0!important;
   box-shadow:0 0 0 4px color-mix(in srgb,var(--rv2-accent,var(--module-accent,#a23d63)) 18%,transparent),var(--rv2-shadow-hover)!important;
 }
 
 /* Search must remain visible and usable in every mobile shell. */
-:is(#restaurants-module,#accommodations-module) .rv2-entity-search{
+:is(#restaurants-module,#accommodations-module,#attractions-module) .rv2-entity-search{
   display:grid!important;
   grid-template-columns:minmax(0,1fr) auto!important;
   gap:10px!important;
@@ -233,7 +233,7 @@
   max-width:100%!important;
   overflow:visible!important;
 }
-:is(#restaurants-module,#accommodations-module) .rv2-entity-search input[name="query"]{
+:is(#restaurants-module,#accommodations-module,#attractions-module) .rv2-entity-search input[name="query"]{
   display:block!important;
   grid-column:1!important;
   min-width:0!important;
@@ -250,7 +250,7 @@
   color:#1f303d!important;
   box-shadow:inset 0 1px 2px rgba(31,48,61,.035)!important;
 }
-:is(#restaurants-module,#accommodations-module) .rv2-search-submit{
+:is(#restaurants-module,#accommodations-module,#attractions-module) .rv2-search-submit{
   display:inline-flex!important;
   align-items:center!important;
   justify-content:center!important;
@@ -261,7 +261,7 @@
   visibility:visible!important;
   position:static!important;
 }
-:is(#restaurants-module,#accommodations-module) .rv2-search-options{
+:is(#restaurants-module,#accommodations-module,#attractions-module) .rv2-search-options{
   display:grid!important;
   grid-column:1/-1!important;
   grid-template-columns:repeat(2,minmax(0,1fr))!important;
@@ -270,7 +270,7 @@
   box-sizing:border-box!important;
   overflow:visible!important;
 }
-:is(#restaurants-module,#accommodations-module) .rv2-search-options select{min-width:0!important;width:100%!important}
+:is(#restaurants-module,#accommodations-module,#attractions-module) .rv2-search-options select{min-width:0!important;width:100%!important}
 
 /* Detail modal: stable document flow, no overlapping or floating content. */
 .rv2-experience-backdrop{
@@ -376,16 +376,16 @@
 .rv2-trip-buttons button{min-height:48px!important;padding:11px 10px!important}
 
 @media(max-width:760px){
-  :is(#restaurants-module,#accommodations-module).luvia-restaurants-v2{padding-inline:0!important}
-  :is(#restaurants-module,#accommodations-module) .rv2-discovery{display:block!important;padding:15px!important;border-radius:20px!important;overflow:visible!important}
-  :is(#restaurants-module,#accommodations-module) .rv2-discovery-copy{display:block!important}
-  :is(#restaurants-module,#accommodations-module) .rv2-quick-wrap{margin-top:15px!important}
-  :is(#restaurants-module,#accommodations-module) .rv2-entity-search{margin-top:12px!important;grid-template-columns:1fr!important}
-  :is(#restaurants-module,#accommodations-module) .rv2-entity-search input[name="query"],
-  :is(#restaurants-module,#accommodations-module) .rv2-search-submit{grid-column:1!important;width:100%!important}
-  :is(#restaurants-module,#accommodations-module) .rv2-search-submit{min-width:0!important}
-  :is(#restaurants-module,#accommodations-module) .rv2-search-options{grid-template-columns:1fr!important;padding:10px!important}
-  :is(#restaurants-module,#accommodations-module) .rv2-search-options .rv2-check{white-space:normal!important;min-height:34px!important}
+  :is(#restaurants-module,#accommodations-module,#attractions-module).luvia-restaurants-v2{padding-inline:0!important}
+  :is(#restaurants-module,#accommodations-module,#attractions-module) .rv2-discovery{display:block!important;padding:15px!important;border-radius:20px!important;overflow:visible!important}
+  :is(#restaurants-module,#accommodations-module,#attractions-module) .rv2-discovery-copy{display:block!important}
+  :is(#restaurants-module,#accommodations-module,#attractions-module) .rv2-quick-wrap{margin-top:15px!important}
+  :is(#restaurants-module,#accommodations-module,#attractions-module) .rv2-entity-search{margin-top:12px!important;grid-template-columns:1fr!important}
+  :is(#restaurants-module,#accommodations-module,#attractions-module) .rv2-entity-search input[name="query"],
+  :is(#restaurants-module,#accommodations-module,#attractions-module) .rv2-search-submit{grid-column:1!important;width:100%!important}
+  :is(#restaurants-module,#accommodations-module,#attractions-module) .rv2-search-submit{min-width:0!important}
+  :is(#restaurants-module,#accommodations-module,#attractions-module) .rv2-search-options{grid-template-columns:1fr!important;padding:10px!important}
+  :is(#restaurants-module,#accommodations-module,#attractions-module) .rv2-search-options .rv2-check{white-space:normal!important;min-height:34px!important}
   .rv2-experience-backdrop{padding:0!important;align-items:end!important;place-items:end stretch!important}
   .rv2-experience{
     width:100%!important;
@@ -423,10 +423,10 @@
 
 
 /* Core 3.5.2 · Central Travel Preferences */
-:is(#restaurants-module,#accommodations-module) .rv2-card{cursor:pointer;transition:transform .2s ease,box-shadow .2s ease,border-color .2s ease}
-:is(#restaurants-module,#accommodations-module) .rv2-card:hover{transform:translateY(-2px);box-shadow:0 20px 48px rgba(35,49,61,.13);border-color:color-mix(in srgb,var(--rv2-accent) 28%,#dde3e7)}
-:is(#restaurants-module,#accommodations-module) .rv2-card:focus-visible{outline:0;box-shadow:0 0 0 4px color-mix(in srgb,var(--rv2-accent) 18%,transparent),0 20px 48px rgba(35,49,61,.13)}
-:is(#restaurants-module,#accommodations-module) .rv2-action.primary{background:color-mix(in srgb,var(--rv2-accent) 14%,#fff)!important;border-color:color-mix(in srgb,var(--rv2-accent) 22%,#e4e8eb)!important;color:#263744!important;font-weight:850!important}
+:is(#restaurants-module,#accommodations-module,#attractions-module) .rv2-card{cursor:pointer;transition:transform .2s ease,box-shadow .2s ease,border-color .2s ease}
+:is(#restaurants-module,#accommodations-module,#attractions-module) .rv2-card:hover{transform:translateY(-2px);box-shadow:0 20px 48px rgba(35,49,61,.13);border-color:color-mix(in srgb,var(--rv2-accent) 28%,#dde3e7)}
+:is(#restaurants-module,#accommodations-module,#attractions-module) .rv2-card:focus-visible{outline:0;box-shadow:0 0 0 4px color-mix(in srgb,var(--rv2-accent) 18%,transparent),0 20px 48px rgba(35,49,61,.13)}
+:is(#restaurants-module,#accommodations-module,#attractions-module) .rv2-action.primary{background:color-mix(in srgb,var(--rv2-accent) 14%,#fff)!important;border-color:color-mix(in srgb,var(--rv2-accent) 22%,#e4e8eb)!important;color:#263744!important;font-weight:850!important}
 .rv2-workspace-backdrop{position:fixed;inset:0;z-index:100000;background:rgba(23,30,36,.55);backdrop-filter:blur(16px);display:grid;place-items:center;padding:22px}
 .rv2-workspace{--wa:var(--trip-accent,#a23d63);width:min(1080px,100%);max-height:min(900px,calc(100vh - 44px));overflow:hidden;background:#fff;border:1px solid rgba(255,255,255,.7);border-radius:32px;box-shadow:0 35px 110px rgba(17,23,29,.32);display:flex;flex-direction:column;color:#243746}
 .rv2-workspace-head{display:flex;justify-content:space-between;gap:20px;align-items:flex-start;padding:26px 30px 20px;background:linear-gradient(135deg,color-mix(in srgb,var(--wa) 10%,#fff),#fff)}
@@ -466,40 +466,40 @@
 
 /* Build 13.0.3 visual refresh */
 
-:is(#restaurants-module,#accommodations-module) .rv2-shell{max-width:1440px;margin:auto;display:grid;gap:24px}
-:is(#restaurants-module,#accommodations-module) .rv2-head-new{padding:8px 6px 0;background:transparent;border:0;box-shadow:none}
-:is(#restaurants-module,#accommodations-module) .rv2-head-new h2{font-size:clamp(2rem,4vw,3.4rem);letter-spacing:-.055em;line-height:1.02;margin:.35rem 0}
-:is(#restaurants-module,#accommodations-module) .rv2-discovery-new{border:1px solid color-mix(in srgb,var(--rv2-accent) 13%,#e5e7eb);background:linear-gradient(145deg,#fff 0%,color-mix(in srgb,var(--rv2-accent) 5%,#fff) 100%);border-radius:32px;padding:clamp(20px,3vw,38px);box-shadow:0 22px 55px rgba(31,48,61,.07)}
-:is(#restaurants-module,#accommodations-module) .rv2-discovery-title{display:flex;justify-content:space-between;gap:20px;align-items:flex-start;margin-bottom:18px}
-:is(#restaurants-module,#accommodations-module) .rv2-discovery-title h3{font-size:clamp(1.6rem,2.8vw,2.5rem);margin:0 0 6px;letter-spacing:-.04em}
-:is(#restaurants-module,#accommodations-module) .rv2-smart-pill{white-space:nowrap;padding:9px 13px;border-radius:999px;background:color-mix(in srgb,var(--rv2-accent) 10%,#fff);font-weight:700;font-size:.82rem}
-:is(#restaurants-module,#accommodations-module) .rv2-entity-search-new{display:block!important}
-:is(#restaurants-module,#accommodations-module) .rv2-search-box{display:grid;grid-template-columns:auto minmax(0,1fr) auto;align-items:center;gap:10px;background:#fff;border:1px solid #e4e9ec;border-radius:22px;padding:7px 8px 7px 16px;box-shadow:0 12px 30px rgba(31,48,61,.06)}
-:is(#restaurants-module,#accommodations-module) .rv2-search-box>span{font-size:1.4rem;opacity:.55}
-:is(#restaurants-module,#accommodations-module) .rv2-search-box input[name=query]{border:0!important;box-shadow:none!important;min-height:48px!important;padding:0 6px!important}
-:is(#restaurants-module,#accommodations-module) .rv2-search-submit{border-radius:16px!important;min-width:120px!important}
-:is(#restaurants-module,#accommodations-module) .rv2-quick-row{overflow-x:auto;padding:14px 2px 4px;scrollbar-width:none}
-:is(#restaurants-module,#accommodations-module) .rv2-filter-drawer{margin-top:12px;border-top:1px solid #edf0f2;padding-top:10px}
-:is(#restaurants-module,#accommodations-module) .rv2-filter-drawer summary{cursor:pointer;font-weight:700;color:#587080}
-:is(#restaurants-module,#accommodations-module) .rv2-recommendation-head{display:flex;justify-content:space-between;align-items:end;margin:26px 0 12px}
-:is(#restaurants-module,#accommodations-module) .rv2-recommendation-head span,:is(#restaurants-module,#accommodations-module) .rv2-section-heading span{font-size:.72rem;letter-spacing:.12em;text-transform:uppercase;color:#64818d;font-weight:800}
-:is(#restaurants-module,#accommodations-module) .rv2-recommendation-head h4{font-size:1.35rem;margin:4px 0 0}
-:is(#restaurants-module,#accommodations-module) .rv2-recommendation-head button{border:0;background:transparent;color:var(--rv2-accent);font-weight:800;cursor:pointer}
-:is(#restaurants-module,#accommodations-module) .rv2-favorites-new,:is(#restaurants-module,#accommodations-module) .rv2-saved-section{background:#fff;border:1px solid #e7ebed;border-radius:28px;padding:clamp(18px,2.4vw,28px)}
-:is(#restaurants-module,#accommodations-module) .rv2-section-heading{display:flex;justify-content:space-between;gap:16px;align-items:flex-start;margin-bottom:18px}
-:is(#restaurants-module,#accommodations-module) .rv2-section-heading h3{font-size:1.65rem;margin:4px 0}
-:is(#restaurants-module,#accommodations-module) .rv2-section-heading p{margin:0;color:#71828f}
-:is(#restaurants-module,#accommodations-module) .rv2-favorite-list{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:12px}
-:is(#restaurants-module,#accommodations-module) .rv2-favorite-card{display:grid;grid-template-columns:auto minmax(0,1fr);gap:12px;padding:15px;border:1px solid #e7ebed;border-radius:20px;background:linear-gradient(135deg,#fff,#fafcfc);cursor:pointer;transition:.18s ease}
-:is(#restaurants-module,#accommodations-module) .rv2-favorite-card:hover{transform:translateY(-2px);box-shadow:0 14px 30px rgba(31,48,61,.08)}
-:is(#restaurants-module,#accommodations-module) .rv2-favorite-icon{width:42px;height:42px;border-radius:14px;display:grid;place-items:center;background:color-mix(in srgb,var(--rv2-accent) 8%,#fff)}
-:is(#restaurants-module,#accommodations-module) .rv2-favorite-copy{min-width:0}
-:is(#restaurants-module,#accommodations-module) .rv2-favorite-copy strong,:is(#restaurants-module,#accommodations-module) .rv2-favorite-copy small{display:block}
-:is(#restaurants-module,#accommodations-module) .rv2-favorite-copy small{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;color:#7b8b96;margin-top:4px}
-:is(#restaurants-module,#accommodations-module) .rv2-favorite-actions{grid-column:1/-1;display:flex;gap:8px}
-:is(#restaurants-module,#accommodations-module) .rv2-favorite-actions button{border:1px solid #e1e6e9;background:#fff;border-radius:12px;padding:8px 12px;font-weight:700}
-:is(#restaurants-module,#accommodations-module) .rv2-favorite-actions .danger{color:#9b4962}
-:is(#restaurants-module,#accommodations-module) .rv2-saved-section .rv2-grid{grid-template-columns:repeat(auto-fit,minmax(310px,1fr));gap:16px}
+:is(#restaurants-module,#accommodations-module,#attractions-module) .rv2-shell{max-width:1440px;margin:auto;display:grid;gap:24px}
+:is(#restaurants-module,#accommodations-module,#attractions-module) .rv2-head-new{padding:8px 6px 0;background:transparent;border:0;box-shadow:none}
+:is(#restaurants-module,#accommodations-module,#attractions-module) .rv2-head-new h2{font-size:clamp(2rem,4vw,3.4rem);letter-spacing:-.055em;line-height:1.02;margin:.35rem 0}
+:is(#restaurants-module,#accommodations-module,#attractions-module) .rv2-discovery-new{border:1px solid color-mix(in srgb,var(--rv2-accent) 13%,#e5e7eb);background:linear-gradient(145deg,#fff 0%,color-mix(in srgb,var(--rv2-accent) 5%,#fff) 100%);border-radius:32px;padding:clamp(20px,3vw,38px);box-shadow:0 22px 55px rgba(31,48,61,.07)}
+:is(#restaurants-module,#accommodations-module,#attractions-module) .rv2-discovery-title{display:flex;justify-content:space-between;gap:20px;align-items:flex-start;margin-bottom:18px}
+:is(#restaurants-module,#accommodations-module,#attractions-module) .rv2-discovery-title h3{font-size:clamp(1.6rem,2.8vw,2.5rem);margin:0 0 6px;letter-spacing:-.04em}
+:is(#restaurants-module,#accommodations-module,#attractions-module) .rv2-smart-pill{white-space:nowrap;padding:9px 13px;border-radius:999px;background:color-mix(in srgb,var(--rv2-accent) 10%,#fff);font-weight:700;font-size:.82rem}
+:is(#restaurants-module,#accommodations-module,#attractions-module) .rv2-entity-search-new{display:block!important}
+:is(#restaurants-module,#accommodations-module,#attractions-module) .rv2-search-box{display:grid;grid-template-columns:auto minmax(0,1fr) auto;align-items:center;gap:10px;background:#fff;border:1px solid #e4e9ec;border-radius:22px;padding:7px 8px 7px 16px;box-shadow:0 12px 30px rgba(31,48,61,.06)}
+:is(#restaurants-module,#accommodations-module,#attractions-module) .rv2-search-box>span{font-size:1.4rem;opacity:.55}
+:is(#restaurants-module,#accommodations-module,#attractions-module) .rv2-search-box input[name=query]{border:0!important;box-shadow:none!important;min-height:48px!important;padding:0 6px!important}
+:is(#restaurants-module,#accommodations-module,#attractions-module) .rv2-search-submit{border-radius:16px!important;min-width:120px!important}
+:is(#restaurants-module,#accommodations-module,#attractions-module) .rv2-quick-row{overflow-x:auto;padding:14px 2px 4px;scrollbar-width:none}
+:is(#restaurants-module,#accommodations-module,#attractions-module) .rv2-filter-drawer{margin-top:12px;border-top:1px solid #edf0f2;padding-top:10px}
+:is(#restaurants-module,#accommodations-module,#attractions-module) .rv2-filter-drawer summary{cursor:pointer;font-weight:700;color:#587080}
+:is(#restaurants-module,#accommodations-module,#attractions-module) .rv2-recommendation-head{display:flex;justify-content:space-between;align-items:end;margin:26px 0 12px}
+:is(#restaurants-module,#accommodations-module,#attractions-module) .rv2-recommendation-head span,:is(#restaurants-module,#accommodations-module,#attractions-module) .rv2-section-heading span{font-size:.72rem;letter-spacing:.12em;text-transform:uppercase;color:#64818d;font-weight:800}
+:is(#restaurants-module,#accommodations-module,#attractions-module) .rv2-recommendation-head h4{font-size:1.35rem;margin:4px 0 0}
+:is(#restaurants-module,#accommodations-module,#attractions-module) .rv2-recommendation-head button{border:0;background:transparent;color:var(--rv2-accent);font-weight:800;cursor:pointer}
+:is(#restaurants-module,#accommodations-module,#attractions-module) .rv2-favorites-new,:is(#restaurants-module,#accommodations-module,#attractions-module) .rv2-saved-section{background:#fff;border:1px solid #e7ebed;border-radius:28px;padding:clamp(18px,2.4vw,28px)}
+:is(#restaurants-module,#accommodations-module,#attractions-module) .rv2-section-heading{display:flex;justify-content:space-between;gap:16px;align-items:flex-start;margin-bottom:18px}
+:is(#restaurants-module,#accommodations-module,#attractions-module) .rv2-section-heading h3{font-size:1.65rem;margin:4px 0}
+:is(#restaurants-module,#accommodations-module,#attractions-module) .rv2-section-heading p{margin:0;color:#71828f}
+:is(#restaurants-module,#accommodations-module,#attractions-module) .rv2-favorite-list{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:12px}
+:is(#restaurants-module,#accommodations-module,#attractions-module) .rv2-favorite-card{display:grid;grid-template-columns:auto minmax(0,1fr);gap:12px;padding:15px;border:1px solid #e7ebed;border-radius:20px;background:linear-gradient(135deg,#fff,#fafcfc);cursor:pointer;transition:.18s ease}
+:is(#restaurants-module,#accommodations-module,#attractions-module) .rv2-favorite-card:hover{transform:translateY(-2px);box-shadow:0 14px 30px rgba(31,48,61,.08)}
+:is(#restaurants-module,#accommodations-module,#attractions-module) .rv2-favorite-icon{width:42px;height:42px;border-radius:14px;display:grid;place-items:center;background:color-mix(in srgb,var(--rv2-accent) 8%,#fff)}
+:is(#restaurants-module,#accommodations-module,#attractions-module) .rv2-favorite-copy{min-width:0}
+:is(#restaurants-module,#accommodations-module,#attractions-module) .rv2-favorite-copy strong,:is(#restaurants-module,#accommodations-module,#attractions-module) .rv2-favorite-copy small{display:block}
+:is(#restaurants-module,#accommodations-module,#attractions-module) .rv2-favorite-copy small{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;color:#7b8b96;margin-top:4px}
+:is(#restaurants-module,#accommodations-module,#attractions-module) .rv2-favorite-actions{grid-column:1/-1;display:flex;gap:8px}
+:is(#restaurants-module,#accommodations-module,#attractions-module) .rv2-favorite-actions button{border:1px solid #e1e6e9;background:#fff;border-radius:12px;padding:8px 12px;font-weight:700}
+:is(#restaurants-module,#accommodations-module,#attractions-module) .rv2-favorite-actions .danger{color:#9b4962}
+:is(#restaurants-module,#accommodations-module,#attractions-module) .rv2-saved-section .rv2-grid{grid-template-columns:repeat(auto-fit,minmax(310px,1fr));gap:16px}
 .rv2-workspace-compact{max-width:860px!important}
 .rv2-workspace-compact .rv2-workspace-head{background:linear-gradient(135deg,#f5fbfb,#fff)}
 .rv2-compact-summary{display:flex;align-items:center;justify-content:space-between;gap:16px;padding:18px 28px;border-bottom:1px solid #edf0f2}
@@ -510,107 +510,107 @@
 .rv2-compact-section{display:block!important}
 .rv2-optional-details{margin-top:18px;border:1px solid #e7ebed;border-radius:18px;padding:14px}
 .rv2-optional-details summary{cursor:pointer;font-weight:800}
-@media(max-width:700px){:is(#restaurants-module,#accommodations-module) .rv2-discovery-title{display:block}.rv2-smart-pill{display:inline-block;margin-top:10px}:is(#restaurants-module,#accommodations-module) .rv2-search-box{grid-template-columns:auto minmax(0,1fr)}:is(#restaurants-module,#accommodations-module) .rv2-search-submit{grid-column:1/-1;width:100%}.rv2-compact-summary{display:block}.rv2-favorite-toggle{margin-top:12px;width:max-content}}
+@media(max-width:700px){:is(#restaurants-module,#accommodations-module,#attractions-module) .rv2-discovery-title{display:block}.rv2-smart-pill{display:inline-block;margin-top:10px}:is(#restaurants-module,#accommodations-module,#attractions-module) .rv2-search-box{grid-template-columns:auto minmax(0,1fr)}:is(#restaurants-module,#accommodations-module,#attractions-module) .rv2-search-submit{grid-column:1/-1;width:100%}.rv2-compact-summary{display:block}.rv2-favorite-toggle{margin-top:12px;width:max-content}}
 
 /* Build 13.0.3.1 · Calm Restaurant Experience */
-:is(#restaurants-module,#accommodations-module) .rv2-shell{max-width:1220px;gap:20px}
-:is(#restaurants-module,#accommodations-module) .rv2-head-new{padding:4px 2px 0}
-:is(#restaurants-module,#accommodations-module) .rv2-head-new h2{font-size:clamp(1.9rem,3.4vw,3rem)}
-:is(#restaurants-module,#accommodations-module) .rv2-head-new p{max-width:680px}
-:is(#restaurants-module,#accommodations-module) .rv2-discovery-new{padding:clamp(18px,2.5vw,30px);border-radius:28px;box-shadow:0 18px 44px rgba(31,48,61,.06)}
-:is(#restaurants-module,#accommodations-module) .rv2-discovery-title{margin-bottom:14px}
-:is(#restaurants-module,#accommodations-module) .rv2-discovery-title h3{font-size:clamp(1.45rem,2.5vw,2.1rem)}
-:is(#restaurants-module,#accommodations-module) .rv2-search-box{grid-template-columns:auto minmax(0,1fr) auto;min-height:62px;padding:6px 7px 6px 18px;border-radius:20px;overflow:hidden}
-:is(#restaurants-module,#accommodations-module) .rv2-search-box input[name=query]{min-width:0;width:100%;font-size:1rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-:is(#restaurants-module,#accommodations-module) .rv2-search-submit{min-width:104px!important;min-height:48px;border-radius:15px!important}
-:is(#restaurants-module,#accommodations-module) .rv2-quick-row{padding-top:12px}
-:is(#restaurants-module,#accommodations-module) .rv2-quick-wrap{display:grid;gap:8px}
-:is(#restaurants-module,#accommodations-module) .rv2-quick-label{font-size:.72rem;text-transform:uppercase;letter-spacing:.1em;font-weight:800;color:#6b808d}
-:is(#restaurants-module,#accommodations-module) .rv2-discovery-actions{display:flex;gap:8px;overflow-x:auto;padding:2px 2px 6px;scrollbar-width:none}
-:is(#restaurants-module,#accommodations-module) .rv2-quick-chip{flex:0 0 auto;padding:9px 13px!important;border-radius:999px!important;box-shadow:none!important}
-:is(#restaurants-module,#accommodations-module) .rv2-filter-drawer{border:0;padding-top:6px}
-:is(#restaurants-module,#accommodations-module) .rv2-filter-drawer summary{width:max-content;padding:8px 0}
-:is(#restaurants-module,#accommodations-module) .rv2-search-options{margin-top:8px;padding:15px;border-radius:18px;background:#f7fafb}
-:is(#restaurants-module,#accommodations-module) .rv2-context-bar{margin:0;grid-column:1/-1;background:#fff}
-:is(#restaurants-module,#accommodations-module) .rv2-recommendation-head{margin:20px 0 10px}
-:is(#restaurants-module,#accommodations-module) .rv2-search-results{display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:12px}
-:is(#restaurants-module,#accommodations-module) .rv2-search-results .rv2-search-card{border-radius:20px;padding:16px;box-shadow:none;border:1px solid #e6ebee;background:#fff}
-:is(#restaurants-module,#accommodations-module) .rv2-search-results .rv2-search-card:hover{transform:translateY(-2px);box-shadow:0 14px 30px rgba(31,48,61,.08)}
-:is(#restaurants-module,#accommodations-module) .rv2-search-results .rv2-search-intel{display:flex;gap:5px;max-height:58px;overflow:hidden}
-:is(#restaurants-module,#accommodations-module) .rv2-search-results .rv2-search-intel em:nth-child(n+5){display:none}
-:is(#restaurants-module,#accommodations-module) .rv2-library{display:grid;gap:10px}
-:is(#restaurants-module,#accommodations-module) .rv2-library-heading{display:flex;justify-content:space-between;align-items:end;padding:4px 4px 2px}
-:is(#restaurants-module,#accommodations-module) .rv2-library-heading span{font-size:.72rem;letter-spacing:.11em;text-transform:uppercase;font-weight:800;color:#69818e}
-:is(#restaurants-module,#accommodations-module) .rv2-library-heading h3{margin:3px 0 0;font-size:1.35rem}
-:is(#restaurants-module,#accommodations-module) .rv2-library-heading small{color:#71828f}
-:is(#restaurants-module,#accommodations-module) .rv2-library-panel{border:1px solid #e5eaed;border-radius:22px;background:#fff;overflow:hidden}
-:is(#restaurants-module,#accommodations-module) .rv2-library-panel>summary{list-style:none;display:flex;justify-content:space-between;align-items:center;gap:16px;padding:17px 19px;cursor:pointer}
-:is(#restaurants-module,#accommodations-module) .rv2-library-panel>summary::-webkit-details-marker{display:none}
-:is(#restaurants-module,#accommodations-module) .rv2-library-panel>summary>span{display:flex;align-items:center;gap:12px;min-width:0}
-:is(#restaurants-module,#accommodations-module) .rv2-library-panel>summary i{display:grid;place-items:center;width:40px;height:40px;border-radius:14px;background:color-mix(in srgb,var(--rv2-accent) 9%,#fff);font-style:normal;color:var(--rv2-accent)}
-:is(#restaurants-module,#accommodations-module) .rv2-library-panel>summary strong,:is(#restaurants-module,#accommodations-module) .rv2-library-panel>summary small{display:block}
-:is(#restaurants-module,#accommodations-module) .rv2-library-panel>summary small{margin-top:2px;color:#748590}
-:is(#restaurants-module,#accommodations-module) .rv2-library-panel>summary b{display:grid;place-items:center;min-width:31px;height:31px;border-radius:999px;background:#f3f7f8;font-size:.78rem}
-:is(#restaurants-module,#accommodations-module) .rv2-library-panel[open]>summary{border-bottom:1px solid #edf0f2}
-:is(#restaurants-module,#accommodations-module) .rv2-library-content{padding:16px}
-:is(#restaurants-module,#accommodations-module) .rv2-library-empty{padding:18px;border-radius:16px;background:#f7fafb;color:#71828f}
-:is(#restaurants-module,#accommodations-module) .rv2-saved-grid{grid-template-columns:repeat(auto-fit,minmax(270px,1fr));gap:12px}
-:is(#restaurants-module,#accommodations-module) .rv2-saved-grid .rv2-card{padding:16px!important;border-radius:20px!important}
-:is(#restaurants-module,#accommodations-module) .rv2-saved-grid .luv-place-badges span:nth-child(n+5){display:none}
+:is(#restaurants-module,#accommodations-module,#attractions-module) .rv2-shell{max-width:1220px;gap:20px}
+:is(#restaurants-module,#accommodations-module,#attractions-module) .rv2-head-new{padding:4px 2px 0}
+:is(#restaurants-module,#accommodations-module,#attractions-module) .rv2-head-new h2{font-size:clamp(1.9rem,3.4vw,3rem)}
+:is(#restaurants-module,#accommodations-module,#attractions-module) .rv2-head-new p{max-width:680px}
+:is(#restaurants-module,#accommodations-module,#attractions-module) .rv2-discovery-new{padding:clamp(18px,2.5vw,30px);border-radius:28px;box-shadow:0 18px 44px rgba(31,48,61,.06)}
+:is(#restaurants-module,#accommodations-module,#attractions-module) .rv2-discovery-title{margin-bottom:14px}
+:is(#restaurants-module,#accommodations-module,#attractions-module) .rv2-discovery-title h3{font-size:clamp(1.45rem,2.5vw,2.1rem)}
+:is(#restaurants-module,#accommodations-module,#attractions-module) .rv2-search-box{grid-template-columns:auto minmax(0,1fr) auto;min-height:62px;padding:6px 7px 6px 18px;border-radius:20px;overflow:hidden}
+:is(#restaurants-module,#accommodations-module,#attractions-module) .rv2-search-box input[name=query]{min-width:0;width:100%;font-size:1rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+:is(#restaurants-module,#accommodations-module,#attractions-module) .rv2-search-submit{min-width:104px!important;min-height:48px;border-radius:15px!important}
+:is(#restaurants-module,#accommodations-module,#attractions-module) .rv2-quick-row{padding-top:12px}
+:is(#restaurants-module,#accommodations-module,#attractions-module) .rv2-quick-wrap{display:grid;gap:8px}
+:is(#restaurants-module,#accommodations-module,#attractions-module) .rv2-quick-label{font-size:.72rem;text-transform:uppercase;letter-spacing:.1em;font-weight:800;color:#6b808d}
+:is(#restaurants-module,#accommodations-module,#attractions-module) .rv2-discovery-actions{display:flex;gap:8px;overflow-x:auto;padding:2px 2px 6px;scrollbar-width:none}
+:is(#restaurants-module,#accommodations-module,#attractions-module) .rv2-quick-chip{flex:0 0 auto;padding:9px 13px!important;border-radius:999px!important;box-shadow:none!important}
+:is(#restaurants-module,#accommodations-module,#attractions-module) .rv2-filter-drawer{border:0;padding-top:6px}
+:is(#restaurants-module,#accommodations-module,#attractions-module) .rv2-filter-drawer summary{width:max-content;padding:8px 0}
+:is(#restaurants-module,#accommodations-module,#attractions-module) .rv2-search-options{margin-top:8px;padding:15px;border-radius:18px;background:#f7fafb}
+:is(#restaurants-module,#accommodations-module,#attractions-module) .rv2-context-bar{margin:0;grid-column:1/-1;background:#fff}
+:is(#restaurants-module,#accommodations-module,#attractions-module) .rv2-recommendation-head{margin:20px 0 10px}
+:is(#restaurants-module,#accommodations-module,#attractions-module) .rv2-search-results{display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:12px}
+:is(#restaurants-module,#accommodations-module,#attractions-module) .rv2-search-results .rv2-search-card{border-radius:20px;padding:16px;box-shadow:none;border:1px solid #e6ebee;background:#fff}
+:is(#restaurants-module,#accommodations-module,#attractions-module) .rv2-search-results .rv2-search-card:hover{transform:translateY(-2px);box-shadow:0 14px 30px rgba(31,48,61,.08)}
+:is(#restaurants-module,#accommodations-module,#attractions-module) .rv2-search-results .rv2-search-intel{display:flex;gap:5px;max-height:58px;overflow:hidden}
+:is(#restaurants-module,#accommodations-module,#attractions-module) .rv2-search-results .rv2-search-intel em:nth-child(n+5){display:none}
+:is(#restaurants-module,#accommodations-module,#attractions-module) .rv2-library{display:grid;gap:10px}
+:is(#restaurants-module,#accommodations-module,#attractions-module) .rv2-library-heading{display:flex;justify-content:space-between;align-items:end;padding:4px 4px 2px}
+:is(#restaurants-module,#accommodations-module,#attractions-module) .rv2-library-heading span{font-size:.72rem;letter-spacing:.11em;text-transform:uppercase;font-weight:800;color:#69818e}
+:is(#restaurants-module,#accommodations-module,#attractions-module) .rv2-library-heading h3{margin:3px 0 0;font-size:1.35rem}
+:is(#restaurants-module,#accommodations-module,#attractions-module) .rv2-library-heading small{color:#71828f}
+:is(#restaurants-module,#accommodations-module,#attractions-module) .rv2-library-panel{border:1px solid #e5eaed;border-radius:22px;background:#fff;overflow:hidden}
+:is(#restaurants-module,#accommodations-module,#attractions-module) .rv2-library-panel>summary{list-style:none;display:flex;justify-content:space-between;align-items:center;gap:16px;padding:17px 19px;cursor:pointer}
+:is(#restaurants-module,#accommodations-module,#attractions-module) .rv2-library-panel>summary::-webkit-details-marker{display:none}
+:is(#restaurants-module,#accommodations-module,#attractions-module) .rv2-library-panel>summary>span{display:flex;align-items:center;gap:12px;min-width:0}
+:is(#restaurants-module,#accommodations-module,#attractions-module) .rv2-library-panel>summary i{display:grid;place-items:center;width:40px;height:40px;border-radius:14px;background:color-mix(in srgb,var(--rv2-accent) 9%,#fff);font-style:normal;color:var(--rv2-accent)}
+:is(#restaurants-module,#accommodations-module,#attractions-module) .rv2-library-panel>summary strong,:is(#restaurants-module,#accommodations-module,#attractions-module) .rv2-library-panel>summary small{display:block}
+:is(#restaurants-module,#accommodations-module,#attractions-module) .rv2-library-panel>summary small{margin-top:2px;color:#748590}
+:is(#restaurants-module,#accommodations-module,#attractions-module) .rv2-library-panel>summary b{display:grid;place-items:center;min-width:31px;height:31px;border-radius:999px;background:#f3f7f8;font-size:.78rem}
+:is(#restaurants-module,#accommodations-module,#attractions-module) .rv2-library-panel[open]>summary{border-bottom:1px solid #edf0f2}
+:is(#restaurants-module,#accommodations-module,#attractions-module) .rv2-library-content{padding:16px}
+:is(#restaurants-module,#accommodations-module,#attractions-module) .rv2-library-empty{padding:18px;border-radius:16px;background:#f7fafb;color:#71828f}
+:is(#restaurants-module,#accommodations-module,#attractions-module) .rv2-saved-grid{grid-template-columns:repeat(auto-fit,minmax(270px,1fr));gap:12px}
+:is(#restaurants-module,#accommodations-module,#attractions-module) .rv2-saved-grid .rv2-card{padding:16px!important;border-radius:20px!important}
+:is(#restaurants-module,#accommodations-module,#attractions-module) .rv2-saved-grid .luv-place-badges span:nth-child(n+5){display:none}
 @media(max-width:700px){
-  :is(#restaurants-module,#accommodations-module) .rv2-shell{gap:16px}
-  :is(#restaurants-module,#accommodations-module) .rv2-discovery-new{border-radius:22px;padding:17px}
-  :is(#restaurants-module,#accommodations-module) .rv2-smart-pill{display:none}
-  :is(#restaurants-module,#accommodations-module) .rv2-search-box{grid-template-columns:auto minmax(0,1fr);padding:7px 10px 7px 14px}
-  :is(#restaurants-module,#accommodations-module) .rv2-search-submit{grid-column:1/-1;width:100%;min-height:44px}
-  :is(#restaurants-module,#accommodations-module) .rv2-search-box input[name=query]{font-size:.95rem}
-  :is(#restaurants-module,#accommodations-module) .rv2-search-results{grid-template-columns:1fr}
-  :is(#restaurants-module,#accommodations-module) .rv2-library-heading{align-items:flex-start}
-  :is(#restaurants-module,#accommodations-module) .rv2-library-content{padding:12px}
-  :is(#restaurants-module,#accommodations-module) .rv2-favorite-list{grid-template-columns:1fr}
+  :is(#restaurants-module,#accommodations-module,#attractions-module) .rv2-shell{gap:16px}
+  :is(#restaurants-module,#accommodations-module,#attractions-module) .rv2-discovery-new{border-radius:22px;padding:17px}
+  :is(#restaurants-module,#accommodations-module,#attractions-module) .rv2-smart-pill{display:none}
+  :is(#restaurants-module,#accommodations-module,#attractions-module) .rv2-search-box{grid-template-columns:auto minmax(0,1fr);padding:7px 10px 7px 14px}
+  :is(#restaurants-module,#accommodations-module,#attractions-module) .rv2-search-submit{grid-column:1/-1;width:100%;min-height:44px}
+  :is(#restaurants-module,#accommodations-module,#attractions-module) .rv2-search-box input[name=query]{font-size:.95rem}
+  :is(#restaurants-module,#accommodations-module,#attractions-module) .rv2-search-results{grid-template-columns:1fr}
+  :is(#restaurants-module,#accommodations-module,#attractions-module) .rv2-library-heading{align-items:flex-start}
+  :is(#restaurants-module,#accommodations-module,#attractions-module) .rv2-library-content{padding:12px}
+  :is(#restaurants-module,#accommodations-module,#attractions-module) .rv2-favorite-list{grid-template-columns:1fr}
 }
 
 
 /* Build 13.0.3.3 – Restaurant Interaction Polish repair */
-:is(#restaurants-module,#accommodations-module){--rv2-glow:color-mix(in srgb,var(--rv2-accent,#a23d63) 14%,transparent)}
-:is(#restaurants-module,#accommodations-module) .rv2-shell{background:radial-gradient(circle at 8% 0,var(--rv2-glow),transparent 32%),linear-gradient(180deg,color-mix(in srgb,var(--rv2-accent) 4%,#fff),#fff 38%);border-radius:30px;padding:clamp(14px,2.4vw,28px)}
-:is(#restaurants-module,#accommodations-module) .rv2-head-new{padding:8px 6px 20px}
-:is(#restaurants-module,#accommodations-module) .rv2-discovery-new{background:linear-gradient(145deg,color-mix(in srgb,var(--rv2-accent) 8%,#fff),#fff 64%);border:1px solid color-mix(in srgb,var(--rv2-accent) 18%,#e5eaed);box-shadow:0 18px 50px rgba(31,47,59,.07);border-radius:28px}
-:is(#restaurants-module,#accommodations-module) .rv2-search-box{display:grid!important;grid-template-columns:24px minmax(0,1fr) auto!important;align-items:center!important;gap:10px!important;padding:8px 8px 8px 16px!important;background:#fff!important;border:1px solid color-mix(in srgb,var(--rv2-accent) 17%,#e2e7ea)!important;border-radius:20px!important;box-shadow:0 10px 28px rgba(33,48,60,.06)!important}
-:is(#restaurants-module,#accommodations-module) .rv2-search-box input{display:block!important;min-width:0!important;width:100%!important;border:0!important;outline:0!important;background:transparent!important;padding:12px 4px!important;font-size:1rem!important;color:var(--rv2-ink)!important;text-overflow:ellipsis!important}
-:is(#restaurants-module,#accommodations-module) .rv2-search-submit{width:auto!important;min-width:108px!important;max-width:150px!important;min-height:44px!important;padding:10px 18px!important;border-radius:14px!important;justify-self:end!important;box-shadow:none!important;background:color-mix(in srgb,var(--rv2-accent) 15%,#fff)!important}
-:is(#restaurants-module,#accommodations-module) .rv2-search-results{display:grid!important;grid-template-columns:repeat(auto-fit,minmax(min(100%,285px),1fr))!important;gap:16px!important;align-items:stretch!important}
-:is(#restaurants-module,#accommodations-module) .rv2-search-results .luvia-place-card,:is(#restaurants-module,#accommodations-module) .rv2-search-card{display:flex!important;flex-direction:column!important;min-width:0!important;width:100%!important;max-width:none!important;overflow:hidden!important;padding:18px!important;border-radius:24px!important;background:linear-gradient(160deg,#fff,color-mix(in srgb,var(--rv2-accent) 5%,#fff))!important;border:1px solid color-mix(in srgb,var(--rv2-accent) 16%,#e4e9ec)!important;box-shadow:0 14px 36px rgba(31,46,58,.07)!important}
-:is(#restaurants-module,#accommodations-module) .rv2-search-results .luvia-place-card *{min-width:0!important;max-width:100%!important;overflow-wrap:anywhere!important;word-break:normal!important}
-:is(#restaurants-module,#accommodations-module) .rv2-search-results .luvia-place-card h3,:is(#restaurants-module,#accommodations-module) .rv2-search-results .luvia-place-card h4{font-size:1.08rem!important;line-height:1.25!important;margin:0!important}
-:is(#restaurants-module,#accommodations-module) .rv2-search-results .luvia-place-card [class*=badge],:is(#restaurants-module,#accommodations-module) .rv2-search-results .luvia-place-card [class*=pill]{white-space:normal!important;height:auto!important;line-height:1.25!important}
-:is(#restaurants-module,#accommodations-module) .rv2-search-card-actions{display:grid!important;grid-template-columns:1fr 1fr!important;gap:9px!important;margin-top:auto!important;padding-top:14px!important}
-:is(#restaurants-module,#accommodations-module) .rv2-search-card-actions button{width:100%!important;min-width:0!important;white-space:normal!important}
-:is(#restaurants-module,#accommodations-module) .rv2-library{margin-top:20px;padding:18px;border-radius:26px;background:color-mix(in srgb,var(--rv2-accent) 4%,#fff);border:1px solid color-mix(in srgb,var(--rv2-accent) 13%,#e7ebee)}
-:is(#restaurants-module,#accommodations-module) details.rv2-library-group{border-radius:20px!important;background:#fff!important}
-@media(max-width:680px){:is(#restaurants-module,#accommodations-module) .rv2-shell{padding:12px;border-radius:22px}:is(#restaurants-module,#accommodations-module) .rv2-search-box{grid-template-columns:22px minmax(0,1fr)!important;padding:8px 12px!important}:is(#restaurants-module,#accommodations-module) .rv2-search-submit{grid-column:1/-1!important;width:100%!important;max-width:none!important;justify-self:stretch!important}:is(#restaurants-module,#accommodations-module) .rv2-search-results{grid-template-columns:1fr!important}:is(#restaurants-module,#accommodations-module) .rv2-search-card-actions{grid-template-columns:1fr!important}}
+:is(#restaurants-module,#accommodations-module,#attractions-module){--rv2-glow:color-mix(in srgb,var(--rv2-accent,#a23d63) 14%,transparent)}
+:is(#restaurants-module,#accommodations-module,#attractions-module) .rv2-shell{background:radial-gradient(circle at 8% 0,var(--rv2-glow),transparent 32%),linear-gradient(180deg,color-mix(in srgb,var(--rv2-accent) 4%,#fff),#fff 38%);border-radius:30px;padding:clamp(14px,2.4vw,28px)}
+:is(#restaurants-module,#accommodations-module,#attractions-module) .rv2-head-new{padding:8px 6px 20px}
+:is(#restaurants-module,#accommodations-module,#attractions-module) .rv2-discovery-new{background:linear-gradient(145deg,color-mix(in srgb,var(--rv2-accent) 8%,#fff),#fff 64%);border:1px solid color-mix(in srgb,var(--rv2-accent) 18%,#e5eaed);box-shadow:0 18px 50px rgba(31,47,59,.07);border-radius:28px}
+:is(#restaurants-module,#accommodations-module,#attractions-module) .rv2-search-box{display:grid!important;grid-template-columns:24px minmax(0,1fr) auto!important;align-items:center!important;gap:10px!important;padding:8px 8px 8px 16px!important;background:#fff!important;border:1px solid color-mix(in srgb,var(--rv2-accent) 17%,#e2e7ea)!important;border-radius:20px!important;box-shadow:0 10px 28px rgba(33,48,60,.06)!important}
+:is(#restaurants-module,#accommodations-module,#attractions-module) .rv2-search-box input{display:block!important;min-width:0!important;width:100%!important;border:0!important;outline:0!important;background:transparent!important;padding:12px 4px!important;font-size:1rem!important;color:var(--rv2-ink)!important;text-overflow:ellipsis!important}
+:is(#restaurants-module,#accommodations-module,#attractions-module) .rv2-search-submit{width:auto!important;min-width:108px!important;max-width:150px!important;min-height:44px!important;padding:10px 18px!important;border-radius:14px!important;justify-self:end!important;box-shadow:none!important;background:color-mix(in srgb,var(--rv2-accent) 15%,#fff)!important}
+:is(#restaurants-module,#accommodations-module,#attractions-module) .rv2-search-results{display:grid!important;grid-template-columns:repeat(auto-fit,minmax(min(100%,285px),1fr))!important;gap:16px!important;align-items:stretch!important}
+:is(#restaurants-module,#accommodations-module,#attractions-module) .rv2-search-results .luvia-place-card,:is(#restaurants-module,#accommodations-module,#attractions-module) .rv2-search-card{display:flex!important;flex-direction:column!important;min-width:0!important;width:100%!important;max-width:none!important;overflow:hidden!important;padding:18px!important;border-radius:24px!important;background:linear-gradient(160deg,#fff,color-mix(in srgb,var(--rv2-accent) 5%,#fff))!important;border:1px solid color-mix(in srgb,var(--rv2-accent) 16%,#e4e9ec)!important;box-shadow:0 14px 36px rgba(31,46,58,.07)!important}
+:is(#restaurants-module,#accommodations-module,#attractions-module) .rv2-search-results .luvia-place-card *{min-width:0!important;max-width:100%!important;overflow-wrap:anywhere!important;word-break:normal!important}
+:is(#restaurants-module,#accommodations-module,#attractions-module) .rv2-search-results .luvia-place-card h3,:is(#restaurants-module,#accommodations-module,#attractions-module) .rv2-search-results .luvia-place-card h4{font-size:1.08rem!important;line-height:1.25!important;margin:0!important}
+:is(#restaurants-module,#accommodations-module,#attractions-module) .rv2-search-results .luvia-place-card [class*=badge],:is(#restaurants-module,#accommodations-module,#attractions-module) .rv2-search-results .luvia-place-card [class*=pill]{white-space:normal!important;height:auto!important;line-height:1.25!important}
+:is(#restaurants-module,#accommodations-module,#attractions-module) .rv2-search-card-actions{display:grid!important;grid-template-columns:1fr 1fr!important;gap:9px!important;margin-top:auto!important;padding-top:14px!important}
+:is(#restaurants-module,#accommodations-module,#attractions-module) .rv2-search-card-actions button{width:100%!important;min-width:0!important;white-space:normal!important}
+:is(#restaurants-module,#accommodations-module,#attractions-module) .rv2-library{margin-top:20px;padding:18px;border-radius:26px;background:color-mix(in srgb,var(--rv2-accent) 4%,#fff);border:1px solid color-mix(in srgb,var(--rv2-accent) 13%,#e7ebee)}
+:is(#restaurants-module,#accommodations-module,#attractions-module) details.rv2-library-group{border-radius:20px!important;background:#fff!important}
+@media(max-width:680px){:is(#restaurants-module,#accommodations-module,#attractions-module) .rv2-shell{padding:12px;border-radius:22px}:is(#restaurants-module,#accommodations-module,#attractions-module) .rv2-search-box{grid-template-columns:22px minmax(0,1fr)!important;padding:8px 12px!important}:is(#restaurants-module,#accommodations-module,#attractions-module) .rv2-search-submit{grid-column:1/-1!important;width:100%!important;max-width:none!important;justify-self:stretch!important}:is(#restaurants-module,#accommodations-module,#attractions-module) .rv2-search-results{grid-template-columns:1fr!important}:is(#restaurants-module,#accommodations-module,#attractions-module) .rv2-search-card-actions{grid-template-columns:1fr!important}}
 
 /* Build 13.0.3.3 – Restaurant usability and planning correction */
-:is(#restaurants-module,#accommodations-module) .rv2-shell{--rv2-accent-soft:color-mix(in srgb,var(--rv2-accent) 18%,#fff);background:radial-gradient(circle at 8% 2%,color-mix(in srgb,var(--rv2-accent) 24%,transparent),transparent 34%),linear-gradient(180deg,color-mix(in srgb,var(--rv2-accent) 9%,#fff),#fff 42%)!important;border:1px solid color-mix(in srgb,var(--rv2-accent) 18%,#e5eaed)}
-:is(#restaurants-module,#accommodations-module) .rv2-discovery-new{background:linear-gradient(145deg,color-mix(in srgb,var(--rv2-accent) 15%,#fff),color-mix(in srgb,var(--rv2-accent) 5%,#fff) 70%)!important}
-:is(#restaurants-module,#accommodations-module) .rv2-search-box{display:flex!important;align-items:center!important;gap:10px!important;min-height:58px!important;padding:7px 8px 7px 15px!important}
-:is(#restaurants-module,#accommodations-module) .rv2-search-box>span{flex:0 0 22px;color:var(--rv2-accent);font-size:20px}
-:is(#restaurants-module,#accommodations-module) .rv2-search-box input{flex:1 1 auto!important;width:auto!important;min-width:0!important;padding:12px 6px!important;text-overflow:clip!important}
-:is(#restaurants-module,#accommodations-module) .rv2-search-submit{flex:0 0 auto!important;width:auto!important;min-width:96px!important;max-width:none!important;min-height:44px!important;padding:10px 20px!important;background:var(--rv2-accent)!important;color:#fff!important;border:0!important}
-:is(#restaurants-module,#accommodations-module) .rv2-search-results{grid-template-columns:repeat(auto-fit,minmax(320px,1fr))!important}
-:is(#restaurants-module,#accommodations-module) .luv-place-card-head{display:grid!important;grid-template-columns:auto minmax(0,1fr) auto!important;gap:12px!important;align-items:start!important}
-:is(#restaurants-module,#accommodations-module) .luv-place-card-head>div{min-width:0!important}
-:is(#restaurants-module,#accommodations-module) .luv-place-card h3{overflow-wrap:normal!important;word-break:normal!important;hyphens:auto!important}
-:is(#restaurants-module,#accommodations-module) .luv-place-address,:is(#restaurants-module,#accommodations-module) .luv-place-description{line-height:1.45!important}
-:is(#restaurants-module,#accommodations-module) .luv-place-actions{display:grid!important;grid-template-columns:1fr 1fr!important;gap:10px!important;margin-top:auto!important;padding-top:16px!important}
-:is(#restaurants-module,#accommodations-module) .luv-place-actions .rv2-detail-button.primary{background:color-mix(in srgb,var(--rv2-accent) 18%,#fff)!important;color:color-mix(in srgb,var(--rv2-accent) 78%,#172f42)!important;border:1px solid color-mix(in srgb,var(--rv2-accent) 28%,#dce4e8)!important;font-weight:800!important}
-:is(#restaurants-module,#accommodations-module) .luv-place-actions button[data-rv2-import]{background:var(--rv2-accent)!important;color:#fff!important;border-color:var(--rv2-accent)!important}
+:is(#restaurants-module,#accommodations-module,#attractions-module) .rv2-shell{--rv2-accent-soft:color-mix(in srgb,var(--rv2-accent) 18%,#fff);background:radial-gradient(circle at 8% 2%,color-mix(in srgb,var(--rv2-accent) 24%,transparent),transparent 34%),linear-gradient(180deg,color-mix(in srgb,var(--rv2-accent) 9%,#fff),#fff 42%)!important;border:1px solid color-mix(in srgb,var(--rv2-accent) 18%,#e5eaed)}
+:is(#restaurants-module,#accommodations-module,#attractions-module) .rv2-discovery-new{background:linear-gradient(145deg,color-mix(in srgb,var(--rv2-accent) 15%,#fff),color-mix(in srgb,var(--rv2-accent) 5%,#fff) 70%)!important}
+:is(#restaurants-module,#accommodations-module,#attractions-module) .rv2-search-box{display:flex!important;align-items:center!important;gap:10px!important;min-height:58px!important;padding:7px 8px 7px 15px!important}
+:is(#restaurants-module,#accommodations-module,#attractions-module) .rv2-search-box>span{flex:0 0 22px;color:var(--rv2-accent);font-size:20px}
+:is(#restaurants-module,#accommodations-module,#attractions-module) .rv2-search-box input{flex:1 1 auto!important;width:auto!important;min-width:0!important;padding:12px 6px!important;text-overflow:clip!important}
+:is(#restaurants-module,#accommodations-module,#attractions-module) .rv2-search-submit{flex:0 0 auto!important;width:auto!important;min-width:96px!important;max-width:none!important;min-height:44px!important;padding:10px 20px!important;background:var(--rv2-accent)!important;color:#fff!important;border:0!important}
+:is(#restaurants-module,#accommodations-module,#attractions-module) .rv2-search-results{grid-template-columns:repeat(auto-fit,minmax(320px,1fr))!important}
+:is(#restaurants-module,#accommodations-module,#attractions-module) .luv-place-card-head{display:grid!important;grid-template-columns:auto minmax(0,1fr) auto!important;gap:12px!important;align-items:start!important}
+:is(#restaurants-module,#accommodations-module,#attractions-module) .luv-place-card-head>div{min-width:0!important}
+:is(#restaurants-module,#accommodations-module,#attractions-module) .luv-place-card h3{overflow-wrap:normal!important;word-break:normal!important;hyphens:auto!important}
+:is(#restaurants-module,#accommodations-module,#attractions-module) .luv-place-address,:is(#restaurants-module,#accommodations-module,#attractions-module) .luv-place-description{line-height:1.45!important}
+:is(#restaurants-module,#accommodations-module,#attractions-module) .luv-place-actions{display:grid!important;grid-template-columns:1fr 1fr!important;gap:10px!important;margin-top:auto!important;padding-top:16px!important}
+:is(#restaurants-module,#accommodations-module,#attractions-module) .luv-place-actions .rv2-detail-button.primary{background:color-mix(in srgb,var(--rv2-accent) 18%,#fff)!important;color:color-mix(in srgb,var(--rv2-accent) 78%,#172f42)!important;border:1px solid color-mix(in srgb,var(--rv2-accent) 28%,#dce4e8)!important;font-weight:800!important}
+:is(#restaurants-module,#accommodations-module,#attractions-module) .luv-place-actions button[data-rv2-import]{background:var(--rv2-accent)!important;color:#fff!important;border-color:var(--rv2-accent)!important}
 .rv2-plan-backdrop{position:fixed;inset:0;z-index:10050;display:grid;place-items:center;padding:20px;background:rgba(17,29,38,.48);backdrop-filter:blur(14px)}
 .rv2-plan-dialog{position:relative;width:min(480px,100%);display:grid;gap:16px;padding:28px;border-radius:28px;background:#fff;box-shadow:0 30px 90px rgba(12,24,34,.28);border:1px solid color-mix(in srgb,var(--rv2-accent,#a23d63) 18%,#e4e9ec)}
 .rv2-plan-dialog h3{margin:0;font-size:1.55rem;color:#17354d}.rv2-plan-dialog p{margin:-8px 0 4px;color:#718493;line-height:1.5}.rv2-plan-kicker{font-size:.72rem;font-weight:900;letter-spacing:.12em;text-transform:uppercase;color:var(--rv2-accent,#a23d63)}
 .rv2-plan-dialog label{display:grid;gap:7px}.rv2-plan-dialog label span{font-size:.82rem;font-weight:800;color:#526b7c}.rv2-plan-dialog input{width:100%;min-height:52px;padding:12px 14px;border:1px solid #dbe3e8;border-radius:15px;font:inherit;color:#17354d;background:#fbfcfd}.rv2-plan-dialog input:focus{outline:3px solid color-mix(in srgb,var(--rv2-accent,#a23d63) 18%,transparent);border-color:var(--rv2-accent,#a23d63)}
 .rv2-plan-close{position:absolute;top:14px;right:14px;width:38px;height:38px;border:0;border-radius:50%;background:#f1f5f6;font-size:22px}.rv2-plan-actions{display:flex;justify-content:flex-end;gap:10px;margin-top:4px}.rv2-plan-actions button{min-height:46px;padding:10px 16px;border-radius:14px;border:1px solid #dbe3e8;background:#fff;font-weight:800}.rv2-plan-actions .primary{background:var(--rv2-accent,#a23d63);color:#fff;border-color:var(--rv2-accent,#a23d63)}.rv2-plan-message{min-height:20px;color:#527064;font-size:.86rem}
-@media(max-width:680px){:is(#restaurants-module,#accommodations-module) .rv2-search-box{display:grid!important;grid-template-columns:22px minmax(0,1fr)!important}:is(#restaurants-module,#accommodations-module) .rv2-search-submit{grid-column:1/-1!important;width:100%!important}:is(#restaurants-module,#accommodations-module) .rv2-search-results{grid-template-columns:1fr!important}:is(#restaurants-module,#accommodations-module) .luv-place-actions{grid-template-columns:1fr!important}.rv2-plan-dialog{padding:24px 18px}.rv2-plan-actions{display:grid;grid-template-columns:1fr 1fr}.rv2-plan-actions button{width:100%}}
+@media(max-width:680px){:is(#restaurants-module,#accommodations-module,#attractions-module) .rv2-search-box{display:grid!important;grid-template-columns:22px minmax(0,1fr)!important}:is(#restaurants-module,#accommodations-module,#attractions-module) .rv2-search-submit{grid-column:1/-1!important;width:100%!important}:is(#restaurants-module,#accommodations-module,#attractions-module) .rv2-search-results{grid-template-columns:1fr!important}:is(#restaurants-module,#accommodations-module,#attractions-module) .luv-place-actions{grid-template-columns:1fr!important}.rv2-plan-dialog{padding:24px 18px}.rv2-plan-actions{display:grid;grid-template-columns:1fr 1fr}.rv2-plan-actions button{width:100%}}
 
 /* Build 13.0.3.4 – media cards, top day plan and modal stacking */
 .rv2-plan-backdrop{z-index:2147483647!important}
@@ -622,13 +622,13 @@
 @media(max-width:680px){.rv2-card-media{height:104px}.rv2-today-plan{padding:17px}.rv2-today-plan-list{display:grid}.rv2-today-plan-list button{width:100%}}
 
 /* Build 13.0.3.5 – collection management */
-:is(#restaurants-module,#accommodations-module) .rv2-library-summary-actions{display:flex;align-items:center;gap:10px;margin-left:auto}
-:is(#restaurants-module,#accommodations-module) .rv2-clear-all{border:0;background:transparent;color:#9b4352;font:inherit;font-size:.78rem;font-weight:750;padding:7px 9px;border-radius:10px;cursor:pointer}
-:is(#restaurants-module,#accommodations-module) .rv2-clear-all:hover{background:#fff1f3}
-:is(#restaurants-module,#accommodations-module) .rv2-saved-item{position:relative;display:grid;gap:8px;min-width:0}
-:is(#restaurants-module,#accommodations-module) .rv2-remove-saved{width:100%;border:1px solid #ead8dc;background:#fff;color:#973e4d;border-radius:13px;padding:10px 12px;font-weight:750;cursor:pointer}
-:is(#restaurants-module,#accommodations-module) .rv2-remove-saved:hover{background:#fff4f5}
-@media(max-width:620px){:is(#restaurants-module,#accommodations-module) .rv2-library-panel>summary{align-items:flex-start}.rv2-library-summary-actions{flex-direction:column-reverse!important;align-items:flex-end!important}.rv2-clear-all{font-size:.72rem!important;padding:4px!important}}
+:is(#restaurants-module,#accommodations-module,#attractions-module) .rv2-library-summary-actions{display:flex;align-items:center;gap:10px;margin-left:auto}
+:is(#restaurants-module,#accommodations-module,#attractions-module) .rv2-clear-all{border:0;background:transparent;color:#9b4352;font:inherit;font-size:.78rem;font-weight:750;padding:7px 9px;border-radius:10px;cursor:pointer}
+:is(#restaurants-module,#accommodations-module,#attractions-module) .rv2-clear-all:hover{background:#fff1f3}
+:is(#restaurants-module,#accommodations-module,#attractions-module) .rv2-saved-item{position:relative;display:grid;gap:8px;min-width:0}
+:is(#restaurants-module,#accommodations-module,#attractions-module) .rv2-remove-saved{width:100%;border:1px solid #ead8dc;background:#fff;color:#973e4d;border-radius:13px;padding:10px 12px;font-weight:750;cursor:pointer}
+:is(#restaurants-module,#accommodations-module,#attractions-module) .rv2-remove-saved:hover{background:#fff4f5}
+@media(max-width:620px){:is(#restaurants-module,#accommodations-module,#attractions-module) .rv2-library-panel>summary{align-items:flex-start}.rv2-library-summary-actions{flex-direction:column-reverse!important;align-items:flex-end!important}.rv2-clear-all{font-size:.72rem!important;padding:4px!important}}
 
 /* Core 4.0 finalization: safe removal controls for today's plan */
 .rv2-today-plan-item{position:relative;display:grid;grid-template-columns:minmax(0,1fr) auto;align-items:stretch;background:#fff;border-radius:18px;box-shadow:0 10px 28px rgba(25,54,67,.08);overflow:hidden}
@@ -656,14 +656,14 @@
 .rv2-history-card strong,.rv2-history-card small{display:block}.rv2-history-card small{margin-top:3px;color:#71808b}
 
 /* Build 13.1.3.2: the active trip accent wins over legacy module fallbacks. */
-:is(#restaurants-module,#accommodations-module).luvia-restaurants-v2{--rv2-accent:var(--trip-accent)!important;--module-accent:var(--trip-accent)!important}.rv2-kicker,.rv2-eyebrow,.rv2-library-heading>div>span,.rv2-recommendation-head button{color:color-mix(in srgb,var(--trip-accent) 78%,#203142)!important}.rv2-action.primary,.rv2-search-submit,.rv2-plan-primary{background:var(--trip-accent)!important;color:var(--trip-accent-contrast,#203142)!important}
+:is(#restaurants-module,#accommodations-module,#attractions-module).luvia-restaurants-v2{--rv2-accent:var(--trip-accent)!important;--module-accent:var(--trip-accent)!important}.rv2-kicker,.rv2-eyebrow,.rv2-library-heading>div>span,.rv2-recommendation-head button{color:color-mix(in srgb,var(--trip-accent) 78%,#203142)!important}.rv2-action.primary,.rv2-search-submit,.rv2-plan-primary{background:var(--trip-accent)!important;color:var(--trip-accent-contrast,#203142)!important}
 .rv2-today-plan-head-actions{display:flex;align-items:flex-end;gap:.75rem;flex-wrap:wrap;justify-content:flex-end}.rv2-clear-schedule{border:0;background:transparent;color:var(--rv2-accent,var(--trip-accent,#7c4c5c));font:inherit;font-size:.78rem;padding:.15rem 0;cursor:pointer}.rv2-clear-schedule:hover{text-decoration:underline}.rv2-clear-schedule:disabled{opacity:.55;cursor:wait}
 /* Build 13.2.0: direct primary actions and route-aware details */
-:is(#restaurants-module,#accommodations-module) .rv2-detail-primary-actions{display:flex;gap:10px;flex-wrap:wrap;align-items:center;justify-content:flex-start;margin:-4px 0 2px}
-:is(#restaurants-module,#accommodations-module) .rv2-detail-primary-actions button{min-height:44px;padding:10px 16px;border-radius:14px;border:1px solid color-mix(in srgb,var(--rv2-accent) 34%,#d9dfe4);background:color-mix(in srgb,var(--rv2-accent) 10%,#fff);color:var(--rv2-ink);font-weight:800;cursor:pointer;box-shadow:0 8px 22px rgba(35,49,61,.07)}
-:is(#restaurants-module,#accommodations-module) .rv2-detail-primary-actions button:hover{background:color-mix(in srgb,var(--rv2-accent) 17%,#fff);transform:translateY(-1px)}
-:is(#restaurants-module,#accommodations-module) .rv2-plan-message:not(:empty),:is(#restaurants-module,#accommodations-module) [data-workspace-message]:not(:empty){display:block;margin-top:8px;color:#a52c35;font-weight:700}
-@media(max-width:760px){:is(#restaurants-module,#accommodations-module) .rv2-detail-primary-actions{display:grid;grid-template-columns:1fr 1fr}:is(#restaurants-module,#accommodations-module) .rv2-detail-primary-actions button:last-child{grid-column:1/-1}}
+:is(#restaurants-module,#accommodations-module,#attractions-module) .rv2-detail-primary-actions{display:flex;gap:10px;flex-wrap:wrap;align-items:center;justify-content:flex-start;margin:-4px 0 2px}
+:is(#restaurants-module,#accommodations-module,#attractions-module) .rv2-detail-primary-actions button{min-height:44px;padding:10px 16px;border-radius:14px;border:1px solid color-mix(in srgb,var(--rv2-accent) 34%,#d9dfe4);background:color-mix(in srgb,var(--rv2-accent) 10%,#fff);color:var(--rv2-ink);font-weight:800;cursor:pointer;box-shadow:0 8px 22px rgba(35,49,61,.07)}
+:is(#restaurants-module,#accommodations-module,#attractions-module) .rv2-detail-primary-actions button:hover{background:color-mix(in srgb,var(--rv2-accent) 17%,#fff);transform:translateY(-1px)}
+:is(#restaurants-module,#accommodations-module,#attractions-module) .rv2-plan-message:not(:empty),:is(#restaurants-module,#accommodations-module,#attractions-module) [data-workspace-message]:not(:empty){display:block;margin-top:8px;color:#a52c35;font-weight:700}
+@media(max-width:760px){:is(#restaurants-module,#accommodations-module,#attractions-module) .rv2-detail-primary-actions{display:grid;grid-template-columns:1fr 1fr}:is(#restaurants-module,#accommodations-module,#attractions-module) .rv2-detail-primary-actions button:last-child{grid-column:1/-1}}
 
 /* 13.2.0 – Place actions aligned with Luvia design language */
 .rv2-detail-actions,.rv2-place-actions,.rv2-hero-actions{display:flex;flex-wrap:wrap;gap:10px;margin:14px 0 18px}

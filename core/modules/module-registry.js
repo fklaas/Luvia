@@ -2,6 +2,7 @@
   'use strict';
   const entries=[
     {id:'accommodations',title:'Unterkünfte',longTitle:'Unterkünfte & Aufenthalt',icon:'🏨',description:'Unterkünfte suchen, speichern sowie Check-in und Check-out verwalten.',status:'available',defaultEnabled:false,order:5},
+    {id:'attractions',title:'Aktivitäten',longTitle:'Sehenswürdigkeiten & Aktivitäten',icon:'✨',description:'Sehenswürdigkeiten, Museen, Parks und Erlebnisse entdecken und planen.',status:'available',defaultEnabled:true,order:8},
     {id:'restaurants',title:'Restaurants',longTitle:'Restaurants & Reservierungen',icon:'🍽️',description:'Restaurants entdecken, speichern und Reservierungen planen.',status:'available',defaultEnabled:true,order:10},
     {id:'maps',title:'Karten',longTitle:'Karten & gespeicherte Orte',icon:'🗺️',description:'Orte, Wege und Reiseziele auf einer gemeinsamen Karte.',status:'planned',defaultEnabled:false,order:20},
     {id:'weather',title:'Wetter',longTitle:'Wetter & Tageshinweise',icon:'☀️',description:'Wetter am Reiseziel und passende Hinweise für eure Tage.',status:'planned',defaultEnabled:false,order:30},
@@ -16,10 +17,10 @@
   const catalog=new Map(entries.map(x=>[x.id,Object.freeze(x)]));
   const available=()=>entries.filter(x=>x.status==='available');
   const normalize=ids=>[...new Set((Array.isArray(ids)?ids:[]).filter(id=>catalog.has(id)&&catalog.get(id).status==='available'))];
-  function enabledForTrip(trip){const selected=normalize(trip?.modules||trip?.selectedModules);return Array.isArray(trip?.modules)||Array.isArray(trip?.selectedModules)?selected:available().filter(x=>x.defaultEnabled).map(x=>x.id)}
+  function enabledForTrip(trip){const selected=normalize(trip?.modules||trip?.selectedModules),defaults=available().filter(x=>x.defaultEnabled).map(x=>x.id);return Array.isArray(trip?.modules)||Array.isArray(trip?.selectedModules)?normalize([...selected,...defaults]):defaults}
   function list(options={}){return entries.filter(x=>options.includePlanned!==false||x.status==='available').sort((a,b)=>a.order-b.order)}
   function get(id){return catalog.get(id)||null}
   function isEnabled(trip,id){return enabledForTrip(trip).includes(id)}
   function updateTripModules(trip,ids){const modules=normalize(ids);return {...trip,modules,selectedModules:modules,updatedAt:new Date().toISOString()}}
-  window.LuviaModuleRegistry=Object.freeze({version:'4.3.2',list,get,normalize,enabledForTrip,isEnabled,updateTripModules});
+  window.LuviaModuleRegistry=Object.freeze({version:'4.6.0',list,get,normalize,enabledForTrip,isEnabled,updateTripModules});
 })();

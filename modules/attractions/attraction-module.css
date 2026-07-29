@@ -1,0 +1,9 @@
+#attractions-module{min-height:100%;font-family:var(--lv-font-body,Inter,system-ui,sans-serif)}
+#attractions-module .rv2-stay-section{margin-top:18px}
+#attractions-module .stay-form{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px}
+#attractions-module .stay-form label{display:grid;gap:7px;font-weight:800;color:var(--rv2-ink,#263b4d)}
+#attractions-module .stay-form label.wide{grid-column:1/-1}
+#attractions-module .stay-form label.check{display:flex;align-items:center;gap:9px;align-self:end;min-height:48px}
+#attractions-module .stay-form input,#attractions-module .stay-form textarea{width:100%;border:1px solid var(--rv2-line,#dde4e8);border-radius:14px;padding:12px 13px;background:#fff;color:var(--rv2-ink,#263b4d);font:inherit}
+#attractions-module .stay-form textarea{min-height:96px;resize:vertical}
+@media(max-width:700px){#attractions-module .stay-form{grid-template-columns:1fr}}
