@@ -1,5 +1,5 @@
 (()=>{'use strict';
-const MODULE_ID='accommodations',VERSION='4.4.4.1';
+const MODULE_ID='accommodations',VERSION='4.4.5';
 const QUICK=[['🏨','Entdecken','Unterkünfte'],['🏨','Hotel','Hotel'],['🏢','Apartment','Apartment'],['🏡','Ferienhaus','Ferienhaus'],['🛏️','Hostel','Hostel'],['⛺','Camping','Campingplatz'],['🌴','Resort','Resort']];
 const state={root:null,trip:null,query:'Unterkünfte',filter:'Unterkünfte',options:{},results:[],entities:[],searchMap:new Map(),routeCache:new Map(),loading:false,error:null};
 const esc=v=>window.LuviaPlaceExperience?.esc?.(v)||String(v??'');

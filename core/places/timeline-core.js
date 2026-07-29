@@ -1,7 +1,7 @@
 (() => {
 'use strict';
-const VERSION='5.2.1';
-let state={tripId:null,loading:false,entries:[],days:[],lastUpdatedAt:null,lastError:null,members:{},places:{}};
+const VERSION='5.3.0';
+let state={tripId:null,loading:false,hydrated:false,entries:[],days:[],lastUpdatedAt:null,lastError:null,members:{},places:{}};
 let channels=[];const listeners=new Set();
 const clone=v=>v==null?v:JSON.parse(JSON.stringify(v));
 const client=()=>window.LuviaSupabaseService?.getClient?.()||window.ParisSupabaseClient||window.ParisCloud?.client||null;
@@ -18,24 +18,59 @@ function visitEntry(r){const p=state.places[r.place_id]||{},name=state.members[r
 function dedupe(list){const seen=new Map();for(const e of list){const key=e.source==='place-data'?`pd:${e.tripPlaceId}:${e.dataKey}`:e.source==='schedule'?`s:${e.sourceKey}`:e.source==='gps'?`v:${e.sourceKey}`:`e:${e.sourceKey}`;seen.set(key,e)}return [...seen.values()].sort((a,b)=>new Date(a.startAt)-new Date(b.startAt))}
 function buildDays(entries){const map=new Map();for(const e of entries){const key=dayKey(e.startAt);if(!map.has(key))map.set(key,[]);map.get(key).push(e)}return [...map.entries()].sort(([a],[b])=>a.localeCompare(b)).map(([date,items])=>({date,items,hasAutomatic:items.some(x=>x.automatic),count:items.length}))}
 function emit(){state.days=buildDays(state.entries);state.lastUpdatedAt=new Date().toISOString();const snap=snapshot();listeners.forEach(fn=>{try{fn(snap)}catch{}});window.dispatchEvent(new CustomEvent('luvia:timeline-changed',{detail:snap}));window.dispatchEvent(new CustomEvent('luvia:timeline-cloud-changed',{detail:snap}))}
-async function hydrate(tripId=activeTripId()){state.tripId=tripId||null;if(!tripId){state.entries=[];emit();return snapshot()}const db=client();if(!db?.from)throw new Error('Keine Cloud-Verbindung für Timeline verfügbar.');state.loading=true;state.lastError=null;try{
- await window.LuviaTripPlaceData?.hydrate?.(tripId);
- const [s,e,v,tp,m]=await Promise.all([
-  db.from('trip_schedule_events').select('*').eq('trip_id',tripId).order('event_date').order('start_time'),
-  db.from('timeline_events').select('*').eq('trip_id',tripId).order('occurred_at'),
-  db.from('place_visits').select('*').eq('trip_id',tripId).order('arrived_at'),
-  db.from('trip_places').select('id,place_id,module_key,status').eq('trip_id',tripId).neq('status','archived'),
-  db.from('trip_members').select('*').eq('trip_id',tripId)
- ]);for(const r of [s,e,v,tp,m])if(r.error)throw r.error;
- const linked=new Set((tp.data||[]).map(x=>x.place_id).filter(Boolean));const placeIds=[...new Set([...(s.data||[]).map(x=>x.place_id),...(v.data||[]).map(x=>x.place_id)].filter(Boolean))];state.places={};if(placeIds.length){const pr=await db.from('places').select('*').in('id',placeIds);if(!pr.error)for(const p of pr.data||[])state.places[p.id]=p}
- state.members={};for(const x of m.data||[]){const id=x.user_id||x.participant_id||x.id,name=x.display_name||x.member_name||x.name||x.email||'Mitreisender';state.members[id]=name;state.members[x.id]=name}
- const allowedEvents=new Set(['place_visited','manual_note','memory','trip_moment']);
- const validVisits=(v.data||[]).filter(x=>linked.has(x.place_id)&&x.arrived_at&&Number(x.duration_seconds||0)>=300&&['visited','left'].includes(x.state));
- const placeData=window.LuviaTripPlaceData?.dateEntries?.()||[];
- const schedule=(s.data||[]).filter(r=>String(r.entity_type)!=='accommodation'); // accommodation dates have one source only: trip_place_data
- state.entries=dedupe([...placeData.map(dataEntry),...schedule.map(scheduleEntry),...(e.data||[]).filter(x=>allowedEvents.has(x.event_type)).map(eventEntry),...validVisits.map(visitEntry)]);emit();return snapshot()
- }catch(err){state.lastError=err.message;emit();throw err}finally{state.loading=false}}
+async function hydrate(tripId=activeTripId()){
+ state.tripId=tripId||null;state.loading=true;state.hydrated=false;state.lastError=null;
+ if(!tripId){state.entries=[];state.loading=false;state.hydrated=true;emit();return snapshot()}
+ const database=client();if(!database?.from){state.loading=false;state.lastError='Keine Cloud-Verbindung für Timeline verfügbar.';emit();throw new Error(state.lastError)}
+ try{
+  await window.LuviaTripPlaceData?.hydrate?.(tripId);
+  const [scheduleRows,eventRows,visitRows,tripPlaces,members]=await Promise.all([
+   database.from('trip_schedule_events').select('*').eq('trip_id',tripId).order('event_date').order('start_time'),
+   database.from('timeline_events').select('*').eq('trip_id',tripId).order('occurred_at'),
+   database.from('place_visits').select('*').eq('trip_id',tripId).order('arrived_at'),
+   database.from('trip_places').select('id,place_id,module_key,status').eq('trip_id',tripId).neq('status','archived'),
+   database.from('trip_members').select('*').eq('trip_id',tripId)
+  ]);
+  for(const result of [scheduleRows,eventRows,visitRows,tripPlaces,members])if(result.error)throw result.error;
+  const linked=new Set((tripPlaces.data||[]).map(x=>x.place_id).filter(Boolean));
+  const placeIds=[...new Set([...(scheduleRows.data||[]).map(x=>x.place_id),...(visitRows.data||[]).map(x=>x.place_id)].filter(Boolean))];state.places={};
+  if(placeIds.length){const pr=await database.from('places').select('*').in('id',placeIds);if(pr.error)throw pr.error;for(const place of pr.data||[])state.places[place.id]=place}
+  state.members={};for(const member of members.data||[]){const id=member.user_id||member.participant_id||member.id,name=member.display_name||member.member_name||member.name||member.email||'Mitreisender';state.members[id]=name;state.members[member.id]=name}
+  const allowedEvents=new Set(['place_visited','manual_note','memory','trip_moment']);
+  const validVisits=(visitRows.data||[]).filter(x=>linked.has(x.place_id)&&x.arrived_at&&Number(x.duration_seconds||0)>=300&&['visited','left'].includes(x.state));
+  const placeData=window.LuviaTripPlaceData?.dateEntries?.()||[];
+  const schedule=(scheduleRows.data||[]).filter(row=>String(row.entity_type)!=='accommodation');
+  state.entries=dedupe([...placeData.map(dataEntry),...schedule.map(scheduleEntry),...(eventRows.data||[]).filter(x=>allowedEvents.has(x.event_type)).map(eventEntry),...validVisits.map(visitEntry)]);
+  state.loading=false;state.hydrated=true;emit();return snapshot();
+ }catch(error){state.loading=false;state.hydrated=false;state.lastError=error.message||String(error);emit();throw error}
+}
 async function record(raw={}){const db=client(),tripId=raw.tripId||state.tripId||activeTripId();if(!db?.from||!tripId)throw new Error('Timeline-Cloud nicht verfügbar.');const row={trip_id:tripId,place_id:raw.placeId||null,participant_id:raw.participantId||null,event_type:raw.type||'manual_note',title:raw.title||'Reiseereignis',description:raw.description||'',occurred_at:raw.occurredAt||new Date().toISOString(),source:raw.source||'manual',is_automatic:Boolean(raw.automatic),metadata:raw.metadata||{}};const {error}=await db.from('timeline_events').insert(row);if(error)throw error;return hydrate(tripId)}
+async function removeEntry(identity,{tripId=state.tripId||activeTripId()}={}){
+ const entry=typeof identity==='string'?state.entries.find(item=>String(item.id)===String(identity)):identity;
+ if(!entry||!tripId)throw new Error('Timeline-Eintrag wurde nicht gefunden.');
+ const database=client();if(!database?.from)throw new Error('Keine Cloud-Verbindung für Timeline verfügbar.');
+ if(entry.source==='place-data'){
+  if(!entry.tripPlaceId||!entry.dataKey)throw new Error('Der Place-Datensatz ist unvollständig.');
+  await window.LuviaTripPlaceData.updateDateFields(entry.tripPlaceId,{[entry.dataKey]:null},{tripId});
+ }else if(entry.source==='schedule'){
+  let query=database.from('trip_schedule_events').delete().eq('trip_id',tripId);
+  if(entry.rowId)query=query.eq('id',entry.rowId);else if(entry.sourceKey)query=query.eq('source_key',entry.sourceKey);else throw new Error('Der Cloud-Schlüssel des Planeintrags fehlt.');
+  const {error}=await query;if(error)throw error;
+ }else if(entry.source==='event'){
+  const {error}=await database.from('timeline_events').delete().eq('trip_id',tripId).eq('id',entry.rowId);if(error)throw error;
+ }else if(entry.source==='gps'){
+  const {error}=await database.from('place_visits').delete().eq('trip_id',tripId).eq('id',entry.rowId);if(error)throw error;
+ }
+ await Promise.all([hydrate(tripId),window.LuviaScheduleIntelligence?.refresh?.({tripId,force:true,skipThrottle:true})]);
+ window.dispatchEvent(new CustomEvent('luvia:place-plan-changed',{detail:{tripId,type:entry.entityType,tripPlaceId:entry.tripPlaceId,removed:true}}));
+ window.dispatchEvent(new CustomEvent('luvia:in-window-data-changed',{detail:{tripId,placeType:entry.entityType,tripPlaceId:entry.tripPlaceId,removed:true}}));
+ return true;
+}
+async function clearEntries({entityType,tripId=state.tripId||activeTripId()}={}){
+ const entries=state.entries.filter(entry=>!entityType||entry.entityType===entityType).filter(entry=>['place-data','schedule'].includes(entry.source));
+ for(const entry of entries)await removeEntry(entry,{tripId});
+ return snapshot();
+}
 function snapshot(){return clone(state)}
 function list(filter={}){return state.entries.filter(e=>(!filter.tripId||String(e.tripId)===String(filter.tripId))&&(!filter.entityType||e.entityType===filter.entityType))}
 function entriesForDate(date){return state.entries.filter(e=>dayKey(e.startAt)===date)}
@@ -52,7 +87,7 @@ function bindCalendar(root=document){root.querySelectorAll('[data-timeline-date]
 function subscribeRealtime(tripId=state.tripId){channels.forEach(c=>{try{client()?.removeChannel(c)}catch{}});channels=[];const db=client();if(!db||!tripId)return false;for(const table of ['trip_schedule_events','timeline_events','place_visits','trip_place_data'])channels.push(db.channel(`timeline-v52:${table}:${tripId}`).on('postgres_changes',{event:'*',schema:'public',table,filter:`trip_id=eq.${tripId}`},()=>hydrate(tripId).catch(()=>{})).subscribe());return true}
 function subscribe(fn){listeners.add(fn);return()=>listeners.delete(fn)}
 async function init(){const id=activeTripId();await window.LuviaTripPlaceData?.init?.();await hydrate(id).catch(()=>{});subscribeRealtime(id);return diagnostics()}
-function diagnostics(){return{version:VERSION,status:'ready',cloudAuthoritative:true,localPersistence:false,tripId:state.tripId,eventCount:state.entries.length,days:state.days.length,realtimeChannels:channels.length,realtime:channels.length>0,metrics:{queued:0},lastError:state.lastError,placeDataSource:'trip_place_data',gpsRules:{linkedPlacesOnly:true,minStaySeconds:300,states:['visited','left']}}}
+function diagnostics(){return{version:VERSION,status:state.hydrated?'ready':'loading',cloudAuthoritative:true,localPersistence:false,tripId:state.tripId,hydrated:state.hydrated,loading:state.loading,eventCount:state.entries.length,days:state.days.length,realtimeChannels:channels.length,realtime:channels.length>0,metrics:{queued:0},lastError:state.lastError,placeDataSource:'trip_place_data',gpsRules:{linkedPlacesOnly:true,minStaySeconds:300,states:['visited','left']}}}
 window.addEventListener('luvia:trip-changed',e=>{const id=e.detail?.tripId||activeTripId();hydrate(id).then(()=>subscribeRealtime(id)).catch(()=>{})});window.addEventListener('luvia:place-plan-changed',()=>hydrate().catch(()=>{}));window.addEventListener('luvia:place-visit-changed',()=>hydrate().catch(()=>{}));
-window.LuviaTimelineCore=Object.freeze({version:VERSION,init,hydrate,record,snapshot,list,entriesForDate,renderCalendar,bindCalendar,popup,editEntry,subscribe,diagnostics});
+window.LuviaTimelineCore=Object.freeze({version:VERSION,init,hydrate,record,removeEntry,clearEntries,snapshot,list,entriesForDate,renderCalendar,bindCalendar,popup,editEntry,subscribe,diagnostics});
 })();
