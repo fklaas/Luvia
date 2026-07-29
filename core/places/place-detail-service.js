@@ -1,6 +1,6 @@
 (function(){
 'use strict';
-const VERSION='4.4.2';
+const VERSION='4.4.3';
 const adapters=new Map();let current=null;
 const esc=v=>window.LuviaPlaceExperience?.esc?.(v)||String(v??'');
 const LABELS={discovered:'Entdeckt',idea:'Entdeckt',saved:'Gespeichert',favorite:'Favorisiert',planned:'Geplant',reserved:'Reserviert',selected:'Ausgewählt',booked:'Gebucht',checked_in:'Eingecheckt',checked_out:'Ausgecheckt',visited:'Besucht',rated:'Bewertet',rejected:'Verworfen',archived:'Archiviert'};

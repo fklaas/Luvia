@@ -1,0 +1,1 @@
+refactor(timeline): enforce linked-place GPS visits and live cloud editing
