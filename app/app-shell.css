@@ -100,3 +100,12 @@
 .lv-view-host{min-height:calc(100dvh - 170px)}
 .lv-module-intro{min-height:calc(100dvh - 170px)}
 @media(max-width:720px){.lv-view-host,.lv-module-intro{min-height:calc(100dvh - 150px)}}
+
+/* Build 13.4.6.2: compact universal planning actions and bounded timeline calendar */
+.rv2-today-plan-item-actions button,[data-place-edit-schedule],[data-rv2-edit-schedule]{font-size:11px!important;font-weight:400!important;line-height:1.25!important;color:var(--module-accent,var(--lv-accent))!important;text-decoration:none!important;padding:0!important;background:transparent!important;border:0!important;white-space:nowrap!important}
+.rv2-today-plan-item-actions .rv2-today-plan-remove{font-size:11px!important;font-weight:400!important}
+.lv-calendar-grid{grid-template-columns:repeat(7,minmax(0,1fr));max-width:760px}
+.lv-calendar-day.is-calendar-hidden{display:none}
+.lv-calendar-more{justify-self:start;border:1px solid color-mix(in srgb,var(--trip-accent) 32%,var(--lv-line));background:color-mix(in srgb,var(--trip-accent) 8%,var(--lv-surface-elevated));color:var(--trip-accent);border-radius:999px;padding:10px 15px;font-weight:700;cursor:pointer}
+.lv-calendar-more:hover,.lv-calendar-more:focus-visible{transform:translateY(-2px);box-shadow:0 10px 22px rgba(31,48,66,.09)}
+@media(max-width:760px){.lv-calendar-grid{grid-template-columns:repeat(4,minmax(0,1fr));max-width:none}.lv-calendar-more{width:100%;justify-content:center;text-align:center}.rv2-today-plan-item-actions{gap:8px!important}}
