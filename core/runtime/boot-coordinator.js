@@ -1,6 +1,6 @@
 (() => {
   'use strict';
-  const MIN_SPLASH_MS=2600;
+  const MIN_SPLASH_MS=1900;
   let startedAt=0,phase='idle',bootPromise=null,snapshot=null;
   const delay=ms=>new Promise(resolve=>setTimeout(resolve,ms));
   const emit=(next,detail={})=>{phase=next;document.documentElement.dataset.luviaBoot=next;window.dispatchEvent(new CustomEvent('luvia:boot-phase',{detail:{phase:next,...detail}}));};
@@ -48,5 +48,5 @@
     return bootPromise;
   }
   function reset(){bootPromise=null;snapshot=null;phase='idle';}
-  window.LuviaBootCoordinator=Object.freeze({version:'1.0.0',boot,reveal:finish,reset,get phase(){return phase},get snapshot(){return snapshot},get booting(){return !['ready','failed','idle'].includes(phase)}});
+  window.LuviaBootCoordinator=Object.freeze({version:'1.1.0',boot,reveal:finish,reset,get phase(){return phase},get snapshot(){return snapshot},get booting(){return !['ready','failed','idle'].includes(phase)}});
 })();
