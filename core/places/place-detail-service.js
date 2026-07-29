@@ -1,6 +1,6 @@
 (function(){
 'use strict';
-const VERSION='4.5.2';
+const VERSION='4.5.2.1';
 const adapters=new Map();const detailCache=new Map();const detailInflight=new Map();let current=null;
 const esc=v=>window.LuviaPlaceExperience?.esc?.(v)||String(v??'');
 const LABELS={discovered:'Entdeckt',idea:'Entdeckt',saved:'Favorisiert',favorite:'Favorisiert',planned:'Geplant',reserved:'Reserviert',selected:'Ausgewählt',booked:'Gebucht',checked_in:'Eingecheckt',checked_out:'Ausgecheckt',visited:'Besucht',rated:'Bewertet',rejected:'Verworfen',archived:'Archiviert'};

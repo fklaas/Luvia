@@ -1,11 +1,12 @@
 (function(){
   'use strict';
-  const VERSION='3.3.1-public-health-fallback';
+  const VERSION='3.3.2-request-coalescing';
   const DEFAULT_FUNCTION='luvia-gateway';
   const DEFAULT_TIMEOUT=12000;
   const ACTION_PATTERN=/^[a-z][a-z0-9]*(?:[._-][a-z0-9]+)*$/;
   const SENSITIVE_KEYS=/authorization|token|secret|password|apikey|api_key|cookie|session/i;
   const listeners=new Set();
+  const inflight=new Map();const cooldowns=new Map();
   const state={initialized:false,requests:0,successes:0,failures:0,timeouts:0,lastRequestAt:null,lastSuccessAt:null,lastError:null,lastStatus:null,lastRequestId:null,recent:[]};
   const now=()=>new Date().toISOString();
   const uuid=()=>globalThis.crypto?.randomUUID?.()||`req_${Date.now()}_${Math.random().toString(36).slice(2,10)}`;
@@ -75,7 +76,7 @@
     normalized.retryAfter=error?.retryAfter||null;
     return normalized;
   }
-  async function request(action,payload={},options={}){
+  async function requestRaw(action,payload={},options={}){
     const cfg=config();
     if(!cfg.configured){const error=new Error('Supabase ist nicht konfiguriert.');error.code='BACKEND_NOT_CONFIGURED';throw error;}
     if(!cfg.secureContext&&location.hostname!=='localhost'){const error=new Error('Sichere Backend-Aufrufe benötigen HTTPS.');error.code='INSECURE_CONTEXT';throw error;}
@@ -126,6 +127,7 @@
       throw error;
     }finally{clearTimeout(timeout);}
   }
+  async function request(action,payload={},options={}){const safeAction=validateAction(action);const key=`${safeAction}:${JSON.stringify(sanitize(payload))}`;const until=cooldowns.get(safeAction)||0;if(Date.now()<until){const error=new Error('Der Dienst wird kurz entlastet. Bitte erneut versuchen.');error.code='RATE_LIMIT_COOLDOWN';error.status=429;throw error}if(inflight.has(key))return inflight.get(key);const task=requestRaw(safeAction,payload,options).catch(error=>{if(error?.status===429||error?.code==='RATE_LIMITED')cooldowns.set(safeAction,Date.now()+Math.max(3000,Number(error.retryAfter||3)*1000));throw error}).finally(()=>inflight.delete(key));inflight.set(key,task);return task}
   async function health(options={}){return request('system.health',{},options);}
   async function probe(){
     const cfg=config();
