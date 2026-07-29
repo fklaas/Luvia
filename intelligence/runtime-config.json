@@ -28,26 +28,26 @@
     "logHistory": 500
   },
   "release": {
-    "core": "4.4.6.2",
-    "build": "13.4.6.2",
-    "name": "Dashboard Preferences & Compact Timeline Calendar",
+    "core": "4.4.6.3",
+    "build": "13.4.6.3",
+    "name": "Warm Ambient Dashboard & Compact Timeline",
     "channel": "production",
-    "builtAt": "2026-07-29T14:49:00+02:00"
+    "builtAt": "2026-07-29T15:09:00+02:00"
   },
   "deployment": {
     "canonicalHost": "myluvia.app",
     "wwwHost": "www.myluvia.app",
     "stagingHost": "staging.myluvia.app",
     "githubPagesFallback": "https://fklaas.github.io/Luvia/",
-    "build": "13.4.6.2"
+    "build": "13.4.6.3"
   },
   "build": {
-    "core": "4.4.6.2",
-    "build": "13.4.6.2",
-    "name": "Dashboard Preferences & Compact Timeline Calendar",
+    "core": "4.4.6.3",
+    "build": "13.4.6.3",
+    "name": "Warm Ambient Dashboard & Compact Timeline",
     "channel": "production",
-    "releasedAt": "2026-07-28",
-    "builtAt": "2026-07-29T14:49:00+02:00"
+    "releasedAt": "2026-07-29",
+    "builtAt": "2026-07-29T15:09:00+02:00"
   },
   "backend": {
     "functionName": "luvia-gateway",

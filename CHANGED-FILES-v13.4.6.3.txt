@@ -1,11 +1,11 @@
 app/app-shell.css
-app/app-shell.js
-core/dashboard/dashboard-widget-registry.js
 core/places/timeline-core.js
 index.html
-intelligence/runtime-config.json
-modules/accommodations/accommodation-module.js
 sw.js
+intelligence/runtime-config.json
+core/places/place-experience-shell.js
+modules/accommodations/accommodation-module.js
+app/app-shell.js
 RELEASE-v13.4.6.3.md
 DEPLOYMENT-v13.4.6.3.md
 COMMIT-v13.4.6.3.txt
