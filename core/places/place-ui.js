@@ -1,6 +1,6 @@
 (function(){
 'use strict';
-const VERSION='4.3.0';
+const VERSION='4.3.2';
 const TYPE_META=Object.freeze({restaurant:['🍽️','Restaurant'],accommodation:['🛏️','Unterkunft'],attraction:['🏛️','Sehenswürdigkeit'],photo_spot:['📸','Fotospot'],activity:['✨','Aktivität'],shopping:['🛍️','Shopping'],nature:['🌿','Natur'],family:['👨‍👩‍👧','Familienort'],mobility:['🚗','Mobilität'],transit:['🚉','Verkehr'],custom:['📍','Eigener Ort']});
 const LIFE_LABELS=Object.freeze({discovered:'Entdeckt',saved:'Gespeichert',favorite:'Favorit',planned:'Geplant',visited:'Besucht',rated:'Bewertet',memory:'Erinnerung',reserved:'Reserviert',idea:'Entdeckt',favorited:'Favorit'});
 const esc=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
@@ -12,6 +12,6 @@ function roleBadges(place={}){const roles=Array.isArray(place.roles)?place.roles
 function lifecyclePill(place={}){const value=lifecycle(place);return `<span class="luv-place-lifecycle" data-lifecycle="${esc(value)}">${esc(LIFE_LABELS[value]||value)}</span>`;}
 function card(place={},options={}){const meta=typeMeta(place),intel=options.intelligence||{},title=place.name||place.displayName||'Unbenannter Ort',address=place.address||place.formattedAddress||place.shortAddress||'',description=place.description||place.editorialSummary||options.description||'',symbol=place.symbol||meta[0],id=place.id||place.placeId||'';return `<article class="luv-place-card ${options.className||''}" data-place-id="${esc(id)}" ${options.openAttribute||''} tabindex="0">${options.media||''}<div class="luv-place-card-head"><span class="luv-place-symbol">${esc(symbol)}</span><div><span class="luv-place-type">${esc(meta[1])}</span><h3>${esc(title)}</h3></div>${lifecyclePill(place)}</div>${address?`<p class="luv-place-address">📍 ${esc(address)}</p>`:''}${description?`<p class="luv-place-description">${esc(description)}</p>`:''}${roleBadges(place)}${badges(place,intel)}${options.extra||''}<div class="luv-place-actions">${options.actions||''}</div></article>`;}
 function assessment(intel={}){const reasons=intel.reasons||[],warnings=intel.warnings||[];return `<section class="luv-place-assessment"><article><span>Warum passt das?</span><ul>${reasons.length?reasons.map(x=>`<li>${esc(x)}</li>`).join(''):'<li>Passt zum aktuellen Reisekontext.</li>'}</ul></article><article class="${warnings.length?'has-warning':'is-clear'}"><span>${warnings.length?'Was spricht dagegen?':'Keine wichtigen Einschränkungen'}</span>${warnings.length?`<ul>${warnings.map(x=>`<li>${esc(x)}</li>`).join('')}</ul>`:'<p>Im bekannten Reisekontext spricht nichts Wesentliches dagegen.</p>'}</article></section>`;}
-function diagnostics(){return{version:VERSION,status:'ready',components:['card','badges','roles','lifecycle','assessment'],migratedModules:['restaurants']};}
+function diagnostics(){return{version:VERSION,status:'ready',components:['card','badges','roles','lifecycle','assessment'],migratedModules:['restaurants','accommodations']};}
 window.LuviaPlaceUI=Object.freeze({version:VERSION,typeMeta,badges,roleBadges,lifecyclePill,card,assessment,diagnostics});
 })();
