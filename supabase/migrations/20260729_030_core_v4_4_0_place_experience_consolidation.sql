@@ -14,8 +14,8 @@ alter table if exists public.trip_places
     )
   );
 
-create index if not exists trip_places_trip_type_status_idx
-  on public.trip_places (trip_id, place_type, status)
+create index if not exists trip_places_trip_module_status_idx
+  on public.trip_places (trip_id, module_key, status)
   where status <> 'archived';
 
 create index if not exists trip_places_trip_favorite_idx

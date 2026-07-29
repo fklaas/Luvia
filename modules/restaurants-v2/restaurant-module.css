@@ -674,3 +674,14 @@
 .rv2-detail-primary-actions button{appearance:none;border:1px solid color-mix(in srgb,var(--rv2-accent,var(--lv-accent)) 30%,#dfe7ea);background:color-mix(in srgb,var(--rv2-accent,var(--lv-accent)) 10%,#fff);color:#17364b;border-radius:999px;min-height:42px;padding:0 17px;font:inherit;font-weight:750;box-shadow:0 8px 20px rgba(21,53,71,.07);transition:transform .16s ease,background .16s ease,border-color .16s ease}
 .rv2-detail-primary-actions button:hover{transform:translateY(-1px);background:color-mix(in srgb,var(--rv2-accent,var(--lv-accent)) 17%,#fff);border-color:color-mix(in srgb,var(--rv2-accent,var(--lv-accent)) 50%,#dfe7ea)}
 .rv2-detail-primary-actions button.is-active,.rv2-detail-primary-actions button[aria-pressed="true"]{background:var(--rv2-accent,var(--lv-accent));border-color:var(--rv2-accent,var(--lv-accent));color:#fff}
+
+/* Build 13.4.1 – universal capability workspace */
+.rv2-stay-section{margin-top:20px;padding:22px;border:1px solid color-mix(in srgb,var(--rv2-accent,#668fd1) 26%,#dfe6ef);border-radius:24px;background:rgba(255,255,255,.72)}
+.rv2-stay-section .rv2-workspace-kicker{display:block;margin-bottom:16px;font-size:.74rem;font-weight:800;letter-spacing:.1em;text-transform:uppercase;color:var(--rv2-accent,#668fd1)}
+.stay-form{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px}
+.stay-form label{display:flex;flex-direction:column;gap:7px;font-size:.78rem;font-weight:700;color:#38506a}
+.stay-form input,.stay-form textarea{width:100%;box-sizing:border-box;border:1px solid #d7e1ec;border-radius:14px;background:#fff;padding:12px 13px;font:inherit;color:#21394f;outline:none}
+.stay-form input:focus,.stay-form textarea:focus{border-color:var(--rv2-accent,#668fd1);box-shadow:0 0 0 4px color-mix(in srgb,var(--rv2-accent,#668fd1) 15%,transparent)}
+.stay-form textarea{min-height:92px;resize:vertical}.stay-form .wide{grid-column:1/-1}.stay-form .check{flex-direction:row;align-items:center}.stay-form .check input{width:auto}
+.rv2-stay-section .rv2-action.primary{margin-top:16px;border:0;border-radius:15px;padding:12px 18px;background:var(--rv2-accent,#668fd1);color:#fff;font-weight:800}
+@media(max-width:680px){.stay-form{grid-template-columns:1fr}.stay-form .wide{grid-column:auto}}

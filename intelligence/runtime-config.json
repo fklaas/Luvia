@@ -28,8 +28,8 @@
     "logHistory": 500
   },
   "release": {
-    "core": "4.4.0",
-    "build": "13.4.0",
+    "core": "4.4.1",
+    "build": "13.4.1",
     "name": "Universal Place Detail & Intelligence Contract",
     "channel": "production",
     "builtAt": "2026-07-29T10:20:00+02:00"
@@ -39,11 +39,11 @@
     "wwwHost": "www.myluvia.app",
     "stagingHost": "staging.myluvia.app",
     "githubPagesFallback": "https://fklaas.github.io/Luvia/",
-    "build": "13.4.0"
+    "build": "13.4.1"
   },
   "build": {
-    "core": "4.4.0",
-    "build": "13.4.0",
+    "core": "4.4.1",
+    "build": "13.4.1",
     "name": "Universal Place Detail & Intelligence Contract",
     "channel": "production",
     "releasedAt": "2026-07-28",
@@ -108,7 +108,7 @@
     "globalGps": true,
     "offlineSync": true
   },
-  "coreVersion": "4.4.0",
-  "buildVersion": "13.4.0",
+  "coreVersion": "4.4.1",
+  "buildVersion": "13.4.1",
   "releaseName": "Stay Core & Accommodation Data Foundation"
 }
