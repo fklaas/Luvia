@@ -1,6 +1,6 @@
 (()=>{
 'use strict';
-const VERSION='4.4.6';
+const VERSION='4.4.6.1';
 const CANONICAL=new Set(['idea','discovered','saved','favorite','planned','reserved','selected','booked','checked_in','checked_out','visited','rated','rejected','archived']);
 const MAP={favorited:'favorite',dismissed:'rejected',memory:'visited',travel_book:'visited'};
 const clean=v=>String(v??'').trim();
@@ -43,10 +43,10 @@ async function saveDateFields({tripId:id=tripId(),placeType,tripPlaceId,placeId,
  const result=await window.LuviaTripPlaceData.upsert({tripId:id,tripPlaceId,placeId,placeType,fields});
  await refresh(id,placeType);return result;
 }
-function favoritePanel({items=[],title='Lieblingsorte',empty='Noch keine Favoriten',renderCard,clearAttr='data-place-clear-favorites'}={}){
+function favoritePanel({items=[],title='Lieblingsorte',empty='Noch keine Favoriten',renderCard,clearAttr='data-place-clear-favorites',open=false}={}){
  const cards=items.map(renderCard).join('');
- return `<details class="rv2-library-panel rv2-library-favorites"><summary><span><i>♥</i><span><strong>${title}</strong><small>${items.length?`${items.length} für eure Reise`:empty}</small></span></span><span class="rv2-library-summary-actions">${items.length?`<button type="button" class="rv2-clear-all" ${clearAttr}>Alle entfernen</button>`:''}<b>${items.length}</b></span></summary><div class="rv2-library-content">${items.length?`<div class="rv2-grid rv2-saved-grid">${cards}</div>`:`<div class="rv2-library-empty">${empty}</div>`}</div></details>`;
+ return `<details class="rv2-library-panel rv2-library-favorites"${open?' open':''}><summary><span><i>♥</i><span><strong>${title}</strong><small>${items.length?`${items.length} für eure Reise`:empty}</small></span></span><span class="rv2-library-summary-actions">${items.length?`<button type="button" class="rv2-clear-all" ${clearAttr}>Alle entfernen</button>`:''}<b>${items.length}</b></span></summary><div class="rv2-library-content">${items.length?`<div class="rv2-grid rv2-saved-grid">${cards}</div>`:`<div class="rv2-library-empty">${empty}</div>`}</div></details>`;
 }
-function diagnostics(){return{version:VERSION,status:'ready',cloudAuthoritative:true,contracts:['canonical-lifecycle','favorite-toggle','clear-favorites','trip-place-data-planning','live-refresh','shared-collection-shell']}}
+function diagnostics(){return{version:VERSION,status:'ready',cloudAuthoritative:true,contracts:['canonical-lifecycle','favorite-toggle','clear-favorites','trip-place-data-planning','live-refresh','shared-collection-shell','favorites-only','collapsed-by-default']}}
 window.LuviaPlaceCollections=Object.freeze({version:VERSION,normalizeStatus,setFavorite,clearFavorites,saveDateFields,favoritePanel,refresh,diagnostics});
 })();

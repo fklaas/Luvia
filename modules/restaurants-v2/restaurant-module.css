@@ -689,8 +689,8 @@
 /* Build 13.4.4 – universal planned-place actions */
 .rv2-today-plan-item{align-items:flex-start}
 .rv2-today-plan-item-actions{display:flex;gap:10px;align-items:center;padding:0 14px 10px 14px;flex-wrap:wrap}
-.rv2-today-plan-item-actions button{appearance:none;border:0;background:transparent;padding:0;color:var(--rv2-accent,#668fd1);font:600 12px/1.25 inherit;white-space:nowrap;cursor:pointer}
-.rv2-today-plan-item-actions .rv2-today-plan-remove{font-weight:800;color:#a83b4f}
+.rv2-today-plan-item-actions button{appearance:none;border:0;background:transparent;padding:0;color:#7d8992;font:400 11px/1.25 inherit;white-space:nowrap;cursor:pointer}
+.rv2-today-plan-item-actions .rv2-today-plan-remove{font-weight:400;color:#a83b4f}
 .lv-day-entry-actions{display:flex!important;gap:10px!important;align-items:center!important;flex-wrap:wrap!important;margin:8px 0 0!important;padding-left:0!important}
 .lv-day-entry-actions button{appearance:none!important;border:0!important;background:transparent!important;padding:0!important;color:var(--trip-accent,#668fd1)!important;font:600 12px/1.25 inherit!important;white-space:nowrap!important;cursor:pointer!important;width:auto!important;max-width:none!important}
 .lv-time-fields{display:grid;grid-template-columns:1fr 1fr;gap:14px}

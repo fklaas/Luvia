@@ -1,6 +1,6 @@
 (() => {
 'use strict';
-const VERSION='4.4.6';
+const VERSION='4.4.6.1';
 let state={tripId:null,loading:false,records:[],lastUpdatedAt:null,lastError:null};
 let channel=null; const listeners=new Set();
 const clone=v=>v==null?v:JSON.parse(JSON.stringify(v));
