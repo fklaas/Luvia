@@ -16,10 +16,10 @@
   const catalog=new Map(entries.map(x=>[x.id,Object.freeze(x)]));
   const available=()=>entries.filter(x=>x.status==='available');
   const normalize=ids=>[...new Set((Array.isArray(ids)?ids:[]).filter(id=>catalog.has(id)&&catalog.get(id).status==='available'))];
-  function enabledForTrip(trip){const selected=normalize(trip?.modules||trip?.selectedModules);return selected.length?selected:available().filter(x=>x.defaultEnabled).map(x=>x.id)}
+  function enabledForTrip(trip){const selected=normalize(trip?.modules||trip?.selectedModules);return Array.isArray(trip?.modules)||Array.isArray(trip?.selectedModules)?selected:available().filter(x=>x.defaultEnabled).map(x=>x.id)}
   function list(options={}){return entries.filter(x=>options.includePlanned!==false||x.status==='available').sort((a,b)=>a.order-b.order)}
   function get(id){return catalog.get(id)||null}
   function isEnabled(trip,id){return enabledForTrip(trip).includes(id)}
   function updateTripModules(trip,ids){const modules=normalize(ids);return {...trip,modules,selectedModules:modules,updatedAt:new Date().toISOString()}}
-  window.LuviaModuleRegistry=Object.freeze({version:'4.3.1.1',list,get,normalize,enabledForTrip,isEnabled,updateTripModules});
+  window.LuviaModuleRegistry=Object.freeze({version:'4.3.1.2',list,get,normalize,enabledForTrip,isEnabled,updateTripModules});
 })();

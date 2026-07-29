@@ -1,0 +1,16 @@
+modules/accommodations/accommodation-module.js
+modules/accommodations/accommodation-module.css
+modules/module-manager.js
+core/modules/module-registry.js
+app/app-shell.js
+intelligence/place-entity-service.js
+intelligence/kernel/version.js
+intelligence/runtime-config.json
+index.html
+sw.js
+supabase/migrations/20260729_029_core_v4_3_1_2_accommodation_parity.sql
+RELEASE-v13.3.1.2.md
+DEPLOYMENT-v13.3.1.2.md
+COMMIT-v13.3.1.2.txt
+TEST-v13.3.1.2.md
+CHANGED-FILES-v13.3.1.2.txt
