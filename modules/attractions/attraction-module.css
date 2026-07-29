@@ -1,9 +1,3 @@
-#attractions-module{min-height:100%;font-family:var(--lv-font-body,Inter,system-ui,sans-serif)}
-#attractions-module .rv2-stay-section{margin-top:18px}
-#attractions-module .stay-form{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px}
-#attractions-module .stay-form label{display:grid;gap:7px;font-weight:800;color:var(--rv2-ink,#263b4d)}
-#attractions-module .stay-form label.wide{grid-column:1/-1}
-#attractions-module .stay-form label.check{display:flex;align-items:center;gap:9px;align-self:end;min-height:48px}
-#attractions-module .stay-form input,#attractions-module .stay-form textarea{width:100%;border:1px solid var(--rv2-line,#dde4e8);border-radius:14px;padding:12px 13px;background:#fff;color:var(--rv2-ink,#263b4d);font:inherit}
-#attractions-module .stay-form textarea{min-height:96px;resize:vertical}
-@media(max-width:700px){#attractions-module .stay-form{grid-template-columns:1fr}}
+#attractions-module{min-height:100%;font-family:var(--lv-font-body,Manrope,system-ui,sans-serif);color:var(--lv-text,var(--luv-place-ink))}
+#attractions-module .rv2-shell,#attractions-module .rv2-head,#attractions-module .rv2-planned-panel,#attractions-module .rv2-discovery,#attractions-module .rv2-library{color:var(--lv-text,var(--luv-place-ink))}
+.rv2-planning-dialog{width:min(440px,calc(100vw - 28px));display:grid;gap:13px;padding:28px;border-radius:26px;background:var(--place-surface-raised,var(--lv-surface-elevated,#fff));color:var(--luv-place-ink,var(--lv-text,#263f54));box-shadow:var(--place-shadow-overlay);position:relative}.rv2-planning-dialog h3,.rv2-planning-dialog p{margin:0}.rv2-planning-dialog p{color:var(--luv-place-muted,var(--lv-muted))}.rv2-planning-dialog label{display:grid;gap:7px;font-weight:800}.rv2-planning-dialog input{min-height:48px;padding:10px 13px;border:1px solid var(--place-border);border-radius:14px;background:var(--lv-input,#fff);color:var(--lv-text,#263f54);font:inherit}.rv2-planning-actions{display:flex;justify-content:flex-end;gap:9px;margin-top:4px}.rv2-planning-actions button{min-height:44px;padding:10px 15px;border:1px solid var(--place-border);border-radius:14px;background:var(--place-surface-muted);color:var(--luv-place-ink);font-weight:800}.rv2-planning-actions .primary{background:var(--place-accent);border-color:var(--place-accent);color:var(--trip-accent-contrast,#fff)}
