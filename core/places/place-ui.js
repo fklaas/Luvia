@@ -1,6 +1,6 @@
 (function(){
 'use strict';
-const VERSION='4.5.1.4';
+const VERSION='4.5.1.5';
 const TYPE_META=Object.freeze({restaurant:['🍽️','Restaurant'],accommodation:['🛏️','Unterkunft'],attraction:['🏛️','Sehenswürdigkeit'],photo_spot:['📸','Fotospot'],activity:['✨','Aktivität'],shopping:['🛍️','Shopping'],nature:['🌿','Natur'],family:['👨‍👩‍👧','Familienort'],mobility:['🚗','Mobilität'],transit:['🚉','Verkehr'],custom:['📍','Eigener Ort']});
 const LIFE_LABELS=Object.freeze({discovered:'Entdeckt',saved:'Favorit',favorite:'Favorit',planned:'Geplant',visited:'Besucht',rated:'Bewertet',memory:'Erinnerung',reserved:'Reserviert',idea:'Entdeckt',favorited:'Favorit'});
 const esc=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));

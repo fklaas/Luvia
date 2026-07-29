@@ -1,6 +1,6 @@
 (function(){
 'use strict';
-const VERSION='4.5.1.4';
+const VERSION='4.5.1.5';
 const esc=v=>window.LuviaPlaceExperience?.esc?.(v)||String(v??'');
 const PRICE_LABELS=Object.freeze({
  PRICE_LEVEL_FREE:'Kostenlos',PRICE_LEVEL_INEXPENSIVE:'Günstig · €',PRICE_LEVEL_MODERATE:'Mittel · €€',PRICE_LEVEL_EXPENSIVE:'Gehoben · €€€',PRICE_LEVEL_VERY_EXPENSIVE:'Sehr gehoben · €€€€',
