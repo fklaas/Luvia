@@ -1,12 +1,12 @@
 (function(){
 'use strict';
-const VERSION='4.5.0.1';
+const VERSION='4.5.1';
 const contracts=new Map();
 const CANONICAL_LIFECYCLE=['discovered','favorite','planned','selected','reserved','booked','checked_in','checked_out','visited','rated','rejected','archived'];
 const FIELD_TYPES=['text','textarea','number','boolean','date','time','datetime','select','multiselect','currency','url'];
 const TIMELINE_ROLES=['start','end','point','none'];
 const CAPABILITIES=['favorite','planning','reservation','booking','stay','gpsVisit','alternatives','recommendations','timeline','today','dashboard','travelBook','realtime','photos','ratings','notes'];
-const required=['type','moduleKey','identity','discovery','lifecycle','fields','capabilities','presentation'];
+const required=['type','moduleKey','identity','discovery','lifecycle','fields','capabilities','presentation','ui'];
 const clone=v=>JSON.parse(JSON.stringify(v));
 function validate(input){
  const errors=[],warnings=[]; const c=input||{};
@@ -26,6 +26,9 @@ function validate(input){
  });
  Object.entries(c.capabilities||{}).forEach(([k,v])=>{if(!CAPABILITIES.includes(k))warnings.push(`Unbekannte Capability: ${k}`);if(typeof v!=='boolean')errors.push(`Capability ${k} muss boolean sein`)});
  if(c.capabilities?.planning && !(c.fields||[]).some(f=>['start','end','point'].includes(f.timelineRole)))warnings.push('Planning ist aktiv, aber kein Timeline-Feld definiert.');
+ if(!Array.isArray(c.ui?.card?.factSlots)||!c.ui.card.factSlots.length)errors.push('ui.card.factSlots fehlt');
+ if(!Array.isArray(c.ui?.detail?.sectionOrder)||!c.ui.detail.sectionOrder.length)errors.push('ui.detail.sectionOrder fehlt');
+ if(!c.ui?.detail?.requiredSections?.includes('alternatives'))errors.push('ui.detail.requiredSections muss alternatives enthalten');
  if(c.capabilities?.stay && !((c.fields||[]).some(f=>f.key==='check_in_at')&&(c.fields||[]).some(f=>f.key==='check_out_at')))errors.push('Stay benötigt check_in_at und check_out_at.');
  return{valid:errors.length===0,errors,warnings};
 }
