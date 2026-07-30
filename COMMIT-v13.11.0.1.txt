@@ -1,0 +1,1 @@
+fix(places): register cycling routes in the global runtime

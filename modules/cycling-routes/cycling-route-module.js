@@ -1,5 +1,5 @@
 (()=>{'use strict';
-const MODULE_ID='cycling_routes',VERSION='4.11.0',TYPE='cycling_route';
+const MODULE_ID='cycling_routes',VERSION='4.11.0.1',TYPE='cycling_route';
 const QUICK=[['🚵','MTB-Trails','Mountainbike Trails Singletrails Enduro'],['🪨','Gravel','Gravel Schotter Touren'],['🏙️','City-Touren','City Fahrradtour Stadt'],['🚲','Radtouren','Fahrradrouten Radwege Touren'],['👨‍👩‍👧','Familie','Familien Fahrradrouten leicht'],['🏁','Bikeparks','Bikepark Downhill Trailcenter'],['🔁','Rundtouren','Fahrrad Rundtour'],['✨','Entdecken','Fahrradrouten und Trails']];
 const state={root:null,trip:null,query:'Mountainbike Trails Gravel Fahrradrouten',filter:'MTB-Trails',profile:'mtb',options:{},results:[],entities:[],searchMap:new Map(),loading:false,error:null,providerWarning:null,visibleCount:6};
 const esc=value=>window.LuviaPlaceExperience?.esc?.(value)||String(value??'');

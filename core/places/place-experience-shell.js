@@ -1,6 +1,6 @@
 (function(){
 'use strict';
-const VERSION='4.11.0';
+const VERSION='4.11.0.1';
 const esc=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 let activeOverlay=null;
 function quickFilters(items=[],active=''){return `<div class="rv2-quick-wrap"><span class="rv2-quick-label">Direkt entdecken</span><div class="rv2-discovery-actions" role="list">${items.map(([icon,label,query])=>`<button type="button" role="listitem" class="rv2-quick-chip${String(active)===String(query)?' active':''}" data-place-query="${esc(query)}">${icon} ${esc(label)}</button>`).join('')}</div></div>`}

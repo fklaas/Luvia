@@ -1,6 +1,6 @@
 (function(){
 'use strict';
-const VERSION='4.11.0';
+const VERSION='4.11.0.1';
 const field=(value,confidence,source)=>({value,confidence,source});
 const clean=value=>String(value??'').trim();
 const number=value=>Number.isFinite(Number(value))?Number(value):null;

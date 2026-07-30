@@ -559,47 +559,52 @@ Pflichttest nach Änderungen am Bootstrap oder Planungsdialog:
 
 Jeder Typ muss mindestens ein kanonisches Timeline-Feld liefern. Zusätzlich muss `node tests/place-contract-bootstrap-resilience.test.cjs` erfolgreich sein.
 
-## Build 13.11.0 / Core 4.11.0 – Fahrradrouten und MTB-Trail-Vertrag
+## Build 13.11.0 / Core 4.11.0 – Fahrradrouten als routenbasierter Place-Typ
 
-`cycling_route` ist der erste produktive Place-Typ, dessen kanonische Entity nicht nur einen Punkt, sondern optional eine vollständige Routengeometrie repräsentiert. Trotzdem bleibt er vollständig Teil des Universal Place Systems.
+`cycling_route` ist der erste produktive Place-Typ, dessen primäre Entität nicht nur einen einzelnen Punkt, sondern zusätzlich eine Routengeometrie und ein Fahrprofil besitzen kann.
 
 Verbindlich gilt:
 
-- Modul-ID: `cycling_routes`
-- Place-Typ: `cycling_route`
-- Der Planungstermin ist `planned_at` mit `timelineRole: point`.
-- Shell, Karten, Favoriten, Detailkarte, Planung, Timeline, Runtime, Commands, Cloud-Writer, Reiseisolation und Conformance werden ausschließlich global bereitgestellt.
-- `LuviaCyclingRoutes` ist der Browservertrag für `cycling.search`, `cycling.details` und `cycling.health`.
-- Echte Routen werden primär aus OpenStreetMap-Routenrelationen und Trail-Tags geladen. Bikeparks, Trailzentren und Startpunkte aus Google Places sind nur ein ergänzender Fallback und dürfen nicht als vollständige Route ausgegeben werden.
-- `LuviaCyclingRouteIntelligence` ist der einzige fachliche Ableitungsdienst für Routentyp, Länge, Fahrzeit, Schwierigkeit, Untergrund, Routenform, Beschilderung, Höhenprofil, Rad-Empfehlung und Sicherheitscheck.
-- `mtb:scale`, Untergrund, Distanz, Netzwerk und Referenz dürfen nur als sichere Werte erscheinen, wenn sie aus der Quelle oder Geometrie stammen.
-- Höhenmeter, Befahrbarkeit, Sperrungen, Zugangsrechte, Trailzustand und tatsächliche Schwierigkeit dürfen niemals erfunden werden.
-- Die geschätzte Fahrzeit ist als Schätzung zu kennzeichnen und ersetzt keine individuelle Leistungs- oder Sicherheitsplanung.
-- Routengeometrie wird als typabhängiges Feld über den bestehenden Cloudvertrag gespeichert; eine zweite lokale Routenquelle oder eigene Favoriten-/Timeline-Tabelle ist verboten.
-- Die Datenbank-Constraint `places_primary_type_check` muss `cycling_route` enthalten. Dafür ist die Migration `20260730_036_core_v4_11_0_cycling_route_place_type.sql` verbindlicher Bestandteil des Builds.
-- Google-Routes-`BICYCLE` dient nur der Anfahrt beziehungsweise Wegeinformation und ersetzt nicht die OSM-basierte MTB- oder Tourenentdeckung. Der Beta-Hinweis des Providers muss sichtbar bleiben.
-- Bei Ausfall eines öffentlichen Overpass-Endpunkts soll der Gateway einen zweiten Endpunkt versuchen. Die UI darf anschließend kontrolliert auf Bikeparks/Trailzentren zurückfallen, statt die gesamte Places-Shell zu beschädigen.
+- Modul-ID `cycling_routes`, kanonischer Place-Typ `cycling_route`.
+- Primärer Discovery-Provider für echte Routen und MTB-Trails ist der zentrale Cycling-Gateway-Adapter auf Basis von OpenStreetMap/Overpass.
+- Google Places ergänzt ausschließlich Bikeparks, Trailzentren und geeignete Startpunkte. Ein Fahrradgeschäft darf nicht als vollständige Route ausgegeben werden.
+- Favoriten, Timeline, Detailkarte, Reiseisolation, Cloud-Persistenz und Conformance bleiben vollständig im globalen Place Core.
+- Das kanonische Planungsfeld ist `planned_at` mit `timelineRole: point`.
+- `LuviaCyclingRouteIntelligence` ist der einzige fachliche Ableitungsdienst für Routenprofil, Distanz, Fahrzeit, Schwierigkeit, Untergrund, Rundtour, Beschilderung, Fahrradempfehlung und Sicherheitshinweis.
+- `mtb:scale`, Untergrund- und Routennetzwerte dürfen nur angezeigt werden, wenn sie aus Providerdaten stammen oder als nachvollziehbare Ableitung gekennzeichnet sind.
+- Höhenmeter dürfen ohne belastbaren Höhenprofil-Provider nicht erfunden werden.
+- Routengeometrien werden für UI und Cloud kontrolliert vereinfacht; sie ersetzen noch keine Turn-by-Turn-Navigation.
+- Die Datenbank erlaubt `cycling_route` in der vorhandenen kanonischen `places.primary_type`-Constraint. Es wird keine eigene Fahrradrouten-Tabelle eingeführt.
 
-Produktive Contract-Typen ab diesem Build:
+## Build 13.11.0.1 / Core 4.11.0.1 – Verbindlicher Browser-Asset- und Registry-Bootstrap
 
-```text
-restaurant
-accommodation
-attraction
-photo_spot
-shopping
-nature
-cycling_route
-```
+Ein neuer Place-Typ gilt erst dann als implementiert, wenn seine produktiven Browser-Assets tatsächlich in `index.html` geladen werden. Ein Eintrag in Service Worker, Registry-Quellcode oder Testdateien allein reicht nicht aus.
 
-Pflichttests:
+Ab diesem Fix gilt verbindlich:
+
+- Jede neue Place-CSS-Datei muss im Dokument-Head geladen werden.
+- Provider-Service, Place-Type-Contract, Registry-Adapter, typabhängige Intelligence und Modul müssen in deterministischer Reihenfolge in `index.html` stehen.
+- Alle lokalen CSS- und JavaScript-Referenzen in `index.html` verwenden exakt die aktuelle Build-Version als Asset-Query.
+- Alte Asset-Versionen aus einem vorherigen Build sind in der produktiven `index.html` verboten.
+- Der Inline-Contract-Bootstrap verwendet exakt die aktuelle Core-Version.
+- Der Service Worker darf bei `ignoreSearch` nur im Cache des aktuell aktiven Releases suchen. Ein globales `caches.match(...)` über alte Release-Caches ist für JavaScript und CSS verboten.
+- `LuviaPlaceRegistry.status('<neuer_typ>')` muss unmittelbar nach dem App-Boot mindestens den registrierten Adapter erkennen und bei geladenem Provider sowie Entity Service `state: 'ready'` melden.
+- Für jeden neuen Place-Typ muss ein Browser-Bootstrap-Test sowohl Asset-Vollständigkeit und Script-Reihenfolge als auch die tatsächliche Runtime-Registrierung des Adapters prüfen.
+
+Pflichttest für Fahrradrouten und kommende Place-Typen:
 
 ```javascript
-LuviaPlaceUIActions.schema('cycling_route')
 LuviaPlaceRegistry.status('cycling_route')
-LuviaCyclingRoutes.diagnostics()
-LuviaCyclingRouteIntelligence.diagnostics()
-await LuviaPlaceConformance.runAll()
 ```
 
-Zusätzlich müssen `node tests/cycling-provider-gateway.test.cjs`, `node tests/cycling-route-intelligence.test.cjs` und `node tests/cycling-route-integration.test.cjs` erfolgreich sein.
+Erwartet:
+
+```javascript
+{
+  state: 'ready',
+  ready: true,
+  moduleVisible: true
+}
+```
+
+Zusätzlich muss `node tests/cycling-registry-bootstrap.test.cjs` erfolgreich sein.

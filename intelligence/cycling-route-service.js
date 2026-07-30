@@ -1,6 +1,6 @@
 (function(){
 'use strict';
-const VERSION='4.11.0';
+const VERSION='4.11.0.1';
 const state={requests:0,successes:0,failures:0,lastError:null,lastResult:null};
 const clean=value=>String(value??'').trim();
 function destination(input){

@@ -1,4 +1,4 @@
-const CACHE='luvia-shell-v13.11.0';
+const CACHE='luvia-shell-v13.11.0.1';
 const SCOPE=new URL(self.registration.scope);
 const scoped=path=>new URL(path.replace(/^\/+/,''),SCOPE).toString();
 const OFFLINE=scoped('offline.html');
@@ -55,7 +55,8 @@ self.addEventListener('fetch',event=>{
 
   if(/\.(?:js|css|json|webmanifest)$/i.test(url.pathname)){
     event.respondWith((async()=>{
-      const cached=await caches.match(request,{ignoreSearch:true});
+      const activeCache=await caches.open(CACHE);
+      const cached=await activeCache.match(request,{ignoreSearch:true});
       try{
         const response=await fetch(request,{cache:'no-store'});
         if(response.ok){event.waitUntil(store(request,response));return response;}

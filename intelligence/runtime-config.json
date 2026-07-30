@@ -28,26 +28,26 @@
     "logHistory": 500
   },
   "release": {
-    "core": "4.11.0",
-    "build": "13.11.0",
-    "name": "Cycling Routes & MTB Trail Intelligence",
+    "core": "4.11.0.1",
+    "build": "13.11.0.1",
+    "name": "Cycling Registry Bootstrap & Asset Loading Fix",
     "channel": "production",
-    "builtAt": "2026-07-30T17:54:00+02:00"
+    "builtAt": "2026-07-30T18:57:00+02:00"
   },
   "deployment": {
     "canonicalHost": "myluvia.app",
     "wwwHost": "www.myluvia.app",
     "stagingHost": "staging.myluvia.app",
     "githubPagesFallback": "https://fklaas.github.io/Luvia/",
-    "build": "13.11.0"
+    "build": "13.11.0.1"
   },
   "build": {
-    "core": "4.11.0",
-    "build": "13.11.0",
-    "name": "Cycling Routes & MTB Trail Intelligence",
+    "core": "4.11.0.1",
+    "build": "13.11.0.1",
+    "name": "Cycling Registry Bootstrap & Asset Loading Fix",
     "channel": "production",
     "releasedAt": "2026-07-30",
-    "builtAt": "2026-07-30T17:54:00+02:00"
+    "builtAt": "2026-07-30T18:57:00+02:00"
   },
   "backend": {
     "functionName": "luvia-gateway",
@@ -83,7 +83,7 @@
     "profileSchemaVersion": 5
   },
   "placeIntelligence": {
-    "version": "4.11.0",
+    "version": "4.11.0.1",
     "types": 12,
     "multiType": true,
     "restaurantCompatibility": true,
@@ -108,7 +108,7 @@
     "globalGps": true,
     "offlineSync": true
   },
-  "coreVersion": "4.11.0",
-  "buildVersion": "13.11.0",
-  "releaseName": "Cycling Routes & MTB Trail Intelligence"
+  "coreVersion": "4.11.0.1",
+  "buildVersion": "13.11.0.1",
+  "releaseName": "Cycling Registry Bootstrap & Asset Loading Fix"
 }

@@ -1,4 +1,4 @@
-/* Build 13.11.0 – static architecture regression test */
+/* Build 13.11.0.1 – static architecture regression test */
 const fs=require('fs');
 const assert=require('assert');
 const files=['modules/restaurants-v2/restaurant-module.js','modules/accommodations/accommodation-module.js','modules/attractions/attraction-module.js','modules/photo-spots/photo-spot-module.js','modules/shopping/shopping-module.js','modules/nature/nature-module.js','modules/cycling-routes/cycling-route-module.js'];

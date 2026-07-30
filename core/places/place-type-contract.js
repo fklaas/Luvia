@@ -1,6 +1,6 @@
 (function(){
 'use strict';
-const VERSION='4.11.0';
+const VERSION='4.11.0.1';
 const existing=window.LuviaPlaceTypeContracts;
 if(existing?.version===VERSION&&typeof existing.register==='function'&&!existing.bootstrap){
  window.dispatchEvent(new CustomEvent('luvia:place-contract-ready',{detail:{version:VERSION,reused:true}}));
