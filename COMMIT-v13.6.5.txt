@@ -1,0 +1,5 @@
+Commit title:
+fix(places): close canonical timeline writes and collection actions
+
+Commit description:
+Route every Place timeline write through canonical trip-place UUID handling, centralize collection-wide favorite removal in LuviaPlaceCollections, and enforce place-type declarations through conformance checks.

@@ -1,6 +1,6 @@
 (function(){
 'use strict';
-const VERSION='4.6.4';
+const VERSION='4.6.5';
 const FACT_SLOTS=Object.freeze(['rating','distance','bestTimeToVisit','priceLevel','openingState']);
 const DETAIL_ORDER=Object.freeze(['gallery','header','actions','facts','providerDetails','recommendation','considerations','placeFields','alternatives','openingHours','contact']);
 const HIDDEN=Object.freeze(['participantMatches','nextSteps','departurePlanning','dayPlanning']);

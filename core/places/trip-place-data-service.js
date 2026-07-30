@@ -1,9 +1,11 @@
 (() => {
 'use strict';
-const VERSION='4.6.4';
+const VERSION='4.6.5';
 let state={tripId:null,loading:false,records:[],lastUpdatedAt:null,lastError:null};
 let channel=null; const listeners=new Set();
 const clone=v=>v==null?v:JSON.parse(JSON.stringify(v));
+const UUID_RE=/^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
+const canonicalUuid=v=>UUID_RE.test(String(v||'').trim())?String(v).trim():null;
 const db=()=>window.LuviaSupabaseService?.getClient?.()||window.ParisSupabaseClient||window.ParisCloud?.client||null;
 const tripId=()=>window.LuviaTripContext?.getActiveTrip?.()?.tripId||window.LuviaTripStore?.snapshot?.()?.activeTripId||null;
 const emit=()=>{const snap=snapshot();listeners.forEach(fn=>{try{fn(snap)}catch{}});window.dispatchEvent(new CustomEvent('luvia:trip-place-data-changed',{detail:snap}))};
@@ -26,7 +28,8 @@ function recordsForType(type){return state.records.filter(r=>String(r.place_type
 async function upsert({tripId:id=tripId(),tripPlaceId,placeId,placeType,fields={}}={}){
  if(!id||!tripPlaceId||!placeType)throw new Error('tripId, tripPlaceId und placeType sind erforderlich.');
  const c=db(); if(!c?.rpc)throw new Error('Supabase ist nicht verfügbar.');
- const {data,error}=await c.rpc('luvia_upsert_trip_place_fields',{p_trip_id:id,p_trip_place_id:tripPlaceId,p_place_id:placeId||null,p_place_type:placeType,p_fields:fields||{}});
+ const canonicalPlaceId=canonicalUuid(placeId);
+ const {data,error}=await c.rpc('luvia_upsert_trip_place_fields',{p_trip_id:id,p_trip_place_id:tripPlaceId,p_place_id:canonicalPlaceId,p_place_type:placeType,p_fields:fields||{}});
  if(error)throw error;
  await hydrate(id); return data;
 }
@@ -65,5 +68,5 @@ function subscribeRealtime(id=state.tripId||tripId()){
 async function init(){const id=tripId();await hydrate(id).catch(()=>{});subscribeRealtime(id);return diagnostics()}
 function diagnostics(){return{version:VERSION,status:'ready',cloudAuthoritative:true,localPersistence:false,tripId:state.tripId,records:state.records.length,dateEntries:dateEntries().length,realtime:Boolean(channel)}}
 window.addEventListener('luvia:trip-changed',e=>{const id=e.detail?.tripId||tripId();hydrate(id).then(()=>subscribeRealtime(id)).catch(()=>{})});
-window.LuviaTripPlaceData=Object.freeze({version:VERSION,init,hydrate,snapshot,recordForTripPlace,recordsForType,dateEntries,upsert,replaceFields,remove,updateDateFields,subscribe,subscribeRealtime,diagnostics});
+window.LuviaTripPlaceData=Object.freeze({version:VERSION,init,hydrate,snapshot,recordForTripPlace,recordsForType,dateEntries,upsert,replaceFields,remove,updateDateFields,subscribe,subscribeRealtime,canonicalUuid,diagnostics});
 })();
