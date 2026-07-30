@@ -1,7 +1,7 @@
 (() => {
   'use strict';
-  const VERSION='4.3.0';
-  const BUILD='13.3.0';
+  const VERSION=window.LuviaKernelVersion?.core||'4.7.1';
+  const BUILD=window.LuviaKernelVersion?.build||'13.7.1';
   const now=()=>new Date().toISOString();
   const safe=(fn,fallback=null)=>{try{return fn()}catch(error){return fallback??{error:error?.message||String(error)}}};
   const textBytes=value=>new TextEncoder().encode(String(value||'')).length;
@@ -9,13 +9,15 @@
   const scheduleTrace=()=>{const s=safe(()=>window.LuviaScheduleIntelligence?.snapshot?.(),{})||{};return (s.events||[]).map(event=>({id:event.id,entityType:event.entityType,placeId:event.placeId||event.source?.placeId||event.source?.providerPlaceId||null,tripId:event.tripId||event.source?.tripId||s.tripId||null,title:event.title,date:event.date,time:event.time,startAt:event.startAt,durationMinutes:event.durationMinutes,persistence:event.persistence||'local+remote-merge',sourceAvailable:Boolean(event.source),dashboardVisible:(s.today||[]).some(x=>String(x.id)===String(event.id)),mergeKey:`${event.entityType||'place'}:${event.id}`}));};
   const recommendationTrace=()=>{const rec=safe(()=>window.LuviaRecommendations?.diagnostics?.(),{})||{},cross=safe(()=>window.LuviaCrossModuleRecommendations?.diagnostics?.(),{})||{},restaurant=safe(()=>window.LuviaRestaurantIntelligence?.diagnostics?.(),{})||{};const candidates=(restaurant.restaurants||[]).slice(0,12).map(item=>({id:item.id||item.placeId,name:item.name,score:item.intelligence?.score??item.matchScore??null,reasons:(item.intelligence?.reasons||item.recommendation?.reasons||[]).slice(0,4),warnings:(item.intelligence?.warnings||item.recommendation?.warnings||[]).slice(0,3),distanceMeters:item.distanceMeters??null,openNow:item.openNow??null}));const slots={};for(const [key,value] of Object.entries(cross.slots||{}))slots[key]=Array.isArray(value)?value.slice(0,8).map(item=>({id:item?.id||item?.placeId||null,name:item?.name||item?.title||null,score:item?.score??item?.matchScore??null})):[];return{engine:{version:rec.version,status:rec.status,metrics:rec.metrics},slots,candidates};};
   const compatibilityAudit=()=>({
-    restaurantEntityAdapter:{state:window.LuviaPlaceRegistry?.getAdapter?.('restaurant')?.state||'unknown',required:true,decision:'keep-until-universal-persistence'},
-    restaurantLifecycleBridge:{state:Boolean(window.LuviaPlaceCore&&window.LuviaRestaurants)?'active':'missing',required:true,decision:'keep-for-restaurant-specific-fields'},
-    restaurantScheduleBridge:{state:typeof window.LuviaScheduleIntelligence?.upsertRestaurant==='function'?'active':'missing',required:false,decision:'compatibility-wrapper-over-upsertEvent'},
-    legacyPlacesAlias:{state:Boolean(window.LuviaPlacesCore),'required':false,decision:'remove-after-cache-support-window'},
-    restaurantServiceAlias:{state:Boolean(window.LuviaRestaurantService||window.LuviaRestaurants),required:true,decision:'keep-for-stale-client-compatibility'}
+    globalPlaceRuntime:{state:Boolean(window.LuviaPlaceRuntime)?'ready':'missing',required:true,decision:'canonical-runtime'},
+    globalPlaceCommands:{state:Boolean(window.LuviaPlaceCommands)?'ready':'missing',required:true,decision:'canonical-writer'},
+    restaurantEntityAdapter:{state:window.LuviaPlaceRegistry?.getAdapter?.('restaurant')?.state||'unknown',required:true,decision:'canonical-adapter'},
+    universalTimeline:{state:Boolean(window.LuviaTripPlaceData&&window.LuviaTimelineCore)?'ready':'missing',required:true,decision:'contract-driven'},
+    legacyPlacesAlias:{state:Boolean(window.LuviaPlacesCore)?'compatibility':'removed',required:false,decision:'read-only-compatibility'},
+    restaurantServiceAlias:{state:Boolean(window.LuviaRestaurantService||window.LuviaRestaurants)?'compatibility':'removed',required:false,decision:'read-only-compatibility'}
   });
-  const adapterHealth=()=>safe(()=>window.LuviaPlaceRegistry?.diagnostics?.().adapters,[])||[];
+  const implementedTypes=()=>new Set(['restaurant','accommodation','attraction']);
+  const adapterHealth=()=>{const rows=safe(()=>window.LuviaPlaceRegistry?.diagnostics?.().adapters,[])||[];const ready=implementedTypes();return rows.map(item=>({...item,state:ready.has(item.key||item.type)?((item.state==='failed')?'failed':'ready'):'planned'}));};
   const visitTrace=()=>{const timeline=safe(()=>window.LuviaTimelineCore?.diagnostics?.(),{})||{},presence=safe(()=>window.LuviaPresenceVisitCore?.diagnostics?.(),{})||{};return{timeline,presence,states:['nearby','arrived','stay_detected','visited','left']};};
   const cacheAudit=()=>{const storage=listStorage(),invalid=storage.filter(x=>x.validJson===false);return{serviceWorkerController:Boolean(navigator.serviceWorker?.controller),online:navigator.onLine,entryCount:storage.length,largestEntries:storage.slice().sort((a,b)=>b.bytes-a.bytes).slice(0,20),totalBytes:storage.reduce((n,x)=>n+x.bytes,0),invalidEntries:invalid.slice(0,20),healthy:invalid.length===0};};
   const serviceSummary=()=>{const services=safe(()=>window.LuviaServiceRegistry?.list?.(),[])||[];return{version:window.LuviaServiceRegistry?.version||'unknown',status:'ready',count:services.length,ready:services.filter(x=>x.state==='ready').length,failed:services.filter(x=>x.state==='failed').length,startOrder:safe(()=>window.LuviaServiceRegistry?.order?.(),services.map(x=>x.name)),services};};

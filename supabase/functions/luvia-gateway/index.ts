@@ -12,7 +12,7 @@ import { placeEntityAction } from './_shared/place-entities.ts';
 
 type GatewayBody={action?:string;payload?:unknown;context?:Record<string,unknown>};
 const ACTION_PATTERN=/^[a-z][a-z0-9]*(?:[._-][a-z0-9]+)*$/;
-const PUBLIC_ACTIONS=new Set(['system.health','places.health']);
+const PUBLIC_ACTIONS=new Set(['system.health','places.health','destination.resolve']);
 const PLACES_ACTIONS=new Set(['destination.resolve','places.health','places.text-search','places.nearby-search','places.autocomplete','places.details','places.photo']);
 const PLACE_ENTITY_ACTIONS=new Set(['place.health','place.list','place.import','place.lifecycle.update','place.accommodation.update','place.remove']);
 const RESTAURANT_ACTIONS=new Set(['restaurant.health','restaurant.list','restaurant.history','restaurant.import','restaurant.lifecycle.update','restaurant.feedback','restaurant.remove','restaurant.clear']);
@@ -24,6 +24,7 @@ Deno.serve(async(req:Request)=>{
   const id=requestId(req);
   const origin=resolveOrigin(req.headers.get('origin'));
   const cors=corsHeaders(origin,id);
+  if(!origin)return errorResponse(403,'ORIGIN_NOT_ALLOWED','Origin ist nicht freigeschaltet.',id,cors);
   if(req.method==='OPTIONS')return new Response(null,{status:204,headers:cors});
   if(req.method!=='POST')return errorResponse(405,'METHOD_NOT_ALLOWED','Nur POST ist erlaubt.',id,cors);
   const contentType=req.headers.get('content-type')||'';
@@ -61,7 +62,7 @@ Deno.serve(async(req:Request)=>{
     let data:unknown;
     switch(action){
       case 'system.health':
-        data={status:'ok',service:'luvia-gateway',version:'4.3.1',time:new Date().toISOString(),authenticated:Boolean(userId),places:placesDiagnostics(),restaurants:restaurantDiagnostics(),recommendations:recommendationDiagnostics()};
+        data={status:'ok',service:'luvia-gateway',version:'4.7.1',build:'13.7.1',core:'4.7.1',time:new Date().toISOString(),authenticated:Boolean(userId),places:placesDiagnostics(),restaurants:restaurantDiagnostics(),recommendations:recommendationDiagnostics()};
         break;
       default:
         if(PLACES_ACTIONS.has(action)){

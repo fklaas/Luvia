@@ -413,3 +413,19 @@ Ab Build 13.7.0 gilt zusätzlich verbindlich:
 6. Der Runtime Store ist an eine eindeutige `tripId` gebunden. Ein Reisewechsel darf niemals Datensätze einer vorherigen Reise weiterverwenden.
 7. Conformance muss für alle Module einschließlich Restaurants dieselben Shell-Anforderungen prüfen.
 8. Vor jedem Release ist `node tests/place-architecture-regression.test.cjs` sowie `await LuviaPlaceConformance.runAll()` auszuführen.
+
+
+## Build 13.7.1 / Core 4.7.1 – Gateway-, Diagnose- und Versionsvertrag
+
+Diese Regeln sind verbindlich:
+
+1. **Eine Release-Version:** `intelligence/kernel/version.js` ist die einzige Quelle für Core, Build, Kanal und Build-Zeit. App, Diagnose, Developer Console, Backend Console, PWA und Edge-Health müssen diese Werte anzeigen.
+2. **Auth vor geschützten Requests:** `LuviaBackend` wartet vor dem ersten geschützten Request auf eine gültige Supabase-Sitzung. Ein 401 darf höchstens einen kontrollierten Token-Refresh auslösen.
+3. **Öffentliche Aktionen:** `system.health`, `places.health` und `destination.resolve` dürfen ohne Benutzer-Token laufen. Alle schreibenden Place-Aktionen bleiben geschützt.
+4. **CORS-Vertrag:** Die Edge Function beantwortet `OPTIONS` für freigegebene Origins mit vollständigen CORS-Headern. Nicht freigegebene Origins werden eindeutig mit 403 abgewiesen.
+5. **Deduplizierung und Backoff:** Identische parallele Requests werden zusammengeführt. 502/503/504 werden höchstens zweimal mit exponentiellem Backoff wiederholt; anschließend schützt ein kurzer Circuit Breaker vor Request-Stürmen.
+6. **Keine unhandled Background Requests:** Automatische Destination-Auflösung arbeitet fehlertolerant, gedrosselt und darf die App oder Konsole nicht mit wiederholten Promise-Fehlern fluten.
+7. **Places-Testmatrix:** Backend & Places muss Restaurants, Unterkünfte und Sehenswürdigkeiten einzeln über dieselbe produktive Pipeline testen können.
+8. **Place Readiness:** In der Developer Console stehen implementierte Typen `restaurant`, `accommodation` und `attraction` auf `ready`. Noch nicht implementierte Contracts stehen auf `planned`, nicht fälschlich auf produktionsbereit.
+9. **Diagnose ist Teil des Releases:** Diagnose-, Developer- und Backend-Konsole müssen bei jedem Build aktualisiert und gegen die zentrale Version geprüft werden.
+10. **Konsolen-Regressionsregel:** Normaler Start, Reisewechsel, alle Place-Module, Favorit, Timeline und Backend-Tests dürfen keine Luvia-eigenen 400/401/503/CORS- oder unhandled-Promise-Fehler erzeugen.

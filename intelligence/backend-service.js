@@ -1,12 +1,14 @@
 (function(){
   'use strict';
-  const VERSION='3.3.3-auth-ready';
+  const VERSION='4.7.1-gateway-runtime';
   const DEFAULT_FUNCTION='luvia-gateway';
   const DEFAULT_TIMEOUT=12000;
   const ACTION_PATTERN=/^[a-z][a-z0-9]*(?:[._-][a-z0-9]+)*$/;
   const SENSITIVE_KEYS=/authorization|token|secret|password|apikey|api_key|cookie|session/i;
   const listeners=new Set();
-  const inflight=new Map();const cooldowns=new Map();
+  const inflight=new Map();const cooldowns=new Map();const circuit=new Map();
+  const PUBLIC_ACTIONS=new Set(['system.health','places.health','destination.resolve']);
+  const TRANSIENT_STATUS=new Set([502,503,504]);
   const state={initialized:false,requests:0,successes:0,failures:0,timeouts:0,lastRequestAt:null,lastSuccessAt:null,lastError:null,lastStatus:null,lastRequestId:null,recent:[]};
   const now=()=>new Date().toISOString();
   const uuid=()=>globalThis.crypto?.randomUUID?.()||`req_${Date.now()}_${Math.random().toString(36).slice(2,10)}`;
@@ -101,7 +103,9 @@
     const timeout=setTimeout(()=>controller.abort('timeout'),timeoutMs);
     const started=performance.now();
     state.requests++;state.lastRequestAt=now();state.lastRequestId=requestId;
-    const token=await accessToken();
+    const requiresAuth=!PUBLIC_ACTIONS.has(safeAction);
+    const token=await accessToken({waitMs:requiresAuth?3500:500});
+    if(requiresAuth&&!token){const error=new Error('Die Anmeldung ist noch nicht bereit.');error.code='AUTH_NOT_READY';error.status=401;throw error;}
     const headers={'Content-Type':'application/json','Accept':'application/json'};
     if(cfg.publishableKey)headers.apikey=cfg.publishableKey;
     if(token)headers.Authorization=`Bearer ${token}`;
@@ -109,16 +113,20 @@
     try{
       const requestBody=JSON.stringify({action:safeAction,payload:sanitize(payload),context:{destinationId:window.LuviaDestination?.getActive?.()?.id||null,tripId:window.LuviaTripContext?.getSnapshot?.()?.tripId||null,clientVersion:VERSION,build:cfg.clientBuild}});
       const send=()=>fetch(`${cfg.functionsBase}/${cfg.functionName}`,{method:'POST',headers,body:requestBody,signal:controller.signal,cache:'no-store',credentials:'omit'});
-      let response=await send();
-      if(response.status===401){
-        const refreshedToken=await accessToken({refresh:true});
-        if(refreshedToken){headers.Authorization=`Bearer ${refreshedToken}`;response=await send();}
-        // A stale token must not make public health endpoints unavailable.
-        if(response.status===401&&['system.health','places.health'].includes(safeAction)){
-          delete headers.Authorization;
-          response=await send();
+      const circuitUntil=circuit.get(safeAction)||0;
+      if(Date.now()<circuitUntil){const e=new Error('Backend vorübergehend entlastet.');e.code='BACKEND_CIRCUIT_OPEN';e.status=503;throw e;}
+      let response;
+      for(let attempt=0;attempt<3;attempt++){
+        response=await send();
+        if(response.status===401&&attempt===0&&!PUBLIC_ACTIONS.has(safeAction)){
+          const refreshedToken=await accessToken({refresh:true,waitMs:2500});
+          if(refreshedToken){headers.Authorization=`Bearer ${refreshedToken}`;continue;}
         }
+        if(response.status===401&&PUBLIC_ACTIONS.has(safeAction)&&headers.Authorization){delete headers.Authorization;continue;}
+        if(TRANSIENT_STATUS.has(response.status)&&attempt<2){await sleep(250*(2**attempt)+Math.round(Math.random()*120));continue;}
+        break;
       }
+      if(TRANSIENT_STATUS.has(response.status))circuit.set(safeAction,Date.now()+5000);else circuit.delete(safeAction);
       const body=await response.json().catch(()=>({ok:false,error:{code:'INVALID_RESPONSE',message:'Backend lieferte keine gültige JSON-Antwort.'}}));
       const responseRequestId=response.headers.get('x-luvia-request-id')||body?.meta?.requestId||requestId;
       if(!response.ok||body?.ok===false){
@@ -149,7 +157,7 @@
     try{const result=await health({timeoutMs:5000});return{ok:true,configured:true,result};}
     catch(error){return{ok:false,configured:true,code:error.code,message:error.message,status:error.status||0,requestId:error.requestId||null};}
   }
-  function diagnostics(){const cfg=config();return{version:VERSION,initialized:state.initialized,configured:cfg.configured,secureContext:cfg.secureContext,functionName:cfg.functionName,endpoint:cfg.functionsBase?`${cfg.functionsBase}/${cfg.functionName}`:'',timeoutMs:cfg.timeoutMs,metrics:{requests:state.requests,successes:state.successes,failures:state.failures,timeouts:state.timeouts},lastRequestAt:state.lastRequestAt,lastSuccessAt:state.lastSuccessAt,lastStatus:state.lastStatus,lastError:sanitize(state.lastError),recent:[...state.recent]};}
+  function diagnostics(){const cfg=config();return{version:VERSION,initialized:state.initialized,configured:cfg.configured,secureContext:cfg.secureContext,functionName:cfg.functionName,endpoint:cfg.functionsBase?`${cfg.functionsBase}/${cfg.functionName}`:'',timeoutMs:cfg.timeoutMs,metrics:{requests:state.requests,successes:state.successes,failures:state.failures,timeouts:state.timeouts},lastRequestAt:state.lastRequestAt,lastSuccessAt:state.lastSuccessAt,lastStatus:state.lastStatus,lastError:sanitize(state.lastError),recent:[...state.recent],circuits:[...circuit.entries()].filter(([,until])=>until>Date.now()).map(([action,until])=>({action,until}))};}
   function testContract(){
     const cfg=config();
     const checks={api:typeof request==='function',https:cfg.secureContext||location.hostname==='localhost',configured:cfg.configured,actionValidation:false,sanitization:false,requestIds:Boolean(uuid())};

@@ -9,7 +9,7 @@
   const PLACEHOLDER=/^(destination|reiseziel|unser(?:em|e|es)?\s+reiseziel|euer(?:em|e|es)?\s+reiseziel)$/i;
   const listeners=new Set();
   const pending=new Map();
-  const state={initialized:false,active:null,lastError:null,lastMigration:null,cacheHits:0,cacheMisses:0,resolutions:0,resolutionFailures:0,lastResolvedAt:null};
+  const state={initialized:false,active:null,lastError:null,nextResolveAt:0,lastMigration:null,cacheHits:0,cacheMisses:0,resolutions:0,resolutionFailures:0,lastResolvedAt:null};
   const now=()=>new Date().toISOString();
   const parse=(value,fallback)=>{try{return JSON.parse(value)??fallback}catch{return fallback}};
   const clone=value=>value==null?value:JSON.parse(JSON.stringify(value));
@@ -149,7 +149,7 @@
     pending.set(key,task);return task;
   }
   async function ensureResolved(input,options={}){const destination=resolve(input,options);if(destination.center&&destination.countryCode&&!options.refresh)return destination;return resolveLocation(destination,options);}
-  async function ensureActiveResolved(options={}){const active=getActive({refresh:true});if(!active?.isUsable)return active;try{return await ensureResolved(active,options)}catch{return clone(active)}}
+  async function ensureActiveResolved(options={}){const active=getActive({refresh:true});if(!active?.isUsable)return active;if(!options.refresh&&Date.now()<(state.nextResolveAt||0))return active;try{const result=await ensureResolved(active,options);state.nextResolveAt=0;return result}catch(error){state.nextResolveAt=Date.now()+30000;state.lastError=error?.message||String(error);return clone(active)}}
   function persistActiveDestination(destination){
     const tripId=destination?.tripId||window.LuviaTripStore?.snapshot?.().activeTripId||identity()?.tripId;if(!tripId)return false;
     const canonicalTrip=window.LuviaTripStore?.snapshot?.().trips?.find?.(trip=>trip.id===tripId||trip.tripId===tripId);
