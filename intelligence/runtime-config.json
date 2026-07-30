@@ -28,26 +28,26 @@
     "logHistory": 500
   },
   "release": {
-    "core": "4.9.1.2",
-    "build": "13.9.1.2",
-    "name": "Global Place Contract Bootstrap & Planning Parity",
+    "core": "4.10.0",
+    "build": "13.10.0",
+    "name": "Nature & Excursion Intelligence",
     "channel": "production",
-    "builtAt": "2026-07-30T17:07:00+02:00"
+    "builtAt": "2026-07-30T17:54:00+02:00"
   },
   "deployment": {
     "canonicalHost": "myluvia.app",
     "wwwHost": "www.myluvia.app",
     "stagingHost": "staging.myluvia.app",
     "githubPagesFallback": "https://fklaas.github.io/Luvia/",
-    "build": "13.9.1.2"
+    "build": "13.10.0"
   },
   "build": {
-    "core": "4.9.1.2",
-    "build": "13.9.1.2",
-    "name": "Global Place Contract Bootstrap & Planning Parity",
+    "core": "4.10.0",
+    "build": "13.10.0",
+    "name": "Nature & Excursion Intelligence",
     "channel": "production",
     "releasedAt": "2026-07-30",
-    "builtAt": "2026-07-30T17:07:00+02:00"
+    "builtAt": "2026-07-30T17:54:00+02:00"
   },
   "backend": {
     "functionName": "luvia-gateway",
@@ -83,7 +83,7 @@
     "profileSchemaVersion": 5
   },
   "placeIntelligence": {
-    "version": "4.9.1.2",
+    "version": "4.10.0",
     "types": 11,
     "multiType": true,
     "restaurantCompatibility": true,
@@ -108,7 +108,7 @@
     "globalGps": true,
     "offlineSync": true
   },
-  "coreVersion": "4.9.1.2",
-  "buildVersion": "13.9.1.2",
-  "releaseName": "Global Place Contract Bootstrap & Planning Parity"
+  "coreVersion": "4.10.0",
+  "buildVersion": "13.10.0",
+  "releaseName": "Nature & Excursion Intelligence"
 }

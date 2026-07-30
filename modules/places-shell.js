@@ -1,10 +1,11 @@
 (()=>{'use strict';
-const VERSION='4.9.1.2';
+const VERSION='4.10.0';
 const PLACE_MODULES={
   photo_spots:{type:'photo_spot',title:'Fotospots',icon:'📸',description:'Aussichten, Lichtstimmungen und besondere Fotomomente entdecken.',tags:['Golden Hour','Aussicht','Erinnerungen'],host:'photo-spots-module'},
   attractions:{type:'attraction',title:'Sehenswürdigkeiten & Aktivitäten',icon:'✨',description:'Museen, Parks, Aussichtspunkte und Erlebnisse entdecken.',tags:['Kultur','Aktivitäten','Highlights'],host:'attractions-module'},
   restaurants:{type:'restaurant',title:'Restaurants',icon:'🍽️',description:'Genuss, Cafés und besondere Restaurantmomente entdecken.',tags:['Restaurants','Cafés','Genuss'],host:'restaurants-module'},
   accommodations:{type:'accommodation',title:'Unterkünfte',icon:'🏨',description:'Hotels, Apartments und besondere Unterkünfte finden.',tags:['Hotels','Apartments','Reisebasis'],host:'accommodations-module'},
+  nature:{type:'nature',title:'Natur & Ausflüge',icon:'🌿',description:'Parks, Landschaften, Wanderwege und besondere Ausflugsziele entdecken.',tags:['Natur','Wandern','Ausflüge'],host:'nature-module'},
   shopping:{type:'shopping',title:'Shopping',icon:'🛍️',description:'Märkte, Boutiquen, Souvenirs und besondere Einkaufsorte entdecken.',tags:['Märkte','Boutiquen','Souvenirs'],host:'shopping-module'},
 };
 let state={root:null,trip:null,active:null,mounted:null};
@@ -17,6 +18,6 @@ async function showHub(){if(!state.root)return false;if(state.mounted)await wind
 function bind(){state.root.querySelectorAll('[data-place-module]').forEach(b=>b.onclick=()=>open(b.dataset.placeModule));state.root.querySelector('[data-places-back]')?.addEventListener('click',showHub);}
 async function mount(root,trip,options={}){state.root=root;state.trip=trip;const requested=options.moduleId||null;if(requested&&enabled().includes(requested))await open(requested,options.payload);else renderHub();}
 async function unmount(){if(state.mounted)await window.LuviaModules?.unmountModule?.(state.mounted);state={root:null,trip:null,active:null,mounted:null};}
-function openPlace(payload={}){const id=payload.type==='restaurant'?'restaurants':payload.type==='accommodation'?'accommodations':payload.type==='attraction'?'attractions':payload.type==='photo_spot'?'photo_spots':payload.type==='shopping'?'shopping':null;return id?open(id,payload):false;}
+function openPlace(payload={}){const id=payload.type==='restaurant'?'restaurants':payload.type==='accommodation'?'accommodations':payload.type==='attraction'?'attractions':payload.type==='photo_spot'?'photo_spots':payload.type==='shopping'?'shopping':payload.type==='nature'?'nature':null;return id?open(id,payload):false;}
 window.LuviaPlacesShell=Object.freeze({version:VERSION,mount,unmount,open,openPlace,showHub,active:()=>state.active});
 })();

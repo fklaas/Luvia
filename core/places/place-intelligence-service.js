@@ -1,6 +1,6 @@
 (function(){
 'use strict';
-const VERSION='4.9.1.2';
+const VERSION='4.10.0';
 const adapters=new Map();
 const fmt=m=>{m=Number(m);if(!Number.isFinite(m))return null;return m<1000?`${Math.round(m/50)*50} m`:`${(m/1000).toFixed(m<10000?1:0).replace('.',',')} km`};
 function gpsDistance(place={}){const m=Number(place.gpsDistanceMeters??place.route?.drive?.distanceMeters??place._gpsDistanceMeters);return Number.isFinite(m)?m:null}
@@ -8,9 +8,10 @@ function generic(place={},context={}){const rating=Number(place.rating||0),dista
 function accommodation(place={},context={}){const base=generic(place,context),stay=context.extension||{},reasons=[...base.reasons];if(stay.check_in_at&&stay.check_out_at)reasons.push('Der Aufenthalt ist mit Check-in und Check-out geplant.');if(stay.is_trip_base)reasons.push('Ist als fester Ausgangspunkt der Reise markiert.');if(place.accessibilityOptions||place.accessibility)reasons.push('Es liegen Angaben zur Barrierefreiheit vor.');if(place.parkingOptions||place.parking)reasons.push('Es liegen Parkplatzinformationen vor.');return{...base,reasons:[...new Set(reasons)],bestTime:stay.check_in_at?new Date(stay.check_in_at).toLocaleTimeString('de-DE',{hour:'2-digit',minute:'2-digit'}):null,bestTimeReason:stay.check_in_at?'Aus dem hinterlegten Check-in':'Noch kein Check-in hinterlegt',schedule:window.LuviaScheduleIntelligence?.snapshot?.(),today:window.LuviaTodayIntelligence?.snapshot?.(),visit:window.LuviaPresenceVisit?.snapshot?.()}}
 function restaurant(place={},context={}){if(window.LuviaRestaurantIntelligence?.analyze){try{return{...window.LuviaRestaurantIntelligence.analyze(place,context),distanceLabel:fmt(gpsDistance(place)),distanceOrigin:'gps'}}catch{}}return generic(place,context)}
 function shopping(place={},context={}){const base=generic(place,context),profile=window.LuviaShoppingIntelligence?.analyze?.(place,context)||{},reasons=[...base.reasons,...(profile.travelReasons||[])];return{...base,reasons:[...new Set(reasons)],bestTime:profile.bestVisit?.value||null,bestTimeReason:profile.bestVisit?.source||null,shopping:profile}}
+function nature(place={},context={}){const base=generic(place,context),profile=window.LuviaNatureIntelligence?.analyze?.(place,context)||{},reasons=[...base.reasons,...(profile.travelReasons||[])];return{...base,reasons:[...new Set(reasons)],bestTime:profile.bestVisit?.value||null,bestTimeReason:profile.bestVisit?.source||null,nature:profile}}
 function registerAdapter(type,fn){adapters.set(type,fn)}
 function analyze(type,place,context={}){return(adapters.get(type)||generic)(place,context)}
-registerAdapter('restaurant',restaurant);registerAdapter('accommodation',accommodation);registerAdapter('shopping',shopping);
+registerAdapter('restaurant',restaurant);registerAdapter('accommodation',accommodation);registerAdapter('shopping',shopping);registerAdapter('nature',nature);
 function diagnostics(){return{version:VERSION,status:'ready',adapters:[...adapters.keys(),'generic'],distanceSource:'gps-only',services:{recommendations:Boolean(window.LuviaRecommendations),schedule:Boolean(window.LuviaScheduleIntelligence),timeline:Boolean(window.LuviaTimelineCore),today:Boolean(window.LuviaTodayIntelligence),presence:Boolean(window.LuviaPresenceVisit),crossModule:Boolean(window.LuviaCrossModuleRecommendations),liveDay:Boolean(window.LuviaLiveDayCompanion)}}}
-window.LuviaPlaceIntelligence=Object.freeze({version:VERSION,analyze,generic,accommodation,restaurant,shopping,registerAdapter,diagnostics});
+window.LuviaPlaceIntelligence=Object.freeze({version:VERSION,analyze,generic,accommodation,restaurant,shopping,nature,registerAdapter,diagnostics});
 })();

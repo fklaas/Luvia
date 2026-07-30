@@ -1,0 +1,14 @@
+const fs=require('fs'),vm=require('vm'),assert=require('assert');
+const code=fs.readFileSync('core/places/nature-intelligence-service.js','utf8');
+const sandbox={window:{}};vm.createContext(sandbox);vm.runInContext(code,sandbox);
+const N=sandbox.window.LuviaNatureIntelligence;assert(N,'Nature Intelligence missing');
+let r=N.analyze({name:'Forêt de Meudon',primaryType:'woods',types:['woods','park']});
+assert(/Wald|Park/.test(r.natureFormat.value),'woods classification missing');
+assert(r.weatherExposure.value,'weather guidance missing');
+r=N.analyze({name:'Panorama Sunset Point',primaryType:'scenic_spot',types:['scenic_spot']});
+assert(/Aussicht|Panorama/.test(r.natureFormat.value),'scenic classification missing');
+assert(/Sonnenuntergang|Nachmittag/.test(r.bestVisit.value),'best visit guidance missing');
+r=N.analyze({name:'Mountain Trail',primaryType:'hiking_area',types:['hiking_area','mountain_peak']});
+assert(r.effortLevel.value,'effort guidance missing');
+assert(r.durationHint.value,'duration guidance missing');
+console.log('Nature intelligence: OK');

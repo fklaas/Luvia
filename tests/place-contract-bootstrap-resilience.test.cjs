@@ -9,7 +9,7 @@ const window={
 };
 class CustomEvent{constructor(type,options={}){this.type=type;this.detail=options.detail}}
 const document={
- currentScript:{src:'https://example.test/core/places/place-type-definitions.js?v=13.9.1.2'},
+ currentScript:{src:'https://example.test/core/places/place-type-definitions.js?v=13.10.0'},
  baseURI:'https://example.test/',
  createElement(){return{dataset:{},addEventListener(){},set src(value){this._src=value},get src(){return this._src}}},
  head:{appendChild(){}}
@@ -30,7 +30,8 @@ const expected={
  accommodation:'check_in_at',
  attraction:'starts_at',
  photo_spot:'planned_at',
- shopping:'planned_at'
+ shopping:'planned_at',
+ nature:'planned_at'
 };
 for(const [type,key] of Object.entries(expected)){
  const contract=window.LuviaPlaceTypeContracts.get(type);
@@ -40,15 +41,15 @@ for(const [type,key] of Object.entries(expected)){
 
 run('core/places/place-registry.js');
 run('core/places/place-type-contract.js');
-assert.strictEqual(window.LuviaPlaceTypeContracts.version,'4.9.1.2','full contract did not upgrade the bootstrap');
+assert.strictEqual(window.LuviaPlaceTypeContracts.version,'4.10.0','full contract did not upgrade the bootstrap');
 assert.strictEqual(window.LuviaPlaceTypeContracts.bootstrap,false,'bootstrap flag remained active after upgrade');
 for(const [type,key] of Object.entries(expected)){
  const contract=window.LuviaPlaceTypeContracts.get(type);
  assert(contract,`${type} contract lost during full-contract upgrade`);
- assert.strictEqual(contract.contractVersion,'4.9.1.2',`${type} contract version was not upgraded`);
+ assert.strictEqual(contract.contractVersion,'4.10.0',`${type} contract version was not upgraded`);
  assert(contract.fields.some(field=>field.key===key&&['start','end','point'].includes(field.timelineRole)),`${type} timeline schema lost during upgrade`);
  const registry=window.LuviaPlaceRegistry.getType(type);
- assert.strictEqual(registry.contractVersion,'4.9.1.2',`${type} registry metadata did not refresh`);
+ assert.strictEqual(registry.contractVersion,'4.10.0',`${type} registry metadata did not refresh`);
  assert(registry.capabilities.includes('planning'),`${type} planning capability missing`);
 }
 

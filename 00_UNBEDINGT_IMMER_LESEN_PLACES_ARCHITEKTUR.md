@@ -529,7 +529,7 @@ Ab Build 13.9.1 ist die Planung sämtlicher Place-Typen verbindlich vereinheitli
 - Nicht jeder Place-Typ muss dieselben Inhalte zeigen. Nur fachlich belastbare, typabhängige Informationen dürfen als Karten erscheinen.
 - Restaurants, Unterkünfte und Sehenswürdigkeiten können denselben globalen Renderer künftig für eigene Intelligence-Bereiche nutzen; doppelte Fact-Chips oder erfundene Informationen sind dabei verboten.
 
-## Build 13.9.1.2 / Core 4.9.1.2 – globaler Contract-Bootstrap und Planungsparität
+## Build 13.10.0 / Core 4.10.0 – globaler Contract-Bootstrap und Planungsparität
 
 Der Place-Type-Contract ist eine kritische Laufzeitabhängigkeit. Ein kurzzeitiger Fehler beim Laden von `place-type-contract.js` darf keinen Place-Typ ohne Timeline-Schema zurücklassen.
 
