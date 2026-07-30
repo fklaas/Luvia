@@ -369,7 +369,7 @@ Jeder Favoritenbutton muss durch `LuviaPlaceCollections.favoriteButton(...)` erz
 
 Der globale Core normalisiert sowohl `is_favorite` als auch historische `isFavorite`-Antworten. Module dürfen diese Varianten nicht selbst auswerten. Ereignisse `luvia:place-favorite-changed` und `luvia:place-collection-changed` sind die einzige UI-Synchronisationsschnittstelle.
 
-## 19. Verbindliche Favoriten-Persistenz ab Core 4.6.10
+## 19. Verbindliche Favoriten-Persistenz ab Core 4.6.11
 
 Für alle Place-Typen gilt derselbe atomare Ablauf. Ein noch nicht mit der Reise verknüpfter Provider-Ort wird beim ersten Favoritenklick direkt mit `status: favorite` und `isFavorite: true` importiert. Es ist verboten, zunächst einen unfavorisierten Datensatz zu importieren und anschließend über einen zweiten konkurrierenden Request zu favorisieren.
 
@@ -378,3 +378,24 @@ Der sichtbare Buttonzustand (`aria-pressed`) bestimmt beim Klick eindeutig den g
 Nach erfolgreicher Persistenz verteilt `LuviaPlaceCollections` den kanonischen Zustand über `luvia:place-favorite-changed` und `luvia:place-collection-changed`. Jedes Modul darf diesen Zustand nur spiegeln. Insbesondere darf ein Restaurant-Render einen gerade erfolgreich gespeicherten Favoriten nicht durch ein veraltetes lokales Model wieder zurücksetzen.
 
 Geschützte Gateway-Aufrufe warten auf die initialisierte Supabase-Sitzung und verwenden ausschließlich das aktuelle Access Token. Ein Request ohne verfügbare Sitzung darf nicht als paralleler anonymer Schreibversuch gestartet werden.
+
+## 20. Restaurant-Favoriten-Rendering ab Core 4.6.11
+
+Auch die Darstellung gespeicherter Restaurantfavoriten muss ausschließlich mit den bereits kanonisch aufgelösten Identitäten arbeiten.
+
+Verbindlich:
+
+- Der Kartenrenderer löst die Provider-ID einmal als lokale `providerId` auf.
+- Genau diese aufgelöste ID wird an `LuviaPlaceCollections.favoriteButton(...)` übergeben.
+- Nicht deklarierte oder implizite Variablennamen wie `providerPlaceId` sind im Renderer verboten.
+- Ein Renderfehler in einer Favoritensammlung darf niemals den erfolgreichen globalen Favoritenstatus überschreiben oder dessen UI-Synchronisation abbrechen.
+- Restaurant, Unterkunft und Sehenswürdigkeit verwenden denselben Favorite-Core und unterscheiden sich nur in `placeType` und Identitätsdaten.
+
+Pflichttest nach jeder Änderung an Place-Karten:
+
+1. Einen neuen Favoriten über eine Discovery-Karte setzen.
+2. Favoritensammlung öffnen.
+3. Favoritenkarte vollständig rendern.
+4. Favorit über Discovery- oder Favoritenkarte wieder entfernen.
+5. `Alle entfernen` ausführen.
+6. Prüfen, dass keine `ReferenceError`-Meldung entsteht und alle Karten denselben Zustand zeigen.
