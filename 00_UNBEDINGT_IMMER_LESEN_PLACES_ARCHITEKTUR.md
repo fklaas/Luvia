@@ -326,3 +326,17 @@ Strikt verboten:
 ## 15. Regel für ChatGPT und alle zukünftigen Entwickler
 
 Vor jeder Änderung an Luvia Places muss diese Datei vollständig gelesen werden. Bei Konflikten zwischen einer schnellen lokalen Lösung und diesem Dokument gewinnt immer der globale Core-Vertrag. Keine neue Sonderstruktur, kein Workaround und keine Doppelimplementierung.
+
+## Verbindliche Regel: Favoriten-Sammelaktionen und Kartenstatus
+
+Stand ab Build 13.6.7 / Core 4.6.7:
+
+- `Alle entfernen` wird ausschließlich durch `LuviaPlaceCollections` ausgeführt.
+- Die Sammelaktion darf **nicht** zuerst erneut die komplette Place-Liste vom Gateway laden. Die globale Favorite-Shell übergibt die bereits bekannten kanonischen `tripPlaceId`-Werte direkt an den Collection Core.
+- Jede betroffene Verknüpfung wird über `LuviaPlaceEntities.updateLifecycle(..., { isFavorite:false })` aktualisiert.
+- Anschließend wird genau ein globales Ereignis `luvia:place-collection-changed` mit `action: favorites-cleared`, den betroffenen `clearedTripPlaceIds` und den `providerPlaceIds` ausgelöst.
+- Alle Place-Module müssen dieses Ereignis konsumieren und sowohl Favoritensammlung als auch Discovery-Karten synchronisieren.
+- Eine Karte darf nach einer Sammellöschung nirgendwo weiter `Favorit ✓` oder `♥ Favorit` anzeigen. Der Zustand ist global, tripgebunden und cloudautoritativ.
+- Lokale Sammellöschungen, modulinterne Favoritenlisten oder ein erneuter `place.list`-Zwang vor dem Entfernen sind verboten.
+
+Diese Regel gilt gleichermaßen für Restaurants, Unterkünfte, Sehenswürdigkeiten und alle zukünftigen Place-Typen.
