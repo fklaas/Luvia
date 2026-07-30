@@ -25,5 +25,5 @@
   function get(id){return catalog.get(id)||null}
   function isEnabled(trip,id){return enabledForTrip(trip).includes(id)}
   function updateTripModules(trip,ids){const modules=normalize(ids);return {...trip,modules,selectedModules:modules,updatedAt:new Date().toISOString()}}
-  window.LuviaModuleRegistry=Object.freeze({version:'4.9.1',list,get,normalize,enabledForTrip,isEnabled,updateTripModules});
+  window.LuviaModuleRegistry=Object.freeze({version:'4.9.0.1',list,get,normalize,enabledForTrip,isEnabled,updateTripModules});
 })();

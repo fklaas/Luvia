@@ -61,7 +61,7 @@ html[data-theme=dark] :is(.rv2-head p,.rv2-search-card p,.rv2-search-card small,
 :is(#restaurants-module,#accommodations-module,#attractions-module,#photo-spots-module) .luv-place-favorite-toggle{background:var(--place-accent,var(--rv2-accent,var(--lv-accent)))!important;color:var(--luvia-accent-contrast,#fff)!important;border-color:var(--place-accent,var(--rv2-accent,var(--lv-accent)))!important;opacity:1!important;cursor:pointer!important}
 :is(#restaurants-module,#accommodations-module,#attractions-module,#photo-spots-module) .luv-place-favorite-toggle.is-active{background:color-mix(in srgb,var(--place-accent,var(--rv2-accent,var(--lv-accent))) 72%,#fff)!important}
 
-/* Core 4.9.1 — reusable Place Intelligence insight cards */
+/* Core 4.9.0.1 — reusable Place Intelligence insight cards */
 .luv-place-insight-section {
   position: relative;
   overflow: hidden;
@@ -273,23 +273,3 @@ html[data-theme="dark"] .luv-place-insight-card {
     flex-direction: column;
   }
 }
-
-
-/* Build 13.9.1 – canonical contract-driven Place planning editor */
-.rv2-plan-backdrop[data-luvia-place-plan-editor],.rv2-plan-backdrop{position:fixed;inset:0;z-index:2147483647;display:grid;place-items:center;padding:20px;background:rgba(17,29,38,.48);backdrop-filter:blur(14px)}
-.rv2-plan-dialog.luv-place-plan-dialog,.rv2-plan-dialog{position:relative;width:min(500px,100%);max-height:min(88dvh,760px);overflow:auto;display:grid;gap:16px;padding:28px;border-radius:28px;background:var(--lv-surface-elevated,#fff);box-shadow:var(--place-shadow-overlay,0 30px 90px rgba(12,24,34,.28));border:1px solid color-mix(in srgb,var(--place-accent,var(--rv2-accent,#a23d63)) 18%,var(--lv-line,#e4e9ec));color:var(--lv-text,#17354d)}
-.rv2-plan-dialog h3{margin:0;padding-right:42px;font-size:clamp(1.35rem,4vw,1.65rem);line-height:1.25;color:var(--lv-text,#17354d)}
-.rv2-plan-dialog>p{margin:-8px 0 4px;color:var(--lv-muted,#718493);line-height:1.5}
-.rv2-plan-kicker{font-size:.72rem;font-weight:900;letter-spacing:.12em;text-transform:uppercase;color:var(--place-accent,var(--rv2-accent,#a23d63))}
-.luv-place-plan-fields{display:grid;gap:14px}
-.luv-place-plan-fieldset{min-width:0;margin:0;padding:15px;border:1px solid color-mix(in srgb,var(--place-accent,var(--rv2-accent,#a23d63)) 13%,var(--lv-line,#dbe3e8));border-radius:19px;background:color-mix(in srgb,var(--place-accent,var(--rv2-accent,#a23d63)) 4%,var(--lv-surface-soft,#fbfcfd))}
-.luv-place-plan-fieldset legend{padding:0 7px;color:var(--place-accent,var(--rv2-accent,#a23d63));font-size:.75rem;font-weight:900;letter-spacing:.07em;text-transform:uppercase}
-.luv-place-plan-field-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
-.rv2-plan-dialog label{display:grid;gap:7px}.rv2-plan-dialog label span{font-size:.82rem;font-weight:800;color:var(--lv-muted,#526b7c)}
-.rv2-plan-dialog input{width:100%;min-width:0;min-height:52px;padding:12px 14px;border:1px solid var(--lv-line,#dbe3e8);border-radius:15px;font:inherit;color:var(--lv-text,#17354d);background:var(--lv-input,var(--lv-surface-elevated,#fbfcfd));color-scheme:light dark}
-.rv2-plan-dialog input:focus{outline:3px solid color-mix(in srgb,var(--place-accent,var(--rv2-accent,#a23d63)) 18%,transparent);border-color:var(--place-accent,var(--rv2-accent,#a23d63))}
-.rv2-plan-close{position:absolute;top:14px;right:14px;width:38px;height:38px;border:0;border-radius:50%;background:var(--lv-surface-soft,#f1f5f6);color:var(--lv-text,#17354d);font-size:22px;cursor:pointer}
-.rv2-plan-actions{display:flex;justify-content:flex-end;gap:10px;margin-top:4px}.rv2-plan-actions button{min-height:46px;padding:10px 16px;border-radius:14px;border:1px solid var(--lv-line,#dbe3e8);background:var(--lv-surface-elevated,#fff);color:var(--lv-text,#17354d);font-weight:800;cursor:pointer}.rv2-plan-actions .primary{background:var(--place-accent,var(--rv2-accent,#a23d63));color:#fff;border-color:var(--place-accent,var(--rv2-accent,#a23d63))}.rv2-plan-actions button:disabled{cursor:wait;opacity:.68}
-.rv2-plan-message{min-height:20px;color:var(--lv-muted,#527064);font-size:.86rem}.rv2-plan-message:not(:empty){color:color-mix(in srgb,#b12635 82%,var(--lv-text));font-weight:750}
-html[data-theme="dark"] .rv2-plan-backdrop{background:rgba(4,10,16,.7)}
-@media(max-width:680px){.rv2-plan-dialog.luv-place-plan-dialog,.rv2-plan-dialog{padding:24px 18px;border-radius:24px}.luv-place-plan-field-grid{grid-template-columns:1fr}.rv2-plan-actions{display:grid;grid-template-columns:1fr 1fr}.rv2-plan-actions button{width:100%}}

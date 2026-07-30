@@ -191,5 +191,5 @@ html,body{
 .lv-module-entering>.lv-module-intro{position:fixed;inset:64px 0 0;min-height:0;border-radius:0;z-index:1200}
 @media(max-width:720px){.lv-module-entering>.lv-module-intro{inset:56px 0 0}}
 
-/* Build 13.9.1 — release metadata is always visible and central. */
+/* Build 13.9.0.1 — release metadata is always visible and central. */
 .lv-build-badge{font-size:10px;line-height:1.2;color:var(--lv-muted);border:1px solid var(--lv-line);background:var(--lv-surface);border-radius:999px;padding:6px 9px;white-space:nowrap}@media(max-width:760px){.lv-build-badge{font-size:0;padding:6px}.lv-build-badge::after{content:'v';font-size:10px}}

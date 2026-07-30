@@ -1,6 +1,6 @@
 (function(){
 'use strict';
-const VERSION='4.9.1';
+const VERSION='4.9.0.1';
 const types=new Map(),adapters=new Map(),errors=[];
 const D=()=>window.LuviaPlaceDomain;
 const base=['recommendations','nearby','alternatives','timeline','visit_detection','notes','photos','favorites','ratings','memories','realtime','offline'];
@@ -11,5 +11,6 @@ function adapter(key){return adapters.get(key)||null;}
 function status(key){const a=adapter(key);if(!a)return{state:'unsupported',reason:'Kein Adapter registriert.'};try{return a.status();}catch(error){errors.push({key,message:error.message,at:new Date().toISOString()});return{state:'failed',reason:error.message};}}
 function diagnostics(){return{version:VERSION,registeredTypes:types.size,registeredAdapters:adapters.size,types:[...types.values()],adapters:[...adapters.entries()].map(([key,a])=>({key,version:a.version||'unknown',...status(key)})),errors:[...errors]};}
 D().TYPES.forEach(key=>registerType(key));
+window.addEventListener('luvia:place-contract-registered',event=>{const key=event.detail?.type;if(key&&D().TYPES.includes(key))registerType(key,{version:VERSION})});
 window.LuviaPlaceRegistry=Object.freeze({version:VERSION,registerType,registerAdapter,getType:key=>types.get(key)||null,getTypes:()=>[...types.values()],isSupported:key=>types.has(key),getAdapter:adapter,getCapabilities:key=>types.get(key)?.capabilities||[],status,diagnostics});
 })();
