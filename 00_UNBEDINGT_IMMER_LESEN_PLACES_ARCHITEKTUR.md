@@ -368,3 +368,13 @@ Verboten sind insbesondere:
 Jeder Favoritenbutton muss durch `LuviaPlaceCollections.favoriteButton(...)` erzeugt werden. Jeder Klick wird zentral über `data-place-favorite-toggle` verarbeitet. Ein aktiver Favorit bleibt anklickbar und entfernt den Ort wieder aus der Sammlung. `Alle entfernen` verwendet denselben Writer für jeden einzelnen kanonischen `tripPlaceId`.
 
 Der globale Core normalisiert sowohl `is_favorite` als auch historische `isFavorite`-Antworten. Module dürfen diese Varianten nicht selbst auswerten. Ereignisse `luvia:place-favorite-changed` und `luvia:place-collection-changed` sind die einzige UI-Synchronisationsschnittstelle.
+
+## 19. Verbindliche Favoriten-Persistenz ab Core 4.6.10
+
+Für alle Place-Typen gilt derselbe atomare Ablauf. Ein noch nicht mit der Reise verknüpfter Provider-Ort wird beim ersten Favoritenklick direkt mit `status: favorite` und `isFavorite: true` importiert. Es ist verboten, zunächst einen unfavorisierten Datensatz zu importieren und anschließend über einen zweiten konkurrierenden Request zu favorisieren.
+
+Der sichtbare Buttonzustand (`aria-pressed`) bestimmt beim Klick eindeutig den gewünschten Folgezustand. Modulinterne Models, alte Restaurant-Caches oder historische Feldnamen dürfen diese Entscheidung nicht überschreiben.
+
+Nach erfolgreicher Persistenz verteilt `LuviaPlaceCollections` den kanonischen Zustand über `luvia:place-favorite-changed` und `luvia:place-collection-changed`. Jedes Modul darf diesen Zustand nur spiegeln. Insbesondere darf ein Restaurant-Render einen gerade erfolgreich gespeicherten Favoriten nicht durch ein veraltetes lokales Model wieder zurücksetzen.
+
+Geschützte Gateway-Aufrufe warten auf die initialisierte Supabase-Sitzung und verwenden ausschließlich das aktuelle Access Token. Ein Request ohne verfügbare Sitzung darf nicht als paralleler anonymer Schreibversuch gestartet werden.

@@ -1,6 +1,6 @@
 (function(){
   'use strict';
-  const VERSION='3.3.2-request-coalescing';
+  const VERSION='3.3.3-auth-ready';
   const DEFAULT_FUNCTION='luvia-gateway';
   const DEFAULT_TIMEOUT=12000;
   const ACTION_PATTERN=/^[a-z][a-z0-9]*(?:[._-][a-z0-9]+)*$/;
@@ -47,19 +47,33 @@
   function authClient(){
     return window.ParisSupabaseClient||window.ParisCloud?.client||window.LuviaDatabaseFoundation?.client?.()||null;
   }
-  async function accessToken({refresh=false}={}){
+  const sleep=ms=>new Promise(resolve=>setTimeout(resolve,ms));
+  async function accessToken({refresh=false,waitMs=1800}={}){
     try{
-      const client=authClient();
+      const stateToken=window.ParisAuth?.getState?.()?.session?.access_token;
+      if(stateToken&&!refresh)return stateToken;
+      let client=authClient();
+      if(!client&&window.LuviaSupabaseService?.start){
+        try{client=await window.LuviaSupabaseService.start();}catch{}
+      }
+      if(client&&window.ParisAuth?.ensureInitialSession){
+        try{await window.ParisAuth.ensureInitialSession(client);}catch{}
+      }
       if(refresh&&client?.auth?.refreshSession){
         const refreshed=await client.auth.refreshSession();
         const token=refreshed?.data?.session?.access_token;
         if(token)return token;
       }
-      const result=await client?.auth?.getSession?.();
-      const sessionToken=result?.data?.session?.access_token;
-      if(sessionToken)return sessionToken;
-      const authState=window.ParisAuth?.getState?.();
-      return authState?.session?.access_token||'';
+      const deadline=Date.now()+Math.max(0,Number(waitMs)||0);
+      do{
+        const result=await client?.auth?.getSession?.();
+        const sessionToken=result?.data?.session?.access_token||window.ParisAuth?.getState?.()?.session?.access_token||'';
+        if(sessionToken)return sessionToken;
+        if(Date.now()>=deadline)break;
+        await sleep(80);
+        client=client||authClient();
+      }while(true);
+      return '';
     }catch{return '';}
   }
   function validateAction(action){

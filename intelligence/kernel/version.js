@@ -1,1 +1,1 @@
-(() => {'use strict';window.LuviaKernelVersion=Object.freeze({core:'4.3.2',build:'13.3.2',name:'Universal Places Experience Shell',channel:'production',builtAt:'2026-07-29T09:13:00+02:00'});window.LuviaCoreVersion=window.LuviaKernelVersion;})();
+(() => {'use strict';window.LuviaKernelVersion=Object.freeze({core:'4.6.10',build:'13.6.10',name:'Global Place Favorite Persistence',channel:'production',builtAt:'2026-07-29T09:13:00+02:00'});window.LuviaCoreVersion=window.LuviaKernelVersion;})();
