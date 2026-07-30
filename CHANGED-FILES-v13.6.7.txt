@@ -19,7 +19,7 @@ core/places/place-type-contract.js
 core/places/place-ui-contract.js
 core/places/place-experience-shell.js
 core/places/place-ui.js
-RELEASE-v13.6.7.md
-DEPLOYMENT-v13.6.7.md
-TEST-v13.6.7.md
-CHANGED-FILES-v13.6.7.txt
+RELEASE-v13.6.8.md
+DEPLOYMENT-v13.6.8.md
+TEST-v13.6.8.md
+CHANGED-FILES-v13.6.8.txt

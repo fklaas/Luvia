@@ -1,4 +1,4 @@
-# Luvia 13.6.7 · Core 4.6.7
+# Luvia 13.6.8 · Core 4.6.8
 
 ## Global Favorite Collection State Closure
 

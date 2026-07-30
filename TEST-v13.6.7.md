@@ -1,4 +1,4 @@
-# Regressionstest 13.6.7
+# Regressionstest 13.6.8
 
 1. Restaurantmodul öffnen und mehrere Restaurants favorisieren.
 2. Favoritensammlung öffnen und `Alle entfernen` anklicken.

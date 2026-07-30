@@ -329,7 +329,7 @@ Vor jeder Änderung an Luvia Places muss diese Datei vollständig gelesen werden
 
 ## Verbindliche Regel: Favoriten-Sammelaktionen und Kartenstatus
 
-Stand ab Build 13.6.7 / Core 4.6.7:
+Stand ab Build 13.6.8 / Core 4.6.8:
 
 - `Alle entfernen` wird ausschließlich durch `LuviaPlaceCollections` ausgeführt.
 - Die Sammelaktion darf **nicht** zuerst erneut die komplette Place-Liste vom Gateway laden. Die globale Favorite-Shell übergibt die bereits bekannten kanonischen `tripPlaceId`-Werte direkt an den Collection Core.
@@ -340,3 +340,14 @@ Stand ab Build 13.6.7 / Core 4.6.7:
 - Lokale Sammellöschungen, modulinterne Favoritenlisten oder ein erneuter `place.list`-Zwang vor dem Entfernen sind verboten.
 
 Diese Regel gilt gleichermaßen für Restaurants, Unterkünfte, Sehenswürdigkeiten und alle zukünftigen Place-Typen.
+
+
+## 18. Verbindliches globales Favoritensystem (Core 4.6.8)
+
+Favoriten dürfen ausnahmslos nur über `LuviaPlaceCollections` verändert werden. Die verbindliche UI-Aktion ist `data-place-favorite-toggle`; modulbezogene Schreibaktionen wie `data-rv2-import`, `data-favorite` oder eigene Favoriten-Handler sind für neue Implementierungen verboten.
+
+Jede Favoritenaktion benötigt den Place-Typ und mindestens eine kanonische Identität: `tripPlaceId` für bereits verknüpfte Orte oder `providerPlaceId` für noch nicht importierte Orte. Der Core importiert bei Bedarf genau einmal, schreibt `trip_places.is_favorite`, synchronisiert alle sichtbaren Karten und sendet `luvia:place-favorite-changed` sowie `luvia:place-collection-changed`.
+
+Ein Klick auf einen bereits aktiven Favoritenbutton entfernt den Ort wieder aus den Favoriten. Das gilt für Discovery-Karten, Favoritenkarten und Detailkarten. `Alle entfernen` verwendet denselben zentralen Schreibweg für jeden einzelnen Place. Nach erfolgreichem Entfernen müssen alle Karten desselben Ortes sofort `♡ Favorit` zeigen; ein Reload ist unzulässig.
+
+Module dürfen Favoriten nur darstellen und auf die globalen Events mit einem normalen Daten-Refresh reagieren. Sie dürfen weder einen eigenen Favoriten-Cache als Wahrheit führen noch direkt `place.lifecycle.update`, `place.import` oder `trip_places` für Favoriten aufrufen.
