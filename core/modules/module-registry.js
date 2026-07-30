@@ -3,6 +3,7 @@
   const entries=[
     {id:'accommodations',title:'Unterkünfte',longTitle:'Unterkünfte & Aufenthalt',icon:'🏨',description:'Unterkünfte suchen, speichern sowie Check-in und Check-out verwalten.',status:'available',defaultEnabled:true,order:5},
     {id:'attractions',title:'Aktivitäten',longTitle:'Sehenswürdigkeiten & Aktivitäten',icon:'✨',description:'Sehenswürdigkeiten, Museen, Parks und Erlebnisse entdecken und planen.',status:'available',defaultEnabled:true,order:8},
+    {id:'photo_spots',title:'Fotospots',longTitle:'Fotospots & Lichtmomente',icon:'📸',description:'Aussichten, Lichtstimmungen und besondere Fotomomente entdecken und planen.',status:'available',defaultEnabled:true,order:9},
     {id:'restaurants',title:'Restaurants',longTitle:'Restaurants & Reservierungen',icon:'🍽️',description:'Restaurants entdecken, speichern und Reservierungen planen.',status:'available',defaultEnabled:true,order:10},
     {id:'maps',title:'Karten',longTitle:'Karten & gespeicherte Orte',icon:'🗺️',description:'Orte, Wege und Reiseziele auf einer gemeinsamen Karte.',status:'planned',defaultEnabled:false,order:20},
     {id:'weather',title:'Wetter',longTitle:'Wetter & Tageshinweise',icon:'☀️',description:'Wetter am Reiseziel und passende Hinweise für eure Tage.',status:'planned',defaultEnabled:false,order:30},
@@ -16,7 +17,7 @@
   ];
   const catalog=new Map(entries.map(x=>[x.id,Object.freeze(x)]));
   const available=()=>entries.filter(x=>x.status==='available');
-  const CORE_PLACE_MODULES=Object.freeze(['accommodations','restaurants','attractions']);
+  const CORE_PLACE_MODULES=Object.freeze(['accommodations','restaurants','attractions','photo_spots']);
   const normalize=ids=>[...new Set((Array.isArray(ids)?ids:[]).filter(id=>catalog.has(id)&&catalog.get(id).status==='available'))];
   function enabledForTrip(trip){const selected=normalize(trip?.modules||trip?.selectedModules),defaults=available().filter(x=>x.defaultEnabled).map(x=>x.id);return normalize([...CORE_PLACE_MODULES,...defaults,...selected])}
   function list(options={}){return entries.filter(x=>options.includePlanned!==false||x.status==='available').sort((a,b)=>a.order-b.order)}

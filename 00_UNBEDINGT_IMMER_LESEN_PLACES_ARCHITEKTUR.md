@@ -415,7 +415,7 @@ Ab Build 13.7.0 gilt zusätzlich verbindlich:
 8. Vor jedem Release ist `node tests/place-architecture-regression.test.cjs` sowie `await LuviaPlaceConformance.runAll()` auszuführen.
 
 
-## Build 13.7.1 / Core 4.7.1 – Gateway-, Diagnose- und Versionsvertrag
+## Build 13.8.0 / Core 4.8.0 – Gateway-, Diagnose- und Versionsvertrag
 
 Diese Regeln sind verbindlich:
 
@@ -429,3 +429,19 @@ Diese Regeln sind verbindlich:
 8. **Place Readiness:** In der Developer Console stehen implementierte Typen `restaurant`, `accommodation` und `attraction` auf `ready`. Noch nicht implementierte Contracts stehen auf `planned`, nicht fälschlich auf produktionsbereit.
 9. **Diagnose ist Teil des Releases:** Diagnose-, Developer- und Backend-Konsole müssen bei jedem Build aktualisiert und gegen die zentrale Version geprüft werden.
 10. **Konsolen-Regressionsregel:** Normaler Start, Reisewechsel, alle Place-Module, Favorit, Timeline und Backend-Tests dürfen keine Luvia-eigenen 400/401/503/CORS- oder unhandled-Promise-Fehler erzeugen.
+
+## Build 13.8.0 – Fotospots als Referenz für neue Place-Typen
+
+`photo_spot` ist der erste Place-Typ, der nach der Runtime-&-Conformance-Closure vollständig als Contract plus fachlicher Adapter ergänzt wurde.
+
+Verbindlich gilt:
+
+- Modul-ID: `photo_spots`
+- Place-Typ: `photo_spot`
+- Shell, Karten, Favoriten, Detailkarte, Timeline-Dialog und Cloud-Persistenz kommen ausschließlich aus dem globalen Place Core.
+- Der kurze Planungstermin wird als `planned_at` mit `timelineRole: point` gespeichert.
+- Fotofachliche Werte sind Empfehlungen mit sichtbarer Quelle und Sicherheit. Nutzerangaben überschreiben automatische Ableitungen immer.
+- Sonnenaufgang/-untergang, Lichtfenster und Sonnenrichtung werden aus Place-Koordinaten, Reisedatum und astronomischem Sonnenstand berechnet.
+- Motiv, Indoor/Outdoor, Stativ und Zugang werden aus Google-Kategorie, Name und Beschreibung abgeleitet. Unklare Werte müssen als „wahrscheinlich“ oder „prüfen“ gekennzeichnet werden; erfundene Gewissheit ist verboten.
+- `LuviaPhotoSpotIntelligence` ist der einzige fachliche Ableitungsdienst für Fotospots.
+- Fotospots müssen dieselben Conformance-Regeln wie Restaurant, Unterkunft und Sehenswürdigkeit bestehen.

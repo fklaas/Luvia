@@ -1,7 +1,7 @@
 (function(){
 'use strict';
 const MODULE_ID='restaurants';
-const MODULE_VERSION='4.7.1';
+const MODULE_VERSION='4.8.0';
 const DATA_URL='./modules/restaurants-v2/default.json';
 const DB_NAME='luviaRestaurantsV2Assets';
 const DB_STORE='files';

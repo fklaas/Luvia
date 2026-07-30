@@ -1,6 +1,6 @@
 (()=>{'use strict';
-const VERSION='4.7.1';
-const PLACE_MODULES={attractions:{type:'attraction',title:'Sehenswürdigkeiten & Aktivitäten',icon:'✨',description:'Museen, Parks, Aussichtspunkte und Erlebnisse entdecken.',host:'attractions-module'},restaurants:{type:'restaurant',title:'Restaurants',icon:'🍽️',description:'Genuss, Cafés und besondere Restaurantmomente entdecken.',host:'restaurants-module'},accommodations:{type:'accommodation',title:'Unterkünfte',icon:'🏨',description:'Hotels, Apartments und besondere Unterkünfte finden.',host:'accommodations-module'}};
+const VERSION='4.8.0';
+const PLACE_MODULES={photo_spots:{type:'photo_spot',title:'Fotospots',icon:'📸',description:'Aussichten, Lichtstimmungen und besondere Fotomomente entdecken.',host:'photo-spots-module'},attractions:{type:'attraction',title:'Sehenswürdigkeiten & Aktivitäten',icon:'✨',description:'Museen, Parks, Aussichtspunkte und Erlebnisse entdecken.',host:'attractions-module'},restaurants:{type:'restaurant',title:'Restaurants',icon:'🍽️',description:'Genuss, Cafés und besondere Restaurantmomente entdecken.',host:'restaurants-module'},accommodations:{type:'accommodation',title:'Unterkünfte',icon:'🏨',description:'Hotels, Apartments und besondere Unterkünfte finden.',host:'accommodations-module'}};
 let state={root:null,trip:null,active:null,mounted:null};
 const esc=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 function enabled(){const ids=window.LuviaModuleRegistry?.enabledForTrip?.(state.trip)||[];return ids.filter(id=>PLACE_MODULES[id]);}
@@ -11,6 +11,6 @@ async function showHub(){if(!state.root)return false;if(state.mounted)await wind
 function bind(){state.root.querySelectorAll('[data-place-module]').forEach(b=>b.onclick=()=>open(b.dataset.placeModule));state.root.querySelector('[data-places-back]')?.addEventListener('click',showHub)}
 async function mount(root,trip,options={}){state.root=root;state.trip=trip;const requested=options.moduleId||null;if(requested&&enabled().includes(requested))await open(requested,options.payload);else renderHub()}
 async function unmount(){if(state.mounted)await window.LuviaModules?.unmountModule?.(state.mounted);state={root:null,trip:null,active:null,mounted:null}}
-function openPlace(payload={}){const id=payload.type==='restaurant'?'restaurants':payload.type==='accommodation'?'accommodations':payload.type==='attraction'?'attractions':null;return id?open(id,payload):false}
+function openPlace(payload={}){const id=payload.type==='restaurant'?'restaurants':payload.type==='accommodation'?'accommodations':payload.type==='attraction'?'attractions':payload.type==='photo_spot'?'photo_spots':null;return id?open(id,payload):false}
 window.LuviaPlacesShell=Object.freeze({version:VERSION,mount,unmount,open,openPlace,showHub,active:()=>state.active});
 })();

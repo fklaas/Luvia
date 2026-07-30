@@ -1,0 +1,8 @@
+#photo-spots-module{min-height:100%;font-family:var(--lv-font-body,Manrope,system-ui,sans-serif);color:var(--lv-text,var(--luv-place-ink))}
+#photo-spots-module .luv-photo-guidance{display:grid;gap:14px}
+#photo-spots-module .luv-photo-guidance h3{margin:0;color:var(--lv-text)}
+#photo-spots-module .luv-photo-guidance-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+#photo-spots-module .luv-photo-guidance-row{display:grid;gap:4px;padding:13px;border:1px solid var(--lv-line);border-radius:16px;background:var(--lv-surface-soft)}
+#photo-spots-module .luv-photo-guidance-row span,#photo-spots-module .luv-photo-guidance-row small{color:var(--lv-muted)}
+#photo-spots-module .luv-photo-guidance-row strong{color:var(--lv-text)}
+@media(max-width:680px){#photo-spots-module .luv-photo-guidance-grid{grid-template-columns:1fr}}
