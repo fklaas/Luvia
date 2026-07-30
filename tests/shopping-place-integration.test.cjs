@@ -1,0 +1,28 @@
+const fs=require('fs'),assert=require('assert');
+const contract=fs.readFileSync('core/places/place-type-definitions.js','utf8');
+const moduleCode=fs.readFileSync('modules/shopping/shopping-module.js','utf8');
+const shell=fs.readFileSync('modules/places-shell.js','utf8');
+const registry=fs.readFileSync('core/modules/module-registry.js','utf8');
+const app=fs.readFileSync('app/app-shell.js','utf8');
+const index=fs.readFileSync('index.html','utf8');
+assert(contract.includes("type:'shopping',moduleKey:'shopping'"),'Shopping contract missing');
+assert(contract.includes("key:'planned_at'"),'Shopping timeline field missing');
+assert(moduleCode.includes('LuviaPlaceExperience.discovery'),'Global discovery shell missing');
+assert(moduleCode.includes('LuviaPlaceCollections.favoritePanel'),'Global favorite panel missing');
+assert(moduleCode.includes('LuviaPlaceUI.card'),'Global cards missing');
+assert(moduleCode.includes("registerCapabilityRenderer?.('shopping'"),'Shopping capability renderer missing');
+assert(moduleCode.includes("placeType:'shopping'"),'Canonical shopping collection type missing');
+assert(moduleCode.includes("type:'shopping'"),'Shopping cloud pipeline missing');
+assert(shell.includes("shopping:{type:'shopping'"),'Shopping hub tile missing');
+assert(registry.includes("id:'shopping'"),'Shopping module registry entry missing');
+assert(app.includes("window.LuviaShopping?.openPlace"),'Typed shopping detail routing missing');
+assert(index.includes('shopping-intelligence-service.js'),'Shopping Intelligence not loaded');
+assert(index.includes('modules/shopping/shopping-module.js'),'Shopping module not loaded');
+assert(moduleCode.includes("includedType:''"),'Shopping discovery must not be restricted to shopping_mall');
+const gateway=fs.readFileSync('supabase/functions/luvia-gateway/_shared/place-entities.ts','utf8');
+assert(gateway.includes("luvia_upsert_trip_place_fields"),'Generic Place extension persistence missing');
+assert(gateway.includes("p_place_type:type"),'Generic extension persistence is not type-aware');
+const backend=fs.readFileSync('intelligence/backend-console.js','utf8');
+assert(backend.includes("importPlace(btn.dataset.id,{tripId,type:placeType"),'Backend Explorer uses obsolete Place import signature');
+
+console.log('Shopping place integration: OK');

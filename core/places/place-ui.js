@@ -1,6 +1,6 @@
 (function(){
 'use strict';
-const VERSION='4.8.1';
+const VERSION='4.9.0';
 const TYPE_META=Object.freeze({restaurant:['🍽️','Restaurant'],accommodation:['🛏️','Unterkunft'],attraction:['🏛️','Sehenswürdigkeit'],photo_spot:['📸','Fotospot'],activity:['✨','Aktivität'],shopping:['🛍️','Shopping'],nature:['🌿','Natur'],family:['👨‍👩‍👧','Familienort'],mobility:['🚗','Mobilität'],transit:['🚉','Verkehr'],custom:['📍','Eigener Ort']});
 const LIFE_LABELS=Object.freeze({discovered:'Entdeckt',saved:'Favorit',favorite:'Favorit',planned:'Geplant',visited:'Besucht',rated:'Bewertet',memory:'Erinnerung',reserved:'Reserviert',idea:'Entdeckt',favorited:'Favorit'});
 const esc=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
@@ -16,6 +16,6 @@ function assessment(intel={}){const reasons=intel.reasons||[],warnings=intel.war
 function confidenceClass(value=''){const v=String(value).toLowerCase();return /hoch|high/.test(v)?'is-high':/mittel|medium/.test(v)?'is-medium':'is-low';}
 function confidenceLabel(value=''){const c=confidenceClass(value);return c==='is-high'?'Hohe Sicherheit':c==='is-medium'?'Mittlere Sicherheit':'Niedrige Sicherheit';}
 function insightGrid(config={}){const items=(config.items||[]).filter(item=>item&&item.value);const cards=items.map(item=>`<article class="luv-place-insight-card ${item.featured?'is-featured':''} ${item.wide?'is-wide':''}"><div class="luv-place-insight-card-head"><span class="luv-place-insight-icon" aria-hidden="true">${esc(item.icon||'✨')}</span><span class="luv-place-insight-label">${esc(item.label||'Hinweis')}</span></div><strong>${esc(item.value)}</strong>${item.source||item.confidence?`<div class="luv-place-insight-meta">${item.source?`<span>${esc(item.source)}</span>`:''}${item.confidence?`<em class="${confidenceClass(item.confidence)}">${confidenceLabel(item.confidence)}</em>`:''}</div>`:''}</article>`).join('');return `<section class="luv-place-insight-section ${esc(config.className||'')}"><header><div><span class="rv2-eyebrow">${esc(config.eyebrow||'Place Intelligence')}</span><h3>${esc(config.title||'Gut zu wissen')}</h3>${config.description?`<p>${esc(config.description)}</p>`:''}</div>${config.symbol?`<span class="luv-place-insight-hero-icon" aria-hidden="true">${esc(config.symbol)}</span>`:''}</header><div class="luv-place-insight-grid">${cards}</div>${config.note?`<p class="luv-place-insight-note"><span aria-hidden="true">ℹ️</span>${esc(config.note)}</p>`:''}</section>`;}
-function diagnostics(){return{version:VERSION,status:'ready',components:['card','factSlots','roles','lifecycle','assessment','insightGrid'],migratedModules:['restaurants','accommodations','attractions','photo_spots']};}
+function diagnostics(){return{version:VERSION,status:'ready',components:['card','factSlots','roles','lifecycle','assessment','insightGrid'],migratedModules:['restaurants','accommodations','attractions','photo_spots','shopping']};}
 window.LuviaPlaceUI=Object.freeze({version:VERSION,typeMeta,badges,roleBadges,lifecyclePill,card,assessment,insightGrid,diagnostics});
 })();

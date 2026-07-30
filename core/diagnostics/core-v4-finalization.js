@@ -1,7 +1,7 @@
 (() => {
   'use strict';
-  const VERSION=window.LuviaKernelVersion?.core||'4.8.1.1';
-  const BUILD=window.LuviaKernelVersion?.build||'13.8.1.1';
+  const VERSION=window.LuviaKernelVersion?.core||'4.9.0';
+  const BUILD=window.LuviaKernelVersion?.build||'13.9.0';
   const now=()=>new Date().toISOString();
   const safe=(fn,fallback=null)=>{try{return fn()}catch(error){return fallback??{error:error?.message||String(error)}}};
   const textBytes=value=>new TextEncoder().encode(String(value||'')).length;
@@ -16,7 +16,7 @@
     legacyPlacesAlias:{state:Boolean(window.LuviaPlacesCore)?'compatibility':'removed',required:false,decision:'read-only-compatibility'},
     restaurantServiceAlias:{state:Boolean(window.LuviaRestaurantService||window.LuviaRestaurants)?'compatibility':'removed',required:false,decision:'read-only-compatibility'}
   });
-  const implementedTypes=()=>new Set(['restaurant','accommodation','attraction','photo_spot']);
+  const implementedTypes=()=>new Set(['restaurant','accommodation','attraction','photo_spot','shopping']);
   const adapterHealth=()=>{const rows=safe(()=>window.LuviaPlaceRegistry?.diagnostics?.().adapters,[])||[];const ready=implementedTypes();return rows.map(item=>({...item,state:ready.has(item.key||item.type)?((item.state==='failed')?'failed':'ready'):'planned'}));};
   const visitTrace=()=>{const timeline=safe(()=>window.LuviaTimelineCore?.diagnostics?.(),{})||{},presence=safe(()=>window.LuviaPresenceVisitCore?.diagnostics?.(),{})||{};return{timeline,presence,states:['nearby','arrived','stay_detected','visited','left']};};
   const cacheAudit=()=>{const storage=listStorage(),invalid=storage.filter(x=>x.validJson===false);return{serviceWorkerController:Boolean(navigator.serviceWorker?.controller),online:navigator.onLine,entryCount:storage.length,largestEntries:storage.slice().sort((a,b)=>b.bytes-a.bytes).slice(0,20),totalBytes:storage.reduce((n,x)=>n+x.bytes,0),invalidEntries:invalid.slice(0,20),healthy:invalid.length===0};};
@@ -29,6 +29,7 @@
     test('11 Place Types',()=>({ok:(window.LuviaPlaceRegistry?.diagnostics?.().registeredTypes||0)===11,value:window.LuviaPlaceRegistry?.diagnostics?.().registeredTypes}));
     test('11 Adapters',()=>({ok:(window.LuviaPlaceRegistry?.diagnostics?.().registeredAdapters||0)===11,value:window.LuviaPlaceRegistry?.diagnostics?.().registeredAdapters}));
     test('Photo Spot Adapter',()=>{const status=window.LuviaPlaceRegistry?.status?.('photo_spot')||window.LuviaPlaceRegistry?.diagnostics?.().adapters?.find(item=>item.key==='photo_spot')||{};return{ok:['ready','provider_ready'].includes(status.state),state:status.state||'unknown',reason:status.reason||null}});
+    test('Shopping Adapter',()=>{const status=window.LuviaPlaceRegistry?.status?.('shopping')||window.LuviaPlaceRegistry?.diagnostics?.().adapters?.find(item=>item.key==='shopping')||{};return{ok:status.state==='ready',state:status.state||'unknown',reason:status.reason||null}});
     test('Restaurant Adapter',()=>{const status=window.LuviaPlaceRegistry?.status?.('restaurant')||window.LuviaPlaceRegistry?.diagnostics?.().adapters?.find(item=>item.key==='restaurant')||{};return{ok:status.state==='ready',state:status.state||'unknown',reason:status.reason||null}});
     test('Place UI',()=>({ok:window.LuviaPlaceUI?.diagnostics?.().status==='ready',detail:window.LuviaPlaceUI?.diagnostics?.()}));
     test('Schedule contract',()=>({ok:['upsertEvent','removeEvent','snapshot','analyze'].every(k=>typeof window.LuviaScheduleIntelligence?.[k]==='function')}));

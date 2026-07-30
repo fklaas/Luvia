@@ -61,7 +61,7 @@ html[data-theme=dark] :is(.rv2-head p,.rv2-search-card p,.rv2-search-card small,
 :is(#restaurants-module,#accommodations-module,#attractions-module,#photo-spots-module) .luv-place-favorite-toggle{background:var(--place-accent,var(--rv2-accent,var(--lv-accent)))!important;color:var(--luvia-accent-contrast,#fff)!important;border-color:var(--place-accent,var(--rv2-accent,var(--lv-accent)))!important;opacity:1!important;cursor:pointer!important}
 :is(#restaurants-module,#accommodations-module,#attractions-module,#photo-spots-module) .luv-place-favorite-toggle.is-active{background:color-mix(in srgb,var(--place-accent,var(--rv2-accent,var(--lv-accent))) 72%,#fff)!important}
 
-/* Core 4.8.1 — reusable Place Intelligence insight cards */
+/* Core 4.9.0 — reusable Place Intelligence insight cards */
 .luv-place-insight-section {
   position: relative;
   overflow: hidden;

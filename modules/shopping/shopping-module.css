@@ -1,0 +1,5 @@
+#shopping-module {
+  min-height: 100%;
+  font-family: var(--lv-font-body, Manrope, system-ui, sans-serif);
+  color: var(--lv-text, var(--luv-place-ink));
+}

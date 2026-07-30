@@ -1,0 +1,21 @@
+const fs=require('fs'),vm=require('vm'),assert=require('assert');
+const context={window:{},console};vm.createContext(context);vm.runInContext(fs.readFileSync('core/places/shopping-intelligence-service.js','utf8'),context);
+const svc=context.window.LuviaShoppingIntelligence;assert(svc&&svc.version==='4.9.0');
+const market=svc.analyze({name:'Marché local des artisans',types:['market','tourist_attraction'],editorialSummary:'Regional food and handmade gifts'});
+assert.strictEqual(market.shoppingFormat.value,'Markt');
+assert(market.shoppingPurpose.value);
+assert(market.shoppingExperience.value);
+assert(market.indoorOutdoor.value);
+assert(market.budgetHint.value);
+assert(market.localCharacter.value);
+assert(market.bestVisit.value);
+const mall=svc.analyze({name:'City Shopping Center',types:['shopping_mall'],priceLevel:'PRICE_LEVEL_MODERATE'});
+assert.strictEqual(mall.shoppingFormat.value,'Einkaufszentrum');
+assert(/Geschäfte/.test(mall.shoppingExperience.value));
+const persisted=svc.analyze({name:'Unknown Shop'},{extension:{shopping_type:'Markthalle',shopping_purpose:'Regionale Produkte',best_visit_window:'Samstagvormittag'}});
+assert.strictEqual(persisted.shoppingFormat.value,'Markthalle');
+assert.strictEqual(persisted.shoppingPurpose.value,'Regionale Produkte');
+assert.strictEqual(persisted.bestVisit.value,'Samstagvormittag');
+assert.strictEqual(persisted.shoppingFormat.source,'Gespeicherte Shopping-Einordnung');
+
+console.log('Shopping intelligence: OK');

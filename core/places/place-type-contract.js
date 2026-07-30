@@ -1,11 +1,11 @@
 (function(){
 'use strict';
-const VERSION='4.8.1';
+const VERSION='4.9.0';
 const contracts=new Map();
 const CANONICAL_LIFECYCLE=['discovered','favorite','planned','selected','reserved','booked','checked_in','checked_out','visited','rated','rejected','archived'];
 const FIELD_TYPES=['text','textarea','number','boolean','date','time','datetime','select','multiselect','currency','url'];
 const TIMELINE_ROLES=['start','end','point','none'];
-const CAPABILITIES=['favorite','planning','reservation','booking','stay','gpsVisit','alternatives','recommendations','timeline','today','dashboard','travelBook','realtime','photos','ratings','notes'];
+const CAPABILITIES=['favorite','planning','reservation','booking','stay','gpsVisit','alternatives','recommendations','timeline','today','dashboard','travelBook','realtime','photos','ratings','notes','solarIntelligence','photoPlanning','shoppingIntelligence','shoppingPlanning'];
 const required=['type','moduleKey','identity','discovery','lifecycle','fields','capabilities','presentation','ui'];
 const clone=v=>JSON.parse(JSON.stringify(v));
 function validate(input){

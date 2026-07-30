@@ -466,3 +466,31 @@ Ab Build 13.8.1 gilt zusätzlich:
 - Der globale Detail-Core besitzt zusätzlich typabhängige Capability-Renderer als sicheren Fallback.
 - Typabhängige Bereiche wie `Licht, Motiv und Zugang` müssen deshalb auch beim Öffnen aus Timeline, Today, Dashboard oder späteren Modulen sichtbar bleiben.
 - Provider-Details dürfen den angeforderten Luvia-Place-Typ beim Nachladen nicht überschreiben. Ein als `photo_spot` geöffneter Ort bleibt für diese Darstellung ein Fotospot, auch wenn Google ihn zusätzlich als Museum, Park oder Sehenswürdigkeit klassifiziert.
+
+## Build 13.9.0 / Core 4.9.0 – Shopping als fünfter produktiver Place-Typ
+
+`shopping` wird ausschließlich als neuer fachlicher Vertrag auf der bestehenden globalen Places-Architektur ergänzt. Es ist verboten, dafür eine eigene Favoriten-, Timeline-, Karten-, Detail- oder Cloud-Struktur zu bauen.
+
+Verbindlich gilt:
+
+- Modul-ID und Place-Typ: `shopping`
+- Die globale Places-Shell, Discovery, Vorschaukarten, Favoritensammlung, Detailkarte, Timeline-Dialoge, Reiseakzentfarben, Dark Mode, Runtime, Commands und Conformance werden unverändert wiederverwendet.
+- Der Planungstermin wird als `planned_at` mit `timelineRole: point` in `trip_place_data.fields` gespeichert.
+- `LuviaShoppingIntelligence` ist der einzige fachliche Ableitungsdienst für Einkaufsformat, Sortiment, Einkaufserlebnis, Indoor/Outdoor, Preisgefühl, lokalen Charakter und beste Besuchszeit.
+- Diese Werte sind nachvollziehbare Hinweise aus Google-Place-Daten. Sortiment, konkrete Produkte, Preise, Marktstände und Verfügbarkeit dürfen niemals erfunden werden.
+- Typabhängige Shopping-Hinweise werden ausschließlich über `LuviaPlaceUI.insightGrid(...)` dargestellt.
+- Shopping-Suchen dürfen nicht pauschal auf den Google-Typ `shopping_mall` beschränkt werden. Märkte, Boutiquen, Souvenirshops, Feinkostläden, Kaufhäuser und Outlets müssen über zielgebundene Textsuche erreichbar bleiben.
+- Der Places Explorer muss Shopping separat über die produktive Destination- und Gateway-Pipeline testen können.
+- `restaurant`, `accommodation`, `attraction`, `photo_spot` und `shopping` müssen in Registry, Developer Console, Backend und Conformance als produktive Typen auf `ready` stehen.
+
+### Universelle Persistenz typabhängiger Place-Felder
+
+Ab Core 4.9.0 darf `place.import` ein nicht leeres typabhängiges `extension`-Objekt nicht nur in der Importantwort zurückgeben. Für alle nicht restaurant-spezifischen Place-Typen wird es zusätzlich über `luvia_upsert_trip_place_fields(...)` in der vorhandenen kanonischen Tabelle `trip_place_data` gespeichert.
+
+Damit gilt:
+
+- jedes typabhängige reisebezogene Feld besitzt genau eine cloudautoritative Quelle,
+- Module lesen diese Werte über `LuviaTripPlaceData`,
+- Reload, Reisewechsel, Timeline und externe Detailöffnung verwenden denselben Datensatz,
+- neue Place-Typen benötigen für reine JSON-Felder keine eigene Tabelle und keine parallele lokale Persistenz,
+- eigene Tabellen sind nur zulässig, wenn ein klarer relationaler Fachbedarf besteht und der zentrale Vertrag entsprechend erweitert wird.
