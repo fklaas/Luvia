@@ -19,7 +19,7 @@ assert(timeline.includes("LuviaPlaceCollections?.saveDateFields"),'Planning edit
 assert(timeline.includes("openPlanningEditor,editEntry"),'Global planning editor is not public');
 assert(actions.includes("LuviaTimelineCore?.openPlanningEditor"),'Initial planning does not reuse the global editor');
 assert(actions.includes("LuviaPlaceCollections.saveDateFields"),'Initial planning bypasses the global single writer');
-assert(restaurant.includes("LuviaTimelineCore?.openPlanningEditor"),'Restaurant planning does not use the same global editor');
+assert(restaurant.includes("LuviaPlaceUIActions.openTimelineDialog({type:'restaurant'"),'Restaurant planning does not use the same global contract-driven editor');
 assert(experience.includes('function planningEditor'),'Shared planning form renderer missing');
 assert(experience.includes('data-luvia-place-plan-form'),'Shared planning renderer is not a form');
 assert(tripData.includes("canonicalTripPlaceId=canonicalUuid(tripPlaceId)"),'tripPlace UUID guard missing');

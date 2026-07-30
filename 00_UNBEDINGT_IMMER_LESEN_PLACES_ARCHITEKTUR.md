@@ -496,6 +496,65 @@ Damit gilt:
 - eigene Tabellen sind nur zulässig, wenn ein klarer relationaler Fachbedarf besteht und der zentrale Vertrag entsprechend erweitert wird.
 
 
-## Verbindlicher Bootstrap-Vertrag ab Build 13.9.0.1
+## Build 13.9.1 / Core 4.9.1 – Globaler Planungsdialog und Insight-Card-Contract
 
-Die globale Places-Startkette muss vollständig im PWA App Shell Cache liegen. Versionierte Asset-URLs müssen über `ignoreSearch` auf die aktuelle Cache-Datei zurückfallen können. `place-type-definitions.js` darf nie ungeprüft voraussetzen, dass der Contract bereits geladen ist, sondern muss den zentralen Recovery-Bootstrap verwenden. Place-Module dürfen kein eigenes Ersatz-Timeline-Schema anlegen.
+Ab Build 13.9.1 ist die Planung sämtlicher Place-Typen verbindlich vereinheitlicht.
+
+### Globaler Planungsdialog
+
+- `LuviaPlaceExperience.planningEditor(...)` rendert das einzige zulässige Formular für Datum und Uhrzeit.
+- `LuviaTimelineCore.openPlanningEditor(...)` steuert Öffnen, Schließen, Validierung, Enter-Bestätigung, Ladezustand und Fehlermeldungen.
+- `LuviaPlaceUIActions.openTimelineDialog(...)` verwendet denselben Editor für neue Planungseinträge.
+- `LuviaTimelineCore.editEntry(...)` verwendet denselben Editor für nachträgliche Änderungen aus Timeline, Dashboard und den geplanten Karten oberhalb der Place-Suche.
+- Restaurants, Unterkünfte, Sehenswürdigkeiten, Fotospots, Shopping und alle kommenden Place-Typen dürfen keinen eigenen Datumsdialog mehr implementieren.
+- Enter muss das Formular überall genau wie ein Klick auf den primären Speichern-Button absenden.
+- Die Felddefinitionen stammen ausschließlich aus den `timelineRole`-Feldern des jeweiligen Place-Type-Contracts.
+- Unterkünfte erhalten deshalb Check-in und Check-out; punktuelle Places erhalten genau ihr kanonisches Point-Feld.
+
+### Einziger Cloud-Writer und UUID-Schutz
+
+- Planung und Änderungen schreiben ausschließlich über `LuviaPlaceCollections.saveDateFields(...)` und damit über `LuviaTripPlaceData`.
+- `tripId` und `tripPlaceId` müssen vor jedem RPC-Aufruf als gültige UUID geprüft werden.
+- Werte wie `undefined`, leere IDs oder Provider-IDs dürfen niemals an UUID-Parameter von Supabase übergeben werden.
+- Ein unvollständiger Datensatz wird vor dem Netzwerkaufruf mit einer verständlichen UI-Meldung abgebrochen.
+- Rohe Einträge aus `LuviaTripPlaceData.dateEntries(...)` gelten auch ohne zusätzliches `source`-Attribut als Place-Data-Einträge und dürfen niemals in den Legacy-Writer für `trip_schedule_events` geraten.
+- Nach erfolgreichem Speichern werden Timeline, geplantes Panel und aktuelle Modulansicht ohne Reload über die zentralen Events aktualisiert.
+
+### Insight Cards
+
+- Die visuelle Card-Shell ist ausschließlich `LuviaPlaceUI.insightGrid(...)`.
+- Ein Place-Type-Contract aktiviert typabhängige Insight Cards über `capabilities.insightCards` und beschreibt den Abschnitt unter `ui.detail.insightSection`.
+- Ein aktivierter Insight-Card-Typ muss einen Renderer über `LuviaPlaceDetail.registerCapabilityRenderer(...)` registrieren.
+- Conformance muss fehlende Insight-Section-Metadaten oder fehlende Renderer als Architekturverletzung melden.
+- Nicht jeder Place-Typ muss dieselben Inhalte zeigen. Nur fachlich belastbare, typabhängige Informationen dürfen als Karten erscheinen.
+- Restaurants, Unterkünfte und Sehenswürdigkeiten können denselben globalen Renderer künftig für eigene Intelligence-Bereiche nutzen; doppelte Fact-Chips oder erfundene Informationen sind dabei verboten.
+
+## Build 13.9.1.2 / Core 4.9.1.2 – globaler Contract-Bootstrap und Planungsparität
+
+Der Place-Type-Contract ist eine kritische Laufzeitabhängigkeit. Ein kurzzeitiger Fehler beim Laden von `place-type-contract.js` darf keinen Place-Typ ohne Timeline-Schema zurücklassen.
+
+Verbindlich gilt ab diesem Build:
+
+- `index.html` installiert vor den externen Place-Core-Dateien einen kleinen funktionalen Inline-Bootstrap unter derselben API `LuviaPlaceTypeContracts`.
+- Dieser Bootstrap ist kein zweites Datenmodell und keine alternative Fachlogik. Er hält nur die zentrale Contract-Registry funktionsfähig, bis der vollständige validierende Contract-Core geladen ist.
+- `place-type-definitions.js` registriert Restaurant, Unterkunft, Sehenswürdigkeit, Fotospot und Shopping sowohl gegen den Bootstrap als auch gegen den vollständigen Contract-Core.
+- Auch im Bootstrap-Modus müssen alle kanonischen Timeline-Felder verfügbar sein: `planned_at`, `check_in_at`, `check_out_at` und `starts_at`.
+- Der Definitions-Loader versucht nach einer Bootstrap-Registrierung weiterhin begrenzt, den vollständigen Contract-Core nachzuladen.
+- Beim späteren Upgrade übernimmt `place-type-contract.js` alle bereits registrierten Contracts, validiert sie und verwirft keinen Typ.
+- Nach dem Upgrade werden Registry und Diagnostics über zentrale Events auf die echte Core-Version aktualisiert.
+- Der globale Planungsdialog darf bei keinem produktiven Typ den Fehler „kein Timeline-Schema registriert“ erzeugen, nur weil ein einzelner Asset-Request kurzzeitig fehlschlug.
+- Restaurant darf keinen lokal hart codierten Datumsdialog mehr als Sonderweg verwenden. Auch Restaurant ruft `LuviaPlaceUIActions.openTimelineDialog(...)` auf.
+- Typabhängige Validierungen, etwa die Prüfung von Restaurant-Öffnungszeiten, werden als Callback in den globalen Dialog eingebracht und rechtfertigen keinen eigenen Dialog oder Writer.
+- Alle fünf produktiven Place-Typen verwenden damit denselben Contract, denselben Dialog, Enter-Bestätigung, UUID-Schutz und Cloud-Writer.
+- Der Service Worker hält Contract, Definitionen, Timeline, UI Actions und Conformance weiterhin als kritische App-Shell-Dateien vor und nutzt bei Netzwerkfehlern gültige Cache-Kopien unabhängig vom Build-Query-String.
+
+Pflichttest nach Änderungen am Bootstrap oder Planungsdialog:
+
+```javascript
+['restaurant','accommodation','attraction','photo_spot','shopping'].map(type => ({
+  type,
+  schema: LuviaPlaceUIActions.schema(type)
+}))
+```
+
+Jeder Typ muss mindestens ein kanonisches Timeline-Feld liefern. Zusätzlich muss `node tests/place-contract-bootstrap-resilience.test.cjs` erfolgreich sein.

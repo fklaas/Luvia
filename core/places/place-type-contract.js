@@ -1,11 +1,17 @@
 (function(){
 'use strict';
-const VERSION='4.9.0.1';
+const VERSION='4.9.1.2';
+const existing=window.LuviaPlaceTypeContracts;
+if(existing?.version===VERSION&&typeof existing.register==='function'&&!existing.bootstrap){
+ window.dispatchEvent(new CustomEvent('luvia:place-contract-ready',{detail:{version:VERSION,reused:true}}));
+ return;
+}
+const seeded=typeof existing?.all==='function'?existing.all():[];
 const contracts=new Map();
 const CANONICAL_LIFECYCLE=['discovered','favorite','planned','selected','reserved','booked','checked_in','checked_out','visited','rated','rejected','archived'];
 const FIELD_TYPES=['text','textarea','number','boolean','date','time','datetime','select','multiselect','currency','url'];
 const TIMELINE_ROLES=['start','end','point','none'];
-const CAPABILITIES=['favorite','planning','reservation','booking','stay','gpsVisit','alternatives','recommendations','timeline','today','dashboard','travelBook','realtime','photos','ratings','notes','solarIntelligence','photoPlanning','shoppingIntelligence','shoppingPlanning'];
+const CAPABILITIES=['favorite','planning','reservation','booking','stay','gpsVisit','alternatives','recommendations','timeline','today','dashboard','travelBook','realtime','photos','ratings','notes','solarIntelligence','photoPlanning','shoppingIntelligence','shoppingPlanning','insightCards'];
 const required=['type','moduleKey','identity','discovery','lifecycle','fields','capabilities','presentation','ui'];
 const clone=v=>JSON.parse(JSON.stringify(v));
 function validate(input){
@@ -30,14 +36,22 @@ function validate(input){
  if(!Array.isArray(c.ui?.detail?.sectionOrder)||!c.ui.detail.sectionOrder.length)errors.push('ui.detail.sectionOrder fehlt');
  if(!c.ui?.detail?.requiredSections?.includes('alternatives'))errors.push('ui.detail.requiredSections muss alternatives enthalten');
  if(c.capabilities?.stay && !((c.fields||[]).some(f=>f.key==='check_in_at')&&(c.fields||[]).some(f=>f.key==='check_out_at')))errors.push('Stay benötigt check_in_at und check_out_at.');
+ if(c.capabilities?.insightCards&&!c.ui?.detail?.insightSection)errors.push('insightCards benötigt ui.detail.insightSection.');
  return{valid:errors.length===0,errors,warnings};
 }
 function register(contract){
- const normalized={contractVersion:VERSION,...clone(contract)}; const result=validate(normalized);
+ const normalized={...clone(contract),contractVersion:VERSION}; const result=validate(normalized);
  if(!result.valid)throw new Error(`Ungültiger Place Type Contract ${contract?.type||'unknown'}: ${result.errors.join('; ')}`);
  contracts.set(normalized.type,Object.freeze(normalized));
  window.dispatchEvent(new CustomEvent('luvia:place-contract-registered',{detail:{type:normalized.type}}));
  return normalized;
+}
+for(const contract of seeded){
+ try{
+  const normalized={...clone(contract),contractVersion:VERSION};
+  const result=validate(normalized);
+  if(result.valid)contracts.set(normalized.type,Object.freeze(normalized));
+ }catch(error){console.warn('[Luvia Places] Bootstrap-Contract konnte nicht übernommen werden.',error)}
 }
 function get(type){return contracts.get(type)||null}
 function all(){return[...contracts.values()]}
@@ -45,6 +59,8 @@ function field(type,key){return get(type)?.fields?.find(f=>f.key===key)||null}
 function dateFields(type){return(get(type)?.fields||[]).filter(f=>['date','time','datetime'].includes(f.type))}
 function timelineFields(type){return(get(type)?.fields||[]).filter(f=>['start','end','point'].includes(f.timelineRole))}
 function capability(type,key){return Boolean(get(type)?.capabilities?.[key])}
-function diagnostics(){return{version:VERSION,status:'ready',registered:contracts.size,types:all().map(c=>({type:c.type,moduleKey:c.moduleKey,valid:validate(c).valid,fields:c.fields.length,lifecycle:c.lifecycle,capabilities:c.capabilities})),canonicalLifecycle:[...CANONICAL_LIFECYCLE]}}
-window.LuviaPlaceTypeContracts=Object.freeze({version:VERSION,register,get,all,validate,field,dateFields,timelineFields,capability,diagnostics,CANONICAL_LIFECYCLE:[...CANONICAL_LIFECYCLE]});
+function diagnostics(){return{version:VERSION,status:'ready',bootstrap:false,registered:contracts.size,types:all().map(c=>({type:c.type,moduleKey:c.moduleKey,valid:validate(c).valid,fields:c.fields.length,lifecycle:c.lifecycle,capabilities:c.capabilities})),canonicalLifecycle:[...CANONICAL_LIFECYCLE]}}
+window.LuviaPlaceTypeContracts=Object.freeze({version:VERSION,bootstrap:false,register,get,all,validate,field,dateFields,timelineFields,capability,diagnostics,CANONICAL_LIFECYCLE:[...CANONICAL_LIFECYCLE]});
+if(existing?.bootstrap)for(const type of contracts.keys())window.dispatchEvent(new CustomEvent('luvia:place-contract-registered',{detail:{type,upgradedFromBootstrap:true}}));
+window.dispatchEvent(new CustomEvent('luvia:place-contract-ready',{detail:{version:VERSION,reused:false,upgradedFromBootstrap:Boolean(existing?.bootstrap),seeded:contracts.size}}));
 })();
