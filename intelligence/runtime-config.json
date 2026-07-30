@@ -28,9 +28,9 @@
     "logHistory": 500
   },
   "release": {
-    "core": "4.10.0",
-    "build": "13.10.0",
-    "name": "Nature & Excursion Intelligence",
+    "core": "4.11.0",
+    "build": "13.11.0",
+    "name": "Cycling Routes & MTB Trail Intelligence",
     "channel": "production",
     "builtAt": "2026-07-30T17:54:00+02:00"
   },
@@ -39,12 +39,12 @@
     "wwwHost": "www.myluvia.app",
     "stagingHost": "staging.myluvia.app",
     "githubPagesFallback": "https://fklaas.github.io/Luvia/",
-    "build": "13.10.0"
+    "build": "13.11.0"
   },
   "build": {
-    "core": "4.10.0",
-    "build": "13.10.0",
-    "name": "Nature & Excursion Intelligence",
+    "core": "4.11.0",
+    "build": "13.11.0",
+    "name": "Cycling Routes & MTB Trail Intelligence",
     "channel": "production",
     "releasedAt": "2026-07-30",
     "builtAt": "2026-07-30T17:54:00+02:00"
@@ -83,8 +83,8 @@
     "profileSchemaVersion": 5
   },
   "placeIntelligence": {
-    "version": "4.10.0",
-    "types": 11,
+    "version": "4.11.0",
+    "types": 12,
     "multiType": true,
     "restaurantCompatibility": true,
     "visitDetection": "active",
@@ -108,7 +108,7 @@
     "globalGps": true,
     "offlineSync": true
   },
-  "coreVersion": "4.10.0",
-  "buildVersion": "13.10.0",
-  "releaseName": "Nature & Excursion Intelligence"
+  "coreVersion": "4.11.0",
+  "buildVersion": "13.11.0",
+  "releaseName": "Cycling Routes & MTB Trail Intelligence"
 }
