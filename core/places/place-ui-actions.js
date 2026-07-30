@@ -1,6 +1,6 @@
 (function(){
 'use strict';
-const VERSION='4.8.0';
+const VERSION='4.8.1';
 const labels=Object.freeze({favorite:'Favorit',unfavorite:'Favorit',plan:'Zur Timeline',planned:'In Timeline',changeDate:'Zeitpunkt ändern',removePlanning:'Planung löschen',open:'Details öffnen',route:'Navigation',call:'Anrufen',website:'Website öffnen',reserve:'Reservieren'});
 const esc=v=>window.LuviaPlaceExperience?.esc?.(v)||String(v??'');
 function actionButtons({favorite=false,planned=false,favoriteAttr='data-place-favorite-action',planAttr='data-place-plan-action'}={}){return `<button type="button" class="luv-place-primary-action ${favorite?'is-active':''}" ${favoriteAttr} aria-pressed="${favorite?'true':'false'}">${favorite?'♥':'♡'} ${labels.favorite}</button><button type="button" class="luv-place-primary-action ${planned?'is-active':''}" ${planAttr}>${planned?'✓':'＋'} ${planned?labels.planned:labels.plan}</button>`}

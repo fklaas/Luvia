@@ -60,3 +60,216 @@ html[data-theme=dark] :is(.rv2-head p,.rv2-search-card p,.rv2-search-card small,
 /* Core 4.6.9: one canonical favorite action for every Place surface */
 :is(#restaurants-module,#accommodations-module,#attractions-module,#photo-spots-module) .luv-place-favorite-toggle{background:var(--place-accent,var(--rv2-accent,var(--lv-accent)))!important;color:var(--luvia-accent-contrast,#fff)!important;border-color:var(--place-accent,var(--rv2-accent,var(--lv-accent)))!important;opacity:1!important;cursor:pointer!important}
 :is(#restaurants-module,#accommodations-module,#attractions-module,#photo-spots-module) .luv-place-favorite-toggle.is-active{background:color-mix(in srgb,var(--place-accent,var(--rv2-accent,var(--lv-accent))) 72%,#fff)!important}
+
+/* Core 4.8.1 — reusable Place Intelligence insight cards */
+.luv-place-insight-section {
+  position: relative;
+  overflow: hidden;
+  display: grid;
+  gap: 20px;
+  padding: clamp(20px, 3vw, 28px);
+  border: 1px solid color-mix(in srgb, var(--place-accent, var(--lv-accent)) 16%, var(--lv-line));
+  border-radius: 26px;
+  background:
+    radial-gradient(circle at 94% 12%, color-mix(in srgb, var(--place-accent, var(--lv-accent)) 13%, transparent) 0 10%, transparent 11%),
+    linear-gradient(145deg, color-mix(in srgb, var(--place-accent, var(--lv-accent)) 5%, var(--lv-surface-elevated)), var(--lv-surface-elevated));
+  box-shadow: var(--lv-shadow-sm, 0 14px 34px rgba(35, 53, 70, .07));
+}
+
+.luv-place-insight-section > header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 18px;
+}
+
+.luv-place-insight-section h3 {
+  margin: 5px 0 0;
+  color: var(--lv-text);
+  font-family: var(--lv-font-display, var(--lv-font-body, Manrope, system-ui, sans-serif));
+  font-size: clamp(1.35rem, 2.5vw, 1.8rem);
+  line-height: 1.18;
+  text-wrap: balance;
+}
+
+.luv-place-insight-section > header p {
+  max-width: 680px;
+  margin: 8px 0 0;
+  color: var(--lv-muted);
+  line-height: 1.55;
+}
+
+.luv-place-insight-hero-icon {
+  flex: 0 0 auto;
+  width: 58px;
+  height: 58px;
+  display: grid;
+  place-items: center;
+  border: 1px solid color-mix(in srgb, var(--place-accent, var(--lv-accent)) 18%, var(--lv-line));
+  border-radius: 19px;
+  background: color-mix(in srgb, var(--place-accent, var(--lv-accent)) 11%, var(--lv-surface-elevated));
+  font-size: 1.75rem;
+}
+
+.luv-place-insight-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 13px;
+}
+
+.luv-place-insight-card {
+  min-width: 0;
+  min-height: 152px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 18px;
+  border: 1px solid color-mix(in srgb, var(--place-accent, var(--lv-accent)) 11%, var(--lv-line));
+  border-radius: 20px;
+  background: color-mix(in srgb, var(--place-accent, var(--lv-accent)) 3%, var(--lv-surface-soft));
+  box-shadow: inset 0 1px 0 color-mix(in srgb, #fff 55%, transparent);
+}
+
+.luv-place-insight-card.is-featured {
+  background:
+    linear-gradient(135deg, color-mix(in srgb, var(--place-accent, var(--lv-accent)) 13%, var(--lv-surface-elevated)), var(--lv-surface-elevated));
+  border-color: color-mix(in srgb, var(--place-accent, var(--lv-accent)) 23%, var(--lv-line));
+}
+
+.luv-place-insight-card.is-wide {
+  grid-column: 1 / -1;
+  min-height: 0;
+}
+
+.luv-place-insight-card-head {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-width: 0;
+}
+
+.luv-place-insight-icon {
+  flex: 0 0 auto;
+  width: 38px;
+  height: 38px;
+  display: grid;
+  place-items: center;
+  border-radius: 13px;
+  background: color-mix(in srgb, var(--place-accent, var(--lv-accent)) 12%, var(--lv-surface-elevated));
+  font-size: 1.15rem;
+}
+
+.luv-place-insight-label {
+  min-width: 0;
+  color: var(--lv-muted);
+  font-size: .78rem;
+  font-weight: 900;
+  letter-spacing: .035em;
+  line-height: 1.25;
+  text-transform: uppercase;
+  overflow-wrap: anywhere;
+}
+
+.luv-place-insight-card > strong {
+  color: var(--lv-text);
+  font-family: var(--lv-font-display, var(--lv-font-body, Manrope, system-ui, sans-serif));
+  font-size: clamp(1.02rem, 2vw, 1.25rem);
+  line-height: 1.35;
+  overflow-wrap: anywhere;
+}
+
+.luv-place-insight-card.is-featured > strong {
+  font-size: clamp(1.15rem, 2.4vw, 1.48rem);
+}
+
+.luv-place-insight-meta {
+  margin-top: auto;
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 10px;
+  color: var(--lv-muted);
+  font-size: .75rem;
+  line-height: 1.4;
+}
+
+.luv-place-insight-meta > span {
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
+.luv-place-insight-meta em {
+  flex: 0 0 auto;
+  padding: 5px 8px;
+  border-radius: 999px;
+  font-style: normal;
+  font-size: .68rem;
+  font-weight: 900;
+  white-space: nowrap;
+}
+
+.luv-place-insight-meta em.is-high {
+  background: color-mix(in srgb, #28a36a 13%, var(--lv-surface-elevated));
+  color: color-mix(in srgb, #188453 82%, var(--lv-text));
+}
+
+.luv-place-insight-meta em.is-medium {
+  background: color-mix(in srgb, #d89119 14%, var(--lv-surface-elevated));
+  color: color-mix(in srgb, #a86700 78%, var(--lv-text));
+}
+
+.luv-place-insight-meta em.is-low {
+  background: color-mix(in srgb, var(--lv-muted) 11%, var(--lv-surface-elevated));
+  color: var(--lv-muted);
+}
+
+.luv-place-insight-note {
+  display: flex;
+  align-items: flex-start;
+  gap: 9px;
+  margin: 0;
+  padding: 13px 15px;
+  border-radius: 16px;
+  background: color-mix(in srgb, var(--place-accent, var(--lv-accent)) 7%, var(--lv-surface-soft));
+  color: var(--lv-muted);
+  font-size: .82rem;
+  line-height: 1.5;
+}
+
+html[data-theme="dark"] .luv-place-insight-section,
+html[data-theme="dark"] .luv-place-insight-card {
+  box-shadow: none;
+}
+
+@media (max-width: 680px) {
+  .luv-place-insight-section {
+    padding: 20px 16px;
+    border-radius: 22px;
+  }
+
+  .luv-place-insight-section > header {
+    gap: 12px;
+  }
+
+  .luv-place-insight-hero-icon {
+    width: 50px;
+    height: 50px;
+    border-radius: 16px;
+    font-size: 1.45rem;
+  }
+
+  .luv-place-insight-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .luv-place-insight-card,
+  .luv-place-insight-card.is-wide {
+    grid-column: auto;
+    min-height: 0;
+  }
+
+  .luv-place-insight-meta {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+}

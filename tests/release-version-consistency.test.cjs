@@ -1,7 +1,7 @@
 const fs=require('fs');
 const path=require('path');
 const root=path.resolve(__dirname,'..');
-const build='13.8.0',core='4.8.0';
+const build='13.8.1',core='4.8.1';
 const must=[
  ['intelligence/kernel/version.js',build,core],
  ['index.html',`?v=${build}`],

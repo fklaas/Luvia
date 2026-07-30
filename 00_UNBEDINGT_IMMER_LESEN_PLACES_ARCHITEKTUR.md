@@ -445,3 +445,15 @@ Verbindlich gilt:
 - Motiv, Indoor/Outdoor, Stativ und Zugang werden aus Google-Kategorie, Name und Beschreibung abgeleitet. Unklare Werte müssen als „wahrscheinlich“ oder „prüfen“ gekennzeichnet werden; erfundene Gewissheit ist verboten.
 - `LuviaPhotoSpotIntelligence` ist der einzige fachliche Ableitungsdienst für Fotospots.
 - Fotospots müssen dieselben Conformance-Regeln wie Restaurant, Unterkunft und Sehenswürdigkeit bestehen.
+
+## Build 13.8.1 / Core 4.8.1 – Verbindlicher Places-Hub- und Insight-Card-Vertrag
+
+Ab Build 13.8.1 gilt zusätzlich:
+
+- Der Places-Hub verwendet auf großen Web-Ansichten **maximal drei Spalten**. Unterhalb von 1040 px werden zwei Spalten, auf mobilen Ansichten eine Spalte verwendet.
+- Hub-Kacheln werden ausschließlich durch `LuviaPlacesShell` erzeugt. Sie müssen globale Theme-, Reiseakzent-, Typografie-, Flächen- und Linien-Tokens verwenden.
+- Inhalte einer Hub-Kachel dürfen ihre Containergrenzen niemals überschreiten. Titel, Beschreibungen und Tags müssen umbrechen können und auf Mobilgeräten vollständig lesbar bleiben.
+- Typabhängige Intelligence-Informationen in Detailkarten werden über den globalen Renderer `LuviaPlaceUI.insightGrid(...)` ausgegeben.
+- Ein Place-Modul liefert an `insightGrid` nur fachliche Werte, Icons, Quellen und Sicherheiten. Es erstellt keine eigene Card-Struktur und keine lokale Insight-CSS-Shell.
+- Insight Cards zeigen Wert, Quelle und Ableitungssicherheit klar getrennt. Unklare Daten dürfen weiterhin nicht als sichere Tatsachen dargestellt werden.
+- Der Fotospot-Bereich ist die erste Referenzimplementierung für diesen globalen Insight-Card-Vertrag. Weitere Place-Typen sollen denselben Renderer für typabhängige Informationen verwenden.
