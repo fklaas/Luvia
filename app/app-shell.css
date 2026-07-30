@@ -145,7 +145,7 @@ body::after{content:"☁   ✦   ☁";right:4vw;top:15vh;font-size:clamp(25px,3v
 @media(prefers-reduced-motion:reduce){body::before,body::after,.lv-shell::before{animation:none!important}}
 
 
-/* Build 13.4.6.5: richer travel-memory ambience and calmer hero */
+/* Build 13.4.6.6: richer travel-memory ambience and calmer hero */
 html,body{
   background:
     radial-gradient(circle at 10% 14%,color-mix(in srgb,var(--trip-accent) 18%,transparent) 0 12%,transparent 34%),

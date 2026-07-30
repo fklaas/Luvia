@@ -1,6 +1,6 @@
 (function(){
 'use strict';
-const VERSION='4.6.5';
+const VERSION='4.6.6';
 const forbidden=[
  {name:'localStorage in Place-Modulen',pattern:/localStorage\s*\./g},
  {name:'direkter trip_places Zugriff',pattern:/\.from\(\s*['"]trip_places['"]\s*\)/g},

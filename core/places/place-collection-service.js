@@ -1,6 +1,6 @@
 (()=>{
 'use strict';
-const VERSION='4.6.5';
+const VERSION='4.6.6';
 const CANONICAL=new Set(['idea','discovered','saved','favorite','planned','reserved','selected','booked','checked_in','checked_out','visited','rated','rejected','archived']);
 const MAP={favorited:'favorite',dismissed:'rejected',memory:'visited',travel_book:'visited'};
 const clean=v=>String(v??'').trim();

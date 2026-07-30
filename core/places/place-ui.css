@@ -35,7 +35,7 @@ html[data-theme=dark] :is(.rv2-head p,.rv2-search-card p,.rv2-search-card small,
 .rv2-detail-primary-actions>button:hover,.luv-place-actions>button:hover{background:color-mix(in srgb,var(--place-accent,var(--trip-accent,var(--lv-accent))) 88%,#000)!important;color:var(--trip-accent-contrast,#fff)!important}
 
 
-/* Build 13.6.5 — canonical Place module shell, collections and planning dialog */
+/* Build 13.6.6 — canonical Place module shell, collections and planning dialog */
 :is(#restaurants-module,#accommodations-module,#attractions-module).luvia-restaurants-v2{font-family:var(--lv-font-body,Manrope,system-ui,sans-serif);color:var(--lv-text,var(--luv-place-ink));--place-accent:var(--trip-accent,var(--module-accent,var(--lv-accent)))}
 :is(#restaurants-module,#accommodations-module,#attractions-module) .rv2-head.rv2-head-new{display:flex;align-items:flex-start;justify-content:space-between;gap:18px}
 :is(#restaurants-module,#accommodations-module,#attractions-module) .rv2-head-copy{min-width:0}
