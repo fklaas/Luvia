@@ -64,7 +64,7 @@ Deno.serve(async(req:Request)=>{
     let data:unknown;
     switch(action){
       case 'system.health':
-        data={status:'ok',service:'luvia-gateway',version:'4.11.0.1',build:'13.11.0.1',core:'4.11.0.1',time:new Date().toISOString(),authenticated:Boolean(userId),places:placesDiagnostics(),restaurants:restaurantDiagnostics(),recommendations:recommendationDiagnostics(),cycling:cyclingDiagnostics()};
+        data={status:'ok',service:'luvia-gateway',version:'4.11.1',build:'13.11.1',core:'4.11.1',time:new Date().toISOString(),authenticated:Boolean(userId),places:placesDiagnostics(),restaurants:restaurantDiagnostics(),recommendations:recommendationDiagnostics(),cycling:cyclingDiagnostics()};
         break;
       default:
         if(PLACES_ACTIONS.has(action)){

@@ -28,26 +28,26 @@
     "logHistory": 500
   },
   "release": {
-    "core": "4.11.0.1",
-    "build": "13.11.0.1",
-    "name": "Cycling Registry Bootstrap & Asset Loading Fix",
+    "core": "4.11.1",
+    "build": "13.11.1",
+    "name": "Cycling Place Core Conformance & Fast Discovery",
     "channel": "production",
-    "builtAt": "2026-07-30T18:57:00+02:00"
+    "builtAt": "2026-07-30T19:28:00+02:00"
   },
   "deployment": {
     "canonicalHost": "myluvia.app",
     "wwwHost": "www.myluvia.app",
     "stagingHost": "staging.myluvia.app",
     "githubPagesFallback": "https://fklaas.github.io/Luvia/",
-    "build": "13.11.0.1"
+    "build": "13.11.1"
   },
   "build": {
-    "core": "4.11.0.1",
-    "build": "13.11.0.1",
-    "name": "Cycling Registry Bootstrap & Asset Loading Fix",
+    "core": "4.11.1",
+    "build": "13.11.1",
+    "name": "Cycling Place Core Conformance & Fast Discovery",
     "channel": "production",
     "releasedAt": "2026-07-30",
-    "builtAt": "2026-07-30T18:57:00+02:00"
+    "builtAt": "2026-07-30T19:28:00+02:00"
   },
   "backend": {
     "functionName": "luvia-gateway",
@@ -83,7 +83,7 @@
     "profileSchemaVersion": 5
   },
   "placeIntelligence": {
-    "version": "4.11.0.1",
+    "version": "4.11.1",
     "types": 12,
     "multiType": true,
     "restaurantCompatibility": true,
@@ -108,7 +108,7 @@
     "globalGps": true,
     "offlineSync": true
   },
-  "coreVersion": "4.11.0.1",
-  "buildVersion": "13.11.0.1",
-  "releaseName": "Cycling Registry Bootstrap & Asset Loading Fix"
+  "coreVersion": "4.11.1",
+  "buildVersion": "13.11.1",
+  "releaseName": "Cycling Place Core Conformance & Fast Discovery"
 }

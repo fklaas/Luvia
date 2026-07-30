@@ -1,10 +1,10 @@
 (function(){
 'use strict';
-const VERSION='4.11.0.1';
+const VERSION='4.11.1';
 const FACT_SLOTS=Object.freeze(['rating','distance','bestTimeToVisit','priceLevel','openingState']);
 const DETAIL_ORDER=Object.freeze(['gallery','header','actions','facts','providerDetails','recommendation','considerations','placeFields','alternatives','openingHours','contact']);
 const HIDDEN=Object.freeze(['participantMatches','nextSteps','departurePlanning','dayPlanning']);
-const MODULE_SHELL=Object.freeze({rootClass:'luvia-restaurants-v2',shellClass:'rv2-shell',headerClass:'rv2-head rv2-head-new',planned:'LuviaPlaceExperience.plannedPanel',discovery:'LuviaPlaceExperience.discovery',collection:'LuviaPlaceCollections.favoritePanel',card:'LuviaPlaceUI.card',planningDialog:'LuviaPlaceExperience.planningEditor'});
+const MODULE_SHELL=Object.freeze({rootClass:'luvia-restaurants-v2',shellClass:'rv2-shell',headerClass:'rv2-head rv2-head-new',renderer:'LuviaPlaceExperience.moduleShell',planned:'LuviaPlaceExperience.plannedPanel',discovery:'LuviaPlaceExperience.discovery',collection:'LuviaPlaceCollections.favoritePanel',card:'LuviaPlaceUI.card',planningDialog:'LuviaPlaceExperience.planningEditor'});
 const CARD_ACTIONS=Object.freeze({detailClass:'rv2-detail-button primary',favoriteAttribute:'data-place-favorite-toggle',favoriteLabel:'Favorit',accent:'trip'});
 const TOKENS=Object.freeze(['--place-surface','--place-surface-raised','--place-surface-muted','--place-border','--place-radius-card','--place-radius-overlay','--place-card-padding','--place-control-height','--place-gap-sm','--place-gap-md','--place-gap-lg','--place-shadow-card','--place-shadow-overlay','--place-accent','--place-accent-soft']);
 function forType(type){const c=window.LuviaPlaceTypeContracts?.get?.(type)||{};return Object.freeze({version:VERSION,type,card:{factSlots:[...(c.ui?.card?.factSlots||FACT_SLOTS)]},detail:{providerFields:'allAvailable',sectionOrder:[...(c.ui?.detail?.sectionOrder||DETAIL_ORDER)],hiddenSections:[...(c.ui?.detail?.hiddenSections||HIDDEN)],requiredSections:[...(c.ui?.detail?.requiredSections||['alternatives'])],actions:{favorite:'Favorit',timeline:'Zur Timeline',accent:'trip'},planning:{mode:'contract-dialog',timelineFields:window.LuviaPlaceTypeContracts?.timelineFields?.(type)||[],submitOnEnter:true,singleWriter:'LuviaPlaceCollections.saveDateFields'},insights:{layout:'LuviaPlaceUI.insightGrid',renderer:'LuviaPlaceDetail.registerCapabilityRenderer',typeSpecific:true}}})}

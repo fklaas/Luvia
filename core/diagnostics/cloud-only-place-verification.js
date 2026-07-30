@@ -1,6 +1,6 @@
 (function(){
 'use strict';
-const VERSION=window.LuviaKernelVersion?.core||'4.11.0.1';
+const VERSION=window.LuviaKernelVersion?.core||'4.11.1';
 const FORBIDDEN_PATTERNS=[/^luvia\.schedule\./,/^luvia\.today\./,/^luvia\.live-day\./,/^luvia\.timeline\./,/^luvia\.place-visits\./,/^luviaRestaurantsV2Demo:/];
 const clone=value=>value==null?value:JSON.parse(JSON.stringify(value));
 const sleep=ms=>new Promise(resolve=>setTimeout(resolve,ms));

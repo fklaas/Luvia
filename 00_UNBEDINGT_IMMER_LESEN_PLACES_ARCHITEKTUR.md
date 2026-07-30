@@ -608,3 +608,52 @@ Erwartet:
 ```
 
 Zusätzlich muss `node tests/cycling-registry-bootstrap.test.cjs` erfolgreich sein.
+
+---
+
+## Build 13.11.1 / Core 4.11.1 – Verbindliche Fahrradrouten-Conformance und progressive Provider-Suche
+
+### Globale Module-Shell ist ab jetzt ein echter Renderer
+
+Der globale UI-Vertrag benennt nicht mehr nur CSS-Klassen, sondern stellt mit
+
+```javascript
+LuviaPlaceExperience.moduleShell(...)
+```
+
+einen verbindlichen Renderer für Place-Modulseiten bereit.
+
+Ein Place-Modul darf keinen eigenen Header-Hintergrund, keine eigene Shell-Struktur und keine lokale Modul-Typografie ergänzen. Typabhängig bleiben ausschließlich Inhalte, Kategorien, Filterfelder und Capability-Abschnitte.
+
+Fahrradrouten verwenden ab diesem Build zwingend:
+
+- `LuviaPlaceExperience.moduleShell`,
+- `LuviaPlaceExperience.plannedPanel`,
+- `LuviaPlaceExperience.discovery`,
+- `LuviaPlaceCollections.favoritePanel`,
+- `LuviaPlaceUI.card`,
+- `LuviaPlaceDetail`,
+- `LuviaPlaceUIActions.openTimelineDialog`.
+
+Die Conformance-Prüfung muss einen lokalen Fahrradrouten-Header oder eine fehlende globale Module-Shell als Architekturverletzung melden.
+
+### Externe Spezialprovider dürfen den Place-Screen nicht blockieren
+
+Für Routen-, Event-, Wetter- oder andere langsamere Spezialprovider gilt verbindlich:
+
+1. Modul-Shell sofort rendern.
+2. Provider parallel starten.
+3. Erste belastbare Ergebnisse sofort anzeigen.
+4. Weitere Quellen schrittweise ergänzen.
+5. Vorhandene Ergebnisse während des Nachladens nicht entfernen.
+6. Verspätete Antworten veralteter Suchläufe verwerfen.
+7. Provider mit kurzen definierten Timeouts betreiben.
+8. Suchfehler einer Quelle dürfen andere Quellen nicht unbrauchbar machen.
+
+### Fahrradrouten-Suchraum
+
+Fahrradrouten unterscheiden sich fachlich von Restaurants oder innerstädtischen Places. Der Standardradius beträgt daher 100 km; der Nutzer kann 50, 100, 150 oder 200 km wählen. Die Radiusabweichung ist typabhängige Fachkonfiguration innerhalb der globalen Discovery-Shell und kein eigenes UI-System.
+
+### Qualitätsranking
+
+MTB- und Fahrradrouten werden zentral nach Datenqualität und Reiseeignung sortiert. Relevante Kriterien sind Profiltreffer, Routenrelation, Name, Netzwerk, Distanzangabe, MTB-Skala, Untergrund und Entfernung zum Reiseziel. Generische Kategorienamen dürfen keine fachlich passenden Treffer herausfiltern.

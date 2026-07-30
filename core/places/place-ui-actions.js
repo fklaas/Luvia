@@ -1,6 +1,6 @@
 (function(){
 'use strict';
-const VERSION='4.11.0.1';
+const VERSION='4.11.1';
 const labels=Object.freeze({favorite:'Favorit',unfavorite:'Favorit',plan:'Zur Timeline',planned:'In Timeline',changeDate:'Zeitpunkt ändern',removePlanning:'Planung löschen',open:'Details öffnen',route:'Navigation',call:'Anrufen',website:'Website öffnen',reserve:'Reservieren'});
 const esc=v=>window.LuviaPlaceExperience?.esc?.(v)||String(v??'');
 const pendingDialogs=new Map();

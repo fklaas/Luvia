@@ -1,5 +1,5 @@
 (()=>{'use strict';
-const MODULE_ID='photo_spots',VERSION='4.11.0.1';
+const MODULE_ID='photo_spots',VERSION='4.11.1';
 const QUICK=[['📸','Entdecken','Fotospots und Aussichtspunkte'],['🌅','Sonnenaufgang','Fotospots Sonnenaufgang'],['🌇','Sonnenuntergang','Fotospots Sonnenuntergang'],['🔭','Aussicht','Aussichtspunkte Panorama'],['🏛️','Architektur','Architektur Fotospots'],['🌿','Natur','Natur Fotospots'],['💞','Romantisch','romantische Fotospots'],['🌃','Nacht','Nachtfotografie Orte']];
 const state={root:null,trip:null,query:'Fotospots und Aussichtspunkte',filter:'Entdecken',options:{},results:[],entities:[],searchMap:new Map(),routeCache:new Map(),loading:false,error:null,visibleCount:6};
 const esc=v=>window.LuviaPlaceExperience?.esc?.(v)||String(v??'');

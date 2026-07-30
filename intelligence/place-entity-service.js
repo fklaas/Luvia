@@ -1,6 +1,6 @@
 (function(){
 'use strict';
-const VERSION='4.11.0.1';
+const VERSION='4.11.1';
 const TYPES=['restaurant','accommodation','attraction','photo_spot','activity','shopping','nature','cycling_route','family','mobility','transit','custom'];
 const TYPE_TO_GOOGLE={restaurant:'restaurant',accommodation:'lodging',attraction:'tourist_attraction',photo_spot:'tourist_attraction',activity:'amusement_center',shopping:'shopping_mall',nature:'park',cycling_route:'',family:'amusement_park',mobility:'parking',transit:'transit_station',custom:''};
 const clean=v=>String(v??'').trim();

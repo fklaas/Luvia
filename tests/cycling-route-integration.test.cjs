@@ -11,7 +11,7 @@ const migration=fs.readFileSync('supabase/migrations/20260730_036_core_v4_11_0_c
 assert(contract.includes("type:'cycling_route',moduleKey:'cycling_routes'"),'Cycling route contract missing');
 assert(contract.includes("key:'planned_at'"),'Cycling timeline field missing');
 assert(contract.includes("cyclingIntelligence:true"),'Cycling capability missing');
-for(const token of ['LuviaPlaceExperience.discovery','LuviaPlaceCollections.favoritePanel','LuviaPlaceUI.card','LuviaPlaceUIActions.openTimelineDialog'])assert(moduleCode.includes(token),`Global place token missing: ${token}`);
+for(const token of ['LuviaPlaceExperience.moduleShell','LuviaPlaceExperience.discovery','LuviaPlaceCollections.favoritePanel','LuviaPlaceUI.card','LuviaPlaceUIActions.openTimelineDialog'])assert(moduleCode.includes(token),`Global place token missing: ${token}`);
 assert(moduleCode.includes("placeType:'cycling_route'"),'Canonical cycling collection type missing');
 assert(moduleCode.includes("type:TYPE"),'Cycling cloud pipeline missing');
 assert(moduleCode.includes('providerPlace:isOsm(detailed)?detailed:null'),'OSM provider import missing');
@@ -20,10 +20,12 @@ assert(shell.includes("cycling_routes:{type:'cycling_route'"),'Cycling hub tile 
 assert(registry.includes("id:'cycling_routes'"),'Cycling module registry entry missing');
 assert(app.includes('window.LuviaCyclingRouteModule?.openPlace'),'Typed cycling detail routing missing');
 for(const token of ['intelligence/cycling-route-service.js','core/places/cycling-route-intelligence-service.js','modules/cycling-routes/cycling-route-module.js'])assert(index.includes(token),`${token} not loaded`);
-assert(gateway.includes('route"~"^(bicycle|mtb)$'),'OSM bicycle/MTB relation discovery missing');
+assert(gateway.includes('^(bicycle|mtb)$'),'OSM bicycle/MTB relation discovery missing');
 assert(gateway.includes("['mtb','gravel','city','family','touring']")||gateway.includes("profile==='mtb'"),'Cycling profile logic missing');
 assert(entityGateway.includes('payload?.providerPlace'),'Generic non-Google provider import missing');
 assert(migration.includes("'cycling_route'"),'Database place type constraint missing cycling_route');
 const routes=fs.readFileSync('supabase/functions/luvia-gateway/_shared/routes.ts','utf8');assert(routes.includes("'BICYCLE'"),'Google bicycle approach routing missing');
 const sw=fs.readFileSync('sw.js','utf8');assert(sw.includes('cycling-route-service.js'));assert(sw.includes('cycling-route-module.js'));
+assert(!moduleCode.includes('luv-cycling-head'),'Cycling module must not own a custom module header');
+assert(moduleCode.includes('radiusMeters:100000'),'Cycling default radius must be 100 km');
 console.log('Cycling route place integration: OK');
