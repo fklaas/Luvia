@@ -1,7 +1,7 @@
 (() => {
   'use strict';
-  const VERSION=window.LuviaKernelVersion?.core||'4.8.1';
-  const BUILD=window.LuviaKernelVersion?.build||'13.8.1';
+  const VERSION=window.LuviaKernelVersion?.core||'4.8.1.1';
+  const BUILD=window.LuviaKernelVersion?.build||'13.8.1.1';
   const now=()=>new Date().toISOString();
   const safe=(fn,fallback=null)=>{try{return fn()}catch(error){return fallback??{error:error?.message||String(error)}}};
   const textBytes=value=>new TextEncoder().encode(String(value||'')).length;

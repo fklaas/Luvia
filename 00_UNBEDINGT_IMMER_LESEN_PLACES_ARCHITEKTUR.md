@@ -457,3 +457,12 @@ Ab Build 13.8.1 gilt zusätzlich:
 - Ein Place-Modul liefert an `insightGrid` nur fachliche Werte, Icons, Quellen und Sicherheiten. Es erstellt keine eigene Card-Struktur und keine lokale Insight-CSS-Shell.
 - Insight Cards zeigen Wert, Quelle und Ableitungssicherheit klar getrennt. Unklare Daten dürfen weiterhin nicht als sichere Tatsachen dargestellt werden.
 - Der Fotospot-Bereich ist die erste Referenzimplementierung für diesen globalen Insight-Card-Vertrag. Weitere Place-Typen sollen denselben Renderer für typabhängige Informationen verwenden.
+
+
+## Verbindliche Detailkarten-Öffnung aus Timeline, Dashboard und Cross-Module-Flows
+
+- Timeline und Dashboard dürfen niemals eine reduzierte lokale Kopie der Place-Detailkarte erzeugen.
+- Ein externer Place-Aufruf delegiert zuerst an den zuständigen Place-Typ und öffnet damit dieselbe Detailkarte wie innerhalb des Place-Moduls.
+- Der globale Detail-Core besitzt zusätzlich typabhängige Capability-Renderer als sicheren Fallback.
+- Typabhängige Bereiche wie `Licht, Motiv und Zugang` müssen deshalb auch beim Öffnen aus Timeline, Today, Dashboard oder späteren Modulen sichtbar bleiben.
+- Provider-Details dürfen den angeforderten Luvia-Place-Typ beim Nachladen nicht überschreiben. Ein als `photo_spot` geöffneter Ort bleibt für diese Darstellung ein Fotospot, auch wenn Google ihn zusätzlich als Museum, Park oder Sehenswürdigkeit klassifiziert.

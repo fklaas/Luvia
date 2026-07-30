@@ -1,6 +1,6 @@
 (function(){
 'use strict';
-const VERSION='4.8.1';
+const VERSION='4.8.1.1';
 const rad=x=>x*Math.PI/180,deg=x=>x*180/Math.PI;
 const clamp=(v,a,b)=>Math.min(b,Math.max(a,v));
 const text=p=>[p?.name,p?.primaryTypeDisplayName?.text,p?.editorialSummary?.text,p?.editorialSummary,p?.description,...(p?.types||[])].filter(Boolean).join(' ').toLowerCase();
