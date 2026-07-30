@@ -1,6 +1,6 @@
 (() => {
 'use strict';
-const VERSION='4.9.0';
+const VERSION='4.9.1';
 let state={tripId:null,loading:false,records:[],lastUpdatedAt:null,lastError:null};
 let channel=null; const listeners=new Set();
 const clone=v=>v==null?v:JSON.parse(JSON.stringify(v));
@@ -26,12 +26,15 @@ async function hydrate(id=tripId()){
 function recordForTripPlace(id){return state.records.find(r=>String(r.trip_place_id)===String(id))||null}
 function recordsForType(type){return state.records.filter(r=>String(r.place_type)===String(type))}
 async function upsert({tripId:id=tripId(),tripPlaceId,placeId,placeType,fields={}}={}){
- if(!id||!tripPlaceId||!placeType)throw new Error('tripId, tripPlaceId und placeType sind erforderlich.');
+ const canonicalTripId=canonicalUuid(id),canonicalTripPlaceId=canonicalUuid(tripPlaceId);
+ if(!canonicalTripId)throw new Error('Die aktive Reise besitzt keine gültige Cloud-ID. Bitte die Reise erneut öffnen.');
+ if(!canonicalTripPlaceId)throw new Error('Die Place-Verknüpfung besitzt keine gültige Cloud-ID. Bitte den Ort neu öffnen.');
+ if(!placeType)throw new Error('Der Place-Typ ist erforderlich.');
  const c=db(); if(!c?.rpc)throw new Error('Supabase ist nicht verfügbar.');
  const canonicalPlaceId=canonicalUuid(placeId);
- const {data,error}=await c.rpc('luvia_upsert_trip_place_fields',{p_trip_id:id,p_trip_place_id:tripPlaceId,p_place_id:canonicalPlaceId,p_place_type:placeType,p_fields:fields||{}});
+ const {data,error}=await c.rpc('luvia_upsert_trip_place_fields',{p_trip_id:canonicalTripId,p_trip_place_id:canonicalTripPlaceId,p_place_id:canonicalPlaceId,p_place_type:placeType,p_fields:fields||{}});
  if(error)throw error;
- await hydrate(id); return data;
+ await hydrate(canonicalTripId); return data;
 }
 async function replaceFields({tripId:id=tripId(),tripPlaceId,placeId,placeType,fields={}}={}){
  const c=db(); const payload={trip_id:id,trip_place_id:tripPlaceId,place_id:placeId||null,place_type:placeType,fields,updated_at:new Date().toISOString()};
@@ -55,8 +58,9 @@ function dateEntries(type=null){
  return out.sort((a,b)=>new Date(a.startAt)-new Date(b.startAt));
 }
 async function updateDateFields(tripPlaceId,updates,{tripId:id=tripId()}={}){
- const rec=recordForTripPlace(tripPlaceId); if(!rec)throw new Error('Place-Datensatz wurde nicht gefunden.');
- return upsert({tripId:id,tripPlaceId,placeId:rec.place_id,placeType:rec.place_type,fields:updates});
+ const canonicalTripPlaceId=canonicalUuid(tripPlaceId);if(!canonicalTripPlaceId)throw new Error('Die Place-Verknüpfung besitzt keine gültige Cloud-ID. Bitte den Ort neu öffnen.');
+ const rec=recordForTripPlace(canonicalTripPlaceId); if(!rec)throw new Error('Place-Datensatz wurde nicht gefunden. Bitte die Reiseplanung neu laden.');
+ return upsert({tripId:id,tripPlaceId:canonicalTripPlaceId,placeId:rec.place_id,placeType:rec.place_type,fields:updates});
 }
 function subscribe(fn){listeners.add(fn);return()=>listeners.delete(fn)}
 function subscribeRealtime(id=state.tripId||tripId()){

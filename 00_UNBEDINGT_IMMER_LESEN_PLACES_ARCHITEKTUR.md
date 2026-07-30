@@ -494,3 +494,37 @@ Damit gilt:
 - Reload, Reisewechsel, Timeline und externe Detailöffnung verwenden denselben Datensatz,
 - neue Place-Typen benötigen für reine JSON-Felder keine eigene Tabelle und keine parallele lokale Persistenz,
 - eigene Tabellen sind nur zulässig, wenn ein klarer relationaler Fachbedarf besteht und der zentrale Vertrag entsprechend erweitert wird.
+
+
+## Build 13.9.1 / Core 4.9.1 – Globaler Planungsdialog und Insight-Card-Contract
+
+Ab Build 13.9.1 ist die Planung sämtlicher Place-Typen verbindlich vereinheitlicht.
+
+### Globaler Planungsdialog
+
+- `LuviaPlaceExperience.planningEditor(...)` rendert das einzige zulässige Formular für Datum und Uhrzeit.
+- `LuviaTimelineCore.openPlanningEditor(...)` steuert Öffnen, Schließen, Validierung, Enter-Bestätigung, Ladezustand und Fehlermeldungen.
+- `LuviaPlaceUIActions.openTimelineDialog(...)` verwendet denselben Editor für neue Planungseinträge.
+- `LuviaTimelineCore.editEntry(...)` verwendet denselben Editor für nachträgliche Änderungen aus Timeline, Dashboard und den geplanten Karten oberhalb der Place-Suche.
+- Restaurants, Unterkünfte, Sehenswürdigkeiten, Fotospots, Shopping und alle kommenden Place-Typen dürfen keinen eigenen Datumsdialog mehr implementieren.
+- Enter muss das Formular überall genau wie ein Klick auf den primären Speichern-Button absenden.
+- Die Felddefinitionen stammen ausschließlich aus den `timelineRole`-Feldern des jeweiligen Place-Type-Contracts.
+- Unterkünfte erhalten deshalb Check-in und Check-out; punktuelle Places erhalten genau ihr kanonisches Point-Feld.
+
+### Einziger Cloud-Writer und UUID-Schutz
+
+- Planung und Änderungen schreiben ausschließlich über `LuviaPlaceCollections.saveDateFields(...)` und damit über `LuviaTripPlaceData`.
+- `tripId` und `tripPlaceId` müssen vor jedem RPC-Aufruf als gültige UUID geprüft werden.
+- Werte wie `undefined`, leere IDs oder Provider-IDs dürfen niemals an UUID-Parameter von Supabase übergeben werden.
+- Ein unvollständiger Datensatz wird vor dem Netzwerkaufruf mit einer verständlichen UI-Meldung abgebrochen.
+- Rohe Einträge aus `LuviaTripPlaceData.dateEntries(...)` gelten auch ohne zusätzliches `source`-Attribut als Place-Data-Einträge und dürfen niemals in den Legacy-Writer für `trip_schedule_events` geraten.
+- Nach erfolgreichem Speichern werden Timeline, geplantes Panel und aktuelle Modulansicht ohne Reload über die zentralen Events aktualisiert.
+
+### Insight Cards
+
+- Die visuelle Card-Shell ist ausschließlich `LuviaPlaceUI.insightGrid(...)`.
+- Ein Place-Type-Contract aktiviert typabhängige Insight Cards über `capabilities.insightCards` und beschreibt den Abschnitt unter `ui.detail.insightSection`.
+- Ein aktivierter Insight-Card-Typ muss einen Renderer über `LuviaPlaceDetail.registerCapabilityRenderer(...)` registrieren.
+- Conformance muss fehlende Insight-Section-Metadaten oder fehlende Renderer als Architekturverletzung melden.
+- Nicht jeder Place-Typ muss dieselben Inhalte zeigen. Nur fachlich belastbare, typabhängige Informationen dürfen als Karten erscheinen.
+- Restaurants, Unterkünfte und Sehenswürdigkeiten können denselben globalen Renderer künftig für eigene Intelligence-Bereiche nutzen; doppelte Fact-Chips oder erfundene Informationen sind dabei verboten.

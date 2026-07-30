@@ -1,6 +1,6 @@
 const fs=require('fs'),vm=require('vm'),assert=require('assert');
 const context={window:{},console};vm.createContext(context);vm.runInContext(fs.readFileSync('core/places/shopping-intelligence-service.js','utf8'),context);
-const svc=context.window.LuviaShoppingIntelligence;assert(svc&&svc.version==='4.9.0');
+const svc=context.window.LuviaShoppingIntelligence;assert(svc&&svc.version==='4.9.1');
 const market=svc.analyze({name:'Marché local des artisans',types:['market','tourist_attraction'],editorialSummary:'Regional food and handmade gifts'});
 assert.strictEqual(market.shoppingFormat.value,'Markt');
 assert(market.shoppingPurpose.value);

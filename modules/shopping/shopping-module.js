@@ -1,5 +1,5 @@
 (()=>{'use strict';
-const MODULE_ID='shopping',VERSION='4.9.0';
+const MODULE_ID='shopping',VERSION='4.9.1';
 const QUICK=[['🛍️','Entdecken','Shopping und besondere Geschäfte'],['🏬','Einkaufszentren','Einkaufszentren und Kaufhäuser'],['🧺','Märkte','Märkte und Markthallen'],['👗','Mode','Mode Boutiquen und Concept Stores'],['🎁','Souvenirs','Souvenirs und Geschenke'],['🧀','Feinkost','Feinkost regionale Spezialitäten'],['✨','Luxus & Design','Luxus Design und besondere Boutiquen'],['🏷️','Outlet','Outlets und Factory Stores']];
 const state={root:null,trip:null,query:'Shopping und besondere Geschäfte',filter:'Entdecken',options:{},results:[],entities:[],searchMap:new Map(),routeCache:new Map(),loading:false,error:null,visibleCount:6};
 const esc=v=>window.LuviaPlaceExperience?.esc?.(v)||String(v??'');
