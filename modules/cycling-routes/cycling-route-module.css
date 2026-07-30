@@ -1,0 +1,7 @@
+#cycling-routes-module{min-height:100%;font-family:var(--lv-font-body,Manrope,system-ui,sans-serif);color:var(--lv-text,var(--luv-place-ink))}
+#cycling-routes-module .luv-cycling-head{background:linear-gradient(135deg,color-mix(in srgb,var(--rv2-accent) 11%,#fff),#fff)}
+#cycling-routes-module .luv-cycling-media img{object-fit:cover;background:#eef6f2}
+#cycling-routes-module .luv-cycling-card .luv-place-type{letter-spacing:.08em}
+#cycling-routes-module select[name=routeRadius]{min-width:160px}
+.luv-cycling-guidance .luv-place-insight-card.is-featured{border-color:color-mix(in srgb,var(--place-accent) 35%,var(--place-border))}
+@media(max-width:640px){#cycling-routes-module select[name=routeRadius]{width:100%;min-width:0}}

@@ -38,7 +38,7 @@
     return `<div class="lv-today-card is-${esc(t.status||'empty')}">
       <div class="lv-widget-title"><div><h2>Heute</h2><small>${esc(t.dayLoad?.label?`Euer Tag ist ${t.dayLoad.label} geplant`:'Live aus eurem Tagesablauf')}</small></div><span class="lv-live-pulse"></span></div>
       <button type="button" class="lv-today-focus" ${focus?openAttrs(focus):''}>
-        <span class="lv-today-focus-icon">${focus?({restaurant:'🍽️',attraction:'🏛️',activity:'🎟️',photo_spot:'📸',shopping:'🛍️',nature:'🌿'}[focus.entityType]||'📍'):'✨'}</span>
+        <span class="lv-today-focus-icon">${focus?({restaurant:'🍽️',attraction:'🏛️',activity:'🎟️',photo_spot:'📸',shopping:'🛍️',nature:'🌿',cycling_route:'🚵'}[focus.entityType]||'📍'):'✨'}</span>
         <div><span class="lv-today-kicker">${esc(headline)}</span><strong>${esc(focus?(focus.time?`${focus.time} Uhr · `:'')+focus.title:subline)}</strong>${focus?`<small>${esc(subline)}</small>`:''}</div>
       </button>
       ${departure&&t.next?`<div class="lv-today-advice ${departure.status==='late'?'is-alert':''}"><span>⏱</span><div><strong>${departure.status==='late'?'Abfahrt verpasst':departure.status==='leave_now'?'Jetzt losfahren':`Losfahren um ${fmt(departure.recommendedAt)} Uhr`}</strong><small>${departure.travelMinutes==null?'Wegzeit wird noch ergänzt':`${departure.travelMinutes} Min. Weg · ${departure.bufferMinutes} Min. Puffer`}</small></div></div>`:''}

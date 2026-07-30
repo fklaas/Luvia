@@ -1,6 +1,6 @@
 (()=>{
 'use strict';
-const VERSION='4.10.0';
+const VERSION='4.11.0';
 const clean=v=>String(v??'').trim();
 const tripId=v=>clean(v||window.LuviaPlaceRuntime?.snapshot?.().activeTripId||window.LuviaTripContext?.getActiveTrip?.()?.tripId||window.LuviaTripStore?.snapshot?.()?.activeTripId);
 const pending=new Map();

@@ -558,3 +558,48 @@ Pflichttest nach Änderungen am Bootstrap oder Planungsdialog:
 ```
 
 Jeder Typ muss mindestens ein kanonisches Timeline-Feld liefern. Zusätzlich muss `node tests/place-contract-bootstrap-resilience.test.cjs` erfolgreich sein.
+
+## Build 13.11.0 / Core 4.11.0 – Fahrradrouten und MTB-Trail-Vertrag
+
+`cycling_route` ist der erste produktive Place-Typ, dessen kanonische Entity nicht nur einen Punkt, sondern optional eine vollständige Routengeometrie repräsentiert. Trotzdem bleibt er vollständig Teil des Universal Place Systems.
+
+Verbindlich gilt:
+
+- Modul-ID: `cycling_routes`
+- Place-Typ: `cycling_route`
+- Der Planungstermin ist `planned_at` mit `timelineRole: point`.
+- Shell, Karten, Favoriten, Detailkarte, Planung, Timeline, Runtime, Commands, Cloud-Writer, Reiseisolation und Conformance werden ausschließlich global bereitgestellt.
+- `LuviaCyclingRoutes` ist der Browservertrag für `cycling.search`, `cycling.details` und `cycling.health`.
+- Echte Routen werden primär aus OpenStreetMap-Routenrelationen und Trail-Tags geladen. Bikeparks, Trailzentren und Startpunkte aus Google Places sind nur ein ergänzender Fallback und dürfen nicht als vollständige Route ausgegeben werden.
+- `LuviaCyclingRouteIntelligence` ist der einzige fachliche Ableitungsdienst für Routentyp, Länge, Fahrzeit, Schwierigkeit, Untergrund, Routenform, Beschilderung, Höhenprofil, Rad-Empfehlung und Sicherheitscheck.
+- `mtb:scale`, Untergrund, Distanz, Netzwerk und Referenz dürfen nur als sichere Werte erscheinen, wenn sie aus der Quelle oder Geometrie stammen.
+- Höhenmeter, Befahrbarkeit, Sperrungen, Zugangsrechte, Trailzustand und tatsächliche Schwierigkeit dürfen niemals erfunden werden.
+- Die geschätzte Fahrzeit ist als Schätzung zu kennzeichnen und ersetzt keine individuelle Leistungs- oder Sicherheitsplanung.
+- Routengeometrie wird als typabhängiges Feld über den bestehenden Cloudvertrag gespeichert; eine zweite lokale Routenquelle oder eigene Favoriten-/Timeline-Tabelle ist verboten.
+- Die Datenbank-Constraint `places_primary_type_check` muss `cycling_route` enthalten. Dafür ist die Migration `20260730_036_core_v4_11_0_cycling_route_place_type.sql` verbindlicher Bestandteil des Builds.
+- Google-Routes-`BICYCLE` dient nur der Anfahrt beziehungsweise Wegeinformation und ersetzt nicht die OSM-basierte MTB- oder Tourenentdeckung. Der Beta-Hinweis des Providers muss sichtbar bleiben.
+- Bei Ausfall eines öffentlichen Overpass-Endpunkts soll der Gateway einen zweiten Endpunkt versuchen. Die UI darf anschließend kontrolliert auf Bikeparks/Trailzentren zurückfallen, statt die gesamte Places-Shell zu beschädigen.
+
+Produktive Contract-Typen ab diesem Build:
+
+```text
+restaurant
+accommodation
+attraction
+photo_spot
+shopping
+nature
+cycling_route
+```
+
+Pflichttests:
+
+```javascript
+LuviaPlaceUIActions.schema('cycling_route')
+LuviaPlaceRegistry.status('cycling_route')
+LuviaCyclingRoutes.diagnostics()
+LuviaCyclingRouteIntelligence.diagnostics()
+await LuviaPlaceConformance.runAll()
+```
+
+Zusätzlich müssen `node tests/cycling-provider-gateway.test.cjs`, `node tests/cycling-route-intelligence.test.cjs` und `node tests/cycling-route-integration.test.cjs` erfolgreich sein.
