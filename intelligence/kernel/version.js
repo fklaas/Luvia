@@ -1,1 +1,1 @@
-(() => {'use strict';window.LuviaKernelVersion=Object.freeze({core:'4.6.11',build:'13.6.11',name:'Restaurant Favorite Render Closure',channel:'production',builtAt:'2026-07-29T09:13:00+02:00'});window.LuviaCoreVersion=window.LuviaKernelVersion;})();
+(() => {'use strict';window.LuviaKernelVersion=Object.freeze({core:'4.7.0',build:'13.7.0',name:'Restaurant Favorite Render Closure',channel:'production',builtAt:'2026-07-29T09:13:00+02:00'});window.LuviaCoreVersion=window.LuviaKernelVersion;})();

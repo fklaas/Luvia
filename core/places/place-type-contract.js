@@ -1,6 +1,6 @@
 (function(){
 'use strict';
-const VERSION='4.6.11';
+const VERSION='4.7.0';
 const contracts=new Map();
 const CANONICAL_LIFECYCLE=['discovered','favorite','planned','selected','reserved','booked','checked_in','checked_out','visited','rated','rejected','archived'];
 const FIELD_TYPES=['text','textarea','number','boolean','date','time','datetime','select','multiselect','currency','url'];

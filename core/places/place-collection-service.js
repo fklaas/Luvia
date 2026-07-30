@@ -1,6 +1,6 @@
 (()=>{
 'use strict';
-const VERSION='4.6.11';
+const VERSION='4.7.0';
 const CANONICAL=new Set(['idea','discovered','saved','favorite','planned','reserved','selected','booked','checked_in','checked_out','visited','rated','rejected','archived']);
 const MAP={favorited:'favorite',dismissed:'rejected',memory:'visited',travel_book:'visited'};
 const records=new Map();
@@ -14,10 +14,11 @@ const isFavoriteEntity=e=>{const link=entityLink(e);return link?.is_favorite===t
 const providerId=e=>clean(entityPlace(e).providerPlaceId||entityPlace(e).provider_place_id||e?.providerPlaceId||e?.provider_place_id||e?.sourceId||e?.id).replace(/^places\//,'');
 const recordKey=(trip,type,provider,tp)=>`${clean(trip)}|${clean(type)}|${clean(tp)||providerId({providerPlaceId:provider})}`;
 function remember(placeType,items=[],trip=activeTripId()){
+ window.LuviaPlaceRuntime?.ingest?.(placeType,items,trip);
  for(const entity of items||[]){const link=entityLink(entity),provider=providerId(entity),tp=clean(link.id||entity?.tripPlaceId);if(!provider&&!tp)continue;records.set(recordKey(trip,placeType,provider,tp),{tripId:trip,placeType,providerPlaceId:provider,tripPlaceId:tp,isFavorite:isFavoriteEntity(entity),status:normalizeStatus(link.status||link.lifecycle_status||entity?.lifecycleStatus||'idea'),entity});}
 }
 function findRecord({tripId=activeTripId(),placeType,providerPlaceId,tripPlaceId}={}){
- const exact=records.get(recordKey(tripId,placeType,providerPlaceId,tripPlaceId));if(exact)return exact;
+ const runtime=window.LuviaPlaceRuntime?.find?.({tripId,placeType,providerPlaceId,tripPlaceId});if(runtime)return runtime;const exact=records.get(recordKey(tripId,placeType,providerPlaceId,tripPlaceId));if(exact)return exact;
  for(const rec of records.values())if(rec.tripId===clean(tripId)&&rec.placeType===clean(placeType)&&((tripPlaceId&&rec.tripPlaceId===clean(tripPlaceId))||(providerPlaceId&&rec.providerPlaceId===clean(providerPlaceId).replace(/^places\//,''))))return rec;
  return null;
 }
@@ -47,7 +48,7 @@ async function ensureLinked({tripId:id=activeTripId(),placeType,providerPlaceId,
  if(!providerPlaceId)throw new Error('Place-ID fehlt.');
  const response=await window.LuviaPlaceEntities.importPlace(providerPlaceId,{tripId:id,type:placeType,tripPlace:{status:normalizeStatus(initialStatus),isFavorite:Boolean(initialFavorite)},extension});
  const imported=response?.data?.entity||response?.data?.tripPlaceEntity||response?.data||response||{};const linked=entityLink(imported);const rec={tripId:id,placeType,providerPlaceId:providerId(imported)||clean(providerPlaceId),tripPlaceId:clean(linked.id||imported?.tripPlaceId),isFavorite:typeof linked?.is_favorite==='boolean'?linked.is_favorite:(typeof linked?.isFavorite==='boolean'?linked.isFavorite:Boolean(initialFavorite)),status:normalizeStatus(linked.status||linked.lifecycle_status||initialStatus),entity:imported};
- if(!rec.tripPlaceId)throw new Error('Place-Verknüpfung konnte nicht angelegt werden.');records.set(recordKey(id,placeType,rec.providerPlaceId,rec.tripPlaceId),rec);return rec;
+ if(!rec.tripPlaceId)throw new Error('Place-Verknüpfung konnte nicht angelegt werden.');records.set(recordKey(id,placeType,rec.providerPlaceId,rec.tripPlaceId),rec);window.LuviaPlaceRuntime?.upsert?.(rec);return rec;
 }
 async function setFavorite({tripId:id=activeTripId(),placeType,providerPlaceId,tripPlaceId,entity,isFavorite,status,extension={}}={}){
  id=activeTripId(id);placeType=clean(placeType);if(!id||!placeType)throw new Error('Reise und Place-Typ sind erforderlich.');
@@ -60,7 +61,7 @@ async function setFavorite({tripId:id=activeTripId(),placeType,providerPlaceId,t
  const key=`${id}|${placeType}|${rec.tripPlaceId}`;if(pending.has(key))return pending.get(key);
  updateButtons({tripId:id,placeType,providerPlaceId:rec.providerPlaceId,tripPlaceId:rec.tripPlaceId,isFavorite:next});
  const alreadyPersisted=Boolean(!existing?.tripPlaceId&&rec.isFavorite===next&&normalizeStatus(rec.status)===nextStatus);
- const task=(async()=>{try{const response=alreadyPersisted?{ok:true,data:{entity:rec.entity}}:await window.LuviaPlaceEntities.updateLifecycle(rec.tripPlaceId,nextStatus,{isFavorite:next},{tripId:id});const updated=response?.data?.entity||response?.data||rec.entity;const link=entityLink(updated);const finalRec={...rec,entity:updated,isFavorite:typeof link?.is_favorite==='boolean'?link.is_favorite:(typeof link?.isFavorite==='boolean'?link.isFavorite:next),status:normalizeStatus(link.status||link.lifecycle_status||nextStatus),providerPlaceId:providerId(updated)||rec.providerPlaceId};records.set(recordKey(id,placeType,finalRec.providerPlaceId,finalRec.tripPlaceId),finalRec);updateButtons({...finalRec,isFavorite:finalRec.isFavorite});await refresh(id,placeType,{action:next?'favorite-added':'favorite-removed',tripPlaceId:finalRec.tripPlaceId,providerPlaceId:finalRec.providerPlaceId,isFavorite:finalRec.isFavorite,entity:updated});return response}catch(error){updateButtons({tripId:id,placeType,providerPlaceId:rec.providerPlaceId,tripPlaceId:rec.tripPlaceId,isFavorite:Boolean(existing?.isFavorite)});throw error}finally{pending.delete(key)}})();pending.set(key,task);return task;
+ const task=(async()=>{try{const response=alreadyPersisted?{ok:true,data:{entity:rec.entity}}:await window.LuviaPlaceEntities.updateLifecycle(rec.tripPlaceId,nextStatus,{isFavorite:next},{tripId:id});const updated=response?.data?.entity||response?.data||rec.entity;const link=entityLink(updated);const finalRec={...rec,entity:updated,isFavorite:typeof link?.is_favorite==='boolean'?link.is_favorite:(typeof link?.isFavorite==='boolean'?link.isFavorite:next),status:normalizeStatus(link.status||link.lifecycle_status||nextStatus),providerPlaceId:providerId(updated)||rec.providerPlaceId};records.set(recordKey(id,placeType,finalRec.providerPlaceId,finalRec.tripPlaceId),finalRec);window.LuviaPlaceRuntime?.upsert?.(finalRec);updateButtons({...finalRec,isFavorite:finalRec.isFavorite});await refresh(id,placeType,{action:next?'favorite-added':'favorite-removed',tripPlaceId:finalRec.tripPlaceId,providerPlaceId:finalRec.providerPlaceId,isFavorite:finalRec.isFavorite,entity:updated});return response}catch(error){updateButtons({tripId:id,placeType,providerPlaceId:rec.providerPlaceId,tripPlaceId:rec.tripPlaceId,isFavorite:Boolean(existing?.isFavorite)});throw error}finally{pending.delete(key)}})();pending.set(key,task);return task;
 }
 async function toggleFavorite(options={}){const rec=findRecord(options);const desired=typeof options.isFavorite==='boolean'?options.isFavorite:!Boolean(rec?.isFavorite);return setFavorite({...options,isFavorite:desired});}
 async function clearFavorites(placeType,{tripId:id=activeTripId(),tripPlaceIds=[],entities=[]}={}){

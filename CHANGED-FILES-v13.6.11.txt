@@ -1,7 +1,7 @@
 00_UNBEDINGT_IMMER_LESEN_PLACES_ARCHITEKTUR.md
-CHANGED-FILES-v13.6.11.txt
-DEPLOYMENT-v13.6.11.md
-RELEASE-v13.6.11.md
+CHANGED-FILES-v13.7.0.txt
+DEPLOYMENT-v13.7.0.md
+RELEASE-v13.7.0.md
 app/app-shell.js
 core/modules/module-registry.js
 core/places/place-collection-service.js

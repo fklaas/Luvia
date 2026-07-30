@@ -369,7 +369,7 @@ Jeder Favoritenbutton muss durch `LuviaPlaceCollections.favoriteButton(...)` erz
 
 Der globale Core normalisiert sowohl `is_favorite` als auch historische `isFavorite`-Antworten. Module dürfen diese Varianten nicht selbst auswerten. Ereignisse `luvia:place-favorite-changed` und `luvia:place-collection-changed` sind die einzige UI-Synchronisationsschnittstelle.
 
-## 19. Verbindliche Favoriten-Persistenz ab Core 4.6.11
+## 19. Verbindliche Favoriten-Persistenz ab Core 4.7.0
 
 Für alle Place-Typen gilt derselbe atomare Ablauf. Ein noch nicht mit der Reise verknüpfter Provider-Ort wird beim ersten Favoritenklick direkt mit `status: favorite` und `isFavorite: true` importiert. Es ist verboten, zunächst einen unfavorisierten Datensatz zu importieren und anschließend über einen zweiten konkurrierenden Request zu favorisieren.
 
@@ -379,7 +379,7 @@ Nach erfolgreicher Persistenz verteilt `LuviaPlaceCollections` den kanonischen Z
 
 Geschützte Gateway-Aufrufe warten auf die initialisierte Supabase-Sitzung und verwenden ausschließlich das aktuelle Access Token. Ein Request ohne verfügbare Sitzung darf nicht als paralleler anonymer Schreibversuch gestartet werden.
 
-## 20. Restaurant-Favoriten-Rendering ab Core 4.6.11
+## 20. Restaurant-Favoriten-Rendering ab Core 4.7.0
 
 Auch die Darstellung gespeicherter Restaurantfavoriten muss ausschließlich mit den bereits kanonisch aufgelösten Identitäten arbeiten.
 
@@ -399,3 +399,17 @@ Pflichttest nach jeder Änderung an Place-Karten:
 4. Favorit über Discovery- oder Favoritenkarte wieder entfernen.
 5. `Alle entfernen` ausführen.
 6. Prüfen, dass keine `ReferenceError`-Meldung entsteht und alle Karten denselben Zustand zeigen.
+
+
+## Build 13.7.0 – Global Place Runtime & Conformance Closure
+
+Ab Build 13.7.0 gilt zusätzlich verbindlich:
+
+1. `LuviaPlaceRuntime` ist der einzige UI-Laufzeitsnapshot für Place Entities, Trip-Place-Verknüpfungen, Favoriten und reisespezifische Place-Daten. Module dürfen Cloud-Daten nicht als eigene zweite Wahrheit spiegeln.
+2. `LuviaPlaceCommands` ist die einzige Command-Fassade für `favorite`, `unfavorite`, `toggleFavorite`, `clearFavorites`, `plan` und `unplan`.
+3. Restaurant, Unterkunft und Sehenswürdigkeit müssen dieselben Shell-Bausteine verwenden: `LuviaPlaceExperience.discovery`, `LuviaPlaceExperience.plannedPanel`, `LuviaPlaceCollections.favoritePanel`, `LuviaPlaceUI.card`, `LuviaPlaceDetail` und `LuviaPlaceUIActions`.
+4. Lokale Funktionen namens `setFavorite`, `toggleFavorite` oder `clearFavorites` in Place-Modulen sind verboten.
+5. Direkte Lifecycle-Schreibvorgänge mit `isFavorite` aus Modulen sind verboten.
+6. Der Runtime Store ist an eine eindeutige `tripId` gebunden. Ein Reisewechsel darf niemals Datensätze einer vorherigen Reise weiterverwenden.
+7. Conformance muss für alle Module einschließlich Restaurants dieselben Shell-Anforderungen prüfen.
+8. Vor jedem Release ist `node tests/place-architecture-regression.test.cjs` sowie `await LuviaPlaceConformance.runAll()` auszuführen.

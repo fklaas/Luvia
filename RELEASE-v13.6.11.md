@@ -1,4 +1,4 @@
-# Luvia 13.6.11 / Core 4.6.11
+# Luvia 13.7.0 / Core 4.7.0
 
 ## Restaurant Favorite Render Closure
 

@@ -1,6 +1,6 @@
 (() => {
 'use strict';
-const VERSION='4.6.11';
+const VERSION='4.7.0';
 let state={tripId:null,loading:false,records:[],lastUpdatedAt:null,lastError:null};
 let channel=null; const listeners=new Set();
 const clone=v=>v==null?v:JSON.parse(JSON.stringify(v));
@@ -19,7 +19,7 @@ async function hydrate(id=tripId()){
  try{
   const {data,error}=await c.from('trip_place_data').select('*,place:places(*),trip_place:trip_places(*)').eq('trip_id',id);
   if(error)throw error;
-  state.records=(data||[]).map(normalize);state.lastUpdatedAt=new Date().toISOString();emit();return snapshot()
+  state.records=(data||[]).map(normalize);for(const rec of state.records)window.LuviaPlaceRuntime?.setData?.({tripId:id,placeType:rec.place_type,tripPlaceId:rec.trip_place_id,data:rec});state.lastUpdatedAt=new Date().toISOString();emit();return snapshot()
  }catch(error){state.lastError=error.message;emit();throw error}
  finally{state.loading=false}
 }
