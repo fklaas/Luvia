@@ -1,6 +1,6 @@
 (()=>{
 'use strict';
-const VERSION='4.6.8';
+const VERSION='4.6.9';
 const CANONICAL=new Set(['idea','discovered','saved','favorite','planned','reserved','selected','booked','checked_in','checked_out','visited','rated','rejected','archived']);
 const MAP={favorited:'favorite',dismissed:'rejected',memory:'visited',travel_book:'visited'};
 const records=new Map();
@@ -10,10 +10,11 @@ const activeTripId=v=>clean(v||window.LuviaTripContext?.getActiveTrip?.()?.tripI
 const normalizeStatus=v=>{const s=MAP[clean(v)]||clean(v)||'idea';return CANONICAL.has(s)?s:'idea'};
 const entityLink=e=>e?.tripPlace||e?.trip_place||e?.rawEntity?.tripPlace||e?.rawEntity?.trip_place||{};
 const entityPlace=e=>e?.place||e?.rawEntity?.place||e||{};
+const isFavoriteEntity=e=>{const link=entityLink(e);return link?.is_favorite===true||link?.isFavorite===true||e?.is_favorite===true||e?.isFavorite===true};
 const providerId=e=>clean(entityPlace(e).providerPlaceId||entityPlace(e).provider_place_id||e?.providerPlaceId||e?.provider_place_id||e?.sourceId||e?.id).replace(/^places\//,'');
 const recordKey=(trip,type,provider,tp)=>`${clean(trip)}|${clean(type)}|${clean(tp)||providerId({providerPlaceId:provider})}`;
 function remember(placeType,items=[],trip=activeTripId()){
- for(const entity of items||[]){const link=entityLink(entity),provider=providerId(entity),tp=clean(link.id||entity?.tripPlaceId);if(!provider&&!tp)continue;records.set(recordKey(trip,placeType,provider,tp),{tripId:trip,placeType,providerPlaceId:provider,tripPlaceId:tp,isFavorite:link.is_favorite===true||entity?.isFavorite===true,status:normalizeStatus(link.status||link.lifecycle_status||entity?.lifecycleStatus||'idea'),entity});}
+ for(const entity of items||[]){const link=entityLink(entity),provider=providerId(entity),tp=clean(link.id||entity?.tripPlaceId);if(!provider&&!tp)continue;records.set(recordKey(trip,placeType,provider,tp),{tripId:trip,placeType,providerPlaceId:provider,tripPlaceId:tp,isFavorite:isFavoriteEntity(entity),status:normalizeStatus(link.status||link.lifecycle_status||entity?.lifecycleStatus||'idea'),entity});}
 }
 function findRecord({tripId=activeTripId(),placeType,providerPlaceId,tripPlaceId}={}){
  const exact=records.get(recordKey(tripId,placeType,providerPlaceId,tripPlaceId));if(exact)return exact;
@@ -54,7 +55,7 @@ async function setFavorite({tripId:id=activeTripId(),placeType,providerPlaceId,t
  const next=typeof isFavorite==='boolean'?isFavorite:!Boolean(rec.isFavorite);const currentStatus=normalizeStatus(status||rec.status||entityLink(rec.entity).status||entityLink(rec.entity).lifecycle_status||'idea');const nextStatus=next&&['idea','discovered','saved'].includes(currentStatus)?'favorite':(!next&&currentStatus==='favorite'?'discovered':currentStatus);
  const key=`${id}|${placeType}|${rec.tripPlaceId}`;if(pending.has(key))return pending.get(key);
  updateButtons({tripId:id,placeType,providerPlaceId:rec.providerPlaceId,tripPlaceId:rec.tripPlaceId,isFavorite:next});
- const task=(async()=>{try{const response=await window.LuviaPlaceEntities.updateLifecycle(rec.tripPlaceId,nextStatus,{isFavorite:next},{tripId:id});const updated=response?.data?.entity||response?.data||rec.entity;const link=entityLink(updated);const finalRec={...rec,entity:updated,isFavorite:next,status:normalizeStatus(link.status||link.lifecycle_status||nextStatus),providerPlaceId:providerId(updated)||rec.providerPlaceId};records.set(recordKey(id,placeType,finalRec.providerPlaceId,finalRec.tripPlaceId),finalRec);await refresh(id,placeType,{action:next?'favorite-added':'favorite-removed',tripPlaceId:finalRec.tripPlaceId,providerPlaceId:finalRec.providerPlaceId,isFavorite:next,entity:updated});return response}catch(error){updateButtons({tripId:id,placeType,providerPlaceId:rec.providerPlaceId,tripPlaceId:rec.tripPlaceId,isFavorite:rec.isFavorite});throw error}finally{pending.delete(key)}})();pending.set(key,task);return task;
+ const task=(async()=>{try{const response=await window.LuviaPlaceEntities.updateLifecycle(rec.tripPlaceId,nextStatus,{isFavorite:next},{tripId:id});const updated=response?.data?.entity||response?.data||rec.entity;const link=entityLink(updated);const finalRec={...rec,entity:updated,isFavorite:typeof link?.is_favorite==='boolean'?link.is_favorite:(typeof link?.isFavorite==='boolean'?link.isFavorite:next),status:normalizeStatus(link.status||link.lifecycle_status||nextStatus),providerPlaceId:providerId(updated)||rec.providerPlaceId};records.set(recordKey(id,placeType,finalRec.providerPlaceId,finalRec.tripPlaceId),finalRec);await refresh(id,placeType,{action:next?'favorite-added':'favorite-removed',tripPlaceId:finalRec.tripPlaceId,providerPlaceId:finalRec.providerPlaceId,isFavorite:next,entity:updated});return response}catch(error){updateButtons({tripId:id,placeType,providerPlaceId:rec.providerPlaceId,tripPlaceId:rec.tripPlaceId,isFavorite:rec.isFavorite});throw error}finally{pending.delete(key)}})();pending.set(key,task);return task;
 }
 async function toggleFavorite(options={}){const rec=findRecord(options);return setFavorite({...options,isFavorite:typeof options.isFavorite==='boolean'?options.isFavorite:!Boolean(rec?.isFavorite)});}
 async function clearFavorites(placeType,{tripId:id=activeTripId(),tripPlaceIds=[],entities=[]}={}){
@@ -80,5 +81,5 @@ if(!window.__LUVIA_GLOBAL_FAVORITES_BOUND__){
   const button=event.target.closest?.('[data-place-clear-favorites]');if(!button)return;event.preventDefault();event.stopPropagation();event.stopImmediatePropagation();if(button.disabled)return;const type=clean(button.dataset.placeClearFavorites),ids=clean(button.dataset.placeFavoriteTripIds).split(',').filter(Boolean),old=button.textContent;button.disabled=true;button.textContent='Wird entfernt …';try{await clearFavorites(type,{tripId:activeTripId(),tripPlaceIds:ids});window.LuviaUIKit?.toast?.('Alle Favoriten wurden entfernt.',{type:'success'});}catch(error){button.disabled=false;button.textContent=old;window.LuviaUIKit?.toast?.(error.message||'Favoriten konnten nicht entfernt werden.',{type:'error'});}},true);
 }
 function diagnostics(){return{version:VERSION,status:'ready',cloudAuthoritative:true,singleWriter:true,registered:records.size,pending:pending.size,contracts:['one-global-favorite-toggle','one-global-clear-action','canonical-trip-place-id','optimistic-global-state','cross-card-synchronization','favorite-removal-from-mini-cards','no-module-specific-favorite-writes']}}
-window.LuviaPlaceCollections=Object.freeze({version:VERSION,normalizeStatus,remember,findRecord,favoriteButton,setFavorite,toggleFavorite,clearFavorites,saveDateFields,favoritePanel,refresh,diagnostics});
+window.LuviaPlaceCollections=Object.freeze({version:VERSION,normalizeStatus,remember,findRecord,isFavoriteEntity,favoriteButton,setFavorite,toggleFavorite,clearFavorites,saveDateFields,favoritePanel,refresh,diagnostics});
 })();

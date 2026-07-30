@@ -329,7 +329,7 @@ Vor jeder Änderung an Luvia Places muss diese Datei vollständig gelesen werden
 
 ## Verbindliche Regel: Favoriten-Sammelaktionen und Kartenstatus
 
-Stand ab Build 13.6.8 / Core 4.6.8:
+Stand ab Build 13.6.9 / Core 4.6.9:
 
 - `Alle entfernen` wird ausschließlich durch `LuviaPlaceCollections` ausgeführt.
 - Die Sammelaktion darf **nicht** zuerst erneut die komplette Place-Liste vom Gateway laden. Die globale Favorite-Shell übergibt die bereits bekannten kanonischen `tripPlaceId`-Werte direkt an den Collection Core.
@@ -342,7 +342,7 @@ Stand ab Build 13.6.8 / Core 4.6.8:
 Diese Regel gilt gleichermaßen für Restaurants, Unterkünfte, Sehenswürdigkeiten und alle zukünftigen Place-Typen.
 
 
-## 18. Verbindliches globales Favoritensystem (Core 4.6.8)
+## 18. Verbindliches globales Favoritensystem (Core 4.6.9)
 
 Favoriten dürfen ausnahmslos nur über `LuviaPlaceCollections` verändert werden. Die verbindliche UI-Aktion ist `data-place-favorite-toggle`; modulbezogene Schreibaktionen wie `data-rv2-import`, `data-favorite` oder eigene Favoriten-Handler sind für neue Implementierungen verboten.
 
@@ -351,3 +351,20 @@ Jede Favoritenaktion benötigt den Place-Typ und mindestens eine kanonische Iden
 Ein Klick auf einen bereits aktiven Favoritenbutton entfernt den Ort wieder aus den Favoriten. Das gilt für Discovery-Karten, Favoritenkarten und Detailkarten. `Alle entfernen` verwendet denselben zentralen Schreibweg für jeden einzelnen Place. Nach erfolgreichem Entfernen müssen alle Karten desselben Ortes sofort `♡ Favorit` zeigen; ein Reload ist unzulässig.
 
 Module dürfen Favoriten nur darstellen und auf die globalen Events mit einem normalen Daten-Refresh reagieren. Sie dürfen weder einen eigenen Favoriten-Cache als Wahrheit führen noch direkt `place.lifecycle.update`, `place.import` oder `trip_places` für Favoriten aufrufen.
+
+
+## Verbindlicher Favoriten-Writer ab Core 4.6.9
+
+Restaurants, Unterkünfte, Sehenswürdigkeiten und alle zukünftigen Place-Typen verwenden **ausschließlich** `LuviaPlaceCollections`.
+
+Verboten sind insbesondere:
+
+- modulinterne Favoriten-Importfunktionen,
+- eigene Entfernen-Handler,
+- deaktivierte Favoritenbuttons,
+- eigene Favoritencaches als Wahrheit,
+- direkte Lifecycle-Schreibvorgänge für Favoriten aus einem Place-Modul.
+
+Jeder Favoritenbutton muss durch `LuviaPlaceCollections.favoriteButton(...)` erzeugt werden. Jeder Klick wird zentral über `data-place-favorite-toggle` verarbeitet. Ein aktiver Favorit bleibt anklickbar und entfernt den Ort wieder aus der Sammlung. `Alle entfernen` verwendet denselben Writer für jeden einzelnen kanonischen `tripPlaceId`.
+
+Der globale Core normalisiert sowohl `is_favorite` als auch historische `isFavorite`-Antworten. Module dürfen diese Varianten nicht selbst auswerten. Ereignisse `luvia:place-favorite-changed` und `luvia:place-collection-changed` sind die einzige UI-Synchronisationsschnittstelle.

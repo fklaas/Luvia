@@ -1,4 +1,4 @@
-# Tests 13.6.8
+# Tests 13.6.9
 
 1. Favorit auf Discovery-Karte setzen und wieder entfernen.
 2. Dieselbe Aktion in Favoritenkarte und Detailkarte prüfen.

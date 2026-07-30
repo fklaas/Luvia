@@ -1,4 +1,4 @@
-# Luvia 13.6.8 – Global Favorite System
+# Luvia 13.6.9 – Global Favorite System
 
 - Ein einziger globaler Favoriten-Writer für alle Place-Typen.
 - Favoriten können über jede Mini-, Favoriten- und Detailkarte gesetzt und entfernt werden.

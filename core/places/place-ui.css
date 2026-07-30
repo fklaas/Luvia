@@ -35,7 +35,7 @@ html[data-theme=dark] :is(.rv2-head p,.rv2-search-card p,.rv2-search-card small,
 .rv2-detail-primary-actions>button:hover,.luv-place-actions>button:hover{background:color-mix(in srgb,var(--place-accent,var(--trip-accent,var(--lv-accent))) 88%,#000)!important;color:var(--trip-accent-contrast,#fff)!important}
 
 
-/* Build 13.6.8 — canonical Place module shell, collections and planning dialog */
+/* Build 13.6.9 — canonical Place module shell, collections and planning dialog */
 :is(#restaurants-module,#accommodations-module,#attractions-module).luvia-restaurants-v2{font-family:var(--lv-font-body,Manrope,system-ui,sans-serif);color:var(--lv-text,var(--luv-place-ink));--place-accent:var(--trip-accent,var(--module-accent,var(--lv-accent)))}
 :is(#restaurants-module,#accommodations-module,#attractions-module) .rv2-head.rv2-head-new{display:flex;align-items:flex-start;justify-content:space-between;gap:18px}
 :is(#restaurants-module,#accommodations-module,#attractions-module) .rv2-head-copy{min-width:0}
@@ -57,6 +57,6 @@ html[data-theme=dark] :is(.rv2-head p,.rv2-search-card p,.rv2-search-card small,
 .luv-place-plan-dialog .rv2-planning-actions button{min-width:0;white-space:nowrap}
 @media(max-width:520px){.luv-place-plan-dialog{padding:24px 20px 20px!important}.luv-place-plan-dialog>.rv2-experience-close{top:10px!important;right:10px!important}.luv-place-plan-dialog .rv2-planning-actions{display:grid;grid-template-columns:1fr 1fr}.luv-place-plan-dialog .rv2-planning-actions button{width:100%}}
 
-/* Core 4.6.8: one canonical favorite action for every Place surface */
+/* Core 4.6.9: one canonical favorite action for every Place surface */
 :is(#restaurants-module,#accommodations-module,#attractions-module) .luv-place-favorite-toggle{background:var(--place-accent,var(--rv2-accent,var(--lv-accent)))!important;color:var(--luvia-accent-contrast,#fff)!important;border-color:var(--place-accent,var(--rv2-accent,var(--lv-accent)))!important;opacity:1!important;cursor:pointer!important}
 :is(#restaurants-module,#accommodations-module,#attractions-module) .luv-place-favorite-toggle.is-active{background:color-mix(in srgb,var(--place-accent,var(--rv2-accent,var(--lv-accent))) 72%,#fff)!important}

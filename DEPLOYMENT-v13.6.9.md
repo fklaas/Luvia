@@ -4,7 +4,7 @@ Keine SQL-Migration und kein Edge-Function-Deployment erforderlich.
 
 ```bash
 git add .
-git commit -m "refactor(places): enforce one global favorite system"
+git commit -m "fix(places): remove restaurant favorite legacy paths"
 git push
 ```
 
