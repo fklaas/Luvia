@@ -5,7 +5,7 @@
     {id:'attractions',title:'Aktivitäten',longTitle:'Sehenswürdigkeiten & Aktivitäten',icon:'✨',description:'Sehenswürdigkeiten, Museen, Parks und Erlebnisse entdecken und planen.',status:'available',defaultEnabled:true,order:8},
     {id:'photo_spots',title:'Fotospots',longTitle:'Fotospots & Lichtmomente',icon:'📸',description:'Aussichten, Lichtstimmungen und besondere Fotomomente entdecken und planen.',status:'available',defaultEnabled:true,order:9},
     {id:'nature',title:'Natur',longTitle:'Natur & Ausflüge',icon:'🌿',description:'Parks, Landschaften, Wanderwege und besondere Ausflugsziele entdecken und planen.',status:'available',defaultEnabled:true,order:10},
-    {id:'mobility',title:'Mobilität',longTitle:'Transport & Mobilität',icon:'🚉',description:'Bahnhöfe, Nahverkehr, Parken, Laden und weitere Mobilitätspunkte entdecken und planen.',status:'available',defaultEnabled:true,order:11},
+    {id:'mobility',title:'Move',longTitle:'Move · Mobilität',icon:'🚉',description:'An- und Abreise sowie Mobilität vor Ort entdecken und planen.',status:'available',defaultEnabled:true,order:11,domain:'move'},
     {id:'shopping',title:'Shopping',longTitle:'Shopping & besondere Geschäfte',icon:'🛍️',description:'Märkte, Boutiquen, Souvenirs und besondere Einkaufsorte entdecken und planen.',status:'available',defaultEnabled:true,order:12},
     {id:'restaurants',title:'Restaurants',longTitle:'Restaurants & Reservierungen',icon:'🍽️',description:'Restaurants entdecken, speichern und Reservierungen planen.',status:'available',defaultEnabled:true,order:13},
     {id:'maps',title:'Karten',longTitle:'Karten & gespeicherte Orte',icon:'🗺️',description:'Orte, Wege und Reiseziele auf einer gemeinsamen Karte.',status:'planned',defaultEnabled:false,order:20},
@@ -20,12 +20,13 @@
   ];
   const catalog=new Map(entries.map(x=>[x.id,Object.freeze(x)]));
   const available=()=>entries.filter(x=>x.status==='available');
-  const CORE_PLACE_MODULES=Object.freeze(['accommodations','restaurants','attractions','photo_spots','shopping','nature','mobility']);
+  const CORE_PLACE_MODULES=Object.freeze(['accommodations','restaurants','attractions','photo_spots','shopping','nature']);
+  const CORE_MOVE_MODULES=Object.freeze(['mobility']);
   const normalize=ids=>[...new Set((Array.isArray(ids)?ids:[]).filter(id=>catalog.has(id)&&catalog.get(id).status==='available'))];
-  function enabledForTrip(trip){const selected=normalize(trip?.modules||trip?.selectedModules),defaults=available().filter(x=>x.defaultEnabled).map(x=>x.id);return normalize([...CORE_PLACE_MODULES,...defaults,...selected])}
+  function enabledForTrip(trip){const selected=normalize(trip?.modules||trip?.selectedModules),defaults=available().filter(x=>x.defaultEnabled).map(x=>x.id);return normalize([...CORE_PLACE_MODULES,...CORE_MOVE_MODULES,...defaults,...selected])}
   function list(options={}){return entries.filter(x=>options.includePlanned!==false||x.status==='available').sort((a,b)=>a.order-b.order)}
   function get(id){return catalog.get(id)||null}
   function isEnabled(trip,id){return enabledForTrip(trip).includes(id)}
   function updateTripModules(trip,ids){const modules=normalize(ids);return {...trip,modules,selectedModules:modules,updatedAt:new Date().toISOString()}}
-  window.LuviaModuleRegistry=Object.freeze({version:'4.14.0',list,get,normalize,enabledForTrip,isEnabled,updateTripModules});
+  window.LuviaModuleRegistry=Object.freeze({version:'4.15.0',list,get,normalize,enabledForTrip,isEnabled,updateTripModules,domains:Object.freeze({places:CORE_PLACE_MODULES,move:CORE_MOVE_MODULES})});
 })();

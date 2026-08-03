@@ -3,3 +3,15 @@
   font-family: var(--lv-font-body, Manrope, system-ui, sans-serif);
   color: var(--lv-text, var(--luv-place-ink));
 }
+
+.luvia-move-module .move-result-card .luv-place-type {
+  letter-spacing: .11em;
+}
+
+.luvia-move-module .move-result-card .luv-place-description {
+  min-height: 3.1em;
+}
+
+.luvia-move-module .rv2-search-card {
+  min-width: 0;
+}

@@ -1,0 +1,55 @@
+#move-module {
+  min-height: 60vh;
+}
+
+.move-hub-group {
+  margin-top: 34px;
+}
+
+.move-hub-group + .move-hub-group {
+  margin-top: 42px;
+}
+
+.move-hub-group-head {
+  display: grid;
+  gap: 7px;
+  padding: 0 4px;
+}
+
+.move-hub-group-head h2 {
+  margin: 0;
+  color: var(--places-ink, var(--lv-text));
+  font-family: var(--lv-font-display, var(--lv-font-body, Manrope, system-ui, sans-serif));
+  font-size: clamp(1.45rem, 2.6vw, 2rem);
+  line-height: 1.15;
+}
+
+.move-hub-group-head p {
+  margin: 0;
+  color: var(--places-muted, var(--lv-muted));
+  font-size: .96rem;
+  line-height: 1.55;
+}
+
+.move-hub-grid {
+  margin-top: 18px;
+}
+
+.move-hub-tile {
+  min-height: 258px;
+}
+
+.move-experience #mobility-module {
+  min-width: 0;
+}
+
+@media (max-width: 700px) {
+  .move-hub-group,
+  .move-hub-group + .move-hub-group {
+    margin-top: 26px;
+  }
+
+  .move-hub-tile {
+    min-height: 0;
+  }
+}

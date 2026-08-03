@@ -1,7 +1,7 @@
 (() => {
   'use strict';
-  const VERSION=window.LuviaKernelVersion?.core||'4.14.0';
-  const BUILD=window.LuviaKernelVersion?.build||'13.14.0';
+  const VERSION=window.LuviaKernelVersion?.core||'4.15.0';
+  const BUILD=window.LuviaKernelVersion?.build||'13.15.0';
   const now=()=>new Date().toISOString();
   const safe=(fn,fallback=null)=>{try{return fn()}catch(error){return fallback??{error:error?.message||String(error)}}};
   const textBytes=value=>new TextEncoder().encode(String(value||'')).length;
@@ -31,7 +31,7 @@
     test('Photo Spot Adapter',()=>{const status=window.LuviaPlaceRegistry?.status?.('photo_spot')||window.LuviaPlaceRegistry?.diagnostics?.().adapters?.find(item=>item.key==='photo_spot')||{};return{ok:['ready','provider_ready'].includes(status.state),state:status.state||'unknown',reason:status.reason||null}});
     test('Natur Adapter',()=>{const status=window.LuviaPlaceRegistry?.status?.('nature')||window.LuviaPlaceRegistry?.diagnostics?.().adapters?.find(item=>item.key==='nature')||{};return{ok:status.state==='ready',state:status.state||'unknown',reason:status.reason||null}}),
     test('Shopping Adapter',()=>{const status=window.LuviaPlaceRegistry?.status?.('shopping')||window.LuviaPlaceRegistry?.diagnostics?.().adapters?.find(item=>item.key==='shopping')||{};return{ok:status.state==='ready',state:status.state||'unknown',reason:status.reason||null}}),
-    test('Transport & Mobilität Adapter',()=>{const status=window.LuviaPlaceRegistry?.status?.('mobility')||window.LuviaPlaceRegistry?.diagnostics?.().adapters?.find(item=>item.key==='mobility')||{};return{ok:status.state==='ready',state:status.state||'unknown',reason:status.reason||null}});
+    test('Move Adapter',()=>{const status=window.LuviaPlaceRegistry?.status?.('mobility')||window.LuviaPlaceRegistry?.diagnostics?.().adapters?.find(item=>item.key==='mobility')||{};return{ok:status.state==='ready',state:status.state||'unknown',reason:status.reason||null}});
     test('Restaurant Adapter',()=>{const status=window.LuviaPlaceRegistry?.status?.('restaurant')||window.LuviaPlaceRegistry?.diagnostics?.().adapters?.find(item=>item.key==='restaurant')||{};return{ok:status.state==='ready',state:status.state||'unknown',reason:status.reason||null}});
     test('Place UI',()=>({ok:window.LuviaPlaceUI?.diagnostics?.().status==='ready',detail:window.LuviaPlaceUI?.diagnostics?.()}));
     test('Schedule contract',()=>({ok:['upsertEvent','removeEvent','snapshot','analyze'].every(k=>typeof window.LuviaScheduleIntelligence?.[k]==='function')}));

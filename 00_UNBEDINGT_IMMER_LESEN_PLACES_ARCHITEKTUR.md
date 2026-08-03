@@ -600,3 +600,91 @@ await LuviaPlaceConformance.runAll()
 ```
 
 Erwartet werden ein produktiver `mobility`-Adapter, der Capability Renderer `mobility` und keine Conformance-Verletzungen. `cycling_route` darf in keiner produktiven Registry, Shell oder Gateway-Action mehr erscheinen.
+
+## Build 13.15.0 / Core 4.15.0 – Places / Move Domain Separation
+
+`mobility` ist ab diesem Build fachlich kein sichtbarer Bereich der Places-Übersicht mehr. Die Hauptnavigation trennt verbindlich zwischen **Places** und **Move**.
+
+### Verbindliche Navigation
+
+- Dashboard
+- Places
+- Move
+
+Der Name **Places** bleibt bestehen. Eine globale Umbenennung in „Entdecken“ ist mit diesem Build ausdrücklich nicht erfolgt.
+
+### Domain-Zuordnung
+
+`LuviaModuleRegistry.domains.places` enthält ausschließlich:
+
+- `accommodations`
+- `restaurants`
+- `attractions`
+- `photo_spots`
+- `shopping`
+- `nature`
+
+`LuviaModuleRegistry.domains.move` enthält ausschließlich:
+
+- `mobility`
+
+`LuviaPlacesShell` darf `mobility` weder als Kachel rendern noch als Öffnungspfad behandeln. `LuviaMoveShell` ist der einzige sichtbare Domain-Einstieg für Mobilität.
+
+### Keine Kopie des Places-Core
+
+Move ist eine neue fachliche Shell, aber kein zweites technisches System. Verbindlich wiederverwendet werden:
+
+- Place-Entity und Trip-Place-Modell
+- `LuviaPlaceRuntime`
+- `LuviaPlaceCommands`
+- `LuviaPlaceExperience`
+- `LuviaPlaceUI`
+- `LuviaPlaceCollections`
+- `LuviaPlaceDetail`
+- `LuviaPlaceUIActions`
+- `LuviaTripPlaceData`
+- `LuviaTimelineCore`
+- `LuviaPlaceConformance`
+
+Der kanonische Typ bleibt `mobility`. Es dürfen keine Typen wie `flight`, `rail`, `bus` oder `ferry` als parallele Cloud-Domänen eingeführt werden. Die Move-Kacheln konfigurieren lediglich unterschiedliche, streng typisierte Suchansichten desselben Moduls.
+
+### Move-Hub
+
+Die Move-Übersicht verwendet die globalen Hub-Klassen `places-hub`, `places-hub-grid` und `places-hub-tile`. Lokale Kopien von Kachel-, Karten- oder Shell-Komponenten sind verboten.
+
+Die Nutzerführung ist verbindlich in zwei Gruppen gegliedert:
+
+- **An- & Abreise:** Flüge, Bahn, Bus & Fernbus, Fähren
+- **Vor Ort:** Nahverkehr, Taxi & Fahrdienste, Vermietung, Parken & Laden
+
+### Typvalidierung
+
+Jede Move-Suche besitzt eine explizite Provider-Typ-Whitelist. Ein Ergebnis darf nur angezeigt werden, wenn mindestens ein tatsächlicher Google-Place-Typ zum aktiven Suchplan passt.
+
+Insbesondere gilt:
+
+- Flughafen darf nicht in Fähren erscheinen.
+- Bus- oder Bahntreffer dürfen nicht in Flüge erscheinen.
+- Allgemeine untypisierte Treffer sind kein zulässiger Fallback.
+- Ein ehrlicher Leerzustand ist einem fachfremden Ergebnis vorzuziehen.
+
+### Namen und Entfernung
+
+Rohe Provider-Namen dürfen durch die erkannte Verkehrsart verständlich ergänzt werden. Der Originalname wird nicht ersetzt, sondern beispielsweise als `Augustenstraße · Bus` eingeordnet.
+
+Die Discovery-Distanz stammt vom kanonischen Reiseziel beziehungsweise Suchanker. Das Move-Modul darf diese Distanz in der Planungsansicht nicht mit der Entfernung vom aktuellen Gerät überschreiben.
+
+### Echtzeitdaten
+
+Move darf keine Live-Abfahrten, Verspätungen, Gates, Gleise, Belegungen, Preise oder Tarife aus allgemeinen Places-Daten ableiten. Dafür ist künftig eine eigene, vertraglich angebundene Fahrplan- oder Betreiberquelle erforderlich.
+
+### Pflichttests
+
+```bash
+node tests/move-domain-separation.test.cjs
+node tests/mobility-place-integration.test.cjs
+node tests/place-architecture-regression.test.cjs
+node tests/release-version-consistency.test.cjs
+```
+
+Zusätzlich müssen `LuviaPlaceRegistry.status('mobility')`, `LuviaMoveShell.tiles()` und `await LuviaPlaceConformance.runAll()` erfolgreich sein.

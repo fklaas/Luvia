@@ -1,7 +1,7 @@
 (function(){
 'use strict';
-const VERSION='4.14.0';
-const TYPE_META=Object.freeze({restaurant:['🍽️','Restaurant'],accommodation:['🛏️','Unterkunft'],attraction:['🏛️','Sehenswürdigkeit'],photo_spot:['📸','Fotospot'],activity:['✨','Aktivität'],shopping:['🛍️','Shopping'],nature:['🌿','Natur'],family:['👨‍👩‍👧','Familienort'],mobility:['🚉','Transport & Mobilität'],transit:['🚉','Verkehr'],custom:['📍','Eigener Ort']});
+const VERSION='4.15.0';
+const TYPE_META=Object.freeze({restaurant:['🍽️','Restaurant'],accommodation:['🛏️','Unterkunft'],attraction:['🏛️','Sehenswürdigkeit'],photo_spot:['📸','Fotospot'],activity:['✨','Aktivität'],shopping:['🛍️','Shopping'],nature:['🌿','Natur'],family:['👨‍👩‍👧','Familienort'],mobility:['🚉','Move'],transit:['🚉','Verkehr'],custom:['📍','Eigener Ort']});
 const LIFE_LABELS=Object.freeze({discovered:'Entdeckt',saved:'Favorit',favorite:'Favorit',planned:'Geplant',visited:'Besucht',rated:'Bewertet',memory:'Erinnerung',reserved:'Reserviert',idea:'Entdeckt',favorited:'Favorit'});
 const esc=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const score=v=>Math.max(0,Math.min(100,Math.round(Number(v)||0)));

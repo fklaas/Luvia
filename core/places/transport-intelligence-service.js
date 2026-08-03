@@ -1,12 +1,12 @@
 (()=>{'use strict';
-const VERSION='4.14.0';
+const VERSION='4.15.0';
 const field=(value,confidence='mittel',source='Google-Place-Daten')=>({value,confidence,source});
 const text=p=>[p?.name,p?.primaryType,p?.primaryTypeDisplayName,...(p?.types||[]),p?.formattedAddress,p?.editorialSummary].filter(Boolean).join(' ').toLowerCase();
 const typeSet=p=>new Set([p?.primaryType,...(p?.types||[])].filter(Boolean));
 function mode(place={}){
  const t=typeSet(place),s=text(place);
  if(t.has('international_airport')||t.has('airport')||t.has('airstrip')||/airport|flughafen|aéroport|aeroporto/.test(s))return field('Flughafen','hoch','Google-Kategorie');
- if(t.has('train_station')||t.has('train_ticket_office')||/bahnhof|gare|railway|train station/.test(s))return field('Bahn & Fernverkehr','hoch','Google-Kategorie');
+ if(t.has('train_station')||t.has('train_ticket_office')||/bahnhof|gare|railway|train station|reisezentrum/.test(s))return field('Bahn & Fernverkehr','hoch','Google-Kategorie');
  if(t.has('subway_station')||t.has('light_rail_station')||/metro|subway|u-bahn/.test(s))return field('Metro oder Stadtbahn','hoch','Google-Kategorie');
  if(t.has('tram_stop')||/tram|straßenbahn/.test(s))return field('Straßenbahn','hoch','Google-Kategorie');
  if(t.has('bus_station')||t.has('bus_stop')||/bus station|busbahnhof|bushaltestelle/.test(s))return field('Bus','hoch','Google-Kategorie');
@@ -18,7 +18,7 @@ function mode(place={}){
  if(t.has('park_and_ride'))return field('Park-and-Ride','hoch','Google-Kategorie');
  if(t.has('parking_garage'))return field('Parkhaus','hoch','Google-Kategorie');
  if(t.has('parking_lot')||t.has('parking'))return field('Parkplatz','hoch','Google-Kategorie');
- if(t.has('transit_station')||t.has('transit_stop')||t.has('transit_depot'))return field('ÖPNV-Station','hoch','Google-Kategorie');
+ if(t.has('transit_station')||t.has('transit_stop')||t.has('transit_depot')||t.has('transportation_service'))return field('ÖPNV-Station','hoch','Google-Kategorie');
  return field('Mobilitätspunkt','mittel','Name und Google-Place-Typ');
 }
 function role(place={}){
@@ -95,8 +95,8 @@ function analyze(place={},context={}){
  const parkingHint=persisted('parking_hint',parking(place));
  const chargingHint=persisted('charging_hint',charging(place));
  const ticketHint=persisted('ticket_hint',ticket(place));
- return{mobilityMode,transportRole,transferBuffer,accessHint,operatingHint,parkingHint,chargingHint,ticketHint,travelReasons:travelReasons(place),decisionNote:'Luvia zeigt verlässliche Ortsdaten. Live-Abfahrten, Belegung, Preise, Tarife und Verspätungen müssen beim jeweiligen Betreiber geprüft werden.'};
+ return{mobilityMode,transportRole,transferBuffer,accessHint,operatingHint,parkingHint,chargingHint,ticketHint,travelReasons:travelReasons(place),decisionNote:'Move zeigt verlässliche Ortsdaten. Live-Abfahrten, Belegung, Preise, Tarife und Verspätungen müssen beim jeweiligen Betreiber geprüft werden.'};
 }
-function diagnostics(){return{version:VERSION,status:'ready',capability:'mobility',liveTransit:false,providerFields:['accessibilityOptions','parkingOptions','evChargeOptions']}}
+function diagnostics(){return{version:VERSION,status:'ready',capability:'move-mobility',liveTransit:false,providerFields:['accessibilityOptions','parkingOptions','evChargeOptions']}}
 window.LuviaTransportIntelligence=Object.freeze({version:VERSION,analyze,mode,role,buffer,access,operating,parking,charging,ticket,diagnostics});
 })();
