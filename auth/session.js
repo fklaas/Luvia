@@ -137,14 +137,14 @@
     await setFromSession(result.data.session, 'SIGNED_IN');
     return result.data;
   }
-  async function signUp({ email, password, firstName, lastName, displayName }) {
+  async function signUp({ email, password, firstName, lastName, displayName, preferences = null, travelIdea = null }) {
     const name = String(displayName || `${firstName || ''} ${lastName || ''}`).trim();
     const result = await requireClient().auth.signUp({
       email: String(email || '').trim(),
       password: String(password || ''),
       options: {
         emailRedirectTo: window.ParisSupabaseConfig.redirectUrl,
-        data: { first_name: firstName || '', last_name: lastName || '', display_name: name }
+        data: { first_name: firstName || '', last_name: lastName || '', display_name: name, luvia_preferences: preferences || undefined, preference_schema_version: preferences?.preferenceSchemaVersion || preferences?.preferenceVersion || 3, travel_idea: travelIdea || undefined, onboarding_completed_at: preferences?.preferencesCompletedAt || preferences?.travelPreferences?.onboardingCompletedAt || null }
       }
     });
     if (result.error) throw result.error;

@@ -39,8 +39,8 @@ async function hydrate(tripId=activeTripId()){
   state.members={};for(const member of members.data||[]){const id=member.user_id||member.participant_id||member.id,name=member.display_name||member.member_name||member.name||member.email||'Mitreisender';state.members[id]=name;state.members[member.id]=name}
   const allowedEvents=new Set(['place_visited','manual_note','memory','trip_moment']);
   const validVisits=(visitRows.data||[]).filter(x=>linked.has(x.place_id)&&x.arrived_at&&Number(x.duration_seconds||0)>=300&&['visited','left'].includes(x.state));
-  const placeData=window.LuviaTripPlaceData?.dateEntries?.()||[];
-  const schedule=(scheduleRows.data||[]).filter(row=>String(row.entity_type)!=='accommodation');
+  const placeData=(window.LuviaTripPlaceData?.dateEntries?.()||[]).filter(entry=>entry.placeType!=='mobility');
+  const schedule=(scheduleRows.data||[]).filter(row=>!['accommodation','mobility'].includes(String(row.entity_type)));
   state.entries=dedupe([...placeData.map(dataEntry),...schedule.map(scheduleEntry),...(eventRows.data||[]).filter(x=>allowedEvents.has(x.event_type)).map(eventEntry),...validVisits.map(visitEntry)]);
   state.loading=false;state.hydrated=true;emit();return snapshot();
  }catch(error){state.loading=false;state.hydrated=false;state.lastError=error.message||String(error);emit();throw error}

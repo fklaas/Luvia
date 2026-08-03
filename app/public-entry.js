@@ -1,11 +1,11 @@
 (() => {
   'use strict';
 
-  const VERSION = '13.3.0.4';
+  const VERSION = '13.16.1';
   const state = {
     screen: 'home',
     idea: null,
-    registration: { displayName: '', email: '', password: '' }
+    registration: { displayName: '', email: '', password: '', preferences: null }
   };
 
   const ideas = [
@@ -85,16 +85,22 @@
 
   function nameScreen() {
     return stepScreen({
-      key: 'name', back: 'idea', step: '01 von 03', title: 'Wie dürfen wir dich nennen?',
+      key: 'name', back: 'idea', step: '01 von 04', title: 'Wie dürfen wir dich nennen?',
       text: 'Dein Name macht eure gemeinsame Reise persönlicher.',
       field: `<label for="lvName">Dein Name</label><input id="lvName" name="displayName" autocomplete="name" maxlength="80" value="${esc(state.registration.displayName)}" placeholder="Zum Beispiel Fabian" required>`,
-      next: 'email', variant: 'name'
+      next: 'preferences', variant: 'name'
     });
+  }
+
+  function preferencesScreen() {
+    return `<section class="lv-screen lv-screen-preferences" data-screen="preferences" aria-labelledby="lv-preferences-title">
+      <div class="lv-registration-preferences" data-registration-preferences></div>
+    </section>`;
   }
 
   function emailScreen() {
     return stepScreen({
-      key: 'email', back: 'name', step: '02 von 03', title: 'Deine E-Mail',
+      key: 'email', back: 'preferences', step: '03 von 04', title: 'Deine E-Mail',
       text: 'Damit wir deine Reise sicher speichern und auf all deinen Geräten öffnen können.',
       field: `<label for="lvEmail">E-Mail-Adresse</label><input id="lvEmail" name="email" type="email" inputmode="email" autocomplete="email" value="${esc(state.registration.email)}" placeholder="name@beispiel.de" required>`,
       next: 'password', variant: 'email'
@@ -103,7 +109,7 @@
 
   function passwordScreen() {
     return stepScreen({
-      key: 'password', back: 'email', step: '03 von 03', title: 'Erstelle ein Passwort',
+      key: 'password', back: 'email', step: '04 von 04', title: 'Erstelle ein Passwort',
       text: 'Mindestens acht Zeichen. Danach ist deine erste Reiseidee sicher bei Luvia aufgehoben.',
       field: `<label for="lvPassword">Passwort</label><input id="lvPassword" name="password" type="password" autocomplete="new-password" placeholder="Mindestens 8 Zeichen" required><label for="lvPasswordRepeat">Passwort wiederholen</label><input id="lvPasswordRepeat" name="repeat" type="password" autocomplete="new-password" placeholder="Noch einmal eingeben" required>`,
       submit: true, variant: 'password'
@@ -158,7 +164,7 @@
   }
 
   function markup() {
-    return `<main class="lv-entry" data-entry-root>${homeScreen()}${ideaScreen()}${nameScreen()}${emailScreen()}${passwordScreen()}${loginScreen()}${inviteScreen()}</main>`;
+    return `<main class="lv-entry" data-entry-root>${homeScreen()}${ideaScreen()}${nameScreen()}${preferencesScreen()}${emailScreen()}${passwordScreen()}${loginScreen()}${inviteScreen()}</main>`;
   }
 
   function emit() {
@@ -177,6 +183,22 @@
       if (host) {
         host.innerHTML = '';
         window.ParisAuthUI?.renderAuthForm?.(host, 'login');
+      }
+    }
+    if (next === 'preferences') {
+      const host = root.querySelector('[data-registration-preferences]');
+      if (host && window.LuviaGuidedDiscovery) {
+        host.innerHTML = '';
+        window.LuviaGuidedDiscovery.mount(host, {
+          domain: 'onboarding',
+          initialPreferences: state.registration.preferences || {},
+          hideBrowse: true,
+          onCancel: () => show(root, 'name'),
+          onComplete: result => {
+            state.registration.preferences = result.preferences;
+            show(root, 'email');
+          }
+        });
       }
     }
     requestAnimationFrame(() => root.querySelector(`[data-screen="${next}"] input, [data-screen="${next}"] button`)?.focus?.({ preventScroll: true }));
@@ -207,7 +229,7 @@
       event.preventDefault();
       const value = String(new FormData(event.currentTarget).get('displayName') || '').trim();
       if (value.length < 2) return setMessage(event.currentTarget, 'Bitte gib deinen Namen ein.');
-      state.registration.displayName = value; show(root, 'email');
+      state.registration.displayName = value; show(root, 'preferences');
     });
 
     root.querySelector('[data-step-form="email"]')?.addEventListener('submit', event => {
@@ -236,7 +258,9 @@
           password,
           displayName,
           firstName: displayName,
-          lastName: ''
+          lastName: '',
+          preferences: state.registration.preferences,
+          travelIdea: state.idea
         });
         setMessage(form, 'Fast geschafft: Bitte bestätige jetzt die E-Mail von Luvia.', 'success');
       } catch (error) {

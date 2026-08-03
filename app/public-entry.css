@@ -82,3 +82,6 @@ html.lv-public-entry-active,body.lv-public-entry-active{height:100%;overflow:hid
   .lv-entry .lv-step-card h2{font-size:clamp(2rem,9.2vw,2.8rem)}
   .lv-entry .lv-step-card>p{color:#4b5e75!important;font-size:.9rem}
 }
+
+/* Guided registration preferences · v13.16.1 */
+.lv-screen-preferences{background:#fff;overflow:auto}.lv-registration-preferences{min-height:100svh;width:100%}.lv-screen-preferences .gds-sequence{min-height:100svh;border-radius:0}.lv-public-entry-active.gds-overlay-open{overflow:hidden}

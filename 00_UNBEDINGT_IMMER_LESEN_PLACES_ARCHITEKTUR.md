@@ -688,3 +688,58 @@ node tests/release-version-consistency.test.cjs
 ```
 
 Zusätzlich müssen `LuviaPlaceRegistry.status('mobility')`, `LuviaMoveShell.tiles()` und `await LuviaPlaceConformance.runAll()` erfolgreich sein.
+
+---
+
+## Build 13.16.0 · Core 4.16.0 · Guided Discovery
+
+Places und Move besitzen ab diesem Build einen gemeinsamen, globalen Guided-Discovery-Unterbau. Die Sequenz ist kein mehrseitiges Formular, sondern eine zustandsbasierte Vollbildoberfläche mit weichen Szenenübergängen, Gedankenwolken, Reisefarbverläufen, Progress-Route und mobilem Zurück-Wischen.
+
+### Globale Präferenzen
+
+Registrierung, Profil, Places, Move und Recommendation-Services verwenden dieselbe normalisierte Präferenzstruktur. Verbindliche Cloud-Felder bleiben `dietary_preferences` und `travel_preferences`; es dürfen keine lokalen Modulprofile daneben entstehen.
+
+Die Registrierung fragt mindestens Interessen, Ernährung, Reisestil, Aktivitäten, Reisetempo und Budget ab. Das Profil muss alle Angaben jederzeit über denselben Guided Flow änderbar machen.
+
+### Strikte Discovery Contracts
+
+Jeder abgeschlossene Flow erzeugt einen fachlichen Suchvertrag mit erlaubten Google-Typen, ausgeschlossenen Typen, Standortgrenze und Qualitätsanforderungen. Provider-Ergebnisse werden nach der Antwort erneut validiert. Cross-Category-Fallbacks sind verboten. Ein ehrlicher Leerzustand ist verbindlich besser als ein fachfremder Treffer.
+
+### Visuelle Regeln
+
+Jede Gedankenwolke kombiniert die aktive Reisefarbe mit einem deterministisch zugewiesenen Begleitton aus Rosa, Pfirsich, Lavendel, Creme, Mint oder Himmelblau. Animationen müssen weich, mobil flüssig und bei reduzierter Bewegung deaktivierbar sein.
+
+### Move ohne Timeline
+
+Move bleibt vollständig ohne Timeline-Planung. Verboten sind `planned_at`, Planning-Capability, `openTimelineDialog` und die sichtbare Aktion „Zur Timeline“. Move darf nur Details, externe Navigation/Anbieter, Merken und Teilen anbieten.
+
+### Pflichttests 13.16.0
+
+```bash
+node tests/guided-discovery-preferences.test.cjs
+node tests/discovery-contract-strictness.test.cjs
+node tests/guided-discovery-integration.test.cjs
+node tests/move-domain-separation.test.cjs
+node tests/mobility-place-integration.test.cjs
+node tests/release-version-consistency.test.cjs
+```
+
+---
+
+## Build 13.16.1 · Core 4.16.1 · Global User Preference Persistence
+
+Ab diesem Build ist `public.user_profiles` die einzige dauerhafte Source of Truth für globale Benutzerpräferenzen. Die expliziten Präferenzspalten sind führend; `travel_preferences` bleibt ausschließlich als migrationsfähige Legacy-Kompatibilität bestehen. Auth-Metadaten dürfen nur bei Registrierung beziehungsweise einmaliger Migration verwendet werden. Local Storage ist nur Cache und verliert jeden Konflikt gegen den Cloud-Datensatz.
+
+Alle Präferenzzugriffe laufen über `LuviaUserPreferences`. Registrierung, Profil, Places, Move und spätere Recommendation-Services dürfen keine eigenen Feldnamen oder lokalen Präferenzmodelle pflegen.
+
+Verbindliche Pflichttests:
+
+```bash
+node tests/guided-discovery-preferences.test.cjs
+node tests/user-preference-core.test.cjs
+node tests/profile-preference-payload.test.cjs
+node tests/preference-database-migration.test.cjs
+node tests/guided-discovery-integration.test.cjs
+node tests/move-no-timeline-v13.16.1.test.cjs
+node tests/release-version-consistency.test.cjs
+```

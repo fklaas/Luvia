@@ -13,5 +13,5 @@ const charging=service.analyze({name:'Charge Point',primaryType:'electric_vehicl
 assert(/Laden|Ladestation|E-Auto/i.test(charging.mobilityMode.value+' '+charging.chargingHint.value));
 const parking=service.analyze({name:'Parkhaus Zentrum',primaryType:'parking_garage',types:['parking_garage'],parkingOptions:{freeParkingLot:false,paidParkingLot:true}});
 assert(/Park/i.test(parking.mobilityMode.value+parking.parkingHint.value));
-assert(service.diagnostics().version==='4.15.0');
+assert(service.diagnostics().version==='4.16.1');
 console.log('Transport intelligence: OK');

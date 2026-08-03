@@ -1,0 +1,42 @@
+/* Build 13.16.1 – explicit global preferences and Guided Discovery */
+const fs=require('fs');
+const vm=require('vm');
+const assert=require('assert');
+const context=vm.createContext({window:{},console,Date,Math,Object,Array,Set,Map,JSON,String,Number,Boolean,Intl});
+vm.runInContext(fs.readFileSync('core/preferences/preference-schema.js','utf8'),context,{filename:'preference-schema.js'});
+const schema=context.window.LuviaPreferenceSchema;
+assert(schema,'LuviaPreferenceSchema missing');
+assert.strictEqual(schema.profileVersion,3);
+const onboarding=schema.scenes('onboarding',{});
+for(const scene of ['interests','dietary','travelStyles','activityPreferences','entertainmentPreferences','mobilityPreferences','familyPreferences','accessibilityNeeds','pace','budget'])assert(onboarding.some(item=>item.id===scene),`onboarding scene missing: ${scene}`);
+const prefs=schema.preferencesFromAnswers({
+ interests:['culinary','family','photography'],dietary:['vegetarian'],travelStyles:['romantic','planned'],activityPreferences:['indoor','outdoor'],entertainmentPreferences:['live_music'],mobilityPreferences:['rail','walking'],familyPreferences:['baby','stroller'],accessibilityNeeds:['step_free'],pace:['relaxed'],budget:['medium']
+},{});
+assert.deepStrictEqual(Array.from(prefs.dietaryPreferences),['vegetarian']);
+assert.deepStrictEqual(Array.from(prefs.mobilityPreferences),['rail','walking']);
+assert.deepStrictEqual(Array.from(prefs.familyPreferences.needs),['baby','stroller']);
+assert.deepStrictEqual(Array.from(prefs.accessibilityPreferences.needs),['step_free']);
+assert.strictEqual(prefs.preferenceSchemaVersion,3);
+assert(prefs.preferencesCompletedAt&&prefs.preferencesUpdatedAt);
+const patch=schema.toProfilePatch(prefs);
+for(const key of ['dietaryPreferences','travelInterests','travelStyles','activityPreferences','entertainmentPreferences','mobilityPreferences','travelPace','budgetPreference','familyPreferences','accessibilityPreferences','preferenceSchemaVersion','preferencesCompletedAt','preferencesUpdatedAt'])assert(Object.prototype.hasOwnProperty.call(patch,key),`profile patch missing ${key}`);
+const legacy=schema.normalizePreferences({dietary_preferences:['vegan'],travel_preferences:{interests:['nature'],travelStyles:['authentic'],pace:'active',budget:'low',mobilityPreferences:['cycling'],accessibilityNeeds:['quiet_spaces']}});
+assert.deepStrictEqual(Array.from(legacy.dietaryPreferences),['vegan']);
+assert.deepStrictEqual(Array.from(legacy.travelInterests),['nature']);
+assert.deepStrictEqual(Array.from(legacy.mobilityPreferences),['cycling']);
+assert.deepStrictEqual(Array.from(legacy.accessibilityNeeds),['quiet_spaces']);
+const places=schema.buildPlacesContract({intent:['culinary'],subintent:['full_meal'],context:['romantic'],distance:['citywide']},{preferences:prefs});
+assert.strictEqual(places.domain,'places');
+assert.strictEqual(places.strictTypeFiltering,true);
+assert.strictEqual(places.strictDestination,true);
+assert(places.includedTypes.includes('vegetarian_restaurant'),'vegetarian profile is not reflected in Google type contract');
+assert.deepStrictEqual(Array.from(places.profileSelections.dietary),['vegetarian']);
+const move=schema.buildMoveContract({purpose:['arrival'],mode:['ferry'],priorities:['stroller'],distance:['explore_area']},{preferences:prefs});
+assert.strictEqual(move.domain,'move');
+assert.strictEqual(move.placeType,'mobility');
+assert.strictEqual(move.strictTypeFiltering,true);
+assert(move.includedTypes.every(type=>['ferry_terminal','ferry_service'].includes(type)),'ferry flow contains foreign Google types');
+assert.deepStrictEqual(Array.from(move.profileSelections.mobilityPreferences),['rail','walking']);
+assert.deepStrictEqual(Array.from(move.profileSelections.accessibilityNeeds),['step_free']);
+assert(!Object.prototype.hasOwnProperty.call(move,'planned_at'));
+console.log('Explicit global preferences and Guided Discovery schema: OK');
