@@ -1,6 +1,6 @@
 (function(){
 'use strict';
-const VERSION='4.11.2';
+const VERSION='4.12.0';
 const records=new Map();
 const metrics={registered:0,updated:0,removed:0,normalized:0,hydrated:0,imports:0,searches:0,invalid:0,lastError:null};
 const D=()=>window.LuviaPlaceDomain,R=()=>window.LuviaPlaceRegistry;

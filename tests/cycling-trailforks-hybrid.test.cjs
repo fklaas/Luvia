@@ -1,0 +1,13 @@
+const fs=require('fs'),path=require('path'),assert=require('assert');
+const root=path.resolve(__dirname,'..');
+const gateway=fs.readFileSync(path.join(root,'supabase/functions/luvia-gateway/index.ts'),'utf8');
+const provider=fs.readFileSync(path.join(root,'supabase/functions/luvia-gateway/_shared/trailforks.ts'),'utf8');
+const client=fs.readFileSync(path.join(root,'intelligence/cycling-route-service.js'),'utf8');
+const moduleCode=fs.readFileSync(path.join(root,'modules/cycling-routes/cycling-route-module.js'),'utf8');
+assert(gateway.includes("cycling.search.trailforks"));
+assert(provider.includes('TRAILFORKS_APP_ID')&&provider.includes('TRAILFORKS_APP_SECRET'));
+assert(provider.includes("provider:'trailforks'")&&provider.includes('Trail data © Trailforks'));
+assert(client.includes('searchTrailforks')&&client.includes("'cycling.search.trailforks'"));
+assert(moduleCode.includes('Trailforks')&&moduleCode.includes('Wikiloc')&&moduleCode.includes('Komoot'));
+assert(moduleCode.includes('LuviaPlaceExperience.moduleShell'));
+console.log('cycling-trailforks-hybrid: OK');

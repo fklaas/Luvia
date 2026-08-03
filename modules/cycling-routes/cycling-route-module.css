@@ -9,3 +9,11 @@
 @keyframes luvCyclingPulse{to{opacity:.35;transform:scale(.82)}}
 @media(max-width:640px){#cycling-routes-module select[name=routeRadius]{width:100%;min-width:0}}
 @media(prefers-reduced-motion:reduce){#cycling-routes-module .luv-cycling-search-progress span{animation:none}}
+#cycling-routes-module .luv-cycling-media{position:relative}
+#cycling-routes-module .luv-cycling-source-badge{position:absolute;z-index:2;top:.75rem;left:.75rem;display:inline-flex;align-items:center;min-height:1.8rem;padding:.32rem .65rem;border-radius:999px;background:color-mix(in srgb,var(--place-accent,var(--trip-accent)) 88%,#fff);color:#fff;font-size:.72rem;font-weight:800;letter-spacing:.02em;box-shadow:0 .4rem 1rem rgba(20,34,46,.18)}
+#cycling-routes-module .luv-cycling-partners{margin-top:1rem;padding:1rem 1.1rem;border:1px solid var(--place-border);border-radius:var(--place-radius-lg,22px);background:var(--place-surface);display:grid;gap:1rem}
+#cycling-routes-module .luv-cycling-partners h3{margin:.15rem 0 .35rem}
+#cycling-routes-module .luv-cycling-partners p{margin:0;color:var(--lv-muted);font-size:.9rem}
+#cycling-routes-module .luv-cycling-partner-links{display:flex;flex-wrap:wrap;gap:.55rem}
+#cycling-routes-module .luv-cycling-partner-links a{display:inline-flex;align-items:center;min-height:2.4rem;padding:.55rem .8rem;border:1px solid var(--place-border);border-radius:999px;background:var(--place-surface-muted);color:inherit;text-decoration:none;font-weight:750}
+#cycling-routes-module .luv-cycling-partner-links a:hover{border-color:var(--place-accent);transform:translateY(-1px)}

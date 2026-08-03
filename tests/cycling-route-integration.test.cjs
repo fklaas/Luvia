@@ -14,13 +14,15 @@ assert(contract.includes("cyclingIntelligence:true"),'Cycling capability missing
 for(const token of ['LuviaPlaceExperience.moduleShell','LuviaPlaceExperience.discovery','LuviaPlaceCollections.favoritePanel','LuviaPlaceUI.card','LuviaPlaceUIActions.openTimelineDialog'])assert(moduleCode.includes(token),`Global place token missing: ${token}`);
 assert(moduleCode.includes("placeType:'cycling_route'"),'Canonical cycling collection type missing');
 assert(moduleCode.includes("type:TYPE"),'Cycling cloud pipeline missing');
-assert(moduleCode.includes('providerPlace:isOsm(detailed)?detailed:null'),'OSM provider import missing');
+assert(moduleCode.includes('providerPlace:isRouteProvider(detailed)?detailed:null'),'External route provider import missing');
+assert(moduleCode.includes('isGenerated'),'Generated route provider recognition missing');
 assert(moduleCode.includes('registerCapabilityRenderer?.(TYPE'),'Cycling capability renderer missing');
 assert(shell.includes("cycling_routes:{type:'cycling_route'"),'Cycling hub tile missing');
 assert(registry.includes("id:'cycling_routes'"),'Cycling module registry entry missing');
 assert(app.includes('window.LuviaCyclingRouteModule?.openPlace'),'Typed cycling detail routing missing');
 for(const token of ['intelligence/cycling-route-service.js','core/places/cycling-route-intelligence-service.js','modules/cycling-routes/cycling-route-module.js'])assert(index.includes(token),`${token} not loaded`);
 assert(gateway.includes('routeRelationsQuery'),'OSM bicycle/MTB relation discovery missing');
+assert(gateway.includes('cycling.search.generated')&&gateway.includes('cycling-mountain'),'Generated round-trip provider missing');
 assert(gateway.includes('function routeProfile')&&gateway.includes('function matchTier'),'Cycling profile logic missing');
 assert(entityGateway.includes('payload?.providerPlace'),'Generic non-Google provider import missing');
 assert(migration.includes("'cycling_route'"),'Database place type constraint missing cycling_route');

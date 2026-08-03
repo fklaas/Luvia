@@ -691,3 +691,27 @@ Der Runtime-Test beweist mit simulierten Providerdaten, dass:
 - eine allgemeine Radroutenrelation bei fehlenden MTB-Relationen transparent als Fallback erhalten bleibt,
 - unbenannte MTB-Wege zu einem echten `trail_area` gebündelt werden,
 - ein Trailgebiet niemals als vollständige Route ausgegeben wird.
+
+---
+
+## Build 13.12.0 / Core 4.12.0 – Verbindliche Hybrid-Regel für Fahrradrouten
+
+Fahrradrouten dürfen nicht ausschließlich aus vorhandenen OSM-Routenrelationen oder Trail-Tags abgeleitet werden. Diese Daten sind regional unterschiedlich vollständig und können deshalb trotz korrekter Abfrage zu leeren oder fachlich schwachen Ergebnissen führen.
+
+Der Place-Typ `cycling_route` verwendet ab Build 13.12.0 verbindlich eine hybride Providerstrategie:
+
+1. **Für die Reise erzeugte Rundtouren** über openrouteservice,
+2. vorhandene ausgeschilderte OSM-Routenrelationen,
+3. vorhandene MTB-/Gravel-Wegmerkmale und Trailgebiete,
+4. Trailzentren, Bikeparks und geeignete Startpunkte über die globale Places-Pipeline.
+
+Erzeugte Rundtouren sind vollwertige kanonische `cycling_route`-Entities. Sie verwenden dieselbe globale Shell, Karten, Favoriten, Detailkarte, Timeline, Commands, Cloud-Persistenz und Conformance wie jeder andere Place. Es existiert kein paralleles Tourenmodul und keine lokale Tourendatenbank.
+
+Erzeugte Touren müssen sichtbar als **„Für euch erstellt“** gekennzeichnet sein. Sie dürfen niemals als redaktionell kuratierte, offiziell ausgeschilderte oder garantiert legal befahrbare Tour ausgegeben werden. Sperrungen, Wegzustand und Befahrbarkeit bleiben vor Ort zu prüfen.
+
+Openrouteservice wird ausschließlich serverseitig über das Supabase-Secret `OPENROUTESERVICE_API_KEY` angesprochen. Der Schlüssel darf nicht im Frontend, in Runtime-Konfigurationen oder in Providerdaten auftauchen.
+
+Die erzeugte Route speichert ihre vollständige Geometrie, Distanz, Routingzeit, verfügbare Höhenangaben, Profil, Seed und Providerattribution über die bestehende universelle Place- und `trip_place_data`-Pipeline. Eine neue Fahrradrouten-Tabelle ist verboten.
+
+## Build 13.12.0 / Core 4.12.0 — Cycling Provider Contract
+`cycling_route` bleibt ein normaler globaler Place. Trailforks, openrouteservice und OSM sind ausschließlich Provider. Provider dürfen niemals eigene Karten, Favoriten, Detailseiten, Timeline- oder Speicherpfade anlegen. Nicht integrierte Anbieter werden nur als externe Deep Links angeboten.

@@ -1,10 +1,10 @@
 (function(){
 'use strict';
-const VERSION='4.11.2';
+const VERSION='4.12.0';
 const TYPES=Object.freeze(['restaurant','accommodation','attraction','photo_spot','activity','shopping','nature','cycling_route','family','mobility','transit','custom']);
 const LIFECYCLES=Object.freeze(['discovered','saved','favorite','planned','visited','rated','memory']);
 const VISIT_STATES=Object.freeze(['nearby','arrived','stay_detected','visited','left']);
-const SOURCES=Object.freeze(['local','google_places','supabase','restaurant_compatibility','openstreetmap','user']);
+const SOURCES=Object.freeze(['local','google_places','supabase','restaurant_compatibility','openstreetmap','openrouteservice','user']);
 const CAPABILITIES=Object.freeze(['recommendations','nearby','alternatives','timeline','visit_detection','notes','photos','favorites','ratings','memories','realtime','offline']);
 const clean=v=>String(v??'').trim();
 const uniq=a=>[...new Set((Array.isArray(a)?a:[]).map(clean).filter(Boolean))];

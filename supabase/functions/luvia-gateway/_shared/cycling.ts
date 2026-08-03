@@ -3,9 +3,11 @@ const DEFAULT_ENDPOINTS = [
   'https://overpass.kumi.systems/api/interpreter'
 ];
 
-const VERSION = '4.11.2';
+const VERSION = '4.12.0';
 const ROUTE_PROVIDER_TIMEOUT_MS = 5200;
 const TRAIL_PROVIDER_TIMEOUT_MS = 5600;
+const ORS_PROVIDER_TIMEOUT_MS = 9000;
+const ORS_ENDPOINT = String(Deno.env.get('OPENROUTESERVICE_BASE_URL') || 'https://api.openrouteservice.org/v2/directions').trim();
 const MAX_RADIUS_METERS = 300000;
 const cache = new Map<string, { expires: number; value: any }>();
 const metrics = {
@@ -15,6 +17,8 @@ const metrics = {
   timeouts: 0,
   routeSearches: 0,
   trailSearches: 0,
+  generatedSearches: 0,
+  generatedRoutes: 0,
   lastRequestAt: null as string | null,
   lastSuccessAt: null as string | null,
   lastError: null as unknown,
@@ -29,6 +33,14 @@ const wait = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
 function endpoints() {
   const configured = clean(Deno.env.get('OVERPASS_API_URL'));
   return [...new Set([configured, ...DEFAULT_ENDPOINTS].filter(Boolean))];
+}
+
+function orsKey() {
+  return clean(Deno.env.get('OPENROUTESERVICE_API_KEY') || Deno.env.get('ORS_API_KEY'));
+}
+
+function orsConfigured() {
+  return Boolean(orsKey());
 }
 
 function center(payload: any) {
@@ -159,7 +171,8 @@ function resultKindLabel(kind: string) {
     trail_segment: 'Trailsegment',
     trail_area: 'Trailgebiet',
     trail_center: 'Trailzentrum',
-    cycling_area: 'Fahrradgebiet'
+    cycling_area: 'Fahrradgebiet',
+    generated_round_trip: 'Für euch erstellte Rundtour'
   } as Record<string, string>)[kind] || 'Fahrradroute';
 }
 
@@ -370,6 +383,251 @@ function matchesSemantic(route: any, query: string) {
     route.routeData?.resultKindLabel
   ].filter(Boolean).join(' ').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
   return words.every(word => text.includes(word));
+}
+
+const SURFACE_LABELS: Record<string, string> = {
+  '0': 'Unbekannt', '1': 'Befestigt', '2': 'Unbefestigt', '3': 'Asphalt', '4': 'Beton',
+  '5': 'Kopfsteinpflaster', '6': 'Metall', '7': 'Holz', '8': 'Verdichteter Schotter',
+  '9': 'Feiner Schotter', '10': 'Schotter', '11': 'Erde', '12': 'Naturboden',
+  '14': 'Pflastersteine', '15': 'Sand', '17': 'Gras'
+};
+
+function internalProfile(value: string) {
+  const profile = clean(value).toLowerCase();
+  return ['mtb', 'gravel', 'city', 'family', 'touring'].includes(profile) ? profile : 'touring';
+}
+
+function generationPresets(profileValue = 'all') {
+  const profile = clean(profileValue).toLowerCase();
+  const preset = (internal: string, ors: string, length: number, seed: number, points: number, steepness: number) => ({ internal, ors, length, seed, points, steepness });
+  if (profile === 'mtb') return [
+    preset('mtb', 'cycling-mountain', 16000, 17, 5, 1),
+    preset('mtb', 'cycling-mountain', 26000, 43, 6, 2),
+    preset('mtb', 'cycling-mountain', 40000, 71, 7, 2),
+    preset('mtb', 'cycling-mountain', 58000, 97, 8, 3)
+  ];
+  if (profile === 'gravel') return [
+    preset('gravel', 'cycling-mountain', 24000, 13, 5, 1),
+    preset('gravel', 'cycling-mountain', 40000, 37, 6, 1),
+    preset('gravel', 'cycling-mountain', 62000, 61, 7, 2),
+    preset('gravel', 'cycling-mountain', 85000, 89, 8, 2)
+  ];
+  if (profile === 'city') return [
+    preset('city', 'cycling-regular', 8000, 11, 4, 0),
+    preset('city', 'cycling-regular', 14000, 31, 5, 0),
+    preset('city', 'cycling-regular', 22000, 59, 6, 1),
+    preset('city', 'cycling-regular', 32000, 83, 6, 1)
+  ];
+  if (profile === 'family') return [
+    preset('family', 'cycling-regular', 7000, 7, 4, 0),
+    preset('family', 'cycling-regular', 12000, 29, 5, 0),
+    preset('family', 'cycling-regular', 20000, 53, 6, 0),
+    preset('family', 'cycling-regular', 28000, 79, 6, 1)
+  ];
+  if (profile === 'touring') return [
+    preset('touring', 'cycling-regular', 20000, 19, 5, 1),
+    preset('touring', 'cycling-regular', 35000, 41, 6, 1),
+    preset('touring', 'cycling-regular', 55000, 67, 7, 2),
+    preset('touring', 'cycling-regular', 80000, 101, 8, 2)
+  ];
+  return [
+    preset('city', 'cycling-regular', 14000, 23, 5, 0),
+    preset('touring', 'cycling-regular', 32000, 47, 6, 1),
+    preset('gravel', 'cycling-mountain', 38000, 73, 6, 1),
+    preset('mtb', 'cycling-mountain', 26000, 109, 6, 2)
+  ];
+}
+
+function simplifyCoordinates(coordinates: any[] = [], limit = 320) {
+  const valid = coordinates.filter(point => Array.isArray(point) && finite(point[0]) !== null && finite(point[1]) !== null);
+  if (valid.length <= limit) return valid;
+  const step = Math.max(1, Math.ceil(valid.length / limit));
+  return valid.filter((_, index) => index % step === 0 || index === valid.length - 1);
+}
+
+function extraSummary(extras: any, key: string) {
+  const value = extras?.[key] || extras?.[`${key}s`] || null;
+  return Array.isArray(value?.summary) ? value.summary : [];
+}
+
+function dominantSurface(extras: any) {
+  const summary = extraSummary(extras, 'surface')
+    .map((item: any) => ({ id: String(item.value), amount: Number(item.amount || item.distance || 0) }))
+    .sort((a: any, b: any) => b.amount - a.amount);
+  return summary.length ? (SURFACE_LABELS[summary[0].id] || `Oberfläche ${summary[0].id}`) : null;
+}
+
+function surfaceMix(extras: any) {
+  return extraSummary(extras, 'surface')
+    .map((item: any) => ({ label: SURFACE_LABELS[String(item.value)] || `Oberfläche ${item.value}`, amount: Number(item.amount || item.distance || 0) }))
+    .sort((a: any, b: any) => b.amount - a.amount)
+    .slice(0, 4);
+}
+
+function generatedDifficulty(profile: string, extras: any, ascent: number | null, distanceMeters: number | null) {
+  const steep = extraSummary(extras, 'steepness').map((item: any) => Math.abs(Number(item.value))).filter(Number.isFinite);
+  const maximum = steep.length ? Math.max(...steep) : 0;
+  const climbRatio = ascent && distanceMeters ? ascent / Math.max(1, distanceMeters / 1000) : 0;
+  if (profile === 'family' || profile === 'city') return maximum >= 4 || climbRatio > 18 ? 'Moderat' : 'Leicht';
+  if (profile === 'mtb') return maximum >= 5 || climbRatio > 28 ? 'Anspruchsvoll' : maximum >= 3 || climbRatio > 16 ? 'Moderat' : 'Leicht bis moderat';
+  if (profile === 'gravel') return maximum >= 4 || climbRatio > 22 ? 'Moderat bis anspruchsvoll' : 'Leicht bis moderat';
+  return maximum >= 4 || climbRatio > 20 ? 'Moderat' : 'Leicht bis moderat';
+}
+
+function generatedName(profile: string, distanceMeters: number, destinationName: string) {
+  const label = profile === 'mtb' ? 'MTB-Runde' : profile === 'gravel' ? 'Gravel-Runde' : profile === 'city' ? 'City-Runde' : profile === 'family' ? 'Familienrunde' : 'Radtour';
+  const km = Math.max(1, Math.round(distanceMeters / 1000));
+  return `${label} · ${km} km${destinationName ? ` bei ${destinationName}` : ''}`;
+}
+
+async function fetchOrsRoundTrip(start: any, preset: any, destinationName: string) {
+  const apiKey = orsKey();
+  if (!apiKey) throw Object.assign(new Error('Openrouteservice ist noch nicht konfiguriert.'), { code: 'ORS_API_KEY_MISSING', status: 503 });
+  const controller = new AbortController();
+  const timer = setTimeout(() => controller.abort('provider-timeout'), ORS_PROVIDER_TIMEOUT_MS);
+  const started = Date.now();
+  try {
+    const response = await fetch(`${ORS_ENDPOINT}/${preset.ors}/geojson`, {
+      method: 'POST',
+      headers: { 'Authorization': apiKey, 'Content-Type': 'application/json', 'Accept': 'application/json', 'User-Agent': `Luvia-Travel-App/${VERSION}` },
+      body: JSON.stringify({
+        coordinates: [[Number(start.longitude), Number(start.latitude)]],
+        elevation: true,
+        instructions: false,
+        preference: 'recommended',
+        extra_info: ['surface', 'waytype', 'steepness', 'suitability', 'traildifficulty'],
+        options: {
+          avoid_features: preset.internal === 'mtb' ? ['steps'] : ['steps', 'fords'],
+          round_trip: { length: preset.length, points: preset.points, seed: preset.seed },
+          profile_params: { weightings: { steepness_difficulty: preset.steepness } }
+        }
+      }),
+      signal: controller.signal
+    });
+    const body = await response.json().catch(() => ({}));
+    if (!response.ok) {
+      const message = body?.error?.message || body?.message || `openrouteservice ${response.status}`;
+      throw Object.assign(new Error(message), { code: 'ORS_ROUTE_FAILED', status: response.status });
+    }
+    const feature = body?.features?.[0];
+    const coordinates = simplifyCoordinates(feature?.geometry?.coordinates || []);
+    if (!feature || coordinates.length < 2) throw Object.assign(new Error('openrouteservice hat keine Routengeometrie geliefert.'), { code: 'ORS_ROUTE_EMPTY', status: 502 });
+    const properties = feature.properties || {};
+    const summary = properties.summary || {};
+    const distanceMeters = Math.round(Number(summary.distance || preset.length));
+    const durationMinutes = Math.max(1, Math.round(Number(summary.duration || 0) / 60));
+    const elevationValues = coordinates.map((point: any[]) => finite(point[2])).filter((value: number | null): value is number => value !== null);
+    let calculatedAscent = 0;
+    let calculatedDescent = 0;
+    for (let index = 1; index < elevationValues.length; index++) {
+      const delta = elevationValues[index] - elevationValues[index - 1];
+      if (delta > 0) calculatedAscent += delta;
+      else calculatedDescent += Math.abs(delta);
+    }
+    const ascent = finite(properties.ascent ?? summary.ascent) ?? (elevationValues.length > 1 ? Math.round(calculatedAscent) : null);
+    const descent = finite(properties.descent ?? summary.descent) ?? (elevationValues.length > 1 ? Math.round(calculatedDescent) : null);
+    const profile = internalProfile(preset.internal);
+    const centerPoint = coordinates[0];
+    const generatedId = `ors-roundtrip-${profile}-${preset.length}-${preset.seed}-${hash([Number(start.latitude).toFixed(4), Number(start.longitude).toFixed(4)])}`;
+    const geometrySegments = [coordinates.map((point: any[]) => ({ lat: Number(point[1]), lon: Number(point[0]), elevation: finite(point[2]) }))];
+    const surface = dominantSurface(properties.extras);
+    const route = {
+      id: generatedId,
+      providerPlaceId: generatedId,
+      provider: 'openrouteservice',
+      source: 'openrouteservice',
+      sourceId: generatedId,
+      name: generatedName(profile, distanceMeters, destinationName),
+      displayName: generatedName(profile, distanceMeters, destinationName),
+      formattedAddress: destinationName || '',
+      shortAddress: destinationName || '',
+      description: 'Von Luvia für dieses Reiseziel berechnete Rundtour. Der Verlauf basiert auf dem routbaren Wegenetz und ist keine redaktionell kuratierte oder ausgeschilderte Tour.',
+      editorialSummary: 'Für euch erstellte Rundtour mit vollständiger Geometrie, Fahrzeit und Höhenprofil.',
+      location: { latitude: Number(centerPoint[1]), longitude: Number(centerPoint[0]) },
+      primaryType: 'cycling_route',
+      primaryTypeLabel: profileLabel(profile),
+      types: ['cycling_route', profile, 'generated_round_trip'],
+      mapsUri: `https://www.openstreetmap.org/?mlat=${Number(centerPoint[1]).toFixed(6)}&mlon=${Number(centerPoint[0]).toFixed(6)}#map=13/${Number(centerPoint[1]).toFixed(6)}/${Number(centerPoint[0]).toFixed(6)}`,
+      website: null,
+      rating: null,
+      userRatingCount: 0,
+      openNow: null,
+      photos: [],
+      matchScore: profile === 'mtb' ? 96 : profile === 'gravel' ? 94 : 92,
+      routeData: {
+        profile,
+        profileLabel: profileLabel(profile),
+        resultKind: 'generated_round_trip',
+        resultKindLabel: 'Für euch erstellte Rundtour',
+        matchTier: 'exact',
+        requestedProfile: profile,
+        isCompleteRoute: true,
+        canLoadDetails: false,
+        generated: true,
+        roundTrip: true,
+        distanceMeters,
+        estimatedDurationMinutes: durationMinutes,
+        elevationGainMeters: ascent,
+        elevationLossMeters: descent,
+        elevationSource: 'openrouteservice Höhenprofil',
+        surface,
+        surfaceMix: surfaceMix(properties.extras),
+        difficulty: generatedDifficulty(profile, properties.extras, ascent, distanceMeters),
+        geometrySegments,
+        geometryPointCount: coordinates.length,
+        generationProfile: preset.ors,
+        generationSeed: preset.seed,
+        generationTargetLengthMeters: preset.length,
+        generationDurationMs: Date.now() - started,
+        qualityScore: profile === 'mtb' ? 96 : profile === 'gravel' ? 94 : 92,
+        dataConfidence: 'hoch',
+        source: 'openrouteservice',
+        attribution: '© openrouteservice.org by HeiGIT | Map data © OpenStreetMap contributors'
+      },
+      raw: { provider: 'openrouteservice', preset, attribution: body?.metadata?.attribution || 'openrouteservice.org by HeiGIT', engine: body?.metadata?.engine || null }
+    };
+    metrics.generatedRoutes++;
+    return route;
+  } finally {
+    clearTimeout(timer);
+  }
+}
+
+async function generatedSearch(payload: any) {
+  const destinationCenter = center(payload);
+  const anchorRaw = payload?.anchor || {};
+  const anchorLat = finite(anchorRaw.latitude ?? anchorRaw.lat);
+  const anchorLon = finite(anchorRaw.longitude ?? anchorRaw.lng);
+  const start = anchorLat !== null && anchorLon !== null ? { latitude: anchorLat, longitude: anchorLon } : destinationCenter;
+  const profile = clean(payload?.profile || 'all').toLowerCase();
+  const destinationName = clean(payload?.destination?.displayName || payload?.destination?.name || '');
+  const presets = generationPresets(profile).slice(0, Math.max(1, Math.min(4, Number(payload?.maxGeneratedResultCount || 4))));
+  const key = `generated:${hash([start, profile, presets.map(item => [item.ors, item.length, item.seed])])}`;
+  const hit = cached(key);
+  if (hit) return { data: hit, cache: { hit: true, key } };
+  metrics.generatedSearches++;
+  if (!orsConfigured()) {
+    const value = { routes: [], provider: 'openrouteservice', stage: 'generated', configured: false, warning: 'Für zuverlässig erzeugte Rundtouren fehlt noch das Supabase-Secret OPENROUTESERVICE_API_KEY.', summary: { selectedCount: 0, resultMode: 'not_configured' }, attribution: '© openrouteservice.org by HeiGIT | Map data © OpenStreetMap contributors', generatedAt: new Date().toISOString(), searchContext: { start, profile } };
+    return { data: value, cache: { hit: false, key } };
+  }
+  const started = Date.now();
+  const settled = await Promise.allSettled(presets.map(preset => fetchOrsRoundTrip(start, preset, destinationName)));
+  const routes = settled.filter((item): item is PromiseFulfilledResult<any> => item.status === 'fulfilled').map(item => item.value);
+  const failures = settled.filter(item => item.status === 'rejected').map((item: any) => item.reason?.message || String(item.reason));
+  const value = {
+    routes,
+    provider: 'openrouteservice',
+    stage: 'generated',
+    configured: true,
+    warning: failures.length ? `${failures.length} Routenvorschlag${failures.length === 1 ? '' : 'e'} konnten nicht berechnet werden.` : null,
+    summary: { exactCount: routes.length, relatedCount: 0, fallbackCount: 0, selectedCount: routes.length, resultMode: routes.length ? 'generated' : 'empty' },
+    attribution: '© openrouteservice.org by HeiGIT | Map data © OpenStreetMap contributors',
+    generatedAt: new Date().toISOString(),
+    durationMs: Date.now() - started,
+    searchContext: { start, profile, presets: presets.map(item => ({ profile: item.ors, length: item.length, seed: item.seed })) }
+  };
+  store(key, value, 6 * 60 * 60_000);
+  return { data: value, cache: { hit: false, key } };
 }
 
 function routeRelationsQuery(latitude: number, longitude: number, radius: number) {
@@ -643,21 +901,25 @@ export async function cyclingAction(action: string, payload: any) {
         service: 'cycling-routes',
         version: VERSION,
         configured: true,
+        generatedProviderConfigured: orsConfigured(),
         providers: {
           routeRelations: 'openstreetmap-overpass',
           trailFeatures: 'openstreetmap-overpass',
+          generatedRoundTrips: orsConfigured() ? 'openrouteservice' : 'not-configured',
           approachRouting: 'google-routes-bicycle'
         },
         pipeline: {
           stagedDiscovery: true,
-          actions: ['cycling.search.routes', 'cycling.search.trails', 'cycling.search'],
+          actions: ['cycling.search.generated', 'cycling.search.routes', 'cycling.search.trails', 'cycling.search'],
           broadenWhenExactEmpty: true,
-          unnamedTrailClustering: true
+          unnamedTrailClustering: true,
+          generatedRoundTrips: true
         },
         performance: {
           parallelEndpoints: true,
           routeProviderTimeoutMs: ROUTE_PROVIDER_TIMEOUT_MS,
           trailProviderTimeoutMs: TRAIL_PROVIDER_TIMEOUT_MS,
+          generatedProviderTimeoutMs: ORS_PROVIDER_TIMEOUT_MS,
           defaultRadiusMeters: 150000,
           maxRadiusMeters: MAX_RADIUS_METERS
         },
@@ -667,6 +929,7 @@ export async function cyclingAction(action: string, payload: any) {
     };
   }
 
+  if (action === 'cycling.search.generated') return generatedSearch(payload);
   if (action === 'cycling.search.routes') return routeSearch(payload);
   if (action === 'cycling.search.trails') return trailSearch(payload);
 
@@ -674,24 +937,25 @@ export async function cyclingAction(action: string, payload: any) {
     const profile = clean(payload?.profile || 'all').toLowerCase();
     const query = clean(payload?.query);
     const maxResultCount = Number(payload?.maxResultCount || 36);
-    const [routes, trails] = await Promise.all([routeSearch(payload), trailSearch(payload)]);
-    const merged = mergeStageResults([routes, trails], profile, query, maxResultCount);
+    const [generated, routes, trails] = await Promise.all([generatedSearch(payload), routeSearch(payload), trailSearch(payload)]);
+    const merged = mergeStageResults([generated, routes, trails], profile, query, maxResultCount);
     return {
       data: {
         routes: merged.selected,
-        provider: 'openstreetmap-overpass',
+        provider: 'hybrid-cycling',
         stage: 'combined',
-        warning: [routes?.data?.warning, trails?.data?.warning].filter(Boolean).join(' ') || null,
+        warning: [generated?.data?.warning, routes?.data?.warning, trails?.data?.warning].filter(Boolean).join(' ') || null,
         summary: merged.summary,
         stages: {
+          generated: generated?.data?.summary || null,
           routes: routes?.data?.summary || null,
           trails: trails?.data?.summary || null
         },
-        attribution: '© OpenStreetMap-Mitwirkende',
+        attribution: '© openrouteservice.org by HeiGIT | Map data © OpenStreetMap contributors; © OpenStreetMap-Mitwirkende',
         generatedAt: new Date().toISOString(),
-        searchContext: routes?.data?.searchContext || trails?.data?.searchContext || null
+        searchContext: generated?.data?.searchContext || routes?.data?.searchContext || trails?.data?.searchContext || null
       },
-      cache: { hit: Boolean(routes?.cache?.hit && trails?.cache?.hit) }
+      cache: { hit: Boolean(generated?.cache?.hit && routes?.cache?.hit && trails?.cache?.hit) }
     };
   }
 
@@ -733,20 +997,24 @@ export function cyclingDiagnostics() {
   return {
     version: VERSION,
     configured: true,
+    generatedProviderConfigured: orsConfigured(),
     providers: {
       routeRelations: 'openstreetmap-overpass',
       trailFeatures: 'openstreetmap-overpass',
+      generatedRoundTrips: orsConfigured() ? 'openrouteservice' : 'not-configured',
       approachRouting: 'google-routes-bicycle'
     },
     pipeline: {
       stagedDiscovery: true,
       broadenWhenExactEmpty: true,
-      unnamedTrailClustering: true
+      unnamedTrailClustering: true,
+      generatedRoundTrips: true
     },
     performance: {
       parallelEndpoints: true,
       routeProviderTimeoutMs: ROUTE_PROVIDER_TIMEOUT_MS,
       trailProviderTimeoutMs: TRAIL_PROVIDER_TIMEOUT_MS,
+      generatedProviderTimeoutMs: ORS_PROVIDER_TIMEOUT_MS,
       defaultRadiusMeters: 150000,
       maxRadiusMeters: MAX_RADIUS_METERS
     },

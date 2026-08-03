@@ -1,7 +1,7 @@
 (function(){
 'use strict';
 
-const VERSION='4.11.2';
+const VERSION='4.12.0';
 const CACHE_TTL=10*60_000;
 const SEARCH_TIMEOUT_MS=7600;
 const state={requests:0,successes:0,failures:0,cacheHits:0,lastError:null,lastResult:null,cache:new Map()};
@@ -85,8 +85,20 @@ async function searchRoutes(query='',options={}){
   return searchStage('cycling.search.routes',query,options);
 }
 
+async function searchTrailforks(query='',options={}){
+  return searchStage('cycling.search.trailforks',query,{...options,timeoutMs:Number(options.timeoutMs)||7600});
+}
+
 async function searchTrails(query='',options={}){
   return searchStage('cycling.search.trails',query,options);
+}
+
+async function searchGenerated(query='',options={}){
+  const target=await resolvedTarget(options);
+  const payload=searchPayload(query,target,options);
+  if(options.anchor?.latitude!=null&&options.anchor?.longitude!=null)payload.anchor={latitude:Number(options.anchor.latitude),longitude:Number(options.anchor.longitude)};
+  payload.maxGeneratedResultCount=Math.max(1,Math.min(4,Number(options.maxGeneratedResultCount)||4));
+  return call('cycling.search.generated',payload,{timeoutMs:Number(options.timeoutMs)||11000});
 }
 
 function providerId(value={}){return String(value.providerPlaceId||value.provider_place_id||value.id||'');}
@@ -103,21 +115,23 @@ function mergeResponses(responses=[],max=36){
 }
 
 async function search(query='',options={}){
-  const [routes,trails]=await Promise.allSettled([
+  const [trailforks,generated,routes,trails]=await Promise.allSettled([
+    searchTrailforks(query,options),
+    searchGenerated(query,options),
     searchRoutes(query,options),
     searchTrails(query,options)
   ]);
-  const successful=[routes,trails].filter(item=>item.status==='fulfilled').map(item=>item.value);
-  if(!successful.length)throw routes.reason||trails.reason||new Error('Fahrradrouten konnten nicht geladen werden.');
+  const successful=[trailforks,generated,routes,trails].filter(item=>item.status==='fulfilled').map(item=>item.value);
+  if(!successful.length)throw generated.reason||routes.reason||trails.reason||new Error('Fahrradrouten konnten nicht geladen werden.');
   const merged=mergeResponses(successful,Number(options.maxResultCount)||36);
   return{
     ok:true,
     data:{
       routes:merged,
-      provider:'openstreetmap-overpass',
+      provider:'hybrid-cycling',
       stage:'combined-client',
       warning:successful.map(response=>response?.data?.warning).filter(Boolean).join(' ')||null,
-      stages:{routes:routes.status==='fulfilled'?routes.value?.data?.summary:null,trails:trails.status==='fulfilled'?trails.value?.data?.summary:null}
+      stages:{trailforks:trailforks.status==='fulfilled'?trailforks.value?.data?.summary:null,generated:generated.status==='fulfilled'?generated.value?.data?.summary:null,routes:routes.status==='fulfilled'?routes.value?.data?.summary:null,trails:trails.status==='fulfilled'?trails.value?.data?.summary:null}
     }
   };
 }
@@ -140,8 +154,8 @@ function diagnostics(){
   return{
     version:VERSION,
     status:window.LuviaBackend?'ready':'degraded',
-    providers:{routeRelations:'openstreetmap-overpass',trailFeatures:'openstreetmap-overpass',approachRouting:'google-routes-bicycle'},
-    pipeline:{stagedDiscovery:true,actions:['cycling.search.routes','cycling.search.trails'],broadenWhenExactEmpty:true,unnamedTrailClustering:true},
+    providers:{curatedMtbTrails:'trailforks-approved-api',generatedRoundTrips:'openrouteservice',routeRelations:'openstreetmap-overpass',trailFeatures:'openstreetmap-overpass',approachRouting:'google-routes-bicycle'},
+    pipeline:{stagedDiscovery:true,actions:['cycling.search.trailforks','cycling.search.generated','cycling.search.routes','cycling.search.trails'],generatedRoundTrips:true,broadenWhenExactEmpty:true,unnamedTrailClustering:true},
     performance:{searchTimeoutMs:SEARCH_TIMEOUT_MS,cacheTtlMs:CACHE_TTL,defaultRadiusMeters:150000,recommendedMtbRadiusMeters:200000,maxRadiusMeters:300000},
     metrics:{requests:state.requests,successes:state.successes,failures:state.failures,cacheHits:state.cacheHits,cacheEntries:state.cache.size},
     lastError:state.lastError,
@@ -149,5 +163,5 @@ function diagnostics(){
   };
 }
 
-window.LuviaCyclingRoutes=Object.freeze({version:VERSION,search,searchRoutes,searchTrails,details,health,recommendedRadius,clearSearchCache,diagnostics});
+window.LuviaCyclingRoutes=Object.freeze({version:VERSION,search,searchTrailforks,searchGenerated,searchRoutes,searchTrails,details,health,recommendedRadius,clearSearchCache,diagnostics});
 })();
