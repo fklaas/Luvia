@@ -2,7 +2,9 @@ const fs=require('fs');
 const vm=require('vm');
 const assert=require('assert');
 const ts=require('/opt/nvm/versions/node/v22.16.0/lib/node_modules/typescript/lib/typescript.js');
-const source=fs.readFileSync('supabase/functions/luvia-gateway/_shared/cycling.ts','utf8');
+let source=fs.readFileSync('supabase/functions/luvia-gateway/_shared/cycling.ts','utf8');
+source=source.replace(/^import\s+\{[^\n]+\}\s+from\s+'\.\/cycling-google\.ts';\s*/,'');
+source="const googleCyclingSearch=async()=>({data:{routes:[],anchors:[],summary:{selectedCount:0,anchorCount:0}}}); const googleCyclingDiagnostics=()=>({configured:false});\n"+source;
 const compiled=ts.transpileModule(source,{compilerOptions:{target:ts.ScriptTarget.ES2022,module:ts.ModuleKind.CommonJS}}).outputText;
 const calls=[];
 const context={

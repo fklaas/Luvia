@@ -1,9 +1,10 @@
+import { googleCyclingSearch, googleCyclingDiagnostics } from './cycling-google.ts';
 const DEFAULT_ENDPOINTS = [
   'https://overpass-api.de/api/interpreter',
   'https://overpass.kumi.systems/api/interpreter'
 ];
 
-const VERSION = '4.12.0';
+const VERSION = '4.13.0';
 const ROUTE_PROVIDER_TIMEOUT_MS = 5200;
 const TRAIL_PROVIDER_TIMEOUT_MS = 5600;
 const ORS_PROVIDER_TIMEOUT_MS = 9000;
@@ -901,19 +902,22 @@ export async function cyclingAction(action: string, payload: any) {
         service: 'cycling-routes',
         version: VERSION,
         configured: true,
-        generatedProviderConfigured: orsConfigured(),
+        generatedProviderConfigured: Boolean(googleCyclingDiagnostics().configured || orsConfigured()),
         providers: {
+          primaryDiscovery: googleCyclingDiagnostics().configured ? 'google-places-and-routes' : 'not-configured',
+          generatedRoundTrips: orsConfigured() ? 'openrouteservice' : 'optional-not-configured',
           routeRelations: 'openstreetmap-overpass',
           trailFeatures: 'openstreetmap-overpass',
-          generatedRoundTrips: orsConfigured() ? 'openrouteservice' : 'not-configured',
           approachRouting: 'google-routes-bicycle'
         },
         pipeline: {
           stagedDiscovery: true,
-          actions: ['cycling.search.generated', 'cycling.search.routes', 'cycling.search.trails', 'cycling.search'],
+          actions: ['cycling.search.google', 'cycling.search.generated', 'cycling.search.routes', 'cycling.search.trails', 'cycling.search'],
           broadenWhenExactEmpty: true,
           unnamedTrailClustering: true,
-          generatedRoundTrips: true
+          generatedRoundTrips: true,
+          guaranteedPrimaryResults: true,
+          googleAnchorDiscovery: true
         },
         performance: {
           parallelEndpoints: true,
@@ -923,12 +927,14 @@ export async function cyclingAction(action: string, payload: any) {
           defaultRadiusMeters: 150000,
           maxRadiusMeters: MAX_RADIUS_METERS
         },
+        google: googleCyclingDiagnostics(),
         metrics: { ...metrics },
         cache: { entries: cache.size }
       }
     };
   }
 
+  if (action === 'cycling.search.google') return googleCyclingSearch(payload);
   if (action === 'cycling.search.generated') return generatedSearch(payload);
   if (action === 'cycling.search.routes') return routeSearch(payload);
   if (action === 'cycling.search.trails') return trailSearch(payload);
@@ -937,25 +943,28 @@ export async function cyclingAction(action: string, payload: any) {
     const profile = clean(payload?.profile || 'all').toLowerCase();
     const query = clean(payload?.query);
     const maxResultCount = Number(payload?.maxResultCount || 36);
-    const [generated, routes, trails] = await Promise.all([generatedSearch(payload), routeSearch(payload), trailSearch(payload)]);
-    const merged = mergeStageResults([generated, routes, trails], profile, query, maxResultCount);
+    const [google, generated, routes, trails] = await Promise.allSettled([googleCyclingSearch(payload), generatedSearch(payload), routeSearch(payload), trailSearch(payload)]);
+    const fulfilled = [google, generated, routes, trails].filter((item: any) => item.status === 'fulfilled').map((item: any) => item.value);
+    if (!fulfilled.length) throw Object.assign(new Error('Keine Fahrradrouten-Quelle war erreichbar.'), { code: 'CYCLING_ALL_PROVIDERS_FAILED', status: 502 });
+    const merged = mergeStageResults(fulfilled, profile, query, maxResultCount);
     return {
       data: {
         routes: merged.selected,
         provider: 'hybrid-cycling',
         stage: 'combined',
-        warning: [generated?.data?.warning, routes?.data?.warning, trails?.data?.warning].filter(Boolean).join(' ') || null,
+        warning: fulfilled.map((stage: any) => stage?.data?.warning).filter(Boolean).join(' ') || null,
         summary: merged.summary,
         stages: {
-          generated: generated?.data?.summary || null,
-          routes: routes?.data?.summary || null,
-          trails: trails?.data?.summary || null
+          google: google.status === 'fulfilled' ? google.value?.data?.summary || null : null,
+          generated: generated.status === 'fulfilled' ? generated.value?.data?.summary || null : null,
+          routes: routes.status === 'fulfilled' ? routes.value?.data?.summary || null : null,
+          trails: trails.status === 'fulfilled' ? trails.value?.data?.summary || null : null
         },
-        attribution: '© openrouteservice.org by HeiGIT | Map data © OpenStreetMap contributors; © OpenStreetMap-Mitwirkende',
+        attribution: 'Orts- und Routendaten © Google; © openrouteservice.org by HeiGIT | Map data © OpenStreetMap contributors; © OpenStreetMap-Mitwirkende',
         generatedAt: new Date().toISOString(),
-        searchContext: generated?.data?.searchContext || routes?.data?.searchContext || trails?.data?.searchContext || null
+        searchContext: google.status === 'fulfilled' ? google.value?.data?.searchContext : generated.status === 'fulfilled' ? generated.value?.data?.searchContext : routes.status === 'fulfilled' ? routes.value?.data?.searchContext : trails.status === 'fulfilled' ? trails.value?.data?.searchContext : null
       },
-      cache: { hit: Boolean(generated?.cache?.hit && routes?.cache?.hit && trails?.cache?.hit) }
+      cache: { hit: fulfilled.every((stage: any) => Boolean(stage?.cache?.hit)) }
     };
   }
 
@@ -997,18 +1006,21 @@ export function cyclingDiagnostics() {
   return {
     version: VERSION,
     configured: true,
-    generatedProviderConfigured: orsConfigured(),
+    generatedProviderConfigured: Boolean(googleCyclingDiagnostics().configured || orsConfigured()),
     providers: {
+      primaryDiscovery: googleCyclingDiagnostics().configured ? 'google-places-and-routes' : 'not-configured',
       routeRelations: 'openstreetmap-overpass',
       trailFeatures: 'openstreetmap-overpass',
-      generatedRoundTrips: orsConfigured() ? 'openrouteservice' : 'not-configured',
+      generatedRoundTrips: orsConfigured() ? 'openrouteservice' : 'optional-not-configured',
       approachRouting: 'google-routes-bicycle'
     },
     pipeline: {
       stagedDiscovery: true,
       broadenWhenExactEmpty: true,
       unnamedTrailClustering: true,
-      generatedRoundTrips: true
+      generatedRoundTrips: true,
+      guaranteedPrimaryResults: true,
+      googleAnchorDiscovery: true
     },
     performance: {
       parallelEndpoints: true,
@@ -1018,6 +1030,7 @@ export function cyclingDiagnostics() {
       defaultRadiusMeters: 150000,
       maxRadiusMeters: MAX_RADIUS_METERS
     },
+    google: googleCyclingDiagnostics(),
     metrics: { ...metrics },
     cache: { entries: cache.size }
   };

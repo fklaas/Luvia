@@ -1,4 +1,4 @@
-const VERSION='4.12.0';
+const VERSION='4.13.0';
 const TIMEOUT_MS=6500;
 const CACHE_TTL_MS=15*60_000;
 const memory=new Map<string,{expires:number,value:any}>();

@@ -20,7 +20,7 @@ const PLACE_ENTITY_ACTIONS=new Set(['place.health','place.list','place.import','
 const RESTAURANT_ACTIONS=new Set(['restaurant.health','restaurant.list','restaurant.history','restaurant.import','restaurant.lifecycle.update','restaurant.feedback','restaurant.remove','restaurant.clear']);
 const SCHEDULE_ACTIONS=new Set(['schedule.list','schedule.upsert','schedule.delete']);
 const ROUTES_ACTIONS=new Set(['routes.compute']);
-const CYCLING_ACTIONS=new Set(['cycling.health','cycling.search','cycling.search.generated','cycling.search.routes','cycling.search.trails','cycling.search.trailforks','cycling.details']);
+const CYCLING_ACTIONS=new Set(['cycling.health','cycling.search','cycling.search.google','cycling.search.generated','cycling.search.routes','cycling.search.trails','cycling.search.trailforks','cycling.details']);
 const RECOMMENDATION_ACTIONS=new Set(['recommendation.health','recommendation.store','recommendation.event','recommendation.decision','recommendation.list','recommendation.events','recommendation.learning.reset']);
 
 Deno.serve(async(req:Request)=>{
@@ -65,7 +65,7 @@ Deno.serve(async(req:Request)=>{
     let data:unknown;
     switch(action){
       case 'system.health':
-        data={status:'ok',service:'luvia-gateway',version:'4.12.0',build:'13.12.0',core:'4.12.0',time:new Date().toISOString(),authenticated:Boolean(userId),places:placesDiagnostics(),restaurants:restaurantDiagnostics(),recommendations:recommendationDiagnostics(),cycling:{...cyclingDiagnostics(),trailforks:trailforksDiagnostics()}};
+        data={status:'ok',service:'luvia-gateway',version:'4.13.0',build:'13.13.0',core:'4.13.0',time:new Date().toISOString(),authenticated:Boolean(userId),places:placesDiagnostics(),restaurants:restaurantDiagnostics(),recommendations:recommendationDiagnostics(),cycling:{...cyclingDiagnostics(),trailforks:trailforksDiagnostics()}};
         break;
       default:
         if(PLACES_ACTIONS.has(action)){

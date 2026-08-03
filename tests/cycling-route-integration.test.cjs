@@ -6,6 +6,7 @@ const registry=fs.readFileSync('core/modules/module-registry.js','utf8');
 const app=fs.readFileSync('app/app-shell.js','utf8');
 const index=fs.readFileSync('index.html','utf8');
 const gateway=fs.readFileSync('supabase/functions/luvia-gateway/_shared/cycling.ts','utf8');
+const googleGateway=fs.readFileSync('supabase/functions/luvia-gateway/_shared/cycling-google.ts','utf8');
 const entityGateway=fs.readFileSync('supabase/functions/luvia-gateway/_shared/place-entities.ts','utf8');
 const migration=fs.readFileSync('supabase/migrations/20260730_036_core_v4_11_0_cycling_route_place_type.sql','utf8');
 assert(contract.includes("type:'cycling_route',moduleKey:'cycling_routes'"),'Cycling route contract missing');
@@ -22,6 +23,7 @@ assert(registry.includes("id:'cycling_routes'"),'Cycling module registry entry m
 assert(app.includes('window.LuviaCyclingRouteModule?.openPlace'),'Typed cycling detail routing missing');
 for(const token of ['intelligence/cycling-route-service.js','core/places/cycling-route-intelligence-service.js','modules/cycling-routes/cycling-route-module.js'])assert(index.includes(token),`${token} not loaded`);
 assert(gateway.includes('routeRelationsQuery'),'OSM bicycle/MTB relation discovery missing');
+assert(gateway.includes('cycling.search.google')&&googleGateway.includes("travelMode: 'BICYCLE'"),'Google-first bicycle route generation missing');
 assert(gateway.includes('cycling.search.generated')&&gateway.includes('cycling-mountain'),'Generated round-trip provider missing');
 assert(gateway.includes('function routeProfile')&&gateway.includes('function matchTier'),'Cycling profile logic missing');
 assert(entityGateway.includes('payload?.providerPlace'),'Generic non-Google provider import missing');

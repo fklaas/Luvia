@@ -694,24 +694,45 @@ Der Runtime-Test beweist mit simulierten Providerdaten, dass:
 
 ---
 
-## Build 13.12.0 / Core 4.12.0 – Verbindliche Hybrid-Regel für Fahrradrouten
+## Build 13.13.0 / Core 4.13.0 – Google-First Cycling Routes Rebuild
 
-Fahrradrouten dürfen nicht ausschließlich aus vorhandenen OSM-Routenrelationen oder Trail-Tags abgeleitet werden. Diese Daten sind regional unterschiedlich vollständig und können deshalb trotz korrekter Abfrage zu leeren oder fachlich schwachen Ergebnissen führen.
+Der Place-Typ `cycling_route` wird ab diesem Build nicht mehr von vorhandenen Tourendaten abhängig gemacht. OpenStreetMap-Routenrelationen, Trailforks-Daten und openrouteservice sind wertvolle Ergänzungen, dürfen aber niemals Voraussetzung dafür sein, dass der Nutzer überhaupt Fahrradtouren erhält.
 
-Der Place-Typ `cycling_route` verwendet ab Build 13.12.0 verbindlich eine hybride Providerstrategie:
+### Verbindlicher primärer Datenweg
 
-1. **Für die Reise erzeugte Rundtouren** über openrouteservice,
-2. vorhandene ausgeschilderte OSM-Routenrelationen,
-3. vorhandene MTB-/Gravel-Wegmerkmale und Trailgebiete,
-4. Trailzentren, Bikeparks und geeignete Startpunkte über die globale Places-Pipeline.
+1. **Google Places API (New)** sucht im kanonischen Reiseziel nach passenden Parks, Naturgebieten, Bikeparks, Trailzentren, Sehenswürdigkeiten und anderen sinnvollen Tourankern.
+2. **Google Routes API** berechnet daraus beziehungsweise aus kontrolliert erzeugten Wegpunkten mehrere echte Fahrradstrecken mit `travelMode: BICYCLE`.
+3. Kann die Place-Suche keine geeigneten Anker liefern oder antwortet sie zu langsam, erzeugt der serverseitige Cycling-Provider geometrisch verteilte Wegpunkte um das Reiseziel. Die Routenberechnung darf deshalb nicht auf eine vollständige Places-Antwort warten.
+4. Openrouteservice, Trailforks und OpenStreetMap starten anschließend ausschließlich als optionale Ergänzungen für spezialisiertes MTB-/Gravel-Routing, kuratierte Trails, ausgeschilderte Routen und Trailgebiete.
 
-Erzeugte Rundtouren sind vollwertige kanonische `cycling_route`-Entities. Sie verwenden dieselbe globale Shell, Karten, Favoriten, Detailkarte, Timeline, Commands, Cloud-Persistenz und Conformance wie jeder andere Place. Es existiert kein paralleles Tourenmodul und keine lokale Tourendatenbank.
+Google-generierte Strecken sind kanonische `cycling_route`-Entities und durchlaufen ausnahmslos die vorhandenen globalen Systeme für Shell, Karten, Detailkarte, Favoriten, Timeline, Commands, Cloud-Persistenz, Reiseisolation und Conformance. Eine lokale Fahrradrouten-Shell, ein eigener Favoritenspeicher oder eine parallele Timeline bleiben verboten.
 
-Erzeugte Touren müssen sichtbar als **„Für euch erstellt“** gekennzeichnet sein. Sie dürfen niemals als redaktionell kuratierte, offiziell ausgeschilderte oder garantiert legal befahrbare Tour ausgegeben werden. Sperrungen, Wegzustand und Befahrbarkeit bleiben vor Ort zu prüfen.
+### Wahrheits- und Sicherheitsregeln
 
-Openrouteservice wird ausschließlich serverseitig über das Supabase-Secret `OPENROUTESERVICE_API_KEY` angesprochen. Der Schlüssel darf nicht im Frontend, in Runtime-Konfigurationen oder in Providerdaten auftauchen.
+- Google-Routen werden sichtbar als **„Für euch erstellt“** beziehungsweise **„Für euch berechnet“** gekennzeichnet.
+- Das Fahrradprofil von Google Routes ist keine kuratierte MTB-Traildatenbank. Bei MTB und Gravel müssen Trailstatus, Schwierigkeit, Oberfläche, Sperrungen und rechtliche Befahrbarkeit ausdrücklich als vor Ort zu prüfen gekennzeichnet werden.
+- Ohne belastbare Providerdaten dürfen keine Höhenmeter, MTB-Skala, Wegoberfläche oder Bewertungen erfunden werden.
+- Google-Places-Anker sind `cycling_anchor` und keine vollständigen Touren. Sie dürfen favorisiert und geplant werden, müssen in der Detailkarte aber als Startpunkt beziehungsweise Fahrradziel bezeichnet sein.
+- Das System muss auch bei einem Ausfall von Trailforks, openrouteservice oder Overpass weiterhin Google-Routen liefern.
+- Wenn die Places API langsam ist, beginnt die Routenberechnung spätestens nach einer kurzen begrenzten Wartezeit mit synthetischen Wegpunkten.
+- Öffentliche API-Schlüssel bleiben ausschließlich im Supabase Gateway. Im Browsercode dürfen keine Google-, Trailforks- oder openrouteservice-Schlüssel vorkommen.
 
-Die erzeugte Route speichert ihre vollständige Geometrie, Distanz, Routingzeit, verfügbare Höhenangaben, Profil, Seed und Providerattribution über die bestehende universelle Place- und `trip_place_data`-Pipeline. Eine neue Fahrradrouten-Tabelle ist verboten.
+### Provider- und UI-Contract
 
-## Build 13.12.0 / Core 4.12.0 — Cycling Provider Contract
-`cycling_route` bleibt ein normaler globaler Place. Trailforks, openrouteservice und OSM sind ausschließlich Provider. Provider dürfen niemals eigene Karten, Favoriten, Detailseiten, Timeline- oder Speicherpfade anlegen. Nicht integrierte Anbieter werden nur als externe Deep Links angeboten.
+`cycling_route` bleibt ein normaler globaler Place. Provider dürfen niemals eigene Karten, Favoriten, Detailseiten, Timeline- oder Speicherpfade anlegen. Nicht integrierte Anbieter werden ausschließlich als externe Deep Links angeboten.
+
+Die Pflichtdiagnose lautet:
+
+```javascript
+await LuviaBackend.request('cycling.health', {})
+```
+
+Dabei muss `google.providers.places` und `google.providers.routes` den tatsächlichen Konfigurationsstand melden. Zusätzlich müssen erfolgreich sein:
+
+```bash
+node tests/cycling-discovery-runtime.test.cjs
+node tests/cycling-discovery-rebuild.test.cjs
+node tests/cycling-search-performance.test.cjs
+```
+
+Der Runtime-Test beweist, dass Google Places Anker liefert und Google Routes unabhängig davon mehrere vollständige `cycling_route`-Vorschläge mit Geometrie, Distanz, Fahrzeit und sichtbarem Sicherheitshinweis erzeugt.

@@ -3,8 +3,8 @@ const path=require('path');
 const vm=require('vm');
 const assert=require('assert');
 const root=path.resolve(__dirname,'..');
-const build='13.12.0';
-const core='4.12.0';
+const build='13.13.0';
+const core='4.13.0';
 const index=fs.readFileSync(path.join(root,'index.html'),'utf8');
 
 const required=[

@@ -1,7 +1,7 @@
 (function(){
 'use strict';
 
-const VERSION='4.12.0';
+const VERSION='4.13.0';
 const CACHE_TTL=10*60_000;
 const SEARCH_TIMEOUT_MS=7600;
 const state={requests:0,successes:0,failures:0,cacheHits:0,lastError:null,lastResult:null,cache:new Map()};
@@ -15,7 +15,7 @@ function destination(input){
     id:raw.id||null,
     name:raw.name||raw.displayName||raw.canonicalCity?.name||'',
     displayName:raw.displayName||raw.name||raw.canonicalCity?.name||'',
-    countryCode:raw.countryCode||raw.country?.code||'',
+    countryCode:raw.countryCode||raw.country?.code||raw.canonicalCity?.countryCode||'',
     location:center?{latitude:Number(center.latitude??center.lat),longitude:Number(center.longitude??center.lng)}:null,
     searchRadiusMeters:Number(raw.searchRadiusMeters)||150000
   };
@@ -81,6 +81,14 @@ async function searchStage(action,query='',options={}){
   return call(action,searchPayload(query,target,options),{timeoutMs:Number(options.timeoutMs)||SEARCH_TIMEOUT_MS});
 }
 
+
+async function searchGoogle(query='',options={}){
+  const target=await resolvedTarget(options);
+  const payload=searchPayload(query,target,options);
+  payload.maxGeneratedResultCount=Math.max(2,Math.min(4,Number(options.maxGeneratedResultCount)||4));
+  return call('cycling.search.google',payload,{timeoutMs:Number(options.timeoutMs)||13000});
+}
+
 async function searchRoutes(query='',options={}){
   return searchStage('cycling.search.routes',query,options);
 }
@@ -105,7 +113,7 @@ function providerId(value={}){return String(value.providerPlaceId||value.provide
 function mergeResponses(responses=[],max=36){
   const byId=new Map();
   for(const response of responses){
-    for(const route of response?.data?.routes||[]){
+    for(const route of [...(response?.data?.routes||[]),...(response?.data?.anchors||[])]){
       const id=providerId(route);
       if(id)byId.set(id,{...(byId.get(id)||{}),...route});
     }
@@ -115,14 +123,15 @@ function mergeResponses(responses=[],max=36){
 }
 
 async function search(query='',options={}){
-  const [trailforks,generated,routes,trails]=await Promise.allSettled([
+  const [google,trailforks,generated,routes,trails]=await Promise.allSettled([
+    searchGoogle(query,options),
     searchTrailforks(query,options),
     searchGenerated(query,options),
     searchRoutes(query,options),
     searchTrails(query,options)
   ]);
-  const successful=[trailforks,generated,routes,trails].filter(item=>item.status==='fulfilled').map(item=>item.value);
-  if(!successful.length)throw generated.reason||routes.reason||trails.reason||new Error('Fahrradrouten konnten nicht geladen werden.');
+  const successful=[google,trailforks,generated,routes,trails].filter(item=>item.status==='fulfilled').map(item=>item.value);
+  if(!successful.length)throw google.reason||generated.reason||routes.reason||trails.reason||new Error('Fahrradrouten konnten nicht geladen werden.');
   const merged=mergeResponses(successful,Number(options.maxResultCount)||36);
   return{
     ok:true,
@@ -131,7 +140,7 @@ async function search(query='',options={}){
       provider:'hybrid-cycling',
       stage:'combined-client',
       warning:successful.map(response=>response?.data?.warning).filter(Boolean).join(' ')||null,
-      stages:{trailforks:trailforks.status==='fulfilled'?trailforks.value?.data?.summary:null,generated:generated.status==='fulfilled'?generated.value?.data?.summary:null,routes:routes.status==='fulfilled'?routes.value?.data?.summary:null,trails:trails.status==='fulfilled'?trails.value?.data?.summary:null}
+      stages:{google:google.status==='fulfilled'?google.value?.data?.summary:null,trailforks:trailforks.status==='fulfilled'?trailforks.value?.data?.summary:null,generated:generated.status==='fulfilled'?generated.value?.data?.summary:null,routes:routes.status==='fulfilled'?routes.value?.data?.summary:null,trails:trails.status==='fulfilled'?trails.value?.data?.summary:null}
     }
   };
 }
@@ -154,8 +163,8 @@ function diagnostics(){
   return{
     version:VERSION,
     status:window.LuviaBackend?'ready':'degraded',
-    providers:{curatedMtbTrails:'trailforks-approved-api',generatedRoundTrips:'openrouteservice',routeRelations:'openstreetmap-overpass',trailFeatures:'openstreetmap-overpass',approachRouting:'google-routes-bicycle'},
-    pipeline:{stagedDiscovery:true,actions:['cycling.search.trailforks','cycling.search.generated','cycling.search.routes','cycling.search.trails'],generatedRoundTrips:true,broadenWhenExactEmpty:true,unnamedTrailClustering:true},
+    providers:{primaryRoutes:'google-places-and-routes',curatedMtbTrails:'trailforks-optional-api',specializedRoundTrips:'openrouteservice-optional',routeRelations:'openstreetmap-overpass-supplement',trailFeatures:'openstreetmap-overpass-supplement'},
+    pipeline:{stagedDiscovery:true,actions:['cycling.search.google','cycling.search.trailforks','cycling.search.generated','cycling.search.routes','cycling.search.trails'],googlePrimary:true,generatedRoundTrips:true,broadenWhenExactEmpty:true,unnamedTrailClustering:true},
     performance:{searchTimeoutMs:SEARCH_TIMEOUT_MS,cacheTtlMs:CACHE_TTL,defaultRadiusMeters:150000,recommendedMtbRadiusMeters:200000,maxRadiusMeters:300000},
     metrics:{requests:state.requests,successes:state.successes,failures:state.failures,cacheHits:state.cacheHits,cacheEntries:state.cache.size},
     lastError:state.lastError,
@@ -163,5 +172,5 @@ function diagnostics(){
   };
 }
 
-window.LuviaCyclingRoutes=Object.freeze({version:VERSION,search,searchTrailforks,searchGenerated,searchRoutes,searchTrails,details,health,recommendedRadius,clearSearchCache,diagnostics});
+window.LuviaCyclingRoutes=Object.freeze({version:VERSION,search,searchGoogle,searchTrailforks,searchGenerated,searchRoutes,searchTrails,details,health,recommendedRadius,clearSearchCache,diagnostics});
 })();

@@ -1,6 +1,6 @@
 (()=>{
 'use strict';
-const VERSION='4.12.0';
+const VERSION='4.13.0';
 const clean=v=>String(v??'').trim();
 const normalizeProvider=v=>clean(v).replace(/^places\//,'');
 const listeners=new Set();

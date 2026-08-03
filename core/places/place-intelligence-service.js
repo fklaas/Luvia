@@ -1,6 +1,6 @@
 (function(){
 'use strict';
-const VERSION='4.12.0';
+const VERSION='4.13.0';
 const adapters=new Map();
 const fmt=m=>{m=Number(m);if(!Number.isFinite(m))return null;return m<1000?`${Math.round(m/50)*50} m`:`${(m/1000).toFixed(m<10000?1:0).replace('.',',')} km`};
 function gpsDistance(place={}){const m=Number(place.gpsDistanceMeters??place.route?.drive?.distanceMeters??place._gpsDistanceMeters);return Number.isFinite(m)?m:null}
