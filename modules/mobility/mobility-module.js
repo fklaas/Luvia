@@ -1,5 +1,5 @@
 (()=>{'use strict';
-const MODULE_ID='mobility',VERSION='4.16.2';
+const MODULE_ID='mobility',VERSION='4.17.0';
 const QUICK=[['✈️','Flüge','Flughäfen'],['🚆','Bahn','Bahn'],['🚌','Bus & Fernbus','Bus & Fernbus'],['⛴️','Fähren','Fähren'],['🚇','Nahverkehr','Nahverkehr'],['🚕','Taxi','Taxi'],['🚗','Vermietung','Vermietung'],['🅿️','Parken & Laden','Parken & Laden']];
 const PRESETS=Object.freeze({
  flights:{key:'flights',title:'Flüge',description:'Flughäfen, Terminals und die An- oder Abreise rund um euren Flug planen.',discoveryTitle:'Welche Flughäfen sind für eure Reise relevant?',placeholder:'Flughafen, Terminal oder Airport',query:'Flughäfen'},

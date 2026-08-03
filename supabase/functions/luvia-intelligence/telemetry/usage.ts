@@ -1,0 +1,2 @@
+import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.45.4';
+export async function recordUsage(row:Record<string,unknown>){const url=Deno.env.get('SUPABASE_URL')||'',serviceKey=Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')||'';if(!url||!serviceKey)return false;try{const admin=createClient(url,serviceKey,{auth:{persistSession:false}});const {error}=await admin.from('ai_usage_events').insert(row);return !error}catch{return false}}

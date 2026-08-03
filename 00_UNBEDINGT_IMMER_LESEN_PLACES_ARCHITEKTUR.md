@@ -740,7 +740,7 @@ node tests/user-preference-core.test.cjs
 node tests/profile-preference-payload.test.cjs
 node tests/preference-database-migration.test.cjs
 node tests/guided-discovery-integration.test.cjs
-node tests/move-no-timeline-v13.16.2.test.cjs
+node tests/move-no-timeline-v13.16.1.test.cjs
 node tests/release-version-consistency.test.cjs
 ```
 
@@ -773,3 +773,91 @@ node tests/move-domain-separation.test.cjs
 node tests/move-no-timeline-v13.16.2.test.cjs
 node tests/release-version-consistency.test.cjs
 ```
+
+---
+
+## Build 13.17.0 · Core 4.17.0 · Luvia Brain Foundation
+
+Ab diesem Build steht `LuviaAI` als zentrale, providerunabhängige Intelligenzschicht über den fachlichen Entscheidungen der App. Kein Modul darf OpenAI oder einen späteren Modellprovider direkt aufrufen. Dashboard, Places, Move, Timeline, Profil, Empfehlungen, Medien, Reisebuch und alle zukünftigen Module kommunizieren ausschließlich über registrierte AI-Capabilities, den globalen Context Engine und kontrollierte Core-Tools.
+
+### Verbindliche Hierarchie
+
+```text
+UI und Module
+→ LuviaAI Facade
+→ Capability Registry / Context Engine / Model Router / Policy Engine
+→ kontrollierte Read-Tools und bestätigungspflichtige Action Proposals
+→ bestehende Luvia Core APIs
+→ Supabase und externe Provider
+```
+
+Die KI ist federführend für Absichtsverständnis, persönliche Gewichtung, Planungsvorschläge, Erklärungen und Lernsignale. Sie steht niemals über:
+
+- Supabase/RLS und Benutzerrechten,
+- kanonischen Cloud-Daten,
+- Providerfakten,
+- harten Place-/Move-Contracts,
+- ausdrücklichen Benutzerentscheidungen,
+- der Bestätigung vor schreibenden Änderungen.
+
+### Provider- und Modellvertrag
+
+Der Browser kennt nur die internen Tiers `fast`, `default` und `deep`. Die tatsächlichen Modelle werden ausschließlich serverseitig in `luvia-intelligence` konfiguriert. Die Standardzuordnung lautet:
+
+```text
+fast    → GPT-5.6 Luna
+standard→ GPT-5.6 Terra
+deep    → GPT-5.6 Sol
+```
+
+OpenAI ist der erste Provider. Die öffentliche Luvia-API und alle Capability Contracts bleiben providerunabhängig, damit später weitere Provider ergänzt oder ausgetauscht werden können.
+
+### Context Engine und Datensparsamkeit
+
+Jeder AI-Aufruf erhält nur den für seine Capability erforderlichen Kontext. Der Context Engine trennt verbindlich:
+
+- ausdrücklich bestätigte globale Präferenzen,
+- temporäre Auswahl des aktuellen Moduls,
+- belegte, getrennt gespeicherte Lernsignale,
+- Reise-, Tages-, Timeline- und Provider-Evidence.
+
+E-Mail-Adressen, Tokens, Zahlungsdaten, Buchungsnummern und andere nicht erforderliche private Felder dürfen nicht in AI-Requests gelangen. Lernsignale dürfen `user_profiles` niemals automatisch verändern. Sie werden im Profil als getrennte Belege sichtbar und dürfen ausschließlich nach bewusster Benutzerbestätigung über `LuviaUserPreferences` in den globalen Reisekompass übernommen werden.
+
+### Tool- und Schreibvertrag
+
+AI-Capabilities verwenden nur registrierte Read-Tools. Schreibende Vorschläge werden als `DRAFT` in `ai_action_proposals` gespeichert und müssen sichtbar bestätigt werden. Erst danach darf ein whitelisted Core Command ausgeführt werden. Direkte SQL- oder Modulschreibzugriffe aus einer Modellantwort sind verboten.
+
+### Places und Move
+
+Die KI darf Suchpläne erweitern und bereits fachlich valide Kandidaten persönlich neu gewichten. Die Reihenfolge bleibt zwingend:
+
+```text
+Guided Contract
+→ Provider-Suche
+→ harte Typ-, Ziel-, Ausschluss- und Qualitätsprüfung
+→ AI-Reranking der verbleibenden echten Kandidaten
+→ nachvollziehbare Gründe und ehrlich markierte Unbekannte
+```
+
+KI darf nie fachfremde Ergebnisse in die Liste zurückholen. Move bleibt ohne Timeline und ohne Planning-Capability.
+
+### Ausfallverhalten
+
+Jede Capability besitzt einen deterministischen Fallback. Bei fehlendem API-Key, Rate Limit, Timeout oder Providerfehler bleiben Kernfunktionen verfügbar, Cloud-Daten unverändert und harte Contracts aktiv. Ein AI-Ausfall darf den App-Start nicht blockieren.
+
+### Pflichttests 13.17.0
+
+```bash
+node tests/ai-model-router.test.cjs
+node tests/ai-context-policy.test.cjs
+node tests/ai-core-runtime.test.cjs
+node tests/ai-discovery-integration.test.cjs
+node tests/ai-command-proposal.test.cjs
+node tests/ai-database-migration.test.cjs
+node tests/ai-edge-function.test.cjs
+node tests/ai-dashboard-integration.test.cjs
+node tests/discovery-contract-strictness.test.cjs
+node tests/move-no-timeline-v13.16.2.test.cjs
+node tests/release-version-consistency.test.cjs
+```
+

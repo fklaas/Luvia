@@ -1,7 +1,7 @@
 (() => {
   'use strict';
 
-  const VERSION = '4.16.2';
+  const VERSION = '4.17.0';
   const PLACE_MODULES = {
     photo_spots:{type:'photo_spot',title:'Fotospots',icon:'📸',description:'Aussichten, Lichtstimmungen und besondere Fotomomente entdecken.',tags:['Golden Hour','Aussicht','Erinnerungen'],host:'photo-spots-module'},
     attractions:{type:'attraction',title:'Sehenswürdigkeiten & Aktivitäten',icon:'✨',description:'Museen, Parks, Aussichtspunkte und Erlebnisse entdecken.',tags:['Kultur','Aktivitäten','Highlights'],host:'attractions-module'},
@@ -42,7 +42,7 @@
       trip:state.trip,
       hideBrowse:true,
       initialPreferences:window.LuviaUserPreferences?.get?.() || profile(),
-      onComplete:result => open(result.contract?.moduleId, null, result.contract)
+      onComplete:async result => { const contract = window.LuviaAI?.planDiscovery ? await window.LuviaAI.planDiscovery('places',result) : result.contract; return open(contract?.moduleId, null, contract); }
     });
   }
 

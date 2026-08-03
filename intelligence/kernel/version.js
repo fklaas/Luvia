@@ -1,1 +1,1 @@
-(() => {'use strict';window.LuviaKernelVersion=Object.freeze({core:'4.16.2',build:'13.16.2',name:'Guided Travel Canvas Focus Mode',channel:'production',builtAt:'2026-08-03T19:25:00+02:00'});window.LuviaCoreVersion=window.LuviaKernelVersion;window.LUVIA_RELEASE=window.LuviaKernelVersion;})();
+(() => {'use strict';window.LuviaKernelVersion=Object.freeze({core:'4.17.0',build:'13.17.0',name:'Luvia Brain Foundation',channel:'production',builtAt:'2026-08-03T20:26:00+02:00'});window.LuviaCoreVersion=window.LuviaKernelVersion;window.LUVIA_RELEASE=window.LuviaKernelVersion;})();

@@ -1,5 +1,5 @@
 (()=>{'use strict';
-const VERSION='4.16.2';
+const VERSION='4.17.0';
 const field=(value,confidence='mittel',source='Google-Place-Daten')=>({value,confidence,source});
 const text=p=>[p?.name,p?.primaryType,p?.primaryTypeDisplayName,...(p?.types||[]),p?.formattedAddress,p?.editorialSummary].filter(Boolean).join(' ').toLowerCase();
 const typeSet=p=>new Set([p?.primaryType,...(p?.types||[])].filter(Boolean));

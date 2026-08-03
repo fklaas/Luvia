@@ -1,7 +1,7 @@
 (() => {
   'use strict';
 
-  const VERSION = '4.16.2';
+  const VERSION = '4.17.0';
   const TILES = Object.freeze({
     flights:{title:'Flüge',icon:'✈️',description:'Flughäfen und Terminals für eure An- oder Abreise.',tags:['Flughäfen','Terminals','Anreise'],preset:'flights'},
     rail:{title:'Bahn',icon:'🚆',description:'Fern-, Regional- und wichtige Umsteigebahnhöfe.',tags:['Fernverkehr','Regionalbahn','Bahnhöfe'],preset:'rail'},
@@ -47,7 +47,7 @@
       trip:state.trip,
       hideBrowse:true,
       initialPreferences:window.LuviaUserPreferences?.get?.() || profile(),
-      onComplete:result => open(result.contract?.moveTile,null,result.contract)
+      onComplete:async result => { const contract = window.LuviaAI?.planDiscovery ? await window.LuviaAI.planDiscovery('move',result) : result.contract; return open(contract?.moveTile,null,contract); }
     });
   }
 

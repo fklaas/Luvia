@@ -1,2 +1,5 @@
 [functions.luvia-gateway]
 verify_jwt = false
+
+[functions.luvia-intelligence]
+verify_jwt = false

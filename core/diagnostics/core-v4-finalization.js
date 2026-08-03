@@ -1,7 +1,7 @@
 (() => {
   'use strict';
-  const VERSION=window.LuviaKernelVersion?.core||'4.16.2';
-  const BUILD=window.LuviaKernelVersion?.build||'13.16.2';
+  const VERSION=window.LuviaKernelVersion?.core||'4.17.0';
+  const BUILD=window.LuviaKernelVersion?.build||'13.17.0';
   const now=()=>new Date().toISOString();
   const safe=(fn,fallback=null)=>{try{return fn()}catch(error){return fallback??{error:error?.message||String(error)}}};
   const textBytes=value=>new TextEncoder().encode(String(value||'')).length;
@@ -25,6 +25,8 @@
   async function runSmokeTests(){
     const results=[];const test=(name,fn)=>{try{const detail=fn();const ok=typeof detail==='boolean'?detail:Boolean(detail?.ok??detail);results.push({name,ok,detail,at:now()})}catch(error){results.push({name,ok:false,error:error.message,at:now()})}};
     test('Kernel boot',()=>Boolean(window.LuviaKernel));
+    test('Luvia Brain Core',()=>({ok:Boolean(window.LuviaAI&&window.LuviaAICapabilities&&window.LuviaAITools),detail:window.LuviaAI?.diagnostics?.()}));
+    test('Luvia Brain safety',()=>({ok:window.LuviaAIProposals?.diagnostics?.().confirmationRequired===true&&window.LuviaAIPolicy?.diagnostics?.().execution==='confirmation-required'}));
     test('Service registry',()=>{const services=window.LuviaServiceRegistry?.list?.()||[];const ready=services.filter(item=>item.state==='ready').length;const failed=services.filter(item=>item.state==='failed').length;return{ok:services.length>=24&&ready===services.length&&failed===0,count:services.length,ready,failed,mode:window.LUVIA_DIAGNOSTICS_MODE===true?'diagnostics':'app'}});
     test('12 Place Types',()=>({ok:(window.LuviaPlaceRegistry?.diagnostics?.().registeredTypes||0)===12,value:window.LuviaPlaceRegistry?.diagnostics?.().registeredTypes}));
     test('12 Adapters',()=>({ok:(window.LuviaPlaceRegistry?.diagnostics?.().registeredAdapters||0)===12,value:window.LuviaPlaceRegistry?.diagnostics?.().registeredAdapters}));
@@ -45,6 +47,6 @@
     return summary;
   }
   function healthSnapshot(){const registry=safe(()=>window.LuviaPlaceRegistry?.diagnostics?.(),{})||{},services=serviceSummary();return{version:VERSION,build:BUILD,status:'ready',generatedAt:now(),health:{kernel:Boolean(window.LuviaKernel),servicesReady:services.ready||0,servicesTotal:services.count||0,placeTypes:registry.registeredTypes||0,adapters:registry.registeredAdapters||0,scheduleEvents:window.LuviaScheduleIntelligence?.snapshot?.().events?.length||0,timelineEvents:window.LuviaTimelineCore?.diagnostics?.().eventCount||0,todayStatus:window.LuviaTodayIntelligence?.getStatus?.()||'unavailable',todayConflicts:window.LuviaTodayIntelligence?.getConflicts?.()?.length||0}};}
-  function snapshot(){const base=healthSnapshot();return{...base,adapters:adapterHealth(),recommendations:recommendationTrace(),schedule:scheduleTrace(),visits:visitTrace(),compatibility:compatibilityAudit(),cache:cacheAudit(),performance:performanceSnapshot(),lastSmoke:safe(()=>JSON.parse(sessionStorage.getItem('luvia.core4.smoke.latest')||'null'),null)};}
+  function snapshot(){const base=healthSnapshot();return{...base,ai:safe(()=>window.LuviaAI?.diagnostics?.(),{status:'missing'}),adapters:adapterHealth(),recommendations:recommendationTrace(),schedule:scheduleTrace(),visits:visitTrace(),compatibility:compatibilityAudit(),cache:cacheAudit(),performance:performanceSnapshot(),lastSmoke:safe(()=>JSON.parse(sessionStorage.getItem('luvia.core4.smoke.latest')||'null'),null)};}
   window.LuviaCore4Diagnostics=Object.freeze({version:VERSION,build:BUILD,healthSnapshot,snapshot,runSmokeTests,recommendationTrace,scheduleTrace,visitTrace,adapterHealth,compatibilityAudit,cacheAudit,performance:performanceSnapshot});
 })();

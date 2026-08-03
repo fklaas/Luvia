@@ -323,7 +323,7 @@ html[data-theme="dark"] .places-hub > header {
   }
 }
 
-/* Guided travel canvas & focused suggestion mode · Build 13.16.2 */
+/* Guided travel canvas & focused suggestion mode · Build 13.17.0 */
 .places-guided-host,
 .move-guided-host {
   min-height: min(860px, calc(100dvh - 86px));

@@ -54,7 +54,7 @@
   }
 }
 
-/* Move story canvas · Build 13.16.2 */
+/* Move story canvas · Build 13.17.0 */
 .move-experience.is-guided-results {
   --story-accent: var(--trip-accent, var(--lv-accent, #ee6f83));
 }

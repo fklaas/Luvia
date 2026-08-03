@@ -16,7 +16,7 @@
     "pwa": true,
     "native": false,
     "places": true,
-    "ai": false,
+    "ai": true,
     "recommendations": true,
     "mediaV2": false,
     "automation": false,
@@ -28,26 +28,26 @@
     "logHistory": 500
   },
   "release": {
-    "core": "4.16.2",
-    "build": "13.16.2",
-    "name": "Guided Travel Canvas Focus Mode",
+    "core": "4.17.0",
+    "build": "13.17.0",
+    "name": "Luvia Brain Foundation",
     "channel": "production",
-    "builtAt": "2026-08-03T19:25:00+02:00"
+    "builtAt": "2026-08-03T20:26:00+02:00"
   },
   "deployment": {
     "canonicalHost": "myluvia.app",
     "wwwHost": "www.myluvia.app",
     "stagingHost": "staging.myluvia.app",
     "githubPagesFallback": "https://fklaas.github.io/Luvia/",
-    "build": "13.16.2"
+    "build": "13.17.0"
   },
   "build": {
-    "core": "4.16.2",
-    "build": "13.16.2",
-    "name": "Guided Travel Canvas Focus Mode",
+    "core": "4.17.0",
+    "build": "13.17.0",
+    "name": "Luvia Brain Foundation",
     "channel": "production",
     "releasedAt": "2026-08-03",
-    "builtAt": "2026-08-03T19:25:00+02:00"
+    "builtAt": "2026-08-03T20:26:00+02:00"
   },
   "backend": {
     "functionName": "luvia-gateway",
@@ -83,7 +83,7 @@
     "profileSchemaVersion": 5
   },
   "placeIntelligence": {
-    "version": "4.16.2",
+    "version": "4.17.0",
     "types": 12,
     "multiType": true,
     "restaurantCompatibility": true,
@@ -108,7 +108,23 @@
     "globalGps": true,
     "offlineSync": true
   },
-  "coreVersion": "4.16.2",
-  "buildVersion": "13.16.2",
-  "releaseName": "Guided Travel Canvas Focus Mode"
+  "coreVersion": "4.17.0",
+  "buildVersion": "13.17.0",
+  "releaseName": "Luvia Brain Foundation",
+  "ai": {
+    "provider": "openai",
+    "functionName": "luvia-intelligence",
+    "architecture": "provider-independent-luvia-brain",
+    "modelRouting": {
+      "fastAlias": "Luna",
+      "defaultAlias": "Terra",
+      "deepAlias": "Sol",
+      "serverAuthoritative": true
+    },
+    "structuredOutputs": true,
+    "store": false,
+    "commandExecution": "confirmation-required",
+    "learningSignals": "separate-from-explicit-profile",
+    "fallback": "deterministic"
+  }
 }

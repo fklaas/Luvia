@@ -1,6 +1,6 @@
 (function(){
 'use strict';
-const VERSION='4.16.2';
+const VERSION='4.17.0';
 const text=place=>[
  place?.name,
  place?.primaryType,

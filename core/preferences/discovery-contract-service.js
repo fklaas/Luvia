@@ -1,7 +1,7 @@
 (() => {
   'use strict';
 
-  const VERSION = '1.2.0';
+  const VERSION = '1.3.0';
   let pendingContract = null;
   const clone = value => value == null ? value : JSON.parse(JSON.stringify(value));
   const unique = values => [...new Set((Array.isArray(values) ? values : []).map(value => String(value || '').trim()).filter(Boolean))];
@@ -85,13 +85,22 @@
 
   async function textPlans(contract, destination, maxResultCount, searchOptions) {
     if (!window.LuviaPlaces?.textSearch) return [];
+    const aiPlans = (Array.isArray(contract.aiSearchPlans) ? contract.aiSearchPlans : [])
+      .filter(plan => String(plan?.query || '').trim())
+      .slice(0, 6);
     const includedTypes = unique(contract.includedTypes).slice(0, 8);
-    const plans = includedTypes.length ? includedTypes : [''];
-    const perPlan = Math.max(4, Math.min(20, Math.ceil(maxResultCount / Math.max(1, plans.length)) + 2));
-    return Promise.all(plans.map(includedType => window.LuviaPlaces.textSearch(contract.query, {
+    const plans = aiPlans.length
+      ? aiPlans.flatMap(plan => {
+          const types = unique(plan.includedTypes).filter(type => !includedTypes.length || includedTypes.includes(type));
+          return (types.length ? types : includedTypes.length ? includedTypes : ['']).map(includedType => ({ query:String(plan.query).trim(), includedType }));
+        })
+      : (includedTypes.length ? includedTypes : ['']).map(includedType => ({ query:contract.query, includedType }));
+    const limitedPlans = plans.slice(0, 12);
+    const perPlan = Math.max(4, Math.min(20, Math.ceil(maxResultCount / Math.max(1, limitedPlans.length)) + 2));
+    return Promise.all(limitedPlans.map(plan => window.LuviaPlaces.textSearch(plan.query, {
       destination,
-      includedType,
-      strictTypeFiltering: Boolean(includedType && contract.strictTypeFiltering !== false),
+      includedType: plan.includedType,
+      strictTypeFiltering: Boolean(plan.includedType && contract.strictTypeFiltering !== false),
       strictDestination: contract.strictDestination !== false,
       maxResultCount: perPlan,
       maxDistanceMeters: contract.maxDistanceMeters || 0,
@@ -114,9 +123,13 @@
     if (needsText || !useNearby) requests.push(...await textPlans(contract, destination, maxResultCount, searchOptions));
     const responses = (await Promise.all(requests.filter(Boolean).map(request => Promise.resolve(request).catch(error => ({ ok: false, error, data: { places: [] } }))))).filter(Boolean);
     responses.forEach(response => normalizeResponse(response, contract, merged));
-    const places = [...merged.values()]
-      .sort((a, b) => Number(b.discoveryScore || 0) - Number(a.discoveryScore || 0) || Number(a.distanceMeters ?? Infinity) - Number(b.distanceMeters ?? Infinity))
-      .slice(0, Math.max(1, maxResultCount));
+    let places = [...merged.values()]
+      .sort((a, b) => Number(b.discoveryScore || 0) - Number(a.discoveryScore || 0) || Number(a.distanceMeters ?? Infinity) - Number(b.distanceMeters ?? Infinity));
+    if (places.length && window.LuviaAI?.rankCandidates) {
+      try { places = await window.LuviaAI.rankCandidates({ domain:contract.domain || type || 'places', contract, candidates:places }); }
+      catch (error) { console.warn('[LuviaDiscoveryContracts] AI-Ranking nicht verfügbar, deterministische Reihenfolge bleibt aktiv.', error); }
+    }
+    places = places.slice(0, Math.max(1, maxResultCount));
     return {
       ok: true,
       data: {
@@ -131,7 +144,7 @@
         strictTypeFiltering: contract.strictTypeFiltering !== false,
         noCrossCategoryFallback: true,
         requestCount: responses.length,
-        strategies: { nearby: useNearby, text: needsText || !useNearby }
+        strategies: { nearby: useNearby, text: needsText || !useNearby, aiPlanned:Boolean(contract.aiSearchPlans?.length), aiRanked:places.some(place => place.aiMatchScore != null) }
       }
     };
   }

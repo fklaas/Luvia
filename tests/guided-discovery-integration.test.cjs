@@ -1,4 +1,4 @@
-/* Build 13.16.2 – registration, profile, Places and Move integration */
+/* Build 13.17.0 – registration, profile, Places and Move integration */
 const fs=require('fs');
 const assert=require('assert');
 const read=file=>fs.readFileSync(file,'utf8');
