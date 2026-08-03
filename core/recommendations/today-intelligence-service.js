@@ -42,7 +42,7 @@
     return parse(event.endAt) || (parse(event.startAt) ? new Date(parse(event.startAt).getTime() + Number(event.durationMinutes || 90) * 60000) : null);
   }
   function eventIcon(event) {
-    return ({ restaurant: '🍽️', attraction: '🏛️', activity: '🎟️', photo_spot: '📸', shopping: '🛍️', accommodation: '🏨', mobility: '🚗', transit: '🚆', nature: '🌿', cycling_route: '🚵' }[event?.entityType] || '📍');
+    return ({ restaurant: '🍽️', attraction: '🏛️', activity: '🎟️', photo_spot: '📸', shopping: '🛍️', accommodation: '🏨', mobility: '🚗', transit: '🚆', nature: '🌿' }[event?.entityType] || '📍');
   }
   function travelMinutesFor(event) {
     const distance = Number(event?.distanceMeters ?? event?.source?.distanceMeters);

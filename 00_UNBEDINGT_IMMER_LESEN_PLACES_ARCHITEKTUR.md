@@ -559,180 +559,44 @@ Pflichttest nach Änderungen am Bootstrap oder Planungsdialog:
 
 Jeder Typ muss mindestens ein kanonisches Timeline-Feld liefern. Zusätzlich muss `node tests/place-contract-bootstrap-resilience.test.cjs` erfolgreich sein.
 
-## Build 13.11.0 / Core 4.11.0 – Fahrradrouten als routenbasierter Place-Typ
+## Build 13.14.0 / Core 4.14.0 – Transport & Mobilität und Rücknahme von Fahrradrouten
 
-`cycling_route` ist der erste produktive Place-Typ, dessen primäre Entität nicht nur einen einzelnen Punkt, sondern zusätzlich eine Routengeometrie und ein Fahrprofil besitzen kann.
+Der Place-Typ `cycling_route` ist ab diesem Build **kein produktiver Bestandteil von Luvia**. Der Fahrradrouten-Ansatz wurde wegen regional lückenhafter Tourendaten, unzuverlässiger Provider-Antworten und nicht belastbarer automatisch erzeugter Strecken vollständig aus Runtime, Registry, Hub, Gateway, Diagnostics und Conformance entfernt. Historische Migrationen dürfen aus Gründen der Datenbank-Stabilität im Repository verbleiben; sie begründen weder einen aktiven Adapter noch eine sichtbare Funktion.
 
-Verbindlich gilt:
+Der neue produktive Place-Typ ist `mobility` mit der Modul-ID `mobility`. Er nutzt ausschließlich die verbindliche globale Places-Architektur:
 
-- Modul-ID `cycling_routes`, kanonischer Place-Typ `cycling_route`.
-- Primärer Discovery-Provider für echte Routen und MTB-Trails ist der zentrale Cycling-Gateway-Adapter auf Basis von OpenStreetMap/Overpass.
-- Google Places ergänzt ausschließlich Bikeparks, Trailzentren und geeignete Startpunkte. Ein Fahrradgeschäft darf nicht als vollständige Route ausgegeben werden.
-- Favoriten, Timeline, Detailkarte, Reiseisolation, Cloud-Persistenz und Conformance bleiben vollständig im globalen Place Core.
-- Das kanonische Planungsfeld ist `planned_at` mit `timelineRole: point`.
-- `LuviaCyclingRouteIntelligence` ist der einzige fachliche Ableitungsdienst für Routenprofil, Distanz, Fahrzeit, Schwierigkeit, Untergrund, Rundtour, Beschilderung, Fahrradempfehlung und Sicherheitshinweis.
-- `mtb:scale`, Untergrund- und Routennetzwerte dürfen nur angezeigt werden, wenn sie aus Providerdaten stammen oder als nachvollziehbare Ableitung gekennzeichnet sind.
-- Höhenmeter dürfen ohne belastbaren Höhenprofil-Provider nicht erfunden werden.
-- Routengeometrien werden für UI und Cloud kontrolliert vereinfacht; sie ersetzen noch keine Turn-by-Turn-Navigation.
-- Die Datenbank erlaubt `cycling_route` in der vorhandenen kanonischen `places.primary_type`-Constraint. Es wird keine eigene Fahrradrouten-Tabelle eingeführt.
+- `LuviaPlaceRuntime` und `LuviaPlaceCommands`
+- `LuviaPlaceExperience.moduleShell(...)`
+- globale Discovery-, Favoriten- und geplante Karten
+- `LuviaPlaceDetail` mit Capability Renderer
+- zentrale Timeline über `planned_at`
+- kanonische Cloud-Persistenz und Reiseisolation
+- `LuviaPlaceConformance`
 
-## Build 13.11.0.1 / Core 4.11.0.1 – Verbindlicher Browser-Asset- und Registry-Bootstrap
+### Verbindliche Discovery-Strategie
 
-Ein neuer Place-Typ gilt erst dann als implementiert, wenn seine produktiven Browser-Assets tatsächlich in `index.html` geladen werden. Ein Eintrag in Service Worker, Registry-Quellcode oder Testdateien allein reicht nicht aus.
+Transport & Mobilität sucht reale, dauerhaft existierende Punkte direkt über Google Places (New). Exakte Provider-Typen werden je Kategorie parallel abgefragt und anschließend dedupliziert und sortiert. Unterstützt werden insbesondere Bahn, Metro/U-Bahn, Bus, Tram, Fähren, Flughäfen, Taxi, Parken/P+R, Mietwagen, E-Auto- und E-Bike-Laden sowie Bike-Sharing.
 
-Ab diesem Fix gilt verbindlich:
+Großräumige Kategorien wie Flughäfen, Fährterminals und Mietwagen dürfen nicht durch einen engen Ziel-Viewport abgeschnitten werden. Sie verwenden eine Standortgewichtung; lokale Kategorien bleiben strikt am kanonischen Reiseziel gebunden.
 
-- Jede neue Place-CSS-Datei muss im Dokument-Head geladen werden.
-- Provider-Service, Place-Type-Contract, Registry-Adapter, typabhängige Intelligence und Modul müssen in deterministischer Reihenfolge in `index.html` stehen.
-- Alle lokalen CSS- und JavaScript-Referenzen in `index.html` verwenden exakt die aktuelle Build-Version als Asset-Query.
-- Alte Asset-Versionen aus einem vorherigen Build sind in der produktiven `index.html` verboten.
-- Der Inline-Contract-Bootstrap verwendet exakt die aktuelle Core-Version.
-- Der Service Worker darf bei `ignoreSearch` nur im Cache des aktuell aktiven Releases suchen. Ein globales `caches.match(...)` über alte Release-Caches ist für JavaScript und CSS verboten.
-- `LuviaPlaceRegistry.status('<neuer_typ>')` muss unmittelbar nach dem App-Boot mindestens den registrierten Adapter erkennen und bei geladenem Provider sowie Entity Service `state: 'ready'` melden.
-- Für jeden neuen Place-Typ muss ein Browser-Bootstrap-Test sowohl Asset-Vollständigkeit und Script-Reihenfolge als auch die tatsächliche Runtime-Registrierung des Adapters prüfen.
+### Fachliche Intelligence
 
-Pflichttest für Fahrradrouten und kommende Place-Typen:
+`LuviaTransportIntelligence` ist der einzige fachliche Ableitungsdienst für:
 
-```javascript
-LuviaPlaceRegistry.status('cycling_route')
-```
+- Verkehrsart und Rolle im Reiseablauf
+- empfohlene Umstiegs- beziehungsweise Ankunftspuffer
+- Zugangs- und Betriebsinformationen
+- Park- und Ladehinweise aus vorhandenen Providerfeldern
+- Ticket- und Vor-Ort-Hinweise
 
-Erwartet:
+Luvia darf keine Live-Abfahrten, Verspätungen, Auslastungen, freien Stellplätze oder Preise erfinden. Solche Echtzeitinformationen müssen später über einen eigenen, vertraglich angebundenen Transit-Provider kommen.
+
+### Pflichtdiagnose
 
 ```javascript
-{
-  state: 'ready',
-  ready: true,
-  moduleVisible: true
-}
+LuviaPlaceRegistry.status('mobility')
+LuviaPlaceDetail.diagnostics()
+await LuviaPlaceConformance.runAll()
 ```
 
-Zusätzlich muss `node tests/cycling-registry-bootstrap.test.cjs` erfolgreich sein.
-
----
-
-## Build 13.11.2 / Core 4.11.2 – Fahrradrouten: gestufte Discovery statt einer monolithischen Suche
-
-Fahrradrouten dürfen nicht wie ein gewöhnlicher Point-of-Interest-Provider behandelt werden. Eine einzelne große Overpass-Abfrage mit strengem Profilfilter ist nicht ausreichend: Sie kann durch Timeout vollständig leer bleiben und sie blendet allgemeine Radrouten aus, sobald der Nutzer MTB auswählt.
-
-Verbindlich gilt ab diesem Build:
-
-### Drei unabhängige Discovery-Quellen
-
-Die globale Fahrradrouten-Suche startet parallel:
-
-1. `cycling.search.routes` für ausgeschilderte OSM-Routenrelationen (`route=bicycle` und `route=mtb`) im großen Suchraum.
-2. `cycling.search.trails` für lokale MTB-/Gravel-Wegmerkmale, Trailgebiete und Cycling-Anlagen in einem kontrollierten Teilradius.
-3. die vorhandene zentrale Places-Pipeline für klar erkennbare Bikeparks, Trailzentren, Pumptracks und Tour-Startpunkte.
-
-Eine Quelle darf ausfallen oder leer sein, ohne die anderen Ergebnisse zu löschen oder den gesamten Screen zu blockieren. Die Modul-Shell bleibt weiterhin ausschließlich `LuviaPlaceExperience.moduleShell(...)`.
-
-### Kein striktes Leerfiltern mehr
-
-Ein Profil wie MTB oder Gravel ist eine Ranking- und Transparenzvorgabe, kein Alles-oder-nichts-Filter.
-
-Jedes Ergebnis trägt genau eine Trefferstufe:
-
-- `exact`: exakt zum gewählten Profil passend,
-- `related`: fachlich verwandte Alternative,
-- `fallback`: allgemeine Fahrradroute, wenn keine exakte oder verwandte Route vorhanden ist.
-
-Exakte Treffer stehen immer zuerst. Gibt es keine exakt als MTB markierte Route, zeigt Luvia geländenahe Alternativen und allgemeine Radrouten ausdrücklich als solche, statt eine leere Liste auszugeben oder sie fälschlich als MTB-Trail zu bezeichnen.
-
-### Unbenannte OSM-Trailsegmente
-
-Viele echte MTB-Wege besitzen keine eigene Route-Relation und keinen Namen. Solche Segmente dürfen nicht einzeln als erfundene Tour ausgegeben und auch nicht verworfen werden.
-
-`clusterTrailElements(...)` bündelt räumlich nahe, fachlich passende Segmente zu einem `trail_area`:
-
-- ein Trailgebiet ist keine vollständige Route,
-- es besitzt keine erfundene Streckenlänge,
-- es besitzt keine erfundene Rundtour,
-- es kann als Gebiet oder Startpunkt favorisiert und geplant werden,
-- die Detailkarte weist ausdrücklich darauf hin, dass eine konkrete Route vor Ort beziehungsweise mit einem späteren Routing-Provider zusammengestellt werden muss.
-
-Weitere kanonische Ergebnisarten sind:
-
-- `route_relation`,
-- `trail_segment`,
-- `trail_area`,
-- `trail_center`,
-- `cycling_area`.
-
-### Suchradien
-
-Die global gerenderte Discovery-Shell bietet für Fahrradrouten 50, 100, 150, 200 und 300 km. Empfohlene Standardwerte sind typabhängig:
-
-- MTB: 200 km,
-- Gravel: 150 km,
-- Entdecken/klassische Routen: 150 km,
-- City: 60 km,
-- Familie: 75 km.
-
-Der größere Radius betrifft primär leichte Routenrelationen. Teure Wegsegment-Abfragen bleiben auf kontrollierte Teilradien begrenzt.
-
-### Pflichtprüfungen
-
-```javascript
-LuviaCyclingRoutes.diagnostics()
-```
-
-Muss `stagedDiscovery: true`, die Actions `cycling.search.routes` und `cycling.search.trails`, `broadenWhenExactEmpty: true` sowie `unnamedTrailClustering: true` melden.
-
-Zusätzlich müssen erfolgreich sein:
-
-```bash
-node tests/cycling-discovery-rebuild.test.cjs
-node tests/cycling-discovery-runtime.test.cjs
-```
-
-Der Runtime-Test beweist mit simulierten Providerdaten, dass:
-
-- eine allgemeine Radroutenrelation bei fehlenden MTB-Relationen transparent als Fallback erhalten bleibt,
-- unbenannte MTB-Wege zu einem echten `trail_area` gebündelt werden,
-- ein Trailgebiet niemals als vollständige Route ausgegeben wird.
-
----
-
-## Build 13.13.0 / Core 4.13.0 – Google-First Cycling Routes Rebuild
-
-Der Place-Typ `cycling_route` wird ab diesem Build nicht mehr von vorhandenen Tourendaten abhängig gemacht. OpenStreetMap-Routenrelationen, Trailforks-Daten und openrouteservice sind wertvolle Ergänzungen, dürfen aber niemals Voraussetzung dafür sein, dass der Nutzer überhaupt Fahrradtouren erhält.
-
-### Verbindlicher primärer Datenweg
-
-1. **Google Places API (New)** sucht im kanonischen Reiseziel nach passenden Parks, Naturgebieten, Bikeparks, Trailzentren, Sehenswürdigkeiten und anderen sinnvollen Tourankern.
-2. **Google Routes API** berechnet daraus beziehungsweise aus kontrolliert erzeugten Wegpunkten mehrere echte Fahrradstrecken mit `travelMode: BICYCLE`.
-3. Kann die Place-Suche keine geeigneten Anker liefern oder antwortet sie zu langsam, erzeugt der serverseitige Cycling-Provider geometrisch verteilte Wegpunkte um das Reiseziel. Die Routenberechnung darf deshalb nicht auf eine vollständige Places-Antwort warten.
-4. Openrouteservice, Trailforks und OpenStreetMap starten anschließend ausschließlich als optionale Ergänzungen für spezialisiertes MTB-/Gravel-Routing, kuratierte Trails, ausgeschilderte Routen und Trailgebiete.
-
-Google-generierte Strecken sind kanonische `cycling_route`-Entities und durchlaufen ausnahmslos die vorhandenen globalen Systeme für Shell, Karten, Detailkarte, Favoriten, Timeline, Commands, Cloud-Persistenz, Reiseisolation und Conformance. Eine lokale Fahrradrouten-Shell, ein eigener Favoritenspeicher oder eine parallele Timeline bleiben verboten.
-
-### Wahrheits- und Sicherheitsregeln
-
-- Google-Routen werden sichtbar als **„Für euch erstellt“** beziehungsweise **„Für euch berechnet“** gekennzeichnet.
-- Das Fahrradprofil von Google Routes ist keine kuratierte MTB-Traildatenbank. Bei MTB und Gravel müssen Trailstatus, Schwierigkeit, Oberfläche, Sperrungen und rechtliche Befahrbarkeit ausdrücklich als vor Ort zu prüfen gekennzeichnet werden.
-- Ohne belastbare Providerdaten dürfen keine Höhenmeter, MTB-Skala, Wegoberfläche oder Bewertungen erfunden werden.
-- Google-Places-Anker sind `cycling_anchor` und keine vollständigen Touren. Sie dürfen favorisiert und geplant werden, müssen in der Detailkarte aber als Startpunkt beziehungsweise Fahrradziel bezeichnet sein.
-- Das System muss auch bei einem Ausfall von Trailforks, openrouteservice oder Overpass weiterhin Google-Routen liefern.
-- Wenn die Places API langsam ist, beginnt die Routenberechnung spätestens nach einer kurzen begrenzten Wartezeit mit synthetischen Wegpunkten.
-- Öffentliche API-Schlüssel bleiben ausschließlich im Supabase Gateway. Im Browsercode dürfen keine Google-, Trailforks- oder openrouteservice-Schlüssel vorkommen.
-
-### Provider- und UI-Contract
-
-`cycling_route` bleibt ein normaler globaler Place. Provider dürfen niemals eigene Karten, Favoriten, Detailseiten, Timeline- oder Speicherpfade anlegen. Nicht integrierte Anbieter werden ausschließlich als externe Deep Links angeboten.
-
-Die Pflichtdiagnose lautet:
-
-```javascript
-await LuviaBackend.request('cycling.health', {})
-```
-
-Dabei muss `google.providers.places` und `google.providers.routes` den tatsächlichen Konfigurationsstand melden. Zusätzlich müssen erfolgreich sein:
-
-```bash
-node tests/cycling-discovery-runtime.test.cjs
-node tests/cycling-discovery-rebuild.test.cjs
-node tests/cycling-search-performance.test.cjs
-```
-
-Der Runtime-Test beweist, dass Google Places Anker liefert und Google Routes unabhängig davon mehrere vollständige `cycling_route`-Vorschläge mit Geometrie, Distanz, Fahrzeit und sichtbarem Sicherheitshinweis erzeugt.
+Erwartet werden ein produktiver `mobility`-Adapter, der Capability Renderer `mobility` und keine Conformance-Verletzungen. `cycling_route` darf in keiner produktiven Registry, Shell oder Gateway-Action mehr erscheinen.

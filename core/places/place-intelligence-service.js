@@ -1,6 +1,6 @@
 (function(){
 'use strict';
-const VERSION='4.13.0';
+const VERSION='4.14.0';
 const adapters=new Map();
 const fmt=m=>{m=Number(m);if(!Number.isFinite(m))return null;return m<1000?`${Math.round(m/50)*50} m`:`${(m/1000).toFixed(m<10000?1:0).replace('.',',')} km`};
 function gpsDistance(place={}){const m=Number(place.gpsDistanceMeters??place.route?.drive?.distanceMeters??place._gpsDistanceMeters);return Number.isFinite(m)?m:null}
@@ -9,10 +9,10 @@ function accommodation(place={},context={}){const base=generic(place,context),st
 function restaurant(place={},context={}){if(window.LuviaRestaurantIntelligence?.analyze){try{return{...window.LuviaRestaurantIntelligence.analyze(place,context),distanceLabel:fmt(gpsDistance(place)),distanceOrigin:'gps'}}catch{}}return generic(place,context)}
 function shopping(place={},context={}){const base=generic(place,context),profile=window.LuviaShoppingIntelligence?.analyze?.(place,context)||{},reasons=[...base.reasons,...(profile.travelReasons||[])];return{...base,reasons:[...new Set(reasons)],bestTime:profile.bestVisit?.value||null,bestTimeReason:profile.bestVisit?.source||null,shopping:profile}}
 function nature(place={},context={}){const base=generic(place,context),profile=window.LuviaNatureIntelligence?.analyze?.(place,context)||{},reasons=[...base.reasons,...(profile.travelReasons||[])];return{...base,reasons:[...new Set(reasons)],bestTime:profile.bestVisit?.value||null,bestTimeReason:profile.bestVisit?.source||null,nature:profile}}
-function cyclingRoute(place={},context={}){const base=generic(place,context),profile=window.LuviaCyclingRouteIntelligence?.analyze?.(place,context)||{},reasons=[...base.reasons,...(profile.travelReasons||[])];return{...base,reasons:[...new Set(reasons)],bestTime:profile.bestTime?.value||'Bei Tageslicht und passendem Wetter',bestTimeReason:profile.bestTime?.source||'Routen- und Sicherheitscharakter',cyclingRoute:profile}}
+function mobility(place={},context={}){const base=generic(place,context),profile=window.LuviaTransportIntelligence?.analyze?.(place,context)||{},reasons=[...base.reasons,...(profile.travelReasons||[])];return{...base,reasons:[...new Set(reasons)],mobility:profile}}
 function registerAdapter(type,fn){adapters.set(type,fn)}
 function analyze(type,place,context={}){return(adapters.get(type)||generic)(place,context)}
-registerAdapter('restaurant',restaurant);registerAdapter('accommodation',accommodation);registerAdapter('shopping',shopping);registerAdapter('nature',nature);registerAdapter('cycling_route',cyclingRoute);
+registerAdapter('restaurant',restaurant);registerAdapter('accommodation',accommodation);registerAdapter('shopping',shopping);registerAdapter('nature',nature);registerAdapter('mobility',mobility);
 function diagnostics(){return{version:VERSION,status:'ready',adapters:[...adapters.keys(),'generic'],distanceSource:'gps-only',services:{recommendations:Boolean(window.LuviaRecommendations),schedule:Boolean(window.LuviaScheduleIntelligence),timeline:Boolean(window.LuviaTimelineCore),today:Boolean(window.LuviaTodayIntelligence),presence:Boolean(window.LuviaPresenceVisit),crossModule:Boolean(window.LuviaCrossModuleRecommendations),liveDay:Boolean(window.LuviaLiveDayCompanion)}}}
-window.LuviaPlaceIntelligence=Object.freeze({version:VERSION,analyze,generic,accommodation,restaurant,shopping,nature,cyclingRoute,registerAdapter,diagnostics});
+window.LuviaPlaceIntelligence=Object.freeze({version:VERSION,analyze,generic,accommodation,restaurant,shopping,nature,mobility,registerAdapter,diagnostics});
 })();

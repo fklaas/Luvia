@@ -9,7 +9,7 @@ const client=()=>window.LuviaSupabaseService?.getClient?.()||window.ParisSupabas
 const activeTripId=()=>window.LuviaTripContext?.getActiveTrip?.()?.tripId||window.LuviaTripStore?.snapshot?.()?.activeTripId||null;
 const iso=(d,t='00:00')=>new Date(`${d}T${String(t||'00:00').slice(0,5)}:00`).toISOString();
 const dayKey=v=>new Date(v).toLocaleDateString('sv-SE');
-const typeIcon=t=>({restaurant:'🍽️',accommodation:'🏨',attraction:'🏛️',activity:'🎟️',photo_spot:'📸',parking:'🅿️',charging:'🔌',shopping:'🛍️',nature:'🌿',cycling_route:'🚵',mobility:'🚉'}[t]||'📍');
+const typeIcon=t=>({restaurant:'🍽️',accommodation:'🏨',attraction:'🏛️',activity:'🎟️',photo_spot:'📸',parking:'🅿️',charging:'🔌',shopping:'🛍️',nature:'🌿',mobility:'🚉'}[t]||'📍');
 const fmtTime=v=>new Date(v).toLocaleTimeString('de-DE',{hour:'2-digit',minute:'2-digit'});
 const fmtDate=v=>new Date(v).toLocaleDateString('de-DE',{day:'2-digit',month:'2-digit',year:'numeric'});
 function scheduleEntry(r){const start=iso(r.event_date,r.start_time),duration=Number(r.duration_minutes||0);return{id:`schedule:${r.id}`,rowId:r.id,sourceKey:r.source_key,tripId:r.trip_id,placeId:r.place_id,tripPlaceId:r.trip_place_id,providerPlaceId:r.provider_place_id,entityType:r.entity_type||'place',kind:/check-in/i.test(r.title)?'check_in':/check-out/i.test(r.title)?'check_out':'planned',title:r.title,startAt:start,endAt:r.end_time?iso(r.event_date,r.end_time):(duration?new Date(new Date(start).getTime()+duration*60000).toISOString():null),durationMinutes:duration||null,automatic:false,source:'schedule',metadata:r.metadata||{},icon:typeIcon(r.entity_type)}}

@@ -8,8 +8,6 @@ import { restaurantAction, restaurantDiagnostics } from './_shared/restaurants.t
 import { recommendationAction, recommendationDiagnostics } from './_shared/recommendations.ts';
 import { scheduleAction } from './_shared/schedule.ts';
 import { routesAction } from './_shared/routes.ts';
-import { cyclingAction, cyclingDiagnostics } from './_shared/cycling.ts';
-import { trailforksSearch, trailforksDiagnostics } from './_shared/trailforks.ts';
 import { placeEntityAction } from './_shared/place-entities.ts';
 
 type GatewayBody={action?:string;payload?:unknown;context?:Record<string,unknown>};
@@ -20,7 +18,6 @@ const PLACE_ENTITY_ACTIONS=new Set(['place.health','place.list','place.import','
 const RESTAURANT_ACTIONS=new Set(['restaurant.health','restaurant.list','restaurant.history','restaurant.import','restaurant.lifecycle.update','restaurant.feedback','restaurant.remove','restaurant.clear']);
 const SCHEDULE_ACTIONS=new Set(['schedule.list','schedule.upsert','schedule.delete']);
 const ROUTES_ACTIONS=new Set(['routes.compute']);
-const CYCLING_ACTIONS=new Set(['cycling.health','cycling.search','cycling.search.google','cycling.search.generated','cycling.search.routes','cycling.search.trails','cycling.search.trailforks','cycling.details']);
 const RECOMMENDATION_ACTIONS=new Set(['recommendation.health','recommendation.store','recommendation.event','recommendation.decision','recommendation.list','recommendation.events','recommendation.learning.reset']);
 
 Deno.serve(async(req:Request)=>{
@@ -39,7 +36,7 @@ Deno.serve(async(req:Request)=>{
 
   const forwarded=req.headers.get('x-forwarded-for')?.split(',')[0]?.trim();
   const clientKey=forwarded||req.headers.get('cf-connecting-ip')||'unknown';
-  const rate=enforceRateLimit(`${clientKey}:${action}`,action==='system.health'?60:PLACES_ACTIONS.has(action)?45:PLACE_ENTITY_ACTIONS.has(action)?40:RESTAURANT_ACTIONS.has(action)?30:SCHEDULE_ACTIONS.has(action)?60:ROUTES_ACTIONS.has(action)?40:CYCLING_ACTIONS.has(action)?24:RECOMMENDATION_ACTIONS.has(action)?60:30,60_000);
+  const rate=enforceRateLimit(`${clientKey}:${action}`,action==='system.health'?60:PLACES_ACTIONS.has(action)?45:PLACE_ENTITY_ACTIONS.has(action)?40:RESTAURANT_ACTIONS.has(action)?30:SCHEDULE_ACTIONS.has(action)?60:ROUTES_ACTIONS.has(action)?40:RECOMMENDATION_ACTIONS.has(action)?60:30,60_000);
   if(!rate.allowed)return errorResponse(429,'RATE_LIMITED','Zu viele Anfragen.',id,{...cors,'Retry-After':String(rate.retryAfter)});
 
   const supabaseUrl=Deno.env.get('SUPABASE_URL')||'';
@@ -65,7 +62,7 @@ Deno.serve(async(req:Request)=>{
     let data:unknown;
     switch(action){
       case 'system.health':
-        data={status:'ok',service:'luvia-gateway',version:'4.13.0',build:'13.13.0',core:'4.13.0',time:new Date().toISOString(),authenticated:Boolean(userId),places:placesDiagnostics(),restaurants:restaurantDiagnostics(),recommendations:recommendationDiagnostics(),cycling:{...cyclingDiagnostics(),trailforks:trailforksDiagnostics()}};
+        data={status:'ok',service:'luvia-gateway',version:'4.14.0',build:'13.14.0',core:'4.14.0',time:new Date().toISOString(),authenticated:Boolean(userId),places:placesDiagnostics(),restaurants:restaurantDiagnostics(),recommendations:recommendationDiagnostics()};
         break;
       default:
         if(PLACES_ACTIONS.has(action)){
@@ -94,7 +91,6 @@ Deno.serve(async(req:Request)=>{
           return jsonResponse(200,{ok:true,data:schedule.data,meta:{requestId:id,action,durationMs}},cors);
         }
         if(ROUTES_ACTIONS.has(action)){const routes=await routesAction(action,body.payload||{});const durationMs=Math.round((performance.now()-started)*100)/100;return jsonResponse(200,{ok:true,data:routes.data,meta:{requestId:id,action,durationMs}},cors);}
-        if(CYCLING_ACTIONS.has(action)){const cycling=action==='cycling.search.trailforks'?await trailforksSearch(body.payload||{}):await cyclingAction(action,body.payload||{});const durationMs=Math.round((performance.now()-started)*100)/100;return jsonResponse(200,{ok:true,data:cycling.data,meta:{requestId:id,action,durationMs,cache:cycling.cache||null}},cors);}
         if(RECOMMENDATION_ACTIONS.has(action)){
           if(!userClient) return errorResponse(401,'AUTH_REQUIRED','Für diese Aktion ist eine Anmeldung erforderlich.',id,cors);
           const recommendations=await recommendationAction(action,body.payload||{},userClient);

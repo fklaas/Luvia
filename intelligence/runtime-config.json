@@ -28,26 +28,26 @@
     "logHistory": 500
   },
   "release": {
-    "core": "4.13.0",
-    "build": "13.13.0",
-    "name": "Cycling Routes Rebuild & Google-First Discovery",
+    "core": "4.14.0",
+    "build": "13.14.0",
+    "name": "Transport & Mobility Intelligence",
     "channel": "production",
-    "builtAt": "2026-08-03T11:11:00+02:00"
+    "builtAt": "2026-08-03T11:58:00+02:00"
   },
   "deployment": {
     "canonicalHost": "myluvia.app",
     "wwwHost": "www.myluvia.app",
     "stagingHost": "staging.myluvia.app",
     "githubPagesFallback": "https://fklaas.github.io/Luvia/",
-    "build": "13.13.0"
+    "build": "13.14.0"
   },
   "build": {
-    "core": "4.13.0",
-    "build": "13.13.0",
-    "name": "Cycling Routes Rebuild & Google-First Discovery",
+    "core": "4.14.0",
+    "build": "13.14.0",
+    "name": "Transport & Mobility Intelligence",
     "channel": "production",
     "releasedAt": "2026-08-03",
-    "builtAt": "2026-08-03T11:11:00+02:00"
+    "builtAt": "2026-08-03T11:58:00+02:00"
   },
   "backend": {
     "functionName": "luvia-gateway",
@@ -83,7 +83,7 @@
     "profileSchemaVersion": 5
   },
   "placeIntelligence": {
-    "version": "4.13.0",
+    "version": "4.14.0",
     "types": 12,
     "multiType": true,
     "restaurantCompatibility": true,
@@ -108,7 +108,7 @@
     "globalGps": true,
     "offlineSync": true
   },
-  "coreVersion": "4.13.0",
-  "buildVersion": "13.13.0",
-  "releaseName": "Cycling Routes Rebuild & Google-First Discovery"
+  "coreVersion": "4.14.0",
+  "buildVersion": "13.14.0",
+  "releaseName": "Transport & Mobility Intelligence"
 }
