@@ -1,5 +1,5 @@
 (()=>{'use strict';
-const MODULE_ID='nature',VERSION='4.11.1';
+const MODULE_ID='nature',VERSION='4.11.2';
 const QUICK=[['🌿','Entdecken','Natur Parks und Ausflugsziele'],['🌳','Parks & Gärten','Parks botanische Gärten und grüne Oasen'],['🥾','Wandern','Wandergebiete Naturpfade und Spazierwege'],['🏞️','Aussicht','Aussichtspunkte Panorama und Landschaft'],['🌊','Seen & Flüsse','Seen Flüsse Ufer und Wasserlandschaften'],['🏖️','Strände','Strände Küste und Ufer'],['🦌','Naturreservate','Naturreservate Nationalparks und Wildnis'],['🧺','Picknick & Ruhe','Picknickplätze ruhige Parks und Natur']];
 const state={root:null,trip:null,query:'Natur Parks und Ausflugsziele',filter:'Entdecken',options:{},results:[],entities:[],searchMap:new Map(),routeCache:new Map(),loading:false,error:null,visibleCount:6};
 const esc=v=>window.LuviaPlaceExperience?.esc?.(v)||String(v??'');

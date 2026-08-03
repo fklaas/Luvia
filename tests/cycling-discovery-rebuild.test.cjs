@@ -1,0 +1,14 @@
+const fs=require('fs'),assert=require('assert');
+const gateway=fs.readFileSync('supabase/functions/luvia-gateway/_shared/cycling.ts','utf8');
+const index=fs.readFileSync('supabase/functions/luvia-gateway/index.ts','utf8');
+const service=fs.readFileSync('intelligence/cycling-route-service.js','utf8');
+const moduleCode=fs.readFileSync('modules/cycling-routes/cycling-route-module.js','utf8');
+const intelligence=fs.readFileSync('core/places/cycling-route-intelligence-service.js','utf8');
+for(const token of ['cycling.search.routes','cycling.search.trails','routeRelationsQuery','trailFeaturesQuery','clusterTrailElements','dedupeAndSelect','broadenWhenExactEmpty','unnamedTrailClustering','resultMode','matchTier'])assert(gateway.includes(token),`Gateway discovery token missing: ${token}`);
+for(const token of ["'cycling.search.routes'","'cycling.search.trails'"])assert(index.includes(token),`Gateway action missing: ${token}`);
+for(const token of ['searchRoutes','searchTrails','recommendedRadius','maxRadiusMeters:300000','stagedDiscovery:true'])assert(service.includes(token),`Client discovery token missing: ${token}`);
+for(const token of ["loadingSources=new Set(['places','routes','trails'])",'searchSummaries:{}','sourceWarnings:[]','searchNotice','recommendedRadius(profile)','300000','clearSearchCache'])assert(moduleCode.includes(token),`Module discovery token missing: ${token}`);
+assert(moduleCode.includes("profile:'all'"),'Initial discovery must not force MTB and hide all other routes');
+assert(moduleCode.includes("search('Fahrradrouten und Trails',{profile:'all',radiusMeters:150000})"),'Initial discovery must use broad all-profile search');
+for(const token of ['trail_area','trail_center','noTrailAreaPretendsToBeCompleteRoute','route_result_kind','match_tier'])assert(intelligence.includes(token),`Truthful cycling result token missing: ${token}`);
+console.log('Cycling discovery provider rebuild: OK');

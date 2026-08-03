@@ -28,9 +28,9 @@
     "logHistory": 500
   },
   "release": {
-    "core": "4.11.1",
-    "build": "13.11.1",
-    "name": "Cycling Place Core Conformance & Fast Discovery",
+    "core": "4.11.2",
+    "build": "13.11.2",
+    "name": "Cycling Discovery Provider Rebuild & Reliable Results",
     "channel": "production",
     "builtAt": "2026-07-30T19:28:00+02:00"
   },
@@ -39,12 +39,12 @@
     "wwwHost": "www.myluvia.app",
     "stagingHost": "staging.myluvia.app",
     "githubPagesFallback": "https://fklaas.github.io/Luvia/",
-    "build": "13.11.1"
+    "build": "13.11.2"
   },
   "build": {
-    "core": "4.11.1",
-    "build": "13.11.1",
-    "name": "Cycling Place Core Conformance & Fast Discovery",
+    "core": "4.11.2",
+    "build": "13.11.2",
+    "name": "Cycling Discovery Provider Rebuild & Reliable Results",
     "channel": "production",
     "releasedAt": "2026-07-30",
     "builtAt": "2026-07-30T19:28:00+02:00"
@@ -83,7 +83,7 @@
     "profileSchemaVersion": 5
   },
   "placeIntelligence": {
-    "version": "4.11.1",
+    "version": "4.11.2",
     "types": 12,
     "multiType": true,
     "restaurantCompatibility": true,
@@ -108,7 +108,7 @@
     "globalGps": true,
     "offlineSync": true
   },
-  "coreVersion": "4.11.1",
-  "buildVersion": "13.11.1",
-  "releaseName": "Cycling Place Core Conformance & Fast Discovery"
+  "coreVersion": "4.11.2",
+  "buildVersion": "13.11.2",
+  "releaseName": "Cycling Discovery Provider Rebuild & Reliable Results"
 }

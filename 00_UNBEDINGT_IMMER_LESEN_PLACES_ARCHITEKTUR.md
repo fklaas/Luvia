@@ -611,49 +611,83 @@ Zusätzlich muss `node tests/cycling-registry-bootstrap.test.cjs` erfolgreich se
 
 ---
 
-## Build 13.11.1 / Core 4.11.1 – Verbindliche Fahrradrouten-Conformance und progressive Provider-Suche
+## Build 13.11.2 / Core 4.11.2 – Fahrradrouten: gestufte Discovery statt einer monolithischen Suche
 
-### Globale Module-Shell ist ab jetzt ein echter Renderer
+Fahrradrouten dürfen nicht wie ein gewöhnlicher Point-of-Interest-Provider behandelt werden. Eine einzelne große Overpass-Abfrage mit strengem Profilfilter ist nicht ausreichend: Sie kann durch Timeout vollständig leer bleiben und sie blendet allgemeine Radrouten aus, sobald der Nutzer MTB auswählt.
 
-Der globale UI-Vertrag benennt nicht mehr nur CSS-Klassen, sondern stellt mit
+Verbindlich gilt ab diesem Build:
+
+### Drei unabhängige Discovery-Quellen
+
+Die globale Fahrradrouten-Suche startet parallel:
+
+1. `cycling.search.routes` für ausgeschilderte OSM-Routenrelationen (`route=bicycle` und `route=mtb`) im großen Suchraum.
+2. `cycling.search.trails` für lokale MTB-/Gravel-Wegmerkmale, Trailgebiete und Cycling-Anlagen in einem kontrollierten Teilradius.
+3. die vorhandene zentrale Places-Pipeline für klar erkennbare Bikeparks, Trailzentren, Pumptracks und Tour-Startpunkte.
+
+Eine Quelle darf ausfallen oder leer sein, ohne die anderen Ergebnisse zu löschen oder den gesamten Screen zu blockieren. Die Modul-Shell bleibt weiterhin ausschließlich `LuviaPlaceExperience.moduleShell(...)`.
+
+### Kein striktes Leerfiltern mehr
+
+Ein Profil wie MTB oder Gravel ist eine Ranking- und Transparenzvorgabe, kein Alles-oder-nichts-Filter.
+
+Jedes Ergebnis trägt genau eine Trefferstufe:
+
+- `exact`: exakt zum gewählten Profil passend,
+- `related`: fachlich verwandte Alternative,
+- `fallback`: allgemeine Fahrradroute, wenn keine exakte oder verwandte Route vorhanden ist.
+
+Exakte Treffer stehen immer zuerst. Gibt es keine exakt als MTB markierte Route, zeigt Luvia geländenahe Alternativen und allgemeine Radrouten ausdrücklich als solche, statt eine leere Liste auszugeben oder sie fälschlich als MTB-Trail zu bezeichnen.
+
+### Unbenannte OSM-Trailsegmente
+
+Viele echte MTB-Wege besitzen keine eigene Route-Relation und keinen Namen. Solche Segmente dürfen nicht einzeln als erfundene Tour ausgegeben und auch nicht verworfen werden.
+
+`clusterTrailElements(...)` bündelt räumlich nahe, fachlich passende Segmente zu einem `trail_area`:
+
+- ein Trailgebiet ist keine vollständige Route,
+- es besitzt keine erfundene Streckenlänge,
+- es besitzt keine erfundene Rundtour,
+- es kann als Gebiet oder Startpunkt favorisiert und geplant werden,
+- die Detailkarte weist ausdrücklich darauf hin, dass eine konkrete Route vor Ort beziehungsweise mit einem späteren Routing-Provider zusammengestellt werden muss.
+
+Weitere kanonische Ergebnisarten sind:
+
+- `route_relation`,
+- `trail_segment`,
+- `trail_area`,
+- `trail_center`,
+- `cycling_area`.
+
+### Suchradien
+
+Die global gerenderte Discovery-Shell bietet für Fahrradrouten 50, 100, 150, 200 und 300 km. Empfohlene Standardwerte sind typabhängig:
+
+- MTB: 200 km,
+- Gravel: 150 km,
+- Entdecken/klassische Routen: 150 km,
+- City: 60 km,
+- Familie: 75 km.
+
+Der größere Radius betrifft primär leichte Routenrelationen. Teure Wegsegment-Abfragen bleiben auf kontrollierte Teilradien begrenzt.
+
+### Pflichtprüfungen
 
 ```javascript
-LuviaPlaceExperience.moduleShell(...)
+LuviaCyclingRoutes.diagnostics()
 ```
 
-einen verbindlichen Renderer für Place-Modulseiten bereit.
+Muss `stagedDiscovery: true`, die Actions `cycling.search.routes` und `cycling.search.trails`, `broadenWhenExactEmpty: true` sowie `unnamedTrailClustering: true` melden.
 
-Ein Place-Modul darf keinen eigenen Header-Hintergrund, keine eigene Shell-Struktur und keine lokale Modul-Typografie ergänzen. Typabhängig bleiben ausschließlich Inhalte, Kategorien, Filterfelder und Capability-Abschnitte.
+Zusätzlich müssen erfolgreich sein:
 
-Fahrradrouten verwenden ab diesem Build zwingend:
+```bash
+node tests/cycling-discovery-rebuild.test.cjs
+node tests/cycling-discovery-runtime.test.cjs
+```
 
-- `LuviaPlaceExperience.moduleShell`,
-- `LuviaPlaceExperience.plannedPanel`,
-- `LuviaPlaceExperience.discovery`,
-- `LuviaPlaceCollections.favoritePanel`,
-- `LuviaPlaceUI.card`,
-- `LuviaPlaceDetail`,
-- `LuviaPlaceUIActions.openTimelineDialog`.
+Der Runtime-Test beweist mit simulierten Providerdaten, dass:
 
-Die Conformance-Prüfung muss einen lokalen Fahrradrouten-Header oder eine fehlende globale Module-Shell als Architekturverletzung melden.
-
-### Externe Spezialprovider dürfen den Place-Screen nicht blockieren
-
-Für Routen-, Event-, Wetter- oder andere langsamere Spezialprovider gilt verbindlich:
-
-1. Modul-Shell sofort rendern.
-2. Provider parallel starten.
-3. Erste belastbare Ergebnisse sofort anzeigen.
-4. Weitere Quellen schrittweise ergänzen.
-5. Vorhandene Ergebnisse während des Nachladens nicht entfernen.
-6. Verspätete Antworten veralteter Suchläufe verwerfen.
-7. Provider mit kurzen definierten Timeouts betreiben.
-8. Suchfehler einer Quelle dürfen andere Quellen nicht unbrauchbar machen.
-
-### Fahrradrouten-Suchraum
-
-Fahrradrouten unterscheiden sich fachlich von Restaurants oder innerstädtischen Places. Der Standardradius beträgt daher 100 km; der Nutzer kann 50, 100, 150 oder 200 km wählen. Die Radiusabweichung ist typabhängige Fachkonfiguration innerhalb der globalen Discovery-Shell und kein eigenes UI-System.
-
-### Qualitätsranking
-
-MTB- und Fahrradrouten werden zentral nach Datenqualität und Reiseeignung sortiert. Relevante Kriterien sind Profiltreffer, Routenrelation, Name, Netzwerk, Distanzangabe, MTB-Skala, Untergrund und Entfernung zum Reiseziel. Generische Kategorienamen dürfen keine fachlich passenden Treffer herausfiltern.
+- eine allgemeine Radroutenrelation bei fehlenden MTB-Relationen transparent als Fallback erhalten bleibt,
+- unbenannte MTB-Wege zu einem echten `trail_area` gebündelt werden,
+- ein Trailgebiet niemals als vollständige Route ausgegeben wird.
