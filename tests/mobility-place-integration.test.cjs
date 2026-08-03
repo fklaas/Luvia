@@ -1,0 +1,15 @@
+const fs=require('fs');
+const assert=require('assert');
+const moduleText=fs.readFileSync('modules/mobility/mobility-module.js','utf8');
+const definitions=fs.readFileSync('core/places/place-type-definitions.js','utf8');
+const adapters=fs.readFileSync('core/places/place-adapters.js','utf8');
+const gateway=fs.readFileSync('supabase/functions/luvia-gateway/index.ts','utf8');
+const places=fs.readFileSync('supabase/functions/luvia-gateway/_shared/places.ts','utf8');
+for(const token of ["placeType:'mobility'",'LuviaPlaceExperience.discovery','LuviaPlaceCollections.favoritePanel','LuviaPlaceUI.card',"registerCapabilityRenderer?.(\'mobility\'",'SEARCH_PLANS'])assert(moduleText.includes(token),`mobility module missing ${token}`);
+for(const token of ["type:'mobility'",'mobilityIntelligence:true','mobilityPlanning:true',"key:'planned_at'", "renderer:'mobility'"])assert(definitions.includes(token),`mobility definition missing ${token}`);
+assert(adapters.includes("'mobility'"),'mobility adapter missing');
+assert(places.includes('strictDestination===false'),'broad mobility search bias support missing');
+assert(places.includes('evChargeOptions')&&places.includes('parkingOptions'),'mobility provider fields missing');
+for(const forbidden of ['CYCLING_ACTIONS','cycling.search','cycling.health','cycling.details'])assert(!gateway.includes(forbidden),`gateway still exposes ${forbidden}`);
+for(const file of ['core/places/cycling-route-intelligence-service.js','intelligence/cycling-route-service.js','modules/cycling-routes/cycling-route-module.js','supabase/functions/luvia-gateway/_shared/cycling.ts'])assert(!fs.existsSync(file),`retired cycling file still exists: ${file}`);
+console.log('Mobility place integration and cycling removal: OK');

@@ -1,0 +1,17 @@
+const fs=require('fs');
+const vm=require('vm');
+const assert=require('assert');
+const window={};
+const context=vm.createContext({window,console,Object,Array,Set,Map,Math,Number,String,Boolean,Date,JSON});
+vm.runInContext(fs.readFileSync('core/places/transport-intelligence-service.js','utf8'),context,{filename:'transport-intelligence-service.js'});
+const service=window.LuviaTransportIntelligence;
+assert(service,'LuviaTransportIntelligence missing');
+const train=service.analyze({name:'Gare du Nord',primaryType:'train_station',types:['train_station','transit_station'],openingHours:{openNow:true}});
+assert.strictEqual(train.mobilityMode.value,'Bahn & Fernverkehr');
+assert(train.transportRole && train.transferBuffer && train.ticketHint);
+const charging=service.analyze({name:'Charge Point',primaryType:'electric_vehicle_charging_station',types:['electric_vehicle_charging_station'],evChargeOptions:{connectorCount:8}});
+assert(/Laden|Ladestation|E-Auto/i.test(charging.mobilityMode.value+' '+charging.chargingHint.value));
+const parking=service.analyze({name:'Parkhaus Zentrum',primaryType:'parking_garage',types:['parking_garage'],parkingOptions:{freeParkingLot:false,paidParkingLot:true}});
+assert(/Park/i.test(parking.mobilityMode.value+parking.parkingHint.value));
+assert(service.diagnostics().version==='4.14.0');
+console.log('Transport intelligence: OK');
