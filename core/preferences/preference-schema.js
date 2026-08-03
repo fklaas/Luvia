@@ -1,7 +1,7 @@
 (() => {
   'use strict';
 
-  const VERSION = '3.0.0';
+  const VERSION = '3.1.0';
   const PROFILE_VERSION = 3;
   const clone = value => value == null ? value : JSON.parse(JSON.stringify(value));
   const unique = values => [...new Set((Array.isArray(values) ? values : []).map(value => String(value || '').trim()).filter(Boolean))];
@@ -163,12 +163,12 @@
   const options = ids => ids.map(option);
 
   const ONBOARDING_SCENES = Object.freeze([
-    { id: 'interests', eyebrow: 'Was zieht dich an?', title: 'Was möchtest du auf Reisen besonders erleben?', copy: 'Wähle bis zu vier Dinge. Luvia nutzt sie später für persönliche Vorschläge.', mode: 'multi', min: 1, max: 4, featured: options(['culinary','culture','nature','family','photography','adventure']), more: options(['shopping','wellness','nightlife','local','beach']) },
+    { id: 'interests', eyebrow: 'Dein globaler Reisekompass', title: 'Was bedeutet Reisen grundsätzlich für dich?', copy: 'Wähle bis zu vier Dinge. Diese Werte begleiten dich in ganz Luvia – unabhängig von einer einzelnen Suche.', mode: 'multi', min: 1, max: 4, featured: options(['culinary','culture','nature','family','photography','adventure']), more: options(['shopping','wellness','nightlife','local','beach']) },
     { id: 'dietary', eyebrow: 'Genuss, der zu dir passt', title: 'Wie möchtest du dich unterwegs ernähren?', copy: 'Mehrere Angaben sind möglich. Unpassende Restauranttreffer werden später konsequent ausgefiltert.', mode: 'multi', min: 1, max: 4, featured: options(['vegetarian','vegan','mixed','no_diet']), more: options(['halal','gluten_free','lactose_free']) },
     { id: 'travelStyles', eyebrow: 'Dein Reisegefühl', title: 'Wie soll sich eine gute Reise für dich anfühlen?', copy: 'Wähle bis zu vier Reisegefühle, die wirklich zu dir passen.', mode: 'multi', min: 1, max: 4, featured: options(['romantic','family_friendly','spontaneous','planned','comfort','authentic']), more: options(['sustainable','accessible']) },
     { id: 'activityPreferences', eyebrow: 'Eure gemeinsame Zeit', title: 'Welche Aktivitäten machen dir am meisten Spaß?', copy: 'Diese Angaben helfen Luvia bei Aktivitäten und Tagesideen.', mode: 'multi', min: 1, max: 5, featured: options(['indoor','outdoor','active','relaxed','water_fun']), more: options(['hiking','cycling','walking']) },
     { id: 'entertainmentPreferences', eyebrow: 'Abend & Unterhaltung', title: 'Wie verbringst du besondere Abende?', copy: 'Optional – Luvia nutzt die Auswahl für Events und Abendideen.', mode: 'multi', min: 0, max: 4, optional: true, featured: options(['live_music','theatre','events','cinema']), more: options(['concert','bar','comedy']) },
-    { id: 'mobilityPreferences', eyebrow: 'Unterwegs', title: 'Wie bewegst du dich auf Reisen am liebsten?', copy: 'Optional – Move verwendet diese Vorlieben später als freundliche Vorauswahl.', mode: 'multi', min: 0, max: 5, optional: true, featured: options(['rail','local_transit','walking','cycling','rental','taxi']), more: options(['car','sustainable']) },
+    { id: 'mobilityPreferences', eyebrow: 'Dein allgemeiner Mobilitätsstil', title: 'Wie möchtest du dich auf Reisen grundsätzlich bewegen?', copy: 'Optional – diese globale Tendenz fließt in Move ein. Die konkrete Auswahl triffst du weiterhin für jeden Reisemoment neu.', mode: 'multi', min: 0, max: 5, optional: true, featured: options(['rail','local_transit','walking','cycling','rental','taxi']), more: options(['car','sustainable']) },
     { id: 'familyPreferences', eyebrow: 'Familienbedürfnisse', title: 'Was soll Luvia für eure Familie berücksichtigen?', copy: 'Optional – diese Angaben helfen bei passenden Orten und Wegen.', mode: 'multi', min: 0, max: 4, optional: true, featured: options(['traveling_with_children','baby','stroller','family_friendly','no_family_needs']) },
     { id: 'accessibilityNeeds', eyebrow: 'Besondere Anforderungen', title: 'Was soll unterwegs berücksichtigt werden?', copy: 'Optional und privat. Diese Angaben werden nur in deinem Profil gespeichert.', mode: 'multi', min: 0, max: 5, optional: true, featured: options(['step_free','wheelchair','quiet_spaces','no_accessibility']), more: options(['hearing_support','visual_support']) },
     { id: 'pace', eyebrow: 'Euer Tempo', title: 'Wie viel möchtet ihr an einem Reisetag erleben?', copy: 'Das Tempo beeinflusst Empfehlungen und die Dichte späterer Vorschläge.', mode: 'single', min: 1, featured: options(['pace_relaxed','pace_balanced','pace_active']) },
@@ -188,7 +188,7 @@
     accommodation: { id: 'subintent', eyebrow: 'Unterkünfte', title: 'Wie möchtet ihr übernachten?', copy: 'Luvia sucht nur in der gewählten Unterkunftsart.', mode: 'single', min: 1, featured: options(['hotel','apartment','hostel','resort','camping']) }
   });
 
-  const PLACE_CONTEXT_SCENE = Object.freeze({ id: 'context', eyebrow: 'Was ist euch wichtig?', title: 'Welche Stimmung soll dazu passen?', copy: 'Diese Auswahl verfeinert Reihenfolge und Erklärung. Harte Filter verwendet Luvia nur, wenn Google sie eindeutig belegen kann.', mode: 'multi', min: 0, max: 3, optional: true, featured: options(['romantic','family_friendly','indoor','outdoor','relaxed','active']), more: options(['accessible','authentic']) });
+  const PLACE_CONTEXT_SCENE = Object.freeze({ id: 'context', eyebrow: 'Euer Moment', title: 'Welche Stimmung soll diesmal dazu passen?', copy: 'Diese Auswahl gilt nur für die aktuelle Inspiration. Dein globales Reiseprofil bleibt unverändert und ergänzt die Reihenfolge im Hintergrund.', mode: 'multi', min: 0, max: 3, optional: true, featured: options(['romantic','family_friendly','indoor','outdoor','relaxed','active']), more: options(['accessible','authentic']) });
   const PLACE_DISTANCE_SCENE = Object.freeze({ id: 'distance', eyebrow: 'Wie weit darf es gehen?', title: 'Wo soll Luvia für euch suchen?', copy: 'Die Suche bleibt immer am aktiven Reiseziel gebunden.', mode: 'single', min: 1, featured: options(['nearby','citywide','explore_area']) });
 
   const MOVE_MODE_SCENES = Object.freeze({
@@ -329,7 +329,7 @@
     const purpose = unique(answers.purpose)[0];
     const first = { id: 'purpose', eyebrow: 'Luvia Move', title: 'Wobei soll Move euch gerade helfen?', copy: 'Wähle den Anlass. Danach grenzt Luvia das passende Verkehrsmittel ein.', mode: 'single', min: 1, featured: options(['arrival','local_move','transfer','daytrip','vehicle','parking_charge']) };
     const mode = MOVE_MODE_SCENES[purpose] || MOVE_MODE_SCENES.local_move;
-    const priorities = { id: 'priorities', eyebrow: 'Was zählt für euch?', title: 'Was ist euch unterwegs besonders wichtig?', copy: 'Diese Angaben erklären und sortieren Ergebnisse. Move behauptet daraus keine Live-Verbindung.', mode: 'multi', min: 0, max: 4, optional: true, featured: options(['simple','few_changes','fast','affordable','luggage','stroller']), more: options(['accessible','flexible','sustainable']) };
+    const priorities = { id: 'priorities', eyebrow: 'Euer Weg in diesem Moment', title: 'Was ist euch für diese Verbindung besonders wichtig?', copy: 'Diese Auswahl gilt nur für die aktuelle Move-Inspiration. Globale Bedürfnisse aus dem Reiseprofil fließen zusätzlich ein.', mode: 'multi', min: 0, max: 4, optional: true, featured: options(['simple','few_changes','fast','affordable','luggage','stroller']), more: options(['accessible','flexible','sustainable']) };
     const distance = { ...PLACE_DISTANCE_SCENE, eyebrow: 'Suchbereich', title: 'Wie weit darf Move suchen?' };
     return [first, mode, priorities, distance];
   }
@@ -513,9 +513,30 @@
       profileSelections: {
         dietary: [...dietary],
         travelStyles: [...profile.travelPreferences.travelStyles],
+        activityPreferences: [...profile.activityPreferences],
+        entertainmentPreferences: [...profile.entertainmentPreferences],
+        familyPreferences: clone(profile.familyPreferences),
+        accessibilityNeeds: [...profile.accessibilityNeeds],
         pace: profile.travelPreferences.pace,
         budget: profile.travelPreferences.budget
       },
+      preferenceLayers: Object.freeze({
+        globalProfile: Object.freeze({
+          source: 'supabase-user_profiles',
+          dietary: [...dietary],
+          interests: [...profile.travelInterests],
+          styles: [...profile.travelStyles],
+          activities: [...profile.activityPreferences],
+          entertainment: [...profile.entertainmentPreferences],
+          family: clone(profile.familyPreferences),
+          accessibility: [...profile.accessibilityNeeds],
+          pace: profile.travelPace,
+          budget: profile.budgetPreference
+        }),
+        moduleMoment: Object.freeze({intent, subintent, context: [...contextSelections], distance: unique(answers.distance)[0] || 'citywide'}),
+        mergePolicy: 'global-profile-context-plus-explicit-module-moment',
+        mutatesGlobalProfile: false
+      }),
       labels: {
         intent: option(intent).label,
         subintent: option(subintent).label,
@@ -558,9 +579,27 @@
           mobilityPreferences: [...profile.mobilityPreferences],
           accessibilityNeeds: [...profile.accessibilityNeeds],
           familyPreferences: clone(profile.familyPreferences),
+          travelStyles: [...profile.travelStyles],
           pace: profile.travelPace,
           budget: profile.budgetPreference
         };
+      })(),
+      preferenceLayers: (() => {
+        const profile = normalizePreferences(context.preferences || {});
+        return Object.freeze({
+          globalProfile: Object.freeze({
+            source: 'supabase-user_profiles',
+            mobility: [...profile.mobilityPreferences],
+            accessibility: [...profile.accessibilityNeeds],
+            family: clone(profile.familyPreferences),
+            styles: [...profile.travelStyles],
+            pace: profile.travelPace,
+            budget: profile.budgetPreference
+          }),
+          moduleMoment: Object.freeze({purpose, mode, priorities: unique(answers.priorities), distance: unique(answers.distance)[0] || 'citywide'}),
+          mergePolicy: 'global-profile-context-plus-explicit-module-moment',
+          mutatesGlobalProfile: false
+        });
       })(),
       labels: {
         purpose: option(purpose).label,

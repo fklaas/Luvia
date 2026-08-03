@@ -1,6 +1,6 @@
 (function(){
 'use strict';
-const VERSION='4.16.1',BUILD='13.16.1';
+const VERSION='4.16.2',BUILD='13.16.2';
 const currentScript=document.currentScript;
 let registered=false,loading=false,attempts=0,timer=null;
 function registerAll(C){

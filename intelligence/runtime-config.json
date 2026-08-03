@@ -28,26 +28,26 @@
     "logHistory": 500
   },
   "release": {
-    "core": "4.16.1",
-    "build": "13.16.1",
-    "name": "Global User Preference Persistence",
+    "core": "4.16.2",
+    "build": "13.16.2",
+    "name": "Guided Travel Canvas Focus Mode",
     "channel": "production",
-    "builtAt": "2026-08-03T18:35:00+02:00"
+    "builtAt": "2026-08-03T19:25:00+02:00"
   },
   "deployment": {
     "canonicalHost": "myluvia.app",
     "wwwHost": "www.myluvia.app",
     "stagingHost": "staging.myluvia.app",
     "githubPagesFallback": "https://fklaas.github.io/Luvia/",
-    "build": "13.16.1"
+    "build": "13.16.2"
   },
   "build": {
-    "core": "4.16.1",
-    "build": "13.16.1",
-    "name": "Global User Preference Persistence",
+    "core": "4.16.2",
+    "build": "13.16.2",
+    "name": "Guided Travel Canvas Focus Mode",
     "channel": "production",
     "releasedAt": "2026-08-03",
-    "builtAt": "2026-08-03T18:35:00+02:00"
+    "builtAt": "2026-08-03T19:25:00+02:00"
   },
   "backend": {
     "functionName": "luvia-gateway",
@@ -83,7 +83,7 @@
     "profileSchemaVersion": 5
   },
   "placeIntelligence": {
-    "version": "4.16.1",
+    "version": "4.16.2",
     "types": 12,
     "multiType": true,
     "restaurantCompatibility": true,
@@ -108,7 +108,7 @@
     "globalGps": true,
     "offlineSync": true
   },
-  "coreVersion": "4.16.1",
-  "buildVersion": "13.16.1",
-  "releaseName": "Global User Preference Persistence"
+  "coreVersion": "4.16.2",
+  "buildVersion": "13.16.2",
+  "releaseName": "Guided Travel Canvas Focus Mode"
 }

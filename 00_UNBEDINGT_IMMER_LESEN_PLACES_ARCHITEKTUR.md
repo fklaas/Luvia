@@ -740,6 +740,36 @@ node tests/user-preference-core.test.cjs
 node tests/profile-preference-payload.test.cjs
 node tests/preference-database-migration.test.cjs
 node tests/guided-discovery-integration.test.cjs
-node tests/move-no-timeline-v13.16.1.test.cjs
+node tests/move-no-timeline-v13.16.2.test.cjs
+node tests/release-version-consistency.test.cjs
+```
+
+---
+
+## Build 13.16.2 · Core 4.16.2 · Guided Travel Canvas Focus Mode
+
+### Fokussierter Vorschlagsmodus
+
+Nach einem abgeschlossenen Guided-Discovery-Flow zeigen Places und Move ausschließlich die daraus entstandenen persönlichen Vorschläge. Suche, Quick-Filter, Verfeinerung, Planungskopf und Sammlung bleiben in diesem Zustand geschlossen. Der vollständige Katalog wird erst über eine bewusste Aktion am Ende der Vorschläge geöffnet.
+
+### Zwei Präferenzebenen
+
+Das globale Reiseprofil ist ein dauerhafter, benutzergebundener Reisekompass und wird ausschließlich über das Profil beziehungsweise das Registrierungs-Onboarding geändert. Die Auswahl in Places oder Move beschreibt nur den aktuellen Reisemoment. Sie ergänzt den globalen Kontext, überschreibt ihn aber niemals. Jeder Discovery Contract muss `preferenceLayers`, die Merge-Policy `global-profile-context-plus-explicit-module-moment` und `mutatesGlobalProfile: false` enthalten.
+
+### Guided Travel Canvas
+
+Die Sequenz und die Ergebnisansicht bilden eine offene Reiseleinwand statt eines technischen Katalogs. Gedankenwolken müssen als organische Wolken aufgebaut sein. Mehrfachauswahlen werden ohne vollständigen Szenen-Neuaufbau aktualisiert. Daueranimationen sind sparsam und transform-basiert; `prefers-reduced-motion` bleibt verbindlich.
+
+### Modale Ebenen
+
+Ein aus dem Profil gestarteter Preference Flow liegt immer oberhalb des Profilfensters. Das Profil wird währenddessen inert und unsichtbar geschaltet und nach Abschluss oder Abbruch vollständig wiederhergestellt.
+
+### Pflichttests 13.16.2
+
+```bash
+node tests/guided-travel-canvas-focus-mode.test.cjs
+node tests/guided-discovery-integration.test.cjs
+node tests/move-domain-separation.test.cjs
+node tests/move-no-timeline-v13.16.2.test.cjs
 node tests/release-version-consistency.test.cjs
 ```

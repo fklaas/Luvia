@@ -61,7 +61,7 @@ html[data-theme=dark] :is(.rv2-head p,.rv2-search-card p,.rv2-search-card small,
 :is(#restaurants-module,#accommodations-module,#attractions-module,#photo-spots-module,#shopping-module,#nature-module,#mobility-module) .luv-place-favorite-toggle{background:var(--place-accent,var(--rv2-accent,var(--lv-accent)))!important;color:var(--luvia-accent-contrast,#fff)!important;border-color:var(--place-accent,var(--rv2-accent,var(--lv-accent)))!important;opacity:1!important;cursor:pointer!important}
 :is(#restaurants-module,#accommodations-module,#attractions-module,#photo-spots-module,#shopping-module,#nature-module,#mobility-module) .luv-place-favorite-toggle.is-active{background:color-mix(in srgb,var(--place-accent,var(--rv2-accent,var(--lv-accent))) 72%,#fff)!important}
 
-/* Core 4.16.1 — reusable Place Intelligence insight cards */
+/* Core 4.16.2 — reusable Place Intelligence insight cards */
 .luv-place-insight-section {
   position: relative;
   overflow: hidden;
@@ -275,7 +275,7 @@ html[data-theme="dark"] .luv-place-insight-card {
 }
 
 
-/* Build 13.16.1 – canonical contract-driven Place planning editor */
+/* Build 13.16.2 – canonical contract-driven Place planning editor */
 .rv2-plan-backdrop[data-luvia-place-plan-editor],.rv2-plan-backdrop{position:fixed;inset:0;z-index:2147483647;display:grid;place-items:center;padding:20px;background:rgba(17,29,38,.48);backdrop-filter:blur(14px)}
 .rv2-plan-dialog.luv-place-plan-dialog,.rv2-plan-dialog{position:relative;width:min(500px,100%);max-height:min(88dvh,760px);overflow:auto;display:grid;gap:16px;padding:28px;border-radius:28px;background:var(--lv-surface-elevated,#fff);box-shadow:var(--place-shadow-overlay,0 30px 90px rgba(12,24,34,.28));border:1px solid color-mix(in srgb,var(--place-accent,var(--rv2-accent,#a23d63)) 18%,var(--lv-line,#e4e9ec));color:var(--lv-text,#17354d)}
 .rv2-plan-dialog h3{margin:0;padding-right:42px;font-size:clamp(1.35rem,4vw,1.65rem);line-height:1.25;color:var(--lv-text,#17354d)}
@@ -294,6 +294,6 @@ html[data-theme="dark"] .luv-place-insight-card {
 html[data-theme="dark"] .rv2-plan-backdrop{background:rgba(4,10,16,.7)}
 @media(max-width:680px){.rv2-plan-dialog.luv-place-plan-dialog,.rv2-plan-dialog{padding:24px 18px;border-radius:24px}.luv-place-plan-field-grid{grid-template-columns:1fr}.rv2-plan-actions{display:grid;grid-template-columns:1fr 1fr}.rv2-plan-actions button{width:100%}}
 
-/* Guided Discovery visual language · v13.16.1 */
+/* Guided Discovery visual language · v13.16.2 */
 .places-experience-nav{display:flex;justify-content:space-between;align-items:center;gap:12px;margin:0 0 18px}.places-direct-link,.places-guided-return{border:0;border-radius:999px;padding:12px 17px;background:linear-gradient(135deg,color-mix(in srgb,var(--trip-accent,#ee6f83) 12%,#fff),#f1e9fb);box-shadow:0 12px 32px rgba(57,39,52,.08);font:700 13px Manrope;cursor:pointer}.places-guided-return{margin-top:18px}.luv-discovery-contract-banner{display:flex;align-items:center;justify-content:space-between;gap:24px;padding:22px 24px;margin:0 0 22px;border-radius:28px;background:linear-gradient(135deg,color-mix(in srgb,var(--trip-accent,#ee6f83) 15%,#fff),#fff 42%,#f2eafd);box-shadow:0 20px 54px rgba(57,39,52,.08);border:1px solid rgba(88,61,80,.06)}.luv-discovery-contract-banner>div>span{font-size:10px;font-weight:800;letter-spacing:.15em;text-transform:uppercase;color:var(--trip-accent,#ee6f83)}.luv-discovery-contract-banner h3{margin:5px 0 10px;font-size:20px}.luv-discovery-contract-banner>div>div{display:flex;flex-wrap:wrap;gap:7px}.luv-discovery-contract-banner em{font-style:normal;padding:7px 10px;border-radius:999px;background:rgba(255,255,255,.74);font-size:11px;font-weight:700}.luv-discovery-contract-banner button{border:0;border-radius:999px;padding:12px 16px;background:var(--trip-accent,#ee6f83);color:#fff;font-weight:750;white-space:nowrap}.luv-place-card,.rv2-search-card,.places-hub-tile{border-radius:28px!important;box-shadow:0 18px 48px rgba(61,42,56,.08)!important;transition:transform .32s cubic-bezier(.2,.8,.2,1),box-shadow .32s ease!important}.luv-place-card:hover,.rv2-search-card:hover,.places-hub-tile:hover{transform:translateY(-5px)!important;box-shadow:0 28px 66px rgba(61,42,56,.13)!important}.luv-place-detail-sheet,.luv-place-detail-card{border-radius:32px!important}.luv-place-route-link{display:inline-flex;align-items:center;justify-content:center;padding:12px 16px;border-radius:999px;background:linear-gradient(135deg,color-mix(in srgb,var(--trip-accent,#ee6f83) 12%,#fff),#eee7f8);color:#3b3440;text-decoration:none;font-weight:750}
 @media(max-width:720px){.places-experience-nav{position:sticky;top:0;z-index:20;padding:10px 4px;background:color-mix(in srgb,#fff 88%,transparent);backdrop-filter:blur(16px)}.luv-discovery-contract-banner{align-items:flex-start;flex-direction:column;border-radius:24px}.luv-discovery-contract-banner button{width:100%}.luv-place-card,.rv2-search-card,.places-hub-tile{border-radius:24px!important}}

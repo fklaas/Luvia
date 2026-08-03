@@ -1,6 +1,6 @@
 (function(){
 'use strict';
-const VERSION='4.16.1-guided-strict-discovery';
+const VERSION='4.16.2-guided-strict-discovery';
 const listeners=new Set();
 const state={initialized:false,requests:0,successes:0,failures:0,cacheHits:0,lastRequestAt:null,lastSuccessAt:null,lastError:null,lastResult:null,recent:[]};
 const now=()=>new Date().toISOString();

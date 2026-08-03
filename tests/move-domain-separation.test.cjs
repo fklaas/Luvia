@@ -1,4 +1,4 @@
-/* Build 13.16.1 – Guided Move domain and UI separation */
+/* Build 13.16.2 – Guided Move domain and UI separation */
 const fs=require('fs');
 const vm=require('vm');
 const assert=require('assert');
@@ -16,9 +16,9 @@ async function main(){
 
  assert(!places.includes("mobility:{"),'mobility still appears as a Places hub tile');
  assert(!places.includes("payload.type==='mobility'"),'Places shell still routes Move entries');
- assert(move.includes('(options.payload?inferTile(options.payload):null)'),'Move opens a detail tile without a payload instead of showing its guided entry');
- for(const token of ["domain:'move'",'LuviaGuidedDiscovery','Direkt stöbern','An- & Abreise','Vor Ort','data-move-module','places-hub-grid','LuviaMobility?.configureView','LuviaMobility?.openPlace'])assert(move.includes(token),`Move shell missing ${token}`);
- for(const token of ['Wobei soll Move euch gerade helfen?','Wie möchtet ihr euch am Reiseziel bewegen?','Was ist euch unterwegs besonders wichtig?'])assert(schema.includes(token),`Move flow schema missing ${token}`);
+ assert(move.includes('(options.payload ? inferTile(options.payload) : null)'),'Move opens a detail tile without a payload instead of showing its guided entry');
+ for(const token of ["domain:'move'",'LuviaGuidedDiscovery','hideBrowse:true','data-guided-open-catalog','An- & Abreise','Vor Ort','data-move-module','places-hub-grid','LuviaMobility?.configureView','LuviaMobility?.openPlace'])assert(move.includes(token),`Move shell missing ${token}`);
+ for(const token of ['Wobei soll Move euch gerade helfen?','Wie möchtet ihr euch am Reiseziel bewegen?','Was ist euch für diese Verbindung besonders wichtig?'])assert(schema.includes(token),`Move flow schema missing ${token}`);
  for(const tile of ['flights','rail','coaches','ferries','local','taxi','rental','parking'])assert(move.includes(`${tile}:{`),`Move tile missing: ${tile}`);
  assert(css.includes('.move-hub-grid'),'Move hub layout missing');
  assert(css.includes('.move-hub-tile'),'Move hub tile styling missing');

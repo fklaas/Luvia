@@ -1,0 +1,61 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Luvia Guided Discovery Browser Harness</title>
+<link rel="stylesheet" href="../core/preferences/guided-discovery-sequence.css">
+<style>html,body{margin:0;min-height:100%;font-family:Manrope,system-ui,sans-serif}#host{min-height:100vh}#result{position:fixed;left:8px;bottom:8px;z-index:2147483647;background:#10201a;color:#bfffd9;padding:8px 12px;border-radius:8px;font:12px monospace}</style>
+</head>
+<body>
+<div id="host"></div><pre id="result">RUNNING</pre>
+<script>
+window.LuviaProfileService={snapshot:()=>({profile:{reducedMotion:false}})};
+window.LuviaTripContext={getActiveTrip:()=>({id:'trip-test',accent:'#ee6f83',destination:{name:'München'}})};
+window.LuviaTripStore={getActive:()=>window.LuviaTripContext.getActiveTrip()};
+</script>
+<script src="../core/preferences/preference-schema.js"></script>
+<script src="../core/preferences/discovery-contract-service.js"></script>
+<script src="../core/preferences/guided-discovery-sequence.js"></script>
+<script>
+(async()=>{
+ const out=document.getElementById('result');
+ const host=document.getElementById('host');
+ const sleep=ms=>new Promise(resolve=>setTimeout(resolve,ms));
+ const click=selector=>{const node=host.querySelector(selector);if(!node)throw new Error('Missing '+selector);node.click();return node};
+ const scene=()=>host.querySelector('.gds-scene-copy h1')?.textContent||'';
+ const prefs={dietaryPreferences:['vegetarian'],travelStyles:['romantic'],mobilityPreferences:['rail'],accessibilityPreferences:{needs:['accessible']},familyPreferences:{needs:['stroller']}};
+ let placesResult=null;
+ window.LuviaGuidedDiscovery.mount(host,{domain:'places',trip:window.LuviaTripContext.getActiveTrip(),hideBrowse:true,initialPreferences:prefs,onComplete:r=>{placesResult=r}});
+ click('[data-gds-choice="culinary"]'); await sleep(280);
+ click('[data-gds-choice="full_meal"]'); await sleep(280);
+ if(!host.querySelector('[data-gds-scene="context"]'))throw new Error('Places did not reach context scene');
+ const contextButton=click('[data-gds-choice="romantic"]');
+ if(!contextButton.classList.contains('is-selected'))throw new Error('Places multi selection not updated in place');
+ if(!host.querySelector('[data-gds-scene="context"]'))throw new Error('Places multi selection unexpectedly rerendered/advanced');
+ const next=host.querySelector('[data-gds-next]');if(!next||next.disabled)throw new Error('Places continue stayed disabled');
+ next.click(); await sleep(280);
+ click('[data-gds-choice="citywide"]'); await sleep(280);
+ if(!host.querySelector('[data-gds-complete]'))throw new Error('Places summary missing');
+ click('[data-gds-complete]'); await sleep(50);
+ if(!placesResult?.contract?.preferenceLayers||placesResult.contract.preferenceLayers.mutatesGlobalProfile!==false)throw new Error('Places preference layering failed');
+
+ let moveResult=null;host.innerHTML='';
+ window.LuviaGuidedDiscovery.mount(host,{domain:'move',trip:window.LuviaTripContext.getActiveTrip(),hideBrowse:true,initialPreferences:prefs,onComplete:r=>{moveResult=r}});
+ click('[data-gds-choice="arrival"]'); await sleep(280);
+ click('[data-gds-choice="rail"]'); await sleep(280);
+ if(!host.querySelector('[data-gds-scene="priorities"]'))throw new Error('Move did not reach priorities scene');
+ const priorityButton=click('[data-gds-choice="few_changes"]');
+ if(!priorityButton.classList.contains('is-selected'))throw new Error('Move multi selection not updated in place');
+ if(!host.querySelector('[data-gds-scene="priorities"]'))throw new Error('Move multi selection unexpectedly rerendered/advanced');
+ const moveNext=host.querySelector('[data-gds-next]');if(!moveNext||moveNext.disabled)throw new Error('Move continue stayed disabled');
+ moveNext.click(); await sleep(280);
+ click('[data-gds-choice="citywide"]'); await sleep(280);
+ click('[data-gds-complete]'); await sleep(50);
+ if(!moveResult?.contract?.preferenceLayers||moveResult.contract.preferenceLayers.mutatesGlobalProfile!==false)throw new Error('Move preference layering failed');
+ out.textContent='PASS · Places context + Move priorities + layered contracts';
+ document.documentElement.dataset.test='pass';
+})().catch(error=>{document.getElementById('result').textContent='FAIL · '+error.message;document.documentElement.dataset.test='fail';console.error(error)});
+</script>
+</body>
+</html>

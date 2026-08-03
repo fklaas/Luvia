@@ -1,9 +1,10 @@
 (() => {
   'use strict';
 
-  const VERSION = '1.1.0';
+  const VERSION = '1.2.0';
   const instances = new WeakMap();
   let activeOverlay = null;
+  let suspendedSurface = null;
 
   const clone = value => value == null ? value : JSON.parse(JSON.stringify(value));
   const esc = value => String(value ?? '').replace(/[&<>"']/g, char => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[char]));
@@ -18,8 +19,9 @@
     return `<div class="gds-world" aria-hidden="true">
       <span class="gds-aurora gds-aurora-a"></span>
       <span class="gds-aurora gds-aurora-b"></span>
-      <span class="gds-star gds-star-a">✦</span><span class="gds-star gds-star-b">✧</span>
-      <span class="gds-soft-cloud gds-soft-cloud-a"></span><span class="gds-soft-cloud gds-soft-cloud-b"></span>
+      <span class="gds-star gds-star-a">✦</span><span class="gds-star gds-star-b">✧</span><span class="gds-star gds-star-c">✦</span>
+      <span class="gds-soft-cloud gds-soft-cloud-a"><i></i><i></i><i></i></span>
+      <span class="gds-soft-cloud gds-soft-cloud-b"><i></i><i></i><i></i></span>
       <div class="gds-flight-track"><svg viewBox="0 0 800 120" preserveAspectRatio="none"><path d="M18 92 C180 4 312 112 452 48 S665 18 782 72" /></svg><span class="gds-plane">✈</span><i class="gds-point gds-point-a"></i><i class="gds-point gds-point-b"></i><i class="gds-point gds-point-c"></i><i class="gds-point gds-point-d"></i></div>
     </div>`;
   }
@@ -65,6 +67,7 @@
       index: Math.max(0, Number(draft?.index || 0)),
       expanded: new Set(),
       transition: false,
+      transitionId: 0,
       completed: false,
       saving: false,
       error: null,
@@ -91,18 +94,27 @@
 
   function bindAtmosphere(state) {
     const root = state.root;
+    let frame = 0;
+    let pointer = null;
     const resetParallax = () => {
+      pointer = null;
       root.style.setProperty('--gds-parallax-x', '0px');
       root.style.setProperty('--gds-parallax-y', '0px');
     };
-    const onPointerMove = event => {
-      if (reduceMotion() || event.pointerType === 'touch') return;
+    const commitPointer = () => {
+      frame = 0;
+      if (!pointer) return;
       const rect = root.getBoundingClientRect?.();
       if (!rect?.width || !rect?.height) return;
-      const x = Math.max(-1, Math.min(1, ((event.clientX - rect.left) / rect.width - .5) * 2));
-      const y = Math.max(-1, Math.min(1, ((event.clientY - rect.top) / rect.height - .5) * 2));
-      root.style.setProperty('--gds-parallax-x', `${(x * 8).toFixed(2)}px`);
-      root.style.setProperty('--gds-parallax-y', `${(y * 8).toFixed(2)}px`);
+      const x = Math.max(-1, Math.min(1, ((pointer.x - rect.left) / rect.width - .5) * 2));
+      const y = Math.max(-1, Math.min(1, ((pointer.y - rect.top) / rect.height - .5) * 2));
+      root.style.setProperty('--gds-parallax-x', `${(x * 5).toFixed(2)}px`);
+      root.style.setProperty('--gds-parallax-y', `${(y * 5).toFixed(2)}px`);
+    };
+    const onPointerMove = event => {
+      if (reduceMotion() || event.pointerType === 'touch') return;
+      pointer = {x:event.clientX,y:event.clientY};
+      if (!frame) frame = requestAnimationFrame(commitPointer);
     };
     let swipe = null;
     const onTouchStart = event => {
@@ -126,6 +138,7 @@
     state.cleanup.push(() => root.removeEventListener('pointerleave', resetParallax));
     state.cleanup.push(() => root.removeEventListener('touchstart', onTouchStart));
     state.cleanup.push(() => root.removeEventListener('touchend', onTouchEnd));
+    state.cleanup.push(() => frame && cancelAnimationFrame(frame));
   }
 
   function scenes(state) {
@@ -151,9 +164,8 @@
   }
 
   function selectedSummary(state) {
-    const allScenes = scenes(state);
     const labels = [];
-    allScenes.forEach(scene => {
+    scenes(state).forEach(scene => {
       unique(state.answers[scene.id]).forEach(id => {
         const option = window.LuviaPreferenceSchema.option(id);
         if (option?.label) labels.push(option.label);
@@ -175,26 +187,37 @@
       else if (scene.id === 'priorities') selected = [...labels(prefs.accessibilityPreferences?.needs), ...labels(prefs.familyPreferences?.needs)].slice(0, 3);
     }
     if (!selected.length) return '';
-    return `<div class="gds-profile-hint"><span>Aus deinem Profil berücksichtigt</span><strong>${esc(selected.join(' · '))}</strong><small>Du kannst für diese Suche trotzdem anders wählen.</small></div>`;
+    return `<div class="gds-profile-hint"><span>Dein Reiseprofil begleitet diese Auswahl</span><strong>${esc(selected.join(' · '))}</strong><small>Die Antworten hier gelten nur für diesen Moment. Dein globales Profil wird nicht verändert.</small></div>`;
+  }
+
+  function selectionStatus(scene, count) {
+    if (scene.mode !== 'multi') return '';
+    const max = Number(scene.max || 99);
+    if (!count && scene.optional) return 'Optional – du kannst Luvia entscheiden lassen.';
+    if (!count) return 'Wähle mindestens einen Gedanken.';
+    return max < 99 ? `${count} von bis zu ${max} ausgewählt` : `${count} ausgewählt`;
   }
 
   function render(state) {
     writeDraft(state);
     const scene = currentScene(state);
     if (!scene) return renderSummary(state);
+    state.completed = false;
     const progress = sceneProgress(state);
     state.root.style.setProperty('--gds-progress', String(progress));
     const showMore = (scene.more || []).length > 0;
     const expanded = state.expanded.has(scene.id);
     const options = [...(scene.featured || []), ...(expanded ? (scene.more || []) : [])];
     const titleId = `gds-title-${state.domain}-${state.index}`;
-    const domainLabel = state.domain === 'move' ? 'Move' : state.domain === 'places' ? 'Places' : state.domain === 'profile' ? 'Deine Vorlieben' : 'Deine Reisevorlieben';
+    const domainLabel = state.domain === 'move' ? 'Move' : state.domain === 'places' ? 'Places' : state.domain === 'profile' ? 'Dein Reiseprofil' : 'Dein Reiseprofil';
+    const browse = state.options.onBrowse && !state.options.hideBrowse ? '<button type="button" class="gds-browse" data-gds-browse>Direkt stöbern</button>' : '<span class="gds-top-spacer"></span>';
+    const count = unique(state.answers[scene.id]).length;
     state.root.innerHTML = `<section class="gds-sequence gds-domain-${esc(state.domain)}" data-gds-sequence aria-labelledby="${titleId}">
       ${backgroundMarkup()}
       <div class="gds-topbar">
         <button type="button" class="gds-back" data-gds-back ${state.index === 0 && !state.options.onCancel ? 'disabled' : ''} aria-label="Zurück">←</button>
         <div class="gds-brand"><span>Luvia</span><strong>${esc(domainLabel)}</strong></div>
-        ${state.options.onBrowse && !state.options.hideBrowse ? '<button type="button" class="gds-browse" data-gds-browse>Direkt stöbern</button>' : '<span class="gds-top-spacer"></span>'}
+        ${browse}
       </div>
       <div class="gds-stage" data-gds-stage>
         <header class="gds-scene-copy">
@@ -205,11 +228,14 @@
         </header>
         <div class="gds-cloud-field" role="${scene.mode === 'single' ? 'radiogroup' : 'group'}" aria-label="Antwortmöglichkeiten">
           ${options.map((item, index) => cloudMarkup(state, scene, item, index)).join('')}
-          ${showMore && !expanded ? `<button type="button" class="gds-cloud gds-cloud-more" data-gds-more="${esc(scene.id)}" style="--gds-delay:${options.length};--gds-tone:#f6e9cf"><span class="gds-cloud-icon">＋</span><strong>Mehr entdecken</strong><small>Weitere Gedanken öffnen</small></button>` : ''}
+          ${showMore && !expanded ? `<button type="button" class="gds-cloud gds-cloud-more" data-gds-more="${esc(scene.id)}" style="--gds-delay:${options.length};--gds-tone:#f6e9cf"><span class="gds-cloud-shape" aria-hidden="true"><i></i><i></i><i></i><i></i></span><span class="gds-cloud-icon">＋</span><span class="gds-cloud-copy"><strong>Mehr entdecken</strong><small>Weitere Gedanken öffnen</small></span></button>` : ''}
         </div>
         <div class="gds-scene-actions">
-          ${scene.optional ? '<button type="button" class="gds-skip" data-gds-skip>Egal – Luvia darf entscheiden</button>' : ''}
-          ${scene.mode === 'multi' ? `<button type="button" class="gds-continue" data-gds-next ${canContinue(state, scene) ? '' : 'disabled'}>Weiter <span>→</span></button>` : ''}
+          <span class="gds-selection-state" data-gds-selection-state aria-live="polite">${esc(selectionStatus(scene, count))}</span>
+          <div class="gds-action-buttons">
+            ${scene.optional ? '<button type="button" class="gds-skip" data-gds-skip>Luvia darf entscheiden</button>' : ''}
+            ${scene.mode === 'multi' ? `<button type="button" class="gds-continue" data-gds-next ${canContinue(state, scene) ? '' : 'disabled'}>Auswahl übernehmen <span>→</span></button>` : ''}
+          </div>
         </div>
       </div>
       ${progressMarkup(state)}
@@ -223,16 +249,16 @@
     const selected = isSelected(state, scene.id, option.id);
     const tone = window.LuviaPreferenceSchema.tones?.[option.tone] || '#f6e9cf';
     return `<button type="button" class="gds-cloud tone-${esc(option.tone || 'cream')} ${selected ? 'is-selected' : ''}" data-gds-choice="${esc(option.id)}" data-gds-scene="${esc(scene.id)}" aria-pressed="${selected ? 'true' : 'false'}" style="--gds-delay:${index};--gds-tone:${esc(tone)}">
+      <span class="gds-cloud-shape" aria-hidden="true"><i></i><i></i><i></i><i></i></span>
       <span class="gds-cloud-icon" aria-hidden="true">${esc(option.icon || '✦')}</span>
-      <strong>${esc(option.label || option.id)}</strong>
-      ${option.copy ? `<small>${esc(option.copy)}</small>` : ''}
+      <span class="gds-cloud-copy"><strong>${esc(option.label || option.id)}</strong>${option.copy ? `<small>${esc(option.copy)}</small>` : ''}</span>
     </button>`;
   }
 
   function progressMarkup(state) {
     const all = scenes(state);
     return `<footer class="gds-progress" aria-label="Fortschritt">
-      <div class="gds-progress-copy"><span>${Math.min(state.index + 1, all.length)} von ${all.length}</span><strong>${state.domain === 'move' ? 'Eure Route nimmt Form an' : state.domain === 'places' ? 'Eure Idee wird klarer' : 'Luvia lernt euch kennen'}</strong></div>
+      <div class="gds-progress-copy"><span>${Math.min(state.index + 1, all.length)} von ${all.length}</span><strong>${state.domain === 'move' ? 'Eure Route nimmt Form an' : state.domain === 'places' ? 'Eure Idee wird klarer' : 'Luvia lernt euren Reisekompass kennen'}</strong></div>
       <div class="gds-progress-line"><i></i>${all.map((_, index) => `<b class="${index <= state.index ? 'is-reached' : ''}"></b>`).join('')}</div>
     </footer>`;
   }
@@ -246,14 +272,14 @@
     const contract = preferenceMode ? null : schema.buildContract(state.domain, state.answers, {preferences});
     state.result = {domain: state.domain, answers: clone(state.answers), preferences, contract};
     const chips = preferenceMode ? schema.summary(preferences).map(item => item.label) : window.LuviaDiscoveryContracts?.summaryChips?.(contract) || selectedSummary(state);
-    const title = preferenceMode ? 'Das klingt nach dir.' : state.domain === 'move' ? 'So bringt Move euch weiter.' : 'Das klingt nach euch.';
+    const title = preferenceMode ? 'Das ist dein persönlicher Reisekompass.' : state.domain === 'move' ? 'Eure Wege nehmen Form an.' : 'Eure nächste Reiseidee ist bereit.';
     const copy = preferenceMode
-      ? 'Diese Vorlieben gelten künftig überall in Luvia und können im Profil jederzeit geändert werden.'
-      : 'Luvia sucht jetzt nur nach Treffern, die diesen Entscheidungen wirklich entsprechen. Fachfremde Ergebnisse werden nicht ergänzt.';
-    const cta = preferenceMode ? (state.domain === 'profile' ? 'Vorlieben speichern' : 'Mit diesen Vorlieben weiter') : state.domain === 'move' ? 'Passende Move-Ergebnisse zeigen' : 'Inspiration zeigen';
+      ? 'Diese globalen Vorlieben begleiten Entscheidungen in ganz Luvia. Die spontanen Auswahlen in Places und Move bleiben davon getrennt.'
+      : 'Luvia öffnet jetzt nur die Vorschläge, die zu dieser Auswahl passen. Der vollständige Katalog bleibt zunächst bewusst geschlossen.';
+    const cta = preferenceMode ? (state.domain === 'profile' ? 'Reiseprofil speichern' : 'Mit diesem Reisekompass weiter') : state.domain === 'move' ? 'Meine Move-Vorschläge zeigen' : 'Meine Vorschläge zeigen';
     state.root.innerHTML = `<section class="gds-sequence gds-domain-${esc(state.domain)} gds-summary" data-gds-sequence>
       ${backgroundMarkup()}
-      <div class="gds-topbar"><button type="button" class="gds-back" data-gds-back aria-label="Zurück">←</button><div class="gds-brand"><span>Luvia</span><strong>${state.domain === 'move' ? 'Move' : state.domain === 'places' ? 'Places' : 'Vorlieben'}</strong></div><span class="gds-top-spacer"></span></div>
+      <div class="gds-topbar"><button type="button" class="gds-back" data-gds-back aria-label="Zurück">←</button><div class="gds-brand"><span>Luvia</span><strong>${state.domain === 'move' ? 'Move' : state.domain === 'places' ? 'Places' : 'Reiseprofil'}</strong></div><span class="gds-top-spacer"></span></div>
       <div class="gds-stage">
         <header class="gds-scene-copy gds-summary-copy"><span class="gds-eyebrow">Eure Auswahl ist bereit</span><h1>${esc(title)}</h1><p>${esc(copy)}</p></header>
         <div class="gds-summary-orbit" aria-label="Ausgewählte Vorlieben">${chips.map((chip, index) => `<span style="--gds-delay:${index}">${esc(chip)}</span>`).join('')}</div>
@@ -266,6 +292,20 @@
     requestAnimationFrame(() => state.root.querySelector('.gds-sequence')?.classList.add('is-entered'));
   }
 
+  function updateMultiSelectionUI(state, scene) {
+    const selected = new Set(unique(state.answers[scene.id]));
+    state.root.querySelectorAll(`[data-gds-scene="${CSS.escape(scene.id)}"]`).forEach(button => {
+      const on = selected.has(button.dataset.gdsChoice);
+      button.classList.toggle('is-selected', on);
+      button.setAttribute('aria-pressed', on ? 'true' : 'false');
+    });
+    const nextButton = state.root.querySelector('[data-gds-next]');
+    if (nextButton) nextButton.disabled = !canContinue(state, scene);
+    const status = state.root.querySelector('[data-gds-selection-state]');
+    if (status) status.textContent = selectionStatus(scene, selected.size);
+    writeDraft(state);
+  }
+
   function choose(state, sceneId, value) {
     if (state.transition) return;
     const scene = currentScene(state);
@@ -273,8 +313,8 @@
     const selected = unique(state.answers[scene.id]);
     if (scene.mode === 'multi') {
       const exists = selected.includes(value);
-      let nextValues;
       const neutral = {dietary:'no_diet',familyPreferences:'no_family_needs',accessibilityNeeds:'no_accessibility'}[scene.id];
+      let nextValues;
       if (neutral && value === neutral) {
         nextValues = exists ? [] : [neutral];
       } else {
@@ -283,30 +323,37 @@
       }
       state.answers[scene.id] = nextValues;
       navigator.vibrate?.(7);
-      render(state);
+      updateMultiSelectionUI(state, scene);
       return;
     }
     state.answers[scene.id] = [value];
     navigator.vibrate?.(9);
     const chosen = [...state.root.querySelectorAll('[data-gds-choice]')].find(node => node.dataset.gdsChoice === value);
     chosen?.classList.add('is-confirmed');
-    state.root.querySelector('[data-gds-stage]')?.classList.add('is-leaving');
+    advance(state);
+  }
+
+  function advance(state) {
+    const scene = currentScene(state);
+    if (state.transition || !scene || !canContinue(state, scene)) return;
+    const id = ++state.transitionId;
     state.transition = true;
+    state.root.querySelector('[data-gds-stage]')?.classList.add('is-leaving');
     window.setTimeout(() => {
+      if (id !== state.transitionId) return;
       state.transition = false;
       state.index += 1;
       render(state);
-    }, reduceMotion() ? 30 : 360);
+    }, reduceMotion() ? 20 : 240);
   }
 
   function next(state) {
-    const scene = currentScene(state);
-    if (!scene || !canContinue(state, scene)) return;
-    state.index += 1;
-    render(state);
+    advance(state);
   }
 
   function previous(state) {
+    state.transitionId += 1;
+    state.transition = false;
     if (state.completed) {
       state.completed = false;
       state.index = Math.max(0, scenes(state).length - 1);
@@ -328,6 +375,8 @@
     state.index = 0;
     state.completed = false;
     state.error = null;
+    state.transition = false;
+    state.transitionId += 1;
     state.expanded.clear();
     clearDraft(state);
     render(state);
@@ -358,11 +407,20 @@
       render(state);
     });
     state.root.querySelector('[data-gds-next]')?.addEventListener('click', () => next(state));
-    state.root.querySelector('[data-gds-skip]')?.addEventListener('click', () => { const scene = currentScene(state); if (scene) state.answers[scene.id] = []; next(state); });
+    state.root.querySelector('[data-gds-skip]')?.addEventListener('click', () => {
+      const scene = currentScene(state);
+      if (scene) state.answers[scene.id] = [];
+      next(state);
+    });
     state.root.querySelector('[data-gds-back]')?.addEventListener('click', () => previous(state));
     state.root.querySelector('[data-gds-browse]')?.addEventListener('click', () => state.options.onBrowse?.());
     state.root.querySelector('[data-gds-complete]')?.addEventListener('click', () => complete(state));
-    state.root.querySelector('[data-gds-restart]')?.addEventListener('click', () => { state.completed = false; state.index = 0; render(state); });
+    state.root.querySelector('[data-gds-restart]')?.addEventListener('click', () => {
+      state.completed = false;
+      state.index = 0;
+      state.error = null;
+      render(state);
+    });
   }
 
   function destroy(state) {
@@ -382,8 +440,31 @@
     return create(root, {...options, embedded: true});
   }
 
+  function suspendUnderlyingSurface() {
+    const profileOverlay = document.querySelector('.pf-overlay');
+    if (!profileOverlay) return;
+    suspendedSurface = {
+      node: profileOverlay,
+      inert: Boolean(profileOverlay.inert),
+      ariaHidden: profileOverlay.getAttribute('aria-hidden')
+    };
+    profileOverlay.inert = true;
+    profileOverlay.setAttribute('aria-hidden', 'true');
+    profileOverlay.classList.add('is-guided-suspended');
+  }
+
+  function restoreUnderlyingSurface() {
+    if (!suspendedSurface?.node?.isConnected) { suspendedSurface = null; return; }
+    const {node,inert,ariaHidden} = suspendedSurface;
+    node.inert = inert;
+    if (ariaHidden == null) node.removeAttribute('aria-hidden'); else node.setAttribute('aria-hidden', ariaHidden);
+    node.classList.remove('is-guided-suspended');
+    suspendedSurface = null;
+  }
+
   function open(options = {}) {
     close();
+    suspendUnderlyingSurface();
     const overlay = document.createElement('div');
     overlay.className = 'gds-overlay';
     overlay.setAttribute('role', 'dialog');
@@ -407,10 +488,10 @@
   }
 
   function close() {
-    if (!activeOverlay) return;
-    activeOverlay.remove();
+    if (activeOverlay) activeOverlay.remove();
     activeOverlay = null;
     document.documentElement.classList.remove('gds-overlay-open');
+    restoreUnderlyingSurface();
   }
 
   window.LuviaGuidedDiscovery = Object.freeze({version: VERSION, mount, open, close, buildContract: (...args) => window.LuviaPreferenceSchema?.buildContract?.(...args)});

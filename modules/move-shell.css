@@ -53,3 +53,23 @@
     min-height: 0;
   }
 }
+
+/* Move story canvas · Build 13.16.2 */
+.move-experience.is-guided-results {
+  --story-accent: var(--trip-accent, var(--lv-accent, #ee6f83));
+}
+
+.guided-result-story-move .guided-result-scene {
+  background:
+    radial-gradient(circle at 48% 32%, rgba(255,255,255,.96) 0 10%, rgba(255,255,255,.58) 22%, transparent 48%),
+    linear-gradient(145deg, rgba(255,255,255,.58), color-mix(in srgb, #dcecff 48%, color-mix(in srgb, var(--story-accent) 11%, rgba(255,255,255,.48))));
+}
+
+.guided-result-story-move .guided-result-plane {
+  transform: translateZ(0) rotate(-2deg);
+}
+
+.move-hub-direct .move-hub-group {
+  content-visibility: auto;
+  contain-intrinsic-size: 620px;
+}

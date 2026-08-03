@@ -1,7 +1,7 @@
 (() => {
   'use strict';
 
-  const VERSION = '1.1.0';
+  const VERSION = '1.2.0';
   let pendingContract = null;
   const clone = value => value == null ? value : JSON.parse(JSON.stringify(value));
   const unique = values => [...new Set((Array.isArray(values) ? values : []).map(value => String(value || '').trim()).filter(Boolean))];
@@ -145,7 +145,8 @@
     const chips = summaryChips(contract);
     if (!chips.length) return '';
     const esc = value => String(value ?? '').replace(/[&<>"']/g, char => ({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;' }[char]));
-    return `<section class="luv-discovery-contract-banner"><div><span>${esc(options.eyebrow || 'Geführt von Luvia')}</span><h3>${esc(options.title || 'Diese Auswahl passt zu euren Antworten')}</h3><div>${chips.map(chip => `<em>${esc(chip)}</em>`).join('')}</div></div><button type="button" data-guided-refine>Auswahl ändern</button></section>`;
+    const domainLabel = contract.domain === 'move' ? 'Move-Moment' : 'Places-Moment';
+    return `<section class="luv-discovery-contract-banner"><div class="luv-discovery-contract-copy"><span>${esc(options.eyebrow || 'Von Luvia aus eurer Idee geformt')}</span><h3>${esc(options.title || 'Diese Vorschläge erzählen euren nächsten Reisemoment')}</h3><p>Dein globales Reiseprofil wirkt als ruhiger Kompass. Die Auswahl aus ${esc(domainLabel)} beschreibt nur, was gerade zu euch passen soll.</p><div class="luv-discovery-contract-chips">${chips.map(chip => `<em>${esc(chip)}</em>`).join('')}</div></div><div class="luv-discovery-contract-layers" aria-label="Zusammenspiel der Vorlieben"><span><i>✦</i><b>Reiseprofil</b><small>gilt überall</small></span><span><i>↗</i><b>Dieser Moment</b><small>nur hier</small></span></div><button type="button" data-guided-refine>Auswahl ändern</button></section>`;
   }
 
   function setPending(contract = null) { pendingContract = contract ? clone(contract) : null; return pendingContract; }

@@ -322,3 +322,577 @@ html[data-theme="dark"] .places-hub > header {
     transition: none;
   }
 }
+
+/* Guided travel canvas & focused suggestion mode · Build 13.16.2 */
+.places-guided-host,
+.move-guided-host {
+  min-height: min(860px, calc(100dvh - 86px));
+}
+
+.places-experience.is-guided-results {
+  width: min(100%, 1320px);
+  padding-top: 18px;
+  --story-accent: var(--trip-accent, var(--lv-accent, #ee6f83));
+}
+
+.places-experience.is-guided-results::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  background:
+    radial-gradient(circle at 7% 18%, color-mix(in srgb, var(--story-accent) 10%, transparent) 0 11rem, transparent 28rem),
+    radial-gradient(circle at 96% 8%, rgba(255, 213, 191, .34) 0 12rem, transparent 30rem),
+    linear-gradient(150deg, color-mix(in srgb, var(--story-accent) 4%, var(--lv-surface, #fff)) 0%, var(--lv-surface, #fff) 54%, color-mix(in srgb, #eee4ff 36%, var(--lv-surface, #fff)) 100%);
+}
+
+.places-experience-nav {
+  min-height: 50px;
+}
+
+.places-experience.is-guided-results .places-experience-nav {
+  position: relative;
+  z-index: 5;
+  margin-bottom: 14px;
+  padding-inline: 2px;
+}
+
+.places-experience-context {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 15px;
+  border: 1px solid color-mix(in srgb, var(--story-accent) 11%, var(--lv-line, #e5e9ed));
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--lv-surface-elevated, #fff) 92%, transparent);
+  color: var(--lv-muted, #687789);
+  font-size: .76rem;
+  font-weight: 850;
+  letter-spacing: .035em;
+}
+
+.places-experience-context::before {
+  content: "✦";
+  color: var(--story-accent);
+}
+
+.places-experience.is-guided-results .places-back {
+  position: static;
+  margin: 0;
+  border-color: color-mix(in srgb, var(--story-accent) 12%, var(--lv-line, #e5e9ed));
+  background: var(--lv-surface-elevated, #fff);
+  box-shadow: 0 10px 28px rgba(43, 45, 55, .055);
+  transition: transform .2s ease, box-shadow .2s ease, border-color .2s ease;
+}
+
+.places-experience.is-guided-results .places-back:hover,
+.places-experience.is-guided-results .places-back:focus-visible {
+  transform: translateY(-2px);
+  border-color: color-mix(in srgb, var(--story-accent) 38%, var(--lv-line, #e5e9ed));
+  box-shadow: 0 15px 36px color-mix(in srgb, var(--story-accent) 10%, transparent);
+  outline: none;
+}
+
+.guided-result-story {
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
+  display: grid;
+  grid-template-columns: minmax(0, 1.05fr) minmax(330px, .95fr);
+  align-items: center;
+  gap: clamp(28px, 5vw, 72px);
+  min-height: clamp(390px, 54vw, 590px);
+  padding: clamp(34px, 6vw, 78px);
+  border: 1px solid color-mix(in srgb, var(--story-accent) 13%, var(--lv-line, #e6e9ec));
+  border-radius: clamp(30px, 5vw, 58px);
+  background:
+    radial-gradient(circle at 10% 3%, rgba(255, 255, 255, .98) 0 8%, transparent 28%),
+    linear-gradient(132deg,
+      color-mix(in srgb, var(--story-accent) 12%, var(--lv-surface-elevated, #fff)),
+      color-mix(in srgb, #ffe4d6 31%, var(--lv-surface-elevated, #fff)) 44%,
+      color-mix(in srgb, #eadfff 42%, var(--lv-surface-elevated, #fff)));
+  box-shadow: 0 30px 78px rgba(46, 42, 57, .09);
+  transform: translateZ(0);
+}
+
+.guided-result-story::before,
+.guided-result-story::after {
+  content: "";
+  position: absolute;
+  z-index: -1;
+  border-radius: 50%;
+  pointer-events: none;
+  will-change: transform;
+}
+
+.guided-result-story::before {
+  width: 320px;
+  height: 320px;
+  left: -120px;
+  bottom: -180px;
+  background: color-mix(in srgb, var(--story-accent) 9%, transparent);
+  animation: storyFloatA 9s ease-in-out infinite alternate;
+}
+
+.guided-result-story::after {
+  width: 230px;
+  height: 230px;
+  right: 5%;
+  top: -125px;
+  background: rgba(255,255,255,.44);
+  animation: storyFloatB 11s ease-in-out infinite alternate;
+}
+
+.guided-result-story-copy {
+  position: relative;
+  z-index: 2;
+  min-width: 0;
+}
+
+.guided-result-kicker {
+  display: inline-flex;
+  align-items: center;
+  gap: 9px;
+  color: color-mix(in srgb, var(--story-accent) 82%, var(--lv-text, #253a4b));
+  font-size: .72rem;
+  font-weight: 950;
+  letter-spacing: .14em;
+  text-transform: uppercase;
+}
+
+.guided-result-kicker::before {
+  content: "";
+  width: 28px;
+  height: 1px;
+  background: currentColor;
+}
+
+.guided-result-story h1 {
+  max-width: 780px;
+  margin: 16px 0 18px;
+  color: var(--lv-text, #20394b);
+  font-family: var(--lv-font-display, var(--lv-font-body, Manrope, system-ui, sans-serif));
+  font-size: clamp(2.6rem, 5.8vw, 5.55rem);
+  font-weight: 680;
+  letter-spacing: -.055em;
+  line-height: .98;
+  text-wrap: balance;
+}
+
+.guided-result-story p {
+  max-width: 670px;
+  margin: 0;
+  color: color-mix(in srgb, var(--lv-muted, #687789) 92%, var(--lv-text, #20394b));
+  font-size: clamp(1rem, 1.7vw, 1.18rem);
+  line-height: 1.72;
+}
+
+.guided-result-scene {
+  position: relative;
+  min-height: 330px;
+  border-radius: 50% 44% 46% 54% / 46% 54% 44% 56%;
+  background:
+    radial-gradient(circle at 48% 32%, rgba(255,255,255,.96) 0 10%, rgba(255,255,255,.58) 22%, transparent 48%),
+    linear-gradient(145deg, rgba(255,255,255,.55), color-mix(in srgb, var(--story-accent) 13%, rgba(255,255,255,.46)));
+  box-shadow: inset 0 0 0 1px rgba(255,255,255,.62), 0 24px 60px rgba(59,46,64,.075);
+  transform: translateZ(0);
+}
+
+.guided-result-scene::before,
+.guided-result-scene::after {
+  content: "";
+  position: absolute;
+  background: rgba(255,255,255,.78);
+  border-radius: 999px;
+}
+
+.guided-result-scene::before {
+  width: 150px;
+  height: 54px;
+  left: -22px;
+  top: 25%;
+  box-shadow: 38px -22px 0 -4px rgba(255,255,255,.78), 82px -8px 0 -10px rgba(255,255,255,.78);
+}
+
+.guided-result-scene::after {
+  width: 108px;
+  height: 42px;
+  right: -8px;
+  bottom: 21%;
+  box-shadow: -27px -19px 0 -7px rgba(255,255,255,.72), -60px -6px 0 -12px rgba(255,255,255,.72);
+}
+
+.guided-result-sun {
+  position: absolute;
+  right: 12%;
+  top: 10%;
+  color: color-mix(in srgb, var(--story-accent) 65%, #f5b65f);
+  font-size: 2.2rem;
+  animation: storyTwinkle 3.4s ease-in-out infinite;
+}
+
+.guided-result-path {
+  position: absolute;
+  left: 15%;
+  right: 12%;
+  top: 52%;
+  height: 95px;
+  border-top: 2px dashed color-mix(in srgb, var(--story-accent) 42%, transparent);
+  border-radius: 50%;
+  transform: rotate(-12deg);
+}
+
+.guided-result-plane {
+  position: absolute;
+  z-index: 2;
+  left: 48%;
+  top: 39%;
+  display: grid;
+  place-items: center;
+  width: 54px;
+  height: 54px;
+  border-radius: 50%;
+  background: var(--lv-surface-elevated, #fff);
+  color: var(--story-accent);
+  box-shadow: 0 14px 34px color-mix(in srgb, var(--story-accent) 19%, transparent);
+  font-size: 1.45rem;
+  transform: translateZ(0) rotate(-10deg);
+  animation: storyPlane 4.8s ease-in-out infinite;
+}
+
+.guided-result-scene i {
+  position: absolute;
+  z-index: 3;
+  left: calc(7% + (var(--story-index) * 17%));
+  top: calc(12% + (var(--story-index) * 19%));
+  max-width: 150px;
+  padding: 10px 13px;
+  border: 1px solid rgba(255,255,255,.68);
+  border-radius: 17px 17px 17px 5px;
+  background: rgba(255,255,255,.88);
+  color: var(--lv-text, #263b4b);
+  box-shadow: 0 12px 28px rgba(44,45,56,.07);
+  font-size: .73rem;
+  font-style: normal;
+  font-weight: 820;
+  line-height: 1.3;
+  transform: translate3d(0,0,0) rotate(calc((var(--story-index) - 1.5) * 2deg));
+  animation: storyChipIn .45s cubic-bezier(.2,.8,.2,1) both;
+  animation-delay: calc(.12s + var(--story-index) * .08s);
+}
+
+.guided-result-scene i:nth-of-type(2) { left: 59%; top: 17%; }
+.guided-result-scene i:nth-of-type(3) { left: 12%; top: 68%; }
+.guided-result-scene i:nth-of-type(4) { left: 58%; top: 72%; }
+
+/* In guided mode the recommendations are the whole experience. Search, filters,
+   schedule and collections stay closed until the user deliberately opens the catalog. */
+.places-experience.is-guided-results :is(.rv2-head, .rv2-today-plan, .rv2-entity-search, .rv2-library) {
+  display: none !important;
+}
+
+.places-experience.is-guided-results .rv2-discovery {
+  margin-top: clamp(22px, 4vw, 44px);
+  padding: clamp(26px, 4.6vw, 52px);
+  border: 1px solid color-mix(in srgb, var(--story-accent) 12%, var(--lv-line, #e5e9ed));
+  border-radius: clamp(28px, 4vw, 46px);
+  background: color-mix(in srgb, var(--lv-surface-elevated, #fff) 94%, var(--story-accent) 6%);
+  box-shadow: 0 26px 68px rgba(46, 44, 55, .075);
+}
+
+.places-experience.is-guided-results .rv2-discovery-title {
+  align-items: flex-start;
+}
+
+.places-experience.is-guided-results .rv2-discovery-title > div {
+  max-width: 820px;
+}
+
+.places-experience.is-guided-results .rv2-discovery-kicker {
+  color: color-mix(in srgb, var(--story-accent) 84%, var(--lv-text, #20394b));
+}
+
+.places-experience.is-guided-results .rv2-discovery-title h3 {
+  margin-top: 8px;
+  font-size: clamp(2rem, 4vw, 3.7rem);
+  font-weight: 680;
+  letter-spacing: -.045em;
+  line-height: 1.03;
+  text-wrap: balance;
+}
+
+.places-experience.is-guided-results .rv2-discovery-title p {
+  max-width: 760px;
+  font-size: 1rem;
+  line-height: 1.65;
+}
+
+.places-experience.is-guided-results .rv2-smart-pill {
+  padding: 9px 12px;
+  border: 1px solid color-mix(in srgb, var(--story-accent) 15%, var(--lv-line, #e5e9ed));
+  background: color-mix(in srgb, var(--story-accent) 7%, var(--lv-surface-elevated, #fff));
+}
+
+.places-experience.is-guided-results .rv2-recommendation-head {
+  margin-top: clamp(24px, 4vw, 42px);
+}
+
+.places-experience.is-guided-results .rv2-recommendation-head > div > span {
+  color: color-mix(in srgb, var(--story-accent) 78%, var(--lv-muted, #687789));
+  font-size: .72rem;
+  font-weight: 900;
+  letter-spacing: .12em;
+  text-transform: uppercase;
+}
+
+.places-experience.is-guided-results .rv2-recommendation-head h4 {
+  margin: 6px 0 0;
+  font-size: clamp(1.45rem, 2.8vw, 2.15rem);
+  letter-spacing: -.025em;
+}
+
+.places-experience.is-guided-results .rv2-recommendation-head [data-place-refresh] {
+  display: none !important;
+}
+
+.places-experience.is-guided-results .rv2-search-status {
+  margin: 12px 0 18px;
+  color: var(--lv-muted, #687789);
+}
+
+.places-experience.is-guided-results .rv2-search-results {
+  display: grid;
+  gap: 18px;
+}
+
+.places-experience.is-guided-results :is(.luv-place-card, .rv2-search-card) {
+  border-color: color-mix(in srgb, var(--story-accent) 11%, var(--lv-line, #e5e9ed)) !important;
+  background: var(--lv-surface-elevated, #fff) !important;
+  box-shadow: 0 16px 42px rgba(45, 45, 56, .065) !important;
+  content-visibility: auto;
+  contain-intrinsic-size: 360px;
+}
+
+.luv-discovery-contract-banner {
+  margin-top: clamp(18px, 3vw, 30px) !important;
+  padding: clamp(22px, 3.6vw, 36px) !important;
+  border-radius: clamp(24px, 3.4vw, 38px) !important;
+  background:
+    linear-gradient(128deg,
+      color-mix(in srgb, var(--story-accent, var(--trip-accent, #ee6f83)) 10%, var(--lv-surface-elevated, #fff)),
+      var(--lv-surface-elevated, #fff) 46%,
+      color-mix(in srgb, #eee5ff 36%, var(--lv-surface-elevated, #fff))) !important;
+  box-shadow: 0 20px 54px rgba(49, 44, 56, .065) !important;
+}
+
+.luv-discovery-contract-banner h3 {
+  font-size: clamp(1.25rem, 2.4vw, 1.8rem) !important;
+  letter-spacing: -.025em;
+}
+
+.guided-catalog-gate {
+  position: relative;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: clamp(24px, 5vw, 70px);
+  margin-top: clamp(28px, 5vw, 62px);
+  padding: clamp(30px, 5vw, 56px);
+  border: 1px dashed color-mix(in srgb, var(--story-accent) 24%, var(--lv-line, #e5e9ed));
+  border-radius: clamp(28px, 4vw, 44px);
+  background: color-mix(in srgb, var(--story-accent) 4%, var(--lv-surface-soft, #fbfcfd));
+}
+
+.guided-catalog-gate::after {
+  content: "✦";
+  position: absolute;
+  right: 5%;
+  top: -22px;
+  color: color-mix(in srgb, var(--story-accent) 14%, transparent);
+  font-size: 8rem;
+  transform: rotate(18deg);
+  pointer-events: none;
+}
+
+.guided-catalog-gate > div {
+  position: relative;
+  z-index: 1;
+  max-width: 760px;
+}
+
+.guided-catalog-gate h3 {
+  margin: 10px 0 10px;
+  color: var(--lv-text, #20394b);
+  font-size: clamp(1.45rem, 3vw, 2.35rem);
+  letter-spacing: -.035em;
+  line-height: 1.12;
+  text-wrap: balance;
+}
+
+.guided-catalog-gate p {
+  margin: 0;
+  color: var(--lv-muted, #687789);
+  line-height: 1.62;
+}
+
+.guided-catalog-gate button {
+  position: relative;
+  z-index: 1;
+  flex: 0 0 auto;
+  display: inline-flex;
+  align-items: center;
+  gap: 12px;
+  min-height: 54px;
+  padding: 14px 20px;
+  border: 0;
+  border-radius: 999px;
+  background: var(--story-accent);
+  color: var(--trip-accent-contrast, #fff);
+  box-shadow: 0 16px 36px color-mix(in srgb, var(--story-accent) 24%, transparent);
+  font: inherit;
+  font-weight: 900;
+  cursor: pointer;
+  transition: transform .2s ease, box-shadow .2s ease;
+}
+
+.guided-catalog-gate button span {
+  font-size: 1.2rem;
+  transition: transform .2s ease;
+}
+
+.guided-catalog-gate button:hover,
+.guided-catalog-gate button:focus-visible {
+  transform: translateY(-2px);
+  box-shadow: 0 20px 44px color-mix(in srgb, var(--story-accent) 30%, transparent);
+  outline: none;
+}
+
+.guided-catalog-gate button:hover span,
+.guided-catalog-gate button:focus-visible span {
+  transform: translateX(4px);
+}
+
+.places-hub-direct > header {
+  min-height: 360px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+.places-hub-direct .places-guided-return {
+  align-self: flex-start;
+  margin-top: 24px;
+}
+
+@keyframes storyFloatA {
+  from { transform: translate3d(0,0,0); }
+  to { transform: translate3d(22px,-18px,0); }
+}
+
+@keyframes storyFloatB {
+  from { transform: translate3d(0,0,0); }
+  to { transform: translate3d(-16px,20px,0); }
+}
+
+@keyframes storyPlane {
+  0%,100% { transform: translate3d(-8px,4px,0) rotate(-11deg); }
+  50% { transform: translate3d(12px,-9px,0) rotate(-5deg); }
+}
+
+@keyframes storyTwinkle {
+  0%,100% { transform: scale(.92) rotate(0deg); opacity: .72; }
+  50% { transform: scale(1.08) rotate(12deg); opacity: 1; }
+}
+
+@keyframes storyChipIn {
+  from { opacity: 0; transform: translate3d(0,12px,0) scale(.96); }
+  to { opacity: 1; transform: translate3d(0,0,0) rotate(calc((var(--story-index) - 1.5) * 2deg)); }
+}
+
+@media (max-width: 900px) {
+  .guided-result-story {
+    grid-template-columns: 1fr;
+  }
+
+  .guided-result-scene {
+    width: min(100%, 560px);
+    min-height: 290px;
+    margin-inline: auto;
+  }
+
+  .guided-catalog-gate {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .guided-catalog-gate button {
+    width: 100%;
+    justify-content: center;
+  }
+}
+
+@media (max-width: 700px) {
+  .places-experience.is-guided-results {
+    padding-inline: 10px;
+  }
+
+  .places-experience.is-guided-results .places-experience-nav {
+    position: sticky;
+    top: 0;
+    padding: 9px 0;
+    background: color-mix(in srgb, var(--lv-surface, #fff) 92%, transparent);
+    backdrop-filter: blur(10px);
+  }
+
+  .places-experience-context {
+    max-width: 44vw;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .guided-result-story {
+    min-height: 0;
+    padding: 34px 22px 26px;
+    border-radius: 32px;
+  }
+
+  .guided-result-story h1 {
+    font-size: clamp(2.45rem, 13vw, 4.15rem);
+  }
+
+  .guided-result-scene {
+    min-height: 250px;
+  }
+
+  .guided-result-scene i {
+    max-width: 120px;
+    font-size: .66rem;
+  }
+
+  .places-experience.is-guided-results .rv2-discovery,
+  .guided-catalog-gate {
+    padding: 25px 18px;
+    border-radius: 27px;
+  }
+
+  .places-experience.is-guided-results .rv2-discovery-title {
+    display: grid;
+  }
+
+  .places-experience.is-guided-results .rv2-smart-pill {
+    justify-self: start;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .guided-result-story::before,
+  .guided-result-story::after,
+  .guided-result-plane,
+  .guided-result-sun,
+  .guided-result-scene i {
+    animation: none !important;
+  }
+}
