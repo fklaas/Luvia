@@ -1,0 +1,17 @@
+const fs=require('fs'),path=require('path'),assert=require('assert');
+const root=path.join(__dirname,'..');
+const read=f=>fs.readFileSync(path.join(root,f),'utf8');
+const svc=read('core/diagnostics/media-readiness.js');
+assert(svc.includes("const VERSION='4.27.5'"),'Media Readiness version missing');
+assert(svc.includes("service:'media-readiness'"),'standard service response missing');
+assert(svc.includes("gate:'READY WITH MIGRATION'"),'readiness gate missing');
+assert(svc.includes("probeTable(client,'media'"),'media table probe missing');
+assert(svc.includes("probeTable(client,'gallery_photos'"),'legacy gallery probe missing');
+assert(svc.includes("probeTable(client,'live_moment_status'"),'live moment probe missing');
+assert(svc.includes("probeBucket(client,'paris-gallery'"),'bucket probe missing');
+const index=read('index.html'),consoleHtml=read('intelligence/console.html'),base=read('intelligence/services/base-services.js');
+assert(index.includes('core/diagnostics/media-readiness.js?v=13.27.5'),'app load missing');
+assert(consoleHtml.includes('../core/diagnostics/media-readiness.js?v=13.27.5'),'console load missing');
+assert(consoleHtml.includes('runMediaReadiness'),'console action missing');
+assert(base.includes("name:'media-readiness'"),'service registration missing');
+console.log('Media readiness 13.27.5 static integration: OK');
