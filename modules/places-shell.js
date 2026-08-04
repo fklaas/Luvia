@@ -1,7 +1,7 @@
 (() => {
   'use strict';
 
-  const VERSION = '4.17.0';
+  const VERSION = '4.18.0';
   const PLACE_MODULES = {
     photo_spots:{type:'photo_spot',title:'Fotospots',icon:'📸',description:'Aussichten, Lichtstimmungen und besondere Fotomomente entdecken.',tags:['Golden Hour','Aussicht','Erinnerungen'],host:'photo-spots-module'},
     attractions:{type:'attraction',title:'Sehenswürdigkeiten & Aktivitäten',icon:'✨',description:'Museen, Parks, Aussichtspunkte und Erlebnisse entdecken.',tags:['Kultur','Aktivitäten','Highlights'],host:'attractions-module'},

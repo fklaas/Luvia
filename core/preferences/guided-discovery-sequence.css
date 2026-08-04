@@ -16,7 +16,7 @@
 @media(prefers-reduced-motion:reduce){.gds-world,.gds-aurora,.gds-star,.gds-soft-cloud,.gds-cloud,.gds-cloud-shape,.gds-scene-copy,.gds-summary-orbit span,.gds-stage,.gds-plane,.gds-progress-line>i{animation:none!important;transition:none!important;transform:none!important}.gds-cloud,.gds-scene-copy,.gds-summary-orbit span{opacity:1}.gds-world{transform:none!important}}
 html[data-theme=dark] .gds-overlay{background:var(--lv-bg,#101820)}html[data-theme=dark] .gds-sequence{background:linear-gradient(150deg,color-mix(in srgb,var(--gds-accent) 12%,#121921),#121921 48%,color-mix(in srgb,var(--gds-companion) 11%,#121921));color:var(--lv-text,#f5f7f9)}html[data-theme=dark] .gds-scene-copy p,html[data-theme=dark] .gds-cloud small,html[data-theme=dark] .gds-selection-state{color:var(--lv-muted,#a8b4bd)}html[data-theme=dark] .gds-cloud-shape:before,html[data-theme=dark] .gds-cloud-shape i{background:linear-gradient(145deg,color-mix(in srgb,var(--gds-accent) 19%,#202a33),color-mix(in srgb,var(--gds-tone) 14%,#202a33))}html[data-theme=dark] .gds-cloud{color:var(--lv-text,#f5f7f9)}html[data-theme=dark] .gds-cloud-icon,html[data-theme=dark] .gds-back,html[data-theme=dark] .gds-browse,html[data-theme=dark] .gds-profile-hint{background:rgba(31,42,52,.88);color:var(--lv-text,#f5f7f9)}
 
-/* Smooth composite-only atmosphere · Build 13.17.0 */
+/* Smooth composite-only atmosphere · Build 13.18.0 */
 .gds-world {
   transition-duration: .12s;
   transition-timing-function: ease-out;

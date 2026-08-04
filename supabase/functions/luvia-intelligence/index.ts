@@ -23,10 +23,10 @@ Deno.serve(async(req:Request)=>{
   const url=Deno.env.get('SUPABASE_URL')||'',anon=Deno.env.get('SUPABASE_ANON_KEY')||'',authorization=req.headers.get('authorization')||'';let userId:string|null=null;
   if(authorization){const client=createClient(url,anon,{global:{headers:{Authorization:authorization}},auth:{persistSession:false}});const {data,error}=await client.auth.getUser();if(!error&&data.user)userId=data.user.id;else if(!PUBLIC.has(action))return errorResponse(401,'INVALID_SESSION','Sitzung ist ungültig oder abgelaufen.',id,cors)}
   if(!PUBLIC.has(action)&&!userId)return errorResponse(401,'AUTH_REQUIRED','Für diese Aktion ist eine Anmeldung erforderlich.',id,cors);
-  if(PUBLIC.has(action))return jsonResponse(200,{ok:true,data:{service:'luvia-intelligence',status:'ok',version:'4.17.0',build:'13.17.0',core:'4.17.0',authenticated:Boolean(userId),...modelDiagnostics(),capabilities:listCapabilities(),privacy:{store:false,promptsLogged:false,minimumNecessaryContext:true}},meta:{requestId:id}},cors);
+  if(PUBLIC.has(action))return jsonResponse(200,{ok:true,data:{service:'luvia-intelligence',status:'ok',version:'4.18.0',build:'13.18.0',core:'4.18.0',authenticated:Boolean(userId),...modelDiagnostics(),capabilities:listCapabilities(),privacy:{store:false,promptsLogged:false,minimumNecessaryContext:true}},meta:{requestId:id}},cors);
   if(action==='destination.normalize'){const name=String(body.payload?.name||'').trim();return jsonResponse(200,{ok:true,data:{name,isUsable:Boolean(name),isResolved:false,source:'server_normalized'},meta:{requestId:id}},cors)}
-  if(action!=='brain.run')return errorResponse(404,'ACTION_NOT_FOUND','Aktion ist nicht freigeschaltet.',id,cors);
-  const capabilityId=String(body.payload?.capability||'');const definition=capability(capabilityId);if(!definition)return errorResponse(400,'CAPABILITY_NOT_FOUND','Unbekannte Luvia-AI-Capability.',id,cors);
+  if(!['brain.run','brain.orchestrate'].includes(action))return errorResponse(404,'ACTION_NOT_FOUND','Aktion ist nicht freigeschaltet.',id,cors);
+  const capabilityId=action==='brain.orchestrate'?'brain.orchestrate':String(body.payload?.capability||'');const definition=capability(capabilityId);if(!definition)return errorResponse(400,'CAPABILITY_NOT_FOUND','Unbekannte Luvia-AI-Capability.',id,cors);
   const requestedTier=String(body.payload?.tier||definition.tier);const tier=(['fast','default','deep'].includes(requestedTier)?requestedTier:definition.tier) as 'fast'|'default'|'deep';const input=sanitize(body.payload?.input||{}),context=sanitize(body.payload?.context||{});const started=performance.now();
   try{
     const result=await runOpenAI({capability:definition,tier,input,context,safetyId:await safetyIdentifier(userId!)});

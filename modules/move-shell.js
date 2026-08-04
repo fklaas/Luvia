@@ -1,7 +1,7 @@
 (() => {
   'use strict';
 
-  const VERSION = '4.17.0';
+  const VERSION = '4.18.0';
   const TILES = Object.freeze({
     flights:{title:'Flüge',icon:'✈️',description:'Flughäfen und Terminals für eure An- oder Abreise.',tags:['Flughäfen','Terminals','Anreise'],preset:'flights'},
     rail:{title:'Bahn',icon:'🚆',description:'Fern-, Regional- und wichtige Umsteigebahnhöfe.',tags:['Fernverkehr','Regionalbahn','Bahnhöfe'],preset:'rail'},

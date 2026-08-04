@@ -1,7 +1,9 @@
 type JsonSchema=Record<string,unknown>;
 const stringArray={type:'array',items:{type:'string'}};
 const action={type:'object',additionalProperties:false,properties:{id:{type:'string'},label:{type:'string'},capability:{type:'string'},kind:{type:'string'}},required:['id','label','capability','kind']};
+const toolCall={type:'object',additionalProperties:false,properties:{id:{type:'string'},name:{type:'string'},arguments:{type:'object',additionalProperties:true}},required:['id','name','arguments']};
 const schemas:Record<string,JsonSchema>={
+  orchestrator_step:{type:'object',additionalProperties:false,properties:{kind:{type:'string',enum:['tool_calls','final']},toolCalls:{type:'array',items:toolCall},result:{type:'object',additionalProperties:true},reasoningSummary:{type:'string'}},required:['kind','toolCalls','result','reasoningSummary']},
   assistant_response:{type:'object',additionalProperties:false,properties:{answer:{type:'string'},suggestedActions:{type:'array',items:action}},required:['answer','suggestedActions']},
   discovery_plan:{type:'object',additionalProperties:false,properties:{searchPlans:{type:'array',items:{type:'object',additionalProperties:false,properties:{query:{type:'string'},includedTypes:stringArray,weight:{type:'number'}},required:['query','includedTypes','weight']}},preferredSignals:stringArray,mustHave:stringArray,excludedSignals:stringArray,reasoningSummary:{type:'string'},confidence:{type:'number'}},required:['searchPlans','preferredSignals','mustHave','excludedSignals','reasoningSummary','confidence']},
   candidate_ranking:{type:'object',additionalProperties:false,properties:{rankings:{type:'array',items:{type:'object',additionalProperties:false,properties:{entityId:{type:'string'},score:{type:'number'},confidence:{type:'number'},reasons:stringArray,unknowns:stringArray},required:['entityId','score','confidence','reasons','unknowns']}},summary:{type:'string'}},required:['rankings','summary']},

@@ -1,6 +1,6 @@
 (() => {
   'use strict';
-  const VERSION='1.0.0';
+  const VERSION='4.18.0';
   const entries=new Map();
   const clone=value=>value==null?value:JSON.parse(JSON.stringify(value));
   function register(definition={}){
@@ -19,11 +19,11 @@
     entries.set(id,entry);return entry;
   }
   [
-    {id:'brain.ask',tier:'default',mode:'READ',schema:'assistant_response',tools:['trip.current','preferences.current','travel.context','schedule.current','memory.signals'],timeoutMs:30000,description:'Allgemeines kontextbezogenes Luvia-Gespräch.'},
+    {id:'brain.ask',tier:'default',mode:'READ',schema:'assistant_response',tools:['trip.current','preferences.current','travel.context','journey.context','journey.evidence','memory.signals'],timeoutMs:30000,description:'Allgemeines kontextbezogenes Luvia-Gespräch.'},
     {id:'discovery.plan',tier:'default',mode:'READ',schema:'discovery_plan',tools:['trip.current','preferences.current','travel.context','memory.signals'],cacheTtlMs:300000,description:'Erzeugt kontrollierte Suchstrategien aus Guided Discovery.'},
     {id:'discovery.rank',tier:'default',mode:'READ',schema:'candidate_ranking',tools:['trip.current','preferences.current','travel.context','memory.signals'],cacheTtlMs:180000,description:'Ordnet bereits fachlich validierte Providerkandidaten persönlich.'},
-    {id:'dashboard.brief',tier:'default',mode:'READ',schema:'dashboard_brief',tools:['trip.current','preferences.current','travel.context','schedule.current','today.current','recommendations.current','memory.signals'],cacheTtlMs:300000,description:'Erstellt ein ehrliches Reisebriefing für das Dashboard.'},
-    {id:'timeline.propose',tier:'deep',mode:'DRAFT',schema:'timeline_proposal',tools:['trip.current','preferences.current','travel.context','schedule.current','today.current','places.saved','memory.signals'],cacheTtlMs:0,description:'Bereitet bestätigungspflichtige Timeline-Änderungen vor.'},
+    {id:'dashboard.brief',tier:'default',mode:'READ',schema:'dashboard_brief',tools:['trip.current','preferences.current','travel.context','journey.context','journey.events','journey.reservations','journey.evidence','schedule.current','today.current','recommendations.current','memory.signals'],cacheTtlMs:300000,description:'Erstellt ein ehrliches Reisebriefing für das Dashboard.'},
+    {id:'timeline.propose',tier:'deep',mode:'DRAFT',schema:'timeline_proposal',tools:['trip.current','preferences.current','travel.context','journey.context','journey.events','journey.reservations','journey.evidence','schedule.current','today.current','places.saved','memory.signals'],cacheTtlMs:0,description:'Bereitet bestätigungspflichtige Timeline-Änderungen vor.'},
     {id:'memory.extract',tier:'fast',mode:'DRAFT',schema:'memory_signals',tools:['preferences.current'],cacheTtlMs:0,description:'Leitet belegte Lernsignale aus Nutzerentscheidungen ab.'},
     {id:'text.summarize',tier:'fast',mode:'READ',schema:'summary',tools:[],cacheTtlMs:600000,description:'Kurze, kontrollierte Zusammenfassungen.'}
   ].forEach(register);

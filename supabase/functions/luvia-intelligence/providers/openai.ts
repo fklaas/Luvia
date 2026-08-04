@@ -3,7 +3,7 @@ import { outputSchema } from '../schemas/index.ts';
 import { systemPrompt, userInput } from '../prompts/system.ts';
 
 type Tier='fast'|'default'|'deep';
-function models(){return{fast:Deno.env.get('LUVIA_AI_MODEL_FAST')||'gpt-5.6-luna',default:Deno.env.get('LUVIA_AI_MODEL_DEFAULT')||'gpt-5.6-terra',deep:Deno.env.get('LUVIA_AI_MODEL_DEEP')||'gpt-5.6-sol'}}
+function models(){return{fast:Deno.env.get('LUVIA_AI_MODEL_FAST')||'gpt-5-mini',default:Deno.env.get('LUVIA_AI_MODEL_DEFAULT')||'gpt-5',deep:Deno.env.get('LUVIA_AI_MODEL_DEEP')||'gpt-5-pro'}}
 function extractText(response:any){if(typeof response?.output_text==='string')return response.output_text;for(const item of response?.output||[])for(const content of item?.content||[])if(content?.type==='output_text'&&typeof content.text==='string')return content.text;return''}
 function recoverable(status:number,body:any){const code=String(body?.error?.code||'');return status===404||status===400&&/model|unsupported|not_found/i.test(`${code} ${body?.error?.message||''}`)}
 export async function runOpenAI(args:{capability:Capability;tier:Tier;input:unknown;context:unknown;safetyId:string}){
