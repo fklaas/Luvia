@@ -6,7 +6,7 @@
     const timeoutMs=Math.max(3000,Number(options.timeoutMs||30000));
     let timer=null;
     try{
-      const request=client.functions.invoke('luvia-intelligence',{body:{action,payload,client:{appVersion:'13.19.1',coreVersion:'4.19.1'}}});
+      const request=client.functions.invoke('luvia-intelligence',{body:{action,payload,client:{appVersion:'13.20.1',coreVersion:'4.20.1'}}});
       const timeout=new Promise((_,reject)=>{timer=setTimeout(()=>reject(Object.assign(new Error('Luvia Intelligence hat das Zeitlimit überschritten.'),{code:'AI_TIMEOUT'})),timeoutMs)});
       const {data,error}=await Promise.race([request,timeout]);
       if(error)throw Object.assign(new Error(error.message||'Luvia Intelligence ist nicht erreichbar.'),{code:'AI_EDGE_ERROR',cause:error});

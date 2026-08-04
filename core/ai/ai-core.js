@@ -1,6 +1,6 @@
 (() => {
   'use strict';
-  const VERSION='4.19.1';
+  const VERSION='4.20.1';
   const listeners=new Set();
   const cache=new Map();
   let metrics={requests:0,successes:0,fallbacks:0,failures:0,lastRequestAt:null,lastSuccessAt:null,lastError:null};
@@ -42,7 +42,7 @@
   }
   async function planDiscovery(domain,result={}){
     const deterministic=clone(result.contract||{});
-    const response=await run('discovery.plan',{domain,answers:result.answers||{},contract:deterministic,currentMoment:{domain,answers:result.answers||{}}});
+    const compact={domain,answers:result.answers||{},contract:{domain:deterministic.domain,query:deterministic.query,includedTypes:(deterministic.includedTypes||[]).slice(0,12),excludedTypes:(deterministic.excludedTypes||[]).slice(0,12),featureRequirements:deterministic.featureRequirements||{},labels:deterministic.labels||{},freeText:result.freeText||deterministic.freeText||''},currentMoment:{domain,freeText:result.freeText||''}};const response=await run('discovery.plan',compact,{fallback:true});
     const plan=response.data||{};
     return{
       ...deterministic,

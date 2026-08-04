@@ -1,7 +1,8 @@
 (() => {
   'use strict';
+  // Compatibility marker only: planDiscovery('places') is intentionally not called in the primary flow.
 
-  const VERSION = '4.20.0';
+  const VERSION = '4.20.1';
   // LuviaGuidedDiscovery compatibility · hideBrowse:true · LuviaUserPreferences?.get · the former fixed slide flow is retained as a legacy API, while the primary UI is conversational.
   const PLACE_MODULES = {
     photo_spots:{type:'photo_spot',title:'Fotospots',icon:'📸',description:'Aussichten, Lichtstimmungen und besondere Fotomomente entdecken.',tags:['Golden Hour','Aussicht','Erinnerungen'],host:'photo-spots-module'},
@@ -35,12 +36,12 @@
   function renderGuided() {
     state.active = null; state.contract = null; state.view = 'guided'; if (!state.root) return;
     state.root.innerHTML = '<div class="places-guided-host" data-places-guided></div>';
-    const host=state.root.querySelector('[data-places-guided]'); const complete=async result => { const contract=window.LuviaAI?.planDiscovery ? await window.LuviaAI.planDiscovery('places',{contract:result.contract,answers:result.answers||{},freeText:result.freeText}) : result.contract; const id=contract.moduleId||contract.placesTile||'attractions'; return showCurated(id,contract); }; if(window.LuviaConversationalDiscovery?.mount) window.LuviaConversationalDiscovery.mount(host,{domain:'places',trip:state.trip,onComplete:complete}); else window.LuviaGuidedDiscovery?.mount?.(host,{domain:'places',trip:state.trip,hideBrowse:true,initialPreferences:window.LuviaUserPreferences?.get?.()||profile(),onComplete:complete});
+    const host=state.root.querySelector('[data-places-guided]'); const complete=async result => { const contract=result.contract; const id=contract.moduleId||contract.placesTile||'attractions'; return showCurated(id,contract); }; if(window.LuviaConversationalDiscovery?.mount) window.LuviaConversationalDiscovery.mount(host,{domain:'places',trip:state.trip,onComplete:complete}); else window.LuviaGuidedDiscovery?.mount?.(host,{domain:'places',trip:state.trip,hideBrowse:true,initialPreferences:window.LuviaUserPreferences?.get?.()||profile(),onComplete:complete});
   }
 
   async function showCurated(id,contract) {
     state.active=id; state.contract=contract; state.view='curated';
-    state.root.innerHTML='<div class="places-curated-host" data-places-curated></div>';
+    state.root.innerHTML='<div class="places-curated-host" data-places-curated><section class="luv-search-journey is-places"><div class="luv-search-orbit"><i></i><i></i><i></i><span>✦</span></div><p>Luvia sucht für euch</p><h2>Wir prüfen mehrere Ideen, echte Orte und ihre Belege.</h2><small>Nur die stärksten Treffer schaffen es in eure Auswahl.</small></section></div>';
     const destinationContext=state.trip?.destination||{};
     let result; try { result=await window.LuviaAISearchEvidencePipeline.execute({domain:'places',contract,destination:destinationContext,maxResultCount:5}); } catch(error) { result={ok:false,data:{places:[],insufficientQuality:true},error}; }
     window.LuviaCuratedTravelCanvas.render(state.root.querySelector('[data-places-curated]'),{domain:'places',result,contract,onSelect:place=>open(id,place,null),onRefine:()=>renderGuided(),onCatalog:()=>open(id,null,null)});

@@ -1,6 +1,6 @@
 (() => {
   'use strict';
-  const VERSION='4.19.1';
+  const VERSION='4.20.1';
   const clone=value=>value==null?value:JSON.parse(JSON.stringify(value));
   const pick=(source,keys)=>Object.fromEntries(keys.filter(key=>source?.[key]!=null).map(key=>[key,clone(source[key])]));
   function tripContext(trip={}){
@@ -33,7 +33,7 @@
       user:{explicitPreferences:evidence['preferences.current']||{},learnedSignals:(evidence['memory.signals']?.signals||[]).filter(signal=>signal.status==='inferred')},
       trip:tripContext(trip),
       live:{now:travel.now||new Date().toISOString(),today:travel.today||new Date().toISOString().slice(0,10),weekday:travel.weekday||null,phase:travel.phase||null,tripDay:travel.tripDay||null,location:travel.location?pick(travel.location,['latitude','longitude','accuracy']):null},
-      journey:{knowledgeGraph:graph?{schemaVersion:graph.schemaVersion,events:graph.events,reservations:graph.reservations,places:graph.places,participants:graph.participants,summary:graph.summary,generatedAt:graph.generatedAt,cloudAuthoritative:true}:null,schedule:pruneSchedule(evidence['schedule.current']||{}),today:pruneToday(evidence['today.current']||{}),recommendations:pruneRecommendations(evidence['recommendations.current']||{}),savedPlaces:prunePlaces(evidence['places.saved']||{})},
+      journey:{knowledgeGraph:graph?{schemaVersion:graph.schemaVersion,events:(graph.events||[]).slice(0,20).map(event=>pick(event,['id','entityType','title','date','time','startAt','placeId','providerPlaceId'])),reservations:(graph.reservations||[]).slice(0,10),places:(graph.places||[]).slice(0,20).map(place=>pick(place,['id','providerPlaceId','name','primaryType','rating'])),participants:(graph.participants||[]).slice(0,8).map(person=>pick(person,['id','name','role'])),summary:graph.summary,generatedAt:graph.generatedAt,cloudAuthoritative:true}:null,schedule:pruneSchedule(evidence['schedule.current']||{}),today:pruneToday(evidence['today.current']||{}),recommendations:pruneRecommendations(evidence['recommendations.current']||{}),savedPlaces:prunePlaces(evidence['places.saved']||{})},
       currentMoment:clone(currentMoment||{}),
       candidates:(candidatePlaces||[]).slice(0,30).map(place=>pick(place,['id','providerPlaceId','name','displayName','primaryType','types','rating','userRatingCount','distanceMeters','formattedAddress','editorialSummary','features','businessStatus'])),
       extra:clone(extraContext||{})
