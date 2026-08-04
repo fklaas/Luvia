@@ -1,10 +1,20 @@
 (() => {
   'use strict';
-  const VERSION='4.28.0',BUILD='13.28.0',BUCKET='luvia-media',channels=new Map();
+  const VERSION='4.28.1.2',BUILD='13.28.1.2',BUCKET='luvia-media',channels=new Map();
   const id=()=>crypto?.randomUUID?.()||`${Date.now()}-${Math.random().toString(16).slice(2)}`;
   const ext=f=>(f?.name?.split('.').pop()||f?.type?.split('/').pop()||'jpg').replace(/[^a-z0-9]/gi,'').toLowerCase()||'jpg';
   const day=iso=>{const d=new Date(iso);return Number.isNaN(d.getTime())?null:`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`};
-  async function context(){if(window.ParisSync?.requireReady)return window.ParisSync.requireReady();const client=window.LuviaSupabase?.getClient?.()||window.LuviaSupabase?.client?.()||window.ParisCloud?.client,tripId=window.LuviaTripContext?.getActiveTripId?.()||window.LuviaTripContext?.get?.()?.id,session=await client?.auth?.getSession?.(),userId=session?.data?.session?.user?.id;if(!client||!tripId||!userId)throw new Error('Media Core benötigt Anmeldung und aktive Reise.');return{client,tripId,userId}}
+  async function context(){
+    const client=window.LuviaSupabaseService?.getClient?.()||window.LuviaSupabase?.getClient?.()||window.LuviaSupabase?.client?.()||window.ParisSupabaseClient||window.ParisCloud?.client;
+    const trip=window.LuviaTripContext?.getActiveTrip?.()||window.LuviaTripContext?.getSnapshot?.()?.trip||window.LuviaTripStore?.snapshot?.()?.activeTrip||null;
+    const tripId=String(trip?.id||trip?.tripId||window.LuviaTripContext?.getSnapshot?.()?.tripId||window.LuviaTripStore?.snapshot?.()?.activeTripId||'');
+    let userId=window.ParisAuth?.getState?.()?.user?.id||window.LuviaRuntime?.getSnapshot?.()?.auth?.user?.id||null;
+    if(!userId&&client?.auth?.getSession){const session=await client.auth.getSession();if(session?.error)throw session.error;userId=session?.data?.session?.user?.id||null;}
+    if(!client)throw new Error('Media Core benötigt eine aktive Supabase-Verbindung.');
+    if(!userId)throw new Error('Media Core benötigt eine gültige Anmeldung.');
+    if(!tripId)throw new Error('Media Core benötigt eine aktive Reise.');
+    return{client,tripId,userId,trip};
+  }
   function entity(r){return Object.freeze({id:r.id,tripId:r.trip_id,userId:r.user_id,participantId:r.participant_id||null,type:r.type,purpose:r.purpose,source:r.source,originalName:r.original_name,mimeType:r.mime_type,storageBucket:r.storage_bucket||BUCKET,storagePath:r.storage_path,previewPath:r.preview_path||null,thumbnailPath:r.thumbnail_path||null,status:r.status,capturedAt:r.captured_at||r.created_at,dayKey:r.day_key||day(r.captured_at||r.created_at),timezone:r.timezone||null,latitude:r.latitude==null?null:Number(r.latitude),longitude:r.longitude==null?null:Number(r.longitude),width:r.width||null,height:r.height||null,fileSize:r.file_size||null,contentHash:r.content_hash||null,placeId:r.place_id||null,metadata:r.metadata||{},createdAt:r.created_at,updatedAt:r.updated_at,legacySource:r.legacy_source||null,legacyId:r.legacy_id||null})}
   async function list(options={}){const{client,tripId}=await context();let q=client.from('media').select('*').eq('trip_id',tripId).neq('status','deleted');if(options.type)q=q.eq('type',options.type);if(options.dayKey)q=q.eq('day_key',options.dayKey);if(options.placeId)q=q.eq('place_id',options.placeId);const r=await q.order('captured_at',{ascending:true,nullsFirst:false}).order('created_at',{ascending:true});if(r.error)throw r.error;return(r.data||[]).map(entity)}
   async function get(mediaId){const{client,tripId}=await context(),r=await client.from('media').select('*').eq('trip_id',tripId).eq('id',mediaId).maybeSingle();if(r.error)throw r.error;return r.data?entity(r.data):null}
@@ -16,5 +26,5 @@
   async function linkLiveMoment(mediaId,momentKey,options={}){const{client,tripId,userId}=await context(),r=await client.from('live_moment_media').upsert({trip_id:tripId,moment_key:momentKey,media_id:mediaId,position:options.position||0,created_by:userId},{onConflict:'trip_id,moment_key,media_id'}).select('*').single();if(r.error)throw r.error;return r.data}
   async function subscribe(callback){const{client,tripId}=await context();if(channels.has(tripId))await client.removeChannel(channels.get(tripId));const c=client.channel(`luvia-media-${tripId}-${Math.random().toString(36).slice(2)}`).on('postgres_changes',{event:'*',schema:'public',table:'media',filter:`trip_id=eq.${tripId}`},callback).subscribe();channels.set(tripId,c);return async()=>{if(channels.get(tripId)===c)channels.delete(tripId);await client.removeChannel(c)}}
   const diagnostics=()=>({service:'media-core',version:VERSION,build:BUILD,status:'active',ok:true,checkedAt:new Date().toISOString(),durationMs:0,dependencies:{metadata:Boolean(window.LuviaMediaMetadata)},checks:{canonicalMediaEntity:true,privateBucketContract:true,deduplication:true,exifFoundation:true,placeLinks:true,liveMomentLinks:true},failedChecks:[],warnings:[]});
-  window.LuviaMediaCore=Object.freeze({version:VERSION,build:BUILD,bucket:BUCKET,list,get,upload,update,remove,signedUrl,subscribe,linkPlace,linkLiveMoment,diagnostics,rowToEntity:entity});
+  window.LuviaMediaCore=Object.freeze({version:VERSION,build:BUILD,bucket:BUCKET,getContext:context,list,get,upload,update,remove,signedUrl,subscribe,linkPlace,linkLiveMoment,diagnostics,rowToEntity:entity});
 })();

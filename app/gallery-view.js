@@ -1,6 +1,6 @@
 (() => {
   'use strict';
-  const VERSION='4.28.1.1.1',BUILD='13.28.1.1.1';
+  const VERSION='4.28.1.2',BUILD='13.28.1.2';
   let host=null,items=[],clusters=[],urls=[],unsubscribe=null,busy=false;
   const esc=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
   const fmt=v=>v?new Intl.DateTimeFormat('de-DE',{day:'2-digit',month:'short',year:'numeric',hour:'2-digit',minute:'2-digit'}).format(new Date(v)):'Ohne Aufnahmedatum';
