@@ -1,12 +1,13 @@
 (() => {
   'use strict';
-  const VERSION='4.26.1';
+  const VERSION='4.27.0';
   const esc=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot',"'":'&#39;'}[c]));
   const tile=(x)=>`<button type="button" class="lv-hub-tile ${x.primary?'is-primary':''} ${x.preview?'is-preview':''}" data-hub-action="${esc(x.action||'')}" ${x.disabled?'disabled':''}><span class="lv-hub-icon">${x.icon}</span><span class="lv-hub-copy"><strong>${esc(x.title)}</strong><small>${esc(x.description)}</small>${x.meta?`<em>${esc(x.meta)}</em>`:''}</span><span class="lv-hub-arrow">${x.preview?'Demnächst':'→'}</span></button>`;
   function tripStats(trip){const id=trip?.id||trip?.tripId;const places=window.LuviaPlaceCore?.getPlaces?.({tripId:id})||[];const planned=places.filter(p=>p?.metadata?.plannedAt||p?.metadata?.tripPlace?.planned_at).length;return {places:places.length,planned};}
   function shell({eyebrow,title,description,hero,tiles,footer=''}){return `<section class="lv-hub"><header class="lv-hub-head"><span>${esc(eyebrow)}</span><h1>${esc(title)}</h1><p>${esc(description)}</p></header>${hero||''}<div class="lv-hub-grid">${tiles.map(tile).join('')}</div>${footer}</section>`;}
   function plan(trip){const stats=tripStats(trip);return shell({eyebrow:'Gemeinsam vorbereiten',title:'Was möchtet ihr planen?',description:'Alle Werkzeuge für eure Reise – klar gegliedert und ohne unnötige Komplexität.',hero:`<button class="lv-hub-hero" data-hub-action="places"><span>Places entdecken</span><strong>Restaurants, Aktivitäten und besondere Orte finden.</strong><small>${stats.planned?`${stats.planned} Orte bereits geplant`:'Noch keinen Ort geplant'}</small><b>Places öffnen →</b></button>`,tiles:[
     {icon:'📍',title:'Places',description:'Orte entdecken und zur Timeline hinzufügen.',meta:`${stats.places} Orte im Reisekontext`,action:'places',primary:true},
+    {icon:'🧭',title:'Meine Orte',description:'Entdeckt, geplant, besucht und erinnert an einem Ort.',action:'places-lifecycle'},
     {icon:'📅',title:'Timeline',description:'Reisetage und geplante Momente ordnen.',action:'timeline'},
     {icon:'✅',title:'Checklisten',description:'Vor und während der Reise nichts vergessen.',action:'checklists'},
     {icon:'💶',title:'Budget',description:'Ausgaben und gemeinsames Reisebudget im Blick behalten.',action:'budget'},
@@ -19,7 +20,7 @@
     {icon:'🗓️',title:'Tagesübersicht',description:'Was heute ansteht und was als Nächstes kommt.',action:'today',primary:true},
     {icon:'📅',title:'Timeline',description:'Alle Reisetage und geplanten Orte.',action:'timeline'},
     {icon:'👥',title:'Teilnehmer',description:'Gemeinsam planen und den Reisestatus sehen.',action:'participants'},
-    {icon:'📍',title:'Besuchte Orte',description:'Per GPS oder manuell bestätigte Erlebnisse.',preview:true,disabled:true},
+    {icon:'📍',title:'Besuchte Orte',description:'Per GPS oder manuell bestätigte Erlebnisse.',action:'places-lifecycle'},
     {icon:'✨',title:'Live-Momente',description:'Kleine gemeinsame Momente während der Reise.',preview:true,disabled:true},
     {icon:'ℹ️',title:'Reisedaten',description:'Ziel, Zeitraum und zentrale Informationen.',action:'trip-settings'}
   ]});}
