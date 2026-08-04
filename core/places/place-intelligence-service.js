@@ -1,6 +1,6 @@
 (function(){
 'use strict';
-const VERSION='4.19.1';
+const VERSION='4.27.2';
 const adapters=new Map();
 const fmt=m=>{m=Number(m);if(!Number.isFinite(m))return null;return m<1000?`${Math.round(m/50)*50} m`:`${(m/1000).toFixed(m<10000?1:0).replace('.',',')} km`};
 function gpsDistance(place={}){const m=Number(place.gpsDistanceMeters??place.route?.drive?.distanceMeters??place._gpsDistanceMeters);return Number.isFinite(m)?m:null}
@@ -13,6 +13,6 @@ function mobility(place={},context={}){const base=generic(place,context),profile
 function registerAdapter(type,fn){adapters.set(type,fn)}
 function analyze(type,place,context={}){return(adapters.get(type)||generic)(place,context)}
 registerAdapter('restaurant',restaurant);registerAdapter('accommodation',accommodation);registerAdapter('shopping',shopping);registerAdapter('nature',nature);registerAdapter('mobility',mobility);
-function diagnostics(){return{version:VERSION,status:'ready',adapters:[...adapters.keys(),'generic'],distanceSource:'gps-only',services:{recommendations:Boolean(window.LuviaRecommendations),schedule:Boolean(window.LuviaScheduleIntelligence),timeline:Boolean(window.LuviaTimelineCore),today:Boolean(window.LuviaTodayIntelligence),presence:Boolean(window.LuviaPresenceVisit),crossModule:Boolean(window.LuviaCrossModuleRecommendations),liveDay:Boolean(window.LuviaLiveDayCompanion)}}}
+function diagnostics(){const registry=window.LuviaPlaceRegistry?.diagnostics?.()||{},failedChecks=registry.ok===false?(registry.failedChecks||['registry']):[];return{version:VERSION,status:failedChecks.length?'degraded':'ready',ok:failedChecks.length===0,failedChecks,adapters:[...adapters.keys(),'generic'],distanceSource:'gps-only',services:{recommendations:Boolean(window.LuviaRecommendations),schedule:Boolean(window.LuviaScheduleIntelligence),timeline:Boolean(window.LuviaTimelineCore),today:Boolean(window.LuviaTodayIntelligence),presence:Boolean(window.LuviaPresenceVisit),crossModule:Boolean(window.LuviaCrossModuleRecommendations),liveDay:Boolean(window.LuviaLiveDayCompanion)}}}
 window.LuviaPlaceIntelligence=Object.freeze({version:VERSION,analyze,generic,accommodation,restaurant,shopping,nature,mobility,registerAdapter,diagnostics});
 })();

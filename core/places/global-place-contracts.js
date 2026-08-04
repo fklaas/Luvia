@@ -1,0 +1,20 @@
+(() => {
+'use strict';
+const VERSION='4.27.2';
+const UI_CATEGORIES=Object.freeze({
+food:{key:'food',label:'Essen & Trinken',domainTypes:['restaurant'],includedTypes:['restaurant','cafe','bakery','bar','meal_takeaway'],excludedTypes:['hospital','movie_theater','locality'],synonyms:['Restaurant','Café','Bistro','Essen']},
+activities:{key:'activities',label:'Aktivitäten',domainTypes:['activity','attraction','family'],includedTypes:['amusement_park','aquarium','bowling_alley','escape_room','gym','spa','stadium','swimming_pool','water_park','zoo'],excludedTypes:['hospital','store','locality'],synonyms:['Aktivität','Erlebnis','Freizeit']},
+sights:{key:'sights',label:'Sehenswürdigkeiten',domainTypes:['attraction'],includedTypes:['tourist_attraction','historical_landmark','monument','observation_deck'],excludedTypes:['restaurant','hospital'],synonyms:['Sehenswürdigkeit','Wahrzeichen','Aussichtspunkt']},
+culture:{key:'culture',label:'Kultur',domainTypes:['attraction','activity'],includedTypes:['museum','movie_theater','art_gallery','performing_arts_theater','concert_hall'],excludedTypes:['hospital','restaurant'],synonyms:['Museum','Kino','Theater','Galerie']},
+nature:{key:'nature',label:'Natur & Erholung',domainTypes:['nature','activity'],includedTypes:['park','garden','beach','hiking_area','natural_feature','spa'],excludedTypes:['store','hospital'],synonyms:['Park','Garten','See','Strand','Natur']},
+shopping:{key:'shopping',label:'Shopping',domainTypes:['shopping'],includedTypes:['shopping_mall','market','store','clothing_store','department_store'],excludedTypes:['hospital'],synonyms:['Shopping','Markt','Geschäft']},
+nightlife:{key:'nightlife',label:'Nachtleben',domainTypes:['activity','restaurant'],includedTypes:['night_club','bar','concert_hall'],excludedTypes:['hospital','locality'],synonyms:['Club','Bar','Live-Musik','Rooftop']},
+practical:{key:'practical',label:'Praktisch unterwegs',domainTypes:['custom','mobility'],includedTypes:['pharmacy','supermarket','parking','electric_vehicle_charging_station','gas_station','atm','laundry'],excludedTypes:['tourist_attraction'],synonyms:['Apotheke','Supermarkt','Parkplatz','Ladestation']}
+});
+const SWIM_QUERIES=['Schwimmbad','Hallenbad','Freibad','Badesee','Therme','Wasserpark','Aquatic Center'];
+function category(key){return UI_CATEGORIES[key]||UI_CATEGORIES.activities}
+function queryCascade(goal={},destination=''){const text=String(goal.text||'').trim(),lower=text.toLowerCase(),def=category(goal.category);let variants=[text,...def.synonyms];if(/schwimm|baden|badesee|pool|wasser/.test(lower))variants=[text,...SWIM_QUERIES];if(/kino|cinema|film/.test(lower))variants=[text,'Kino','Cinema','Filmtheater'];if(/nudel|pasta|italien/.test(lower))variants=[text,'Italienisches Restaurant Pasta','Vegetarisches Restaurant Nudeln'];return[...new Set(variants.map(v=>`${v} ${destination}`.trim()).filter(Boolean))].slice(0,7)}
+function accepts(place,categoryKey,goalText=''){const def=category(categoryKey),types=new Set((place?.types||[]).map(String)),name=String(place?.name||'');if(!String(place?.providerPlaceId||place?.id||'').replace(/^places\//,'')||name.trim().length<2)return false;const lower=String(goalText).toLowerCase();if(/kino|cinema|film/.test(lower))return types.has('movie_theater');if(/schwimm|baden|badesee|pool|wasser/.test(lower))return[...types].some(t=>/swimming_pool|public_bath|water_park|spa|beach|natural_feature/.test(t))||/schwimm|hallenbad|freibad|therme|badesee|wasserpark/i.test(name);if(def.excludedTypes.some(t=>types.has(t)))return false;if(!def.includedTypes.length)return true;return def.includedTypes.some(t=>types.has(t))||(categoryKey==='food'&&/restaurant|café|cafe|bistro|pizza|bar/i.test(name))}
+function diagnostics(){const registry=window.LuviaPlaceRegistry?.diagnostics?.()||{};return{version:VERSION,status:'ready',uiCategories:Object.keys(UI_CATEGORIES).length,registryTypes:registry.registeredTypes||0,registryAdapters:registry.registeredAdapters||0,singleRegistry:true}}
+window.LuviaGlobalPlaceContracts=Object.freeze({version:VERSION,categories:UI_CATEGORIES,category,queryCascade,accepts,diagnostics});
+})();
