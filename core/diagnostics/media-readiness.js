@@ -1,7 +1,7 @@
 (() => {
   'use strict';
-  const VERSION='4.27.5';
-  const BUILD='13.27.5';
+  const VERSION='4.27.5.1';
+  const BUILD='13.27.5.1';
   const now=()=>new Date().toISOString();
   const elapsed=start=>Math.max(0,Math.round((performance.now()-start)*100)/100);
   async function probeTable(client,table,columns='*'){
@@ -17,7 +17,7 @@
   async function run(options={}){
     const started=performance.now(), warnings=[], failedChecks=[];
     const checks={
-      centralMediaContract:Boolean(window.LuviaKernelVersion?.core==='4.27.5'),
+      centralMediaContract:Boolean(window.LuviaKernelVersion?.core==='4.27.5.1'),
       legacyGallerySync:Boolean(window.ParisSync?.gallery||window.ParisSync?.get?.('gallery')),
       legacyLiveMomentSync:Boolean(window.ParisSync?.liveMoments||window.ParisSync?.get?.('liveMoments')),
       placeCore:Boolean(window.LuviaPlaceCore&&window.LuviaPlaceLifecycle),

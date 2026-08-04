@@ -1,0 +1,789 @@
+TAP version 13
+# AI action proposals require confirmation before Core execution: OK
+# Subtest: tests/ai-command-proposal.test.cjs
+ok 1 - tests/ai-command-proposal.test.cjs
+  ---
+  duration_ms: 39.406802
+  type: 'test'
+  ...
+# AI minimum-context privacy and confirmation policy: OK
+# Subtest: tests/ai-context-policy.test.cjs
+ok 2 - tests/ai-context-policy.test.cjs
+  ---
+  duration_ms: 25.229723
+  type: 'test'
+  ...
+# Central AI facade, hard-contract preservation, reranking and fallback: OK
+# Subtest: tests/ai-core-runtime.test.cjs
+ok 3 - tests/ai-core-runtime.test.cjs
+  ---
+  duration_ms: 44.915853
+  type: 'test'
+  ...
+# Dashboard Brain and global future-module AI facade: OK
+# Subtest: tests/ai-dashboard-integration.test.cjs
+ok 4 - tests/ai-dashboard-integration.test.cjs
+  ---
+  duration_ms: 34.07218
+  type: 'test'
+  ...
+# AI migration, RLS, evidence memory and profile separation: OK
+# Subtest: tests/ai-database-migration.test.cjs
+ok 5 - tests/ai-database-migration.test.cjs
+  ---
+  duration_ms: 28.658852
+  type: 'test'
+  ...
+# node:internal/assert/utils:281
+#     throw err;
+#     ^
+# AssertionError [ERR_ASSERTION]: The expression evaluated to a falsy value:
+#   assert(places.includes('LuviaPlanningFoundation')&&move.includes('LuviaPlanningFoundation'))
+#     at Object.<anonymous> (/mnt/data/luvia_132751_fix/tests/ai-discovery-integration.test.cjs:8:1)
+#     at Module._compile (node:internal/modules/cjs/loader:1730:14)
+#     at Object..js (node:internal/modules/cjs/loader:1895:10)
+#     at Module.load (node:internal/modules/cjs/loader:1465:32)
+#     at Function._load (node:internal/modules/cjs/loader:1282:12)
+#     at TracingChannel.traceSync (node:diagnostics_channel:322:14)
+#     at wrapModuleLoad (node:internal/modules/cjs/loader:235:24)
+#     at Function.executeUserEntryPoint [as runMain] (node:internal/modules/run_main:171:5)
+#     at node:internal/main/run_main_module:36:49 {
+#   generatedMessage: true,
+#   code: 'ERR_ASSERTION',
+#   actual: false,
+#   expected: true,
+#   operator: '=='
+# }
+# Node.js v22.16.0
+# Subtest: tests/ai-discovery-integration.test.cjs
+not ok 6 - tests/ai-discovery-integration.test.cjs
+  ---
+  duration_ms: 32.540893
+  type: 'test'
+  location: '/mnt/data/luvia_132751_fix/tests/ai-discovery-integration.test.cjs:1:1'
+  failureType: 'testCodeFailure'
+  exitCode: 1
+  signal: ~
+  error: 'test failed'
+  code: 'ERR_TEST_FAILURE'
+  ...
+# Secure Edge AI function and TypeScript transpilation: OK
+# Subtest: tests/ai-edge-function.test.cjs
+ok 7 - tests/ai-edge-function.test.cjs
+  ---
+  duration_ms: 482.988262
+  type: 'test'
+  ...
+# AI learning signals, explicit profile confirmation and review UI: OK
+# Subtest: tests/ai-memory-profile-integration.test.cjs
+ok 8 - tests/ai-memory-profile-integration.test.cjs
+  ---
+  duration_ms: 54.377761
+  type: 'test'
+  ...
+# AI model aliases and server-authoritative routing: OK
+# Subtest: tests/ai-model-router.test.cjs
+ok 9 - tests/ai-model-router.test.cjs
+  ---
+  duration_ms: 34.286889
+  type: 'test'
+  ...
+# candidate research v13.23.0 ok
+# Subtest: tests/candidate-research-v13.23.0.test.cjs
+ok 10 - tests/candidate-research-v13.23.0.test.cjs
+  ---
+  duration_ms: 41.602176
+  type: 'test'
+  ...
+# Diagnostics correction 13.27.5.1 static integration: OK
+# Subtest: tests/diagnostics-correction-v13.27.5.1.test.cjs
+ok 11 - tests/diagnostics-correction-v13.27.5.1.test.cjs
+  ---
+  duration_ms: 42.362877
+  type: 'test'
+  ...
+# node:internal/assert/utils:281
+#     throw err;
+#     ^
+# AssertionError [ERR_ASSERTION]: The expression evaluated to a falsy value:
+#   assert(places.includes('LuviaPlanningFoundation'))
+#     at Object.<anonymous> (/mnt/data/luvia_132751_fix/tests/discovery-accuracy-curated-canvas-v13.20.0.test.cjs:5:1)
+#     at Module._compile (node:internal/modules/cjs/loader:1730:14)
+#     at Object..js (node:internal/modules/cjs/loader:1895:10)
+#     at Module.load (node:internal/modules/cjs/loader:1465:32)
+#     at Function._load (node:internal/modules/cjs/loader:1282:12)
+#     at TracingChannel.traceSync (node:diagnostics_channel:322:14)
+#     at wrapModuleLoad (node:internal/modules/cjs/loader:235:24)
+#     at Function.executeUserEntryPoint [as runMain] (node:internal/modules/run_main:171:5)
+#     at node:internal/main/run_main_module:36:49 {
+#   generatedMessage: true,
+#   code: 'ERR_ASSERTION',
+#   actual: false,
+#   expected: true,
+#   operator: '=='
+# }
+# Node.js v22.16.0
+# Subtest: tests/discovery-accuracy-curated-canvas-v13.20.0.test.cjs
+not ok 12 - tests/discovery-accuracy-curated-canvas-v13.20.0.test.cjs
+  ---
+  duration_ms: 84.341964
+  type: 'test'
+  location: '/mnt/data/luvia_132751_fix/tests/discovery-accuracy-curated-canvas-v13.20.0.test.cjs:1:1'
+  failureType: 'testCodeFailure'
+  exitCode: 1
+  signal: ~
+  error: 'test failed'
+  code: 'ERR_TEST_FAILURE'
+  ...
+# Strict discovery contract and no cross-category fallback: OK
+# Subtest: tests/discovery-contract-strictness.test.cjs
+ok 13 - tests/discovery-contract-strictness.test.cjs
+  ---
+  duration_ms: 70.828532
+  type: 'test'
+  ...
+# domain-correct research & journey deck: ok
+# Subtest: tests/domain-correct-research-journey-deck-v13.24.0.test.cjs
+ok 14 - tests/domain-correct-research-journey-deck-v13.24.0.test.cjs
+  ---
+  duration_ms: 22.978786
+  type: 'test'
+  ...
+# Global Place planning dialog and insight contract: OK
+# Subtest: tests/global-place-planning-dialog.test.cjs
+ok 15 - tests/global-place-planning-dialog.test.cjs
+  ---
+  duration_ms: 89.296431
+  type: 'test'
+  ...
+# node:internal/assert/utils:281
+#     throw err;
+#     ^
+# AssertionError [ERR_ASSERTION]: The expression evaluated to a falsy value:
+#   assert(text.includes('LuviaPlanningFoundation'))
+#     at Object.<anonymous> (/mnt/data/luvia_132751_fix/tests/guided-discovery-integration.test.cjs:4:34)
+#     at Module._compile (node:internal/modules/cjs/loader:1730:14)
+#     at Object..js (node:internal/modules/cjs/loader:1895:10)
+#     at Module.load (node:internal/modules/cjs/loader:1465:32)
+#     at Function._load (node:internal/modules/cjs/loader:1282:12)
+#     at TracingChannel.traceSync (node:diagnostics_channel:322:14)
+#     at wrapModuleLoad (node:internal/modules/cjs/loader:235:24)
+#     at Function.executeUserEntryPoint [as runMain] (node:internal/modules/run_main:171:5)
+#     at node:internal/main/run_main_module:36:49 {
+#   generatedMessage: true,
+#   code: 'ERR_ASSERTION',
+#   actual: false,
+#   expected: true,
+#   operator: '=='
+# }
+# Node.js v22.16.0
+# Subtest: tests/guided-discovery-integration.test.cjs
+not ok 16 - tests/guided-discovery-integration.test.cjs
+  ---
+  duration_ms: 55.818193
+  type: 'test'
+  location: '/mnt/data/luvia_132751_fix/tests/guided-discovery-integration.test.cjs:1:1'
+  failureType: 'testCodeFailure'
+  exitCode: 1
+  signal: ~
+  error: 'test failed'
+  code: 'ERR_TEST_FAILURE'
+  ...
+# Explicit global preferences and Guided Discovery schema: OK
+# Subtest: tests/guided-discovery-preferences.test.cjs
+ok 17 - tests/guided-discovery-preferences.test.cjs
+  ---
+  duration_ms: 31.784449
+  type: 'test'
+  ...
+# node:internal/assert/utils:281
+#     throw err;
+#     ^
+# AssertionError [ERR_ASSERTION]: Places focus mode missing: hideBrowse:true
+#     at Object.<anonymous> (/mnt/data/luvia_132751_fix/tests/guided-travel-canvas-focus-mode.test.cjs:25:31)
+#     at Module._compile (node:internal/modules/cjs/loader:1730:14)
+#     at Object..js (node:internal/modules/cjs/loader:1895:10)
+#     at Module.load (node:internal/modules/cjs/loader:1465:32)
+#     at Function._load (node:internal/modules/cjs/loader:1282:12)
+#     at TracingChannel.traceSync (node:diagnostics_channel:322:14)
+#     at wrapModuleLoad (node:internal/modules/cjs/loader:235:24)
+#     at Function.executeUserEntryPoint [as runMain] (node:internal/modules/run_main:171:5)
+#     at node:internal/main/run_main_module:36:49 {
+#   generatedMessage: false,
+#   code: 'ERR_ASSERTION',
+#   actual: false,
+#   expected: true,
+#   operator: '=='
+# }
+# Node.js v22.16.0
+# Subtest: tests/guided-travel-canvas-focus-mode.test.cjs
+not ok 18 - tests/guided-travel-canvas-focus-mode.test.cjs
+  ---
+  duration_ms: 62.170558
+  type: 'test'
+  location: '/mnt/data/luvia_132751_fix/tests/guided-travel-canvas-focus-mode.test.cjs:1:1'
+  failureType: 'testCodeFailure'
+  exitCode: 1
+  signal: ~
+  error: 'test failed'
+  code: 'ERR_TEST_FAILURE'
+  ...
+# Journey Knowledge Graph cloud resolution and invalidation contracts: OK
+# Subtest: tests/journey-knowledge-graph.test.cjs
+ok 19 - tests/journey-knowledge-graph.test.cjs
+  ---
+  duration_ms: 23.974947
+  type: 'test'
+  ...
+# Media readiness 13.27.5.1 static integration: OK
+# Subtest: tests/media-readiness-v13.27.5.test.cjs
+ok 20 - tests/media-readiness-v13.27.5.test.cjs
+  ---
+  duration_ms: 64.791445
+  type: 'test'
+  ...
+# Move mobility integration, no-timeline contract and cycling removal: OK
+# Subtest: tests/mobility-place-integration.test.cjs
+ok 21 - tests/mobility-place-integration.test.cjs
+  ---
+  duration_ms: 36.902739
+  type: 'test'
+  ...
+# Move domain separation under planning reset: OK
+# Subtest: tests/move-domain-separation.test.cjs
+ok 22 - tests/move-domain-separation.test.cjs
+  ---
+  duration_ms: 61.555674
+  type: 'test'
+  ...
+# Move without Timeline/planning: OK
+# Subtest: tests/move-no-timeline-v13.16.1.test.cjs
+ok 23 - tests/move-no-timeline-v13.16.1.test.cjs
+  ---
+  duration_ms: 65.874916
+  type: 'test'
+  ...
+# Move without Timeline/planning: OK
+# Subtest: tests/move-no-timeline-v13.16.2.test.cjs
+ok 24 - tests/move-no-timeline-v13.16.2.test.cjs
+  ---
+  duration_ms: 36.698445
+  type: 'test'
+  ...
+# Nature intelligence: OK
+# Subtest: tests/nature-intelligence.test.cjs
+ok 25 - tests/nature-intelligence.test.cjs
+  ---
+  duration_ms: 38.085407
+  type: 'test'
+  ...
+# node:internal/assert/utils:281
+#     throw err;
+#     ^
+# AssertionError [ERR_ASSERTION]: Nature hub tile missing
+#     at Object.<anonymous> (/mnt/data/luvia_132751_fix/tests/nature-place-integration.test.cjs:17:1)
+#     at Module._compile (node:internal/modules/cjs/loader:1730:14)
+#     at Object..js (node:internal/modules/cjs/loader:1895:10)
+#     at Module.load (node:internal/modules/cjs/loader:1465:32)
+#     at Function._load (node:internal/modules/cjs/loader:1282:12)
+#     at TracingChannel.traceSync (node:diagnostics_channel:322:14)
+#     at wrapModuleLoad (node:internal/modules/cjs/loader:235:24)
+#     at Function.executeUserEntryPoint [as runMain] (node:internal/modules/run_main:171:5)
+#     at node:internal/main/run_main_module:36:49 {
+#   generatedMessage: false,
+#   code: 'ERR_ASSERTION',
+#   actual: false,
+#   expected: true,
+#   operator: '=='
+# }
+# Node.js v22.16.0
+# Subtest: tests/nature-place-integration.test.cjs
+not ok 26 - tests/nature-place-integration.test.cjs
+  ---
+  duration_ms: 45.204112
+  type: 'test'
+  location: '/mnt/data/luvia_132751_fix/tests/nature-place-integration.test.cjs:1:1'
+  failureType: 'testCodeFailure'
+  exitCode: 1
+  signal: ~
+  error: 'test failed'
+  code: 'ERR_TEST_FAILURE'
+  ...
+# Photo spot intelligence: OK
+# Subtest: tests/photo-spot-intelligence.test.cjs
+ok 27 - tests/photo-spot-intelligence.test.cjs
+  ---
+  duration_ms: 25.415719
+  type: 'test'
+  ...
+# node:internal/assert/utils:281
+#     throw err;
+#     ^
+# AssertionError [ERR_ASSERTION]: index missing modules/move-shell.js
+#     at Object.<anonymous> (/mnt/data/luvia_132751_fix/tests/place-architecture-regression.test.cjs:8:312)
+#     at Module._compile (node:internal/modules/cjs/loader:1730:14)
+#     at Object..js (node:internal/modules/cjs/loader:1895:10)
+#     at Module.load (node:internal/modules/cjs/loader:1465:32)
+#     at Function._load (node:internal/modules/cjs/loader:1282:12)
+#     at TracingChannel.traceSync (node:diagnostics_channel:322:14)
+#     at wrapModuleLoad (node:internal/modules/cjs/loader:235:24)
+#     at Function.executeUserEntryPoint [as runMain] (node:internal/modules/run_main:171:5)
+#     at node:internal/main/run_main_module:36:49 {
+#   generatedMessage: false,
+#   code: 'ERR_ASSERTION',
+#   actual: false,
+#   expected: true,
+#   operator: '=='
+# }
+# Node.js v22.16.0
+# Subtest: tests/place-architecture-regression.test.cjs
+not ok 28 - tests/place-architecture-regression.test.cjs
+  ---
+  duration_ms: 47.454518
+  type: 'test'
+  location: '/mnt/data/luvia_132751_fix/tests/place-architecture-regression.test.cjs:1:1'
+  failureType: 'testCodeFailure'
+  exitCode: 1
+  signal: ~
+  error: 'test failed'
+  code: 'ERR_TEST_FAILURE'
+  ...
+# Place contract bootstrap, planned Places and non-plannable Move: OK
+# Subtest: tests/place-contract-bootstrap-resilience.test.cjs
+ok 29 - tests/place-contract-bootstrap-resilience.test.cjs
+  ---
+  duration_ms: 146.563539
+  type: 'test'
+  ...
+# Place detail capability routing: OK
+# Subtest: tests/place-detail-capability-routing.test.cjs
+ok 30 - tests/place-detail-capability-routing.test.cjs
+  ---
+  duration_ms: 39.523586
+  type: 'test'
+  ...
+# node:internal/assert/utils:281
+#     throw err;
+#     ^
+# AssertionError [ERR_ASSERTION]: Modern hub metadata missing
+#     at Object.<anonymous> (/mnt/data/luvia_132751_fix/tests/place-ui-refinement.test.cjs:16:1)
+#     at Module._compile (node:internal/modules/cjs/loader:1730:14)
+#     at Object..js (node:internal/modules/cjs/loader:1895:10)
+#     at Module.load (node:internal/modules/cjs/loader:1465:32)
+#     at Function._load (node:internal/modules/cjs/loader:1282:12)
+#     at TracingChannel.traceSync (node:diagnostics_channel:322:14)
+#     at wrapModuleLoad (node:internal/modules/cjs/loader:235:24)
+#     at Function.executeUserEntryPoint [as runMain] (node:internal/modules/run_main:171:5)
+#     at node:internal/main/run_main_module:36:49 {
+#   generatedMessage: false,
+#   code: 'ERR_ASSERTION',
+#   actual: false,
+#   expected: true,
+#   operator: '=='
+# }
+# Node.js v22.16.0
+# Subtest: tests/place-ui-refinement.test.cjs
+not ok 31 - tests/place-ui-refinement.test.cjs
+  ---
+  duration_ms: 23.098154
+  type: 'test'
+  location: '/mnt/data/luvia_132751_fix/tests/place-ui-refinement.test.cjs:1:1'
+  failureType: 'testCodeFailure'
+  exitCode: 1
+  signal: ~
+  error: 'test failed'
+  code: 'ERR_TEST_FAILURE'
+  ...
+# node:internal/assert/utils:281
+#     throw err;
+#     ^
+# AssertionError [ERR_ASSERTION]: The expression evaluated to a falsy value:
+#   assert(r('index.html').includes('global-place-contracts.js?v=13.27.2'))
+#     at Object.<anonymous> (/mnt/data/luvia_132751_fix/tests/places-core-reliability-v13.27.2.test.cjs:1:157)
+#     at Module._compile (node:internal/modules/cjs/loader:1730:14)
+#     at Object..js (node:internal/modules/cjs/loader:1895:10)
+#     at Module.load (node:internal/modules/cjs/loader:1465:32)
+#     at Function._load (node:internal/modules/cjs/loader:1282:12)
+#     at TracingChannel.traceSync (node:diagnostics_channel:322:14)
+#     at wrapModuleLoad (node:internal/modules/cjs/loader:235:24)
+#     at Function.executeUserEntryPoint [as runMain] (node:internal/modules/run_main:171:5)
+#     at node:internal/main/run_main_module:36:49 {
+#   generatedMessage: true,
+#   code: 'ERR_ASSERTION',
+#   actual: false,
+#   expected: true,
+#   operator: '=='
+# }
+# Node.js v22.16.0
+# Subtest: tests/places-core-reliability-v13.27.2.test.cjs
+not ok 32 - tests/places-core-reliability-v13.27.2.test.cjs
+  ---
+  duration_ms: 27.806535
+  type: 'test'
+  location: '/mnt/data/luvia_132751_fix/tests/places-core-reliability-v13.27.2.test.cjs:1:1'
+  failureType: 'testCodeFailure'
+  exitCode: 1
+  signal: ~
+  error: 'test failed'
+  code: 'ERR_TEST_FAILURE'
+  ...
+# /mnt/data/luvia_132751_fix/tests/places-final-foundation-v13.26.0.test.cjs:11
+# if(!index.includes('places-final-foundation.js?v=13.26.0'))throw new Error('Foundation nicht eingebunden.');
+#                                                            ^
+# Error: Foundation nicht eingebunden.
+#     at Object.<anonymous> (/mnt/data/luvia_132751_fix/tests/places-final-foundation-v13.26.0.test.cjs:11:66)
+#     at Module._compile (node:internal/modules/cjs/loader:1730:14)
+#     at Object..js (node:internal/modules/cjs/loader:1895:10)
+#     at Module.load (node:internal/modules/cjs/loader:1465:32)
+#     at Function._load (node:internal/modules/cjs/loader:1282:12)
+#     at TracingChannel.traceSync (node:diagnostics_channel:322:14)
+#     at wrapModuleLoad (node:internal/modules/cjs/loader:235:24)
+#     at Function.executeUserEntryPoint [as runMain] (node:internal/modules/run_main:171:5)
+#     at node:internal/main/run_main_module:36:49
+# Node.js v22.16.0
+# Subtest: tests/places-final-foundation-v13.26.0.test.cjs
+not ok 33 - tests/places-final-foundation-v13.26.0.test.cjs
+  ---
+  duration_ms: 18.606586
+  type: 'test'
+  location: '/mnt/data/luvia_132751_fix/tests/places-final-foundation-v13.26.0.test.cjs:1:1'
+  failureType: 'testCodeFailure'
+  exitCode: 1
+  signal: ~
+  error: 'test failed'
+  code: 'ERR_TEST_FAILURE'
+  ...
+# /mnt/data/luvia_132751_fix/tests/places-foundation-reliability-v13.26.1.test.cjs:10
+# if(!read('sw.js').includes('luvia-shell-v13.26.1'))throw new Error('cache version missing');
+#                                                    ^
+# Error: cache version missing
+#     at Object.<anonymous> (/mnt/data/luvia_132751_fix/tests/places-foundation-reliability-v13.26.1.test.cjs:10:58)
+#     at Module._compile (node:internal/modules/cjs/loader:1730:14)
+#     at Object..js (node:internal/modules/cjs/loader:1895:10)
+#     at Module.load (node:internal/modules/cjs/loader:1465:32)
+#     at Function._load (node:internal/modules/cjs/loader:1282:12)
+#     at TracingChannel.traceSync (node:diagnostics_channel:322:14)
+#     at wrapModuleLoad (node:internal/modules/cjs/loader:235:24)
+#     at Function.executeUserEntryPoint [as runMain] (node:internal/modules/run_main:171:5)
+#     at node:internal/main/run_main_module:36:49
+# Node.js v22.16.0
+# Subtest: tests/places-foundation-reliability-v13.26.1.test.cjs
+not ok 34 - tests/places-foundation-reliability-v13.26.1.test.cjs
+  ---
+  duration_ms: 20.722701
+  type: 'test'
+  location: '/mnt/data/luvia_132751_fix/tests/places-foundation-reliability-v13.26.1.test.cjs:1:1'
+  failureType: 'testCodeFailure'
+  exitCode: 1
+  signal: ~
+  error: 'test failed'
+  code: 'ERR_TEST_FAILURE'
+  ...
+# /mnt/data/luvia_132751_fix/tests/places-lifecycle-realtime-v13.27.1.test.cjs:3
+# const ok=(v,m)=>{if(!v)throw new Error(m)};
+#                        ^
+# Error: Places-Version fehlt
+#     at ok (/mnt/data/luvia_132751_fix/tests/places-lifecycle-realtime-v13.27.1.test.cjs:3:30)
+#     at Object.<anonymous> (/mnt/data/luvia_132751_fix/tests/places-lifecycle-realtime-v13.27.1.test.cjs:9:1)
+#     at Module._compile (node:internal/modules/cjs/loader:1730:14)
+#     at Object..js (node:internal/modules/cjs/loader:1895:10)
+#     at Module.load (node:internal/modules/cjs/loader:1465:32)
+#     at Function._load (node:internal/modules/cjs/loader:1282:12)
+#     at TracingChannel.traceSync (node:diagnostics_channel:322:14)
+#     at wrapModuleLoad (node:internal/modules/cjs/loader:235:24)
+#     at Function.executeUserEntryPoint [as runMain] (node:internal/modules/run_main:171:5)
+#     at node:internal/main/run_main_module:36:49
+# Node.js v22.16.0
+# Subtest: tests/places-lifecycle-realtime-v13.27.1.test.cjs
+not ok 35 - tests/places-lifecycle-realtime-v13.27.1.test.cjs
+  ---
+  duration_ms: 23.10268
+  type: 'test'
+  location: '/mnt/data/luvia_132751_fix/tests/places-lifecycle-realtime-v13.27.1.test.cjs:1:1'
+  failureType: 'testCodeFailure'
+  exitCode: 1
+  signal: ~
+  error: 'test failed'
+  code: 'ERR_TEST_FAILURE'
+  ...
+# /mnt/data/luvia_132751_fix/tests/places-lifecycle-v13.27.0.test.cjs:9
+# function ok(v,m){if(!v)throw new Error(m)}
+#                        ^
+# Error: Index-Einbindung fehlt
+#     at ok (/mnt/data/luvia_132751_fix/tests/places-lifecycle-v13.27.0.test.cjs:9:30)
+#     at Object.<anonymous> (/mnt/data/luvia_132751_fix/tests/places-lifecycle-v13.27.0.test.cjs:17:1)
+#     at Module._compile (node:internal/modules/cjs/loader:1730:14)
+#     at Object..js (node:internal/modules/cjs/loader:1895:10)
+#     at Module.load (node:internal/modules/cjs/loader:1465:32)
+#     at Function._load (node:internal/modules/cjs/loader:1282:12)
+#     at TracingChannel.traceSync (node:diagnostics_channel:322:14)
+#     at wrapModuleLoad (node:internal/modules/cjs/loader:235:24)
+#     at Function.executeUserEntryPoint [as runMain] (node:internal/modules/run_main:171:5)
+#     at node:internal/main/run_main_module:36:49
+# Node.js v22.16.0
+# Subtest: tests/places-lifecycle-v13.27.0.test.cjs
+not ok 36 - tests/places-lifecycle-v13.27.0.test.cjs
+  ---
+  duration_ms: 18.758031
+  type: 'test'
+  location: '/mnt/data/luvia_132751_fix/tests/places-lifecycle-v13.27.0.test.cjs:1:1'
+  failureType: 'testCodeFailure'
+  exitCode: 1
+  signal: ~
+  error: 'test failed'
+  code: 'ERR_TEST_FAILURE'
+  ...
+# 13.27.3 lifecycle reliability checks passed
+# Subtest: tests/places-lifecycle-v13.27.3.test.cjs
+ok 37 - tests/places-lifecycle-v13.27.3.test.cjs
+  ---
+  duration_ms: 20.402907
+  type: 'test'
+  ...
+# node:internal/assert/utils:281
+#     throw err;
+#     ^
+# AssertionError [ERR_ASSERTION]: The expression evaluated to a falsy value:
+#   assert(places.includes('LuviaPlanningFoundation'))
+#     at Object.<anonymous> (/mnt/data/luvia_132751_fix/tests/planned-visits-conversational-discovery-v13.19.1.test.cjs:6:1)
+#     at Module._compile (node:internal/modules/cjs/loader:1730:14)
+#     at Object..js (node:internal/modules/cjs/loader:1895:10)
+#     at Module.load (node:internal/modules/cjs/loader:1465:32)
+#     at Function._load (node:internal/modules/cjs/loader:1282:12)
+#     at TracingChannel.traceSync (node:diagnostics_channel:322:14)
+#     at wrapModuleLoad (node:internal/modules/cjs/loader:235:24)
+#     at Function.executeUserEntryPoint [as runMain] (node:internal/modules/run_main:171:5)
+#     at node:internal/main/run_main_module:36:49 {
+#   generatedMessage: true,
+#   code: 'ERR_ASSERTION',
+#   actual: false,
+#   expected: true,
+#   operator: '=='
+# }
+# Node.js v22.16.0
+# Subtest: tests/planned-visits-conversational-discovery-v13.19.1.test.cjs
+not ok 38 - tests/planned-visits-conversational-discovery-v13.19.1.test.cjs
+  ---
+  duration_ms: 26.588193
+  type: 'test'
+  location: '/mnt/data/luvia_132751_fix/tests/planned-visits-conversational-discovery-v13.19.1.test.cjs:1:1'
+  failureType: 'testCodeFailure'
+  exitCode: 1
+  signal: ~
+  error: 'test failed'
+  code: 'ERR_TEST_FAILURE'
+  ...
+# planning deck reliability v13.24.1 ok
+# Subtest: tests/planning-deck-reliability-v13.24.1.test.cjs
+ok 39 - tests/planning-deck-reliability-v13.24.1.test.cjs
+  ---
+  duration_ms: 21.798581
+  type: 'test'
+  ...
+# planning dialogue reliability 13.22.1 ok
+# Subtest: tests/planning-dialogue-reliability-v13.22.1.test.cjs
+ok 40 - tests/planning-dialogue-reliability-v13.22.1.test.cjs
+  ---
+  duration_ms: 25.039746
+  type: 'test'
+  ...
+# node:internal/assert/utils:281
+#     throw err;
+#     ^
+# AssertionError [ERR_ASSERTION]: The expression evaluated to a falsy value:
+#   assert(session.includes("SCHEMA_VERSION = 3"))
+#     at Object.<anonymous> (/mnt/data/luvia_132751_fix/tests/planning-dialogue-v13.22.0.test.cjs:1:363)
+#     at Module._compile (node:internal/modules/cjs/loader:1730:14)
+#     at Object..js (node:internal/modules/cjs/loader:1895:10)
+#     at Module.load (node:internal/modules/cjs/loader:1465:32)
+#     at Function._load (node:internal/modules/cjs/loader:1282:12)
+#     at TracingChannel.traceSync (node:diagnostics_channel:322:14)
+#     at wrapModuleLoad (node:internal/modules/cjs/loader:235:24)
+#     at Function.executeUserEntryPoint [as runMain] (node:internal/modules/run_main:171:5)
+#     at node:internal/main/run_main_module:36:49 {
+#   generatedMessage: true,
+#   code: 'ERR_ASSERTION',
+#   actual: false,
+#   expected: true,
+#   operator: '=='
+# }
+# Node.js v22.16.0
+# Subtest: tests/planning-dialogue-v13.22.0.test.cjs
+not ok 41 - tests/planning-dialogue-v13.22.0.test.cjs
+  ---
+  duration_ms: 47.349653
+  type: 'test'
+  location: '/mnt/data/luvia_132751_fix/tests/planning-dialogue-v13.22.0.test.cjs:1:1'
+  failureType: 'testCodeFailure'
+  exitCode: 1
+  signal: ~
+  error: 'test failed'
+  code: 'ERR_TEST_FAILURE'
+  ...
+# /mnt/data/luvia_132751_fix/tests/planning-foundation-reset-v13.21.0.test.cjs:6
+#  if(!text.includes('LuviaPlanningFoundation'))throw new Error(`${name} does not mount planning foundation`);
+#                                               ^
+# Error: places does not mount planning foundation
+#     at Object.<anonymous> (/mnt/data/luvia_132751_fix/tests/planning-foundation-reset-v13.21.0.test.cjs:6:53)
+#     at Module._compile (node:internal/modules/cjs/loader:1730:14)
+#     at Object..js (node:internal/modules/cjs/loader:1895:10)
+#     at Module.load (node:internal/modules/cjs/loader:1465:32)
+#     at Function._load (node:internal/modules/cjs/loader:1282:12)
+#     at TracingChannel.traceSync (node:diagnostics_channel:322:14)
+#     at wrapModuleLoad (node:internal/modules/cjs/loader:235:24)
+#     at Function.executeUserEntryPoint [as runMain] (node:internal/modules/run_main:171:5)
+#     at node:internal/main/run_main_module:36:49
+# Node.js v22.16.0
+# Subtest: tests/planning-foundation-reset-v13.21.0.test.cjs
+not ok 42 - tests/planning-foundation-reset-v13.21.0.test.cjs
+  ---
+  duration_ms: 29.068471
+  type: 'test'
+  location: '/mnt/data/luvia_132751_fix/tests/planning-foundation-reset-v13.21.0.test.cjs:1:1'
+  failureType: 'testCodeFailure'
+  exitCode: 1
+  signal: ~
+  error: 'test failed'
+  code: 'ERR_TEST_FAILURE'
+  ...
+# Preference database migration structure and RLS: OK
+# Subtest: tests/preference-database-migration.test.cjs
+ok 43 - tests/preference-database-migration.test.cjs
+  ---
+  duration_ms: 26.850358
+  type: 'test'
+  ...
+# node:internal/assert/utils:281
+#     throw err;
+#     ^
+# AssertionError [ERR_ASSERTION]: Navigation Registry nicht eingebunden
+#     at Object.<anonymous> (/mnt/data/luvia_132751_fix/tests/product-focus-navigation-v13.25.0.test.cjs:13:1)
+#     at Module._compile (node:internal/modules/cjs/loader:1730:14)
+#     at Object..js (node:internal/modules/cjs/loader:1895:10)
+#     at Module.load (node:internal/modules/cjs/loader:1465:32)
+#     at Function._load (node:internal/modules/cjs/loader:1282:12)
+#     at TracingChannel.traceSync (node:diagnostics_channel:322:14)
+#     at wrapModuleLoad (node:internal/modules/cjs/loader:235:24)
+#     at Function.executeUserEntryPoint [as runMain] (node:internal/modules/run_main:171:5)
+#     at node:internal/main/run_main_module:36:49 {
+#   generatedMessage: false,
+#   code: 'ERR_ASSERTION',
+#   actual: false,
+#   expected: true,
+#   operator: '=='
+# }
+# Node.js v22.16.0
+# Subtest: tests/product-focus-navigation-v13.25.0.test.cjs
+not ok 44 - tests/product-focus-navigation-v13.25.0.test.cjs
+  ---
+  duration_ms: 26.155694
+  type: 'test'
+  location: '/mnt/data/luvia_132751_fix/tests/product-focus-navigation-v13.25.0.test.cjs:1:1'
+  failureType: 'testCodeFailure'
+  exitCode: 1
+  signal: ~
+  error: 'test failed'
+  code: 'ERR_TEST_FAILURE'
+  ...
+# Profile Supabase payload and rollback: OK
+# Subtest: tests/profile-preference-payload.test.cjs
+ok 45 - tests/profile-preference-payload.test.cjs
+  ---
+  duration_ms: 41.670864
+  type: 'test'
+  ...
+# /mnt/data/luvia_132751_fix/tests/release-version-consistency.test.cjs:10
+# for(const [file,needles] of Object.entries(checks)){const text=fs.readFileSync(path.join(root,file),'utf8');for(const needle of needles)if(!text.includes(needle))throw new Error(`${file} missing ${needle}`)}
+#                                                                                                                                                                   ^
+# Error: intelligence/kernel/version.js missing 13.22.0
+#     at Object.<anonymous> (/mnt/data/luvia_132751_fix/tests/release-version-consistency.test.cjs:10:169)
+#     at Module._compile (node:internal/modules/cjs/loader:1730:14)
+#     at Object..js (node:internal/modules/cjs/loader:1895:10)
+#     at Module.load (node:internal/modules/cjs/loader:1465:32)
+#     at Function._load (node:internal/modules/cjs/loader:1282:12)
+#     at TracingChannel.traceSync (node:diagnostics_channel:322:14)
+#     at wrapModuleLoad (node:internal/modules/cjs/loader:235:24)
+#     at Function.executeUserEntryPoint [as runMain] (node:internal/modules/run_main:171:5)
+#     at node:internal/main/run_main_module:36:49
+# Node.js v22.16.0
+# Subtest: tests/release-version-consistency.test.cjs
+not ok 46 - tests/release-version-consistency.test.cjs
+  ---
+  duration_ms: 20.427607
+  type: 'test'
+  location: '/mnt/data/luvia_132751_fix/tests/release-version-consistency.test.cjs:1:1'
+  failureType: 'testCodeFailure'
+  exitCode: 1
+  signal: ~
+  error: 'test failed'
+  code: 'ERR_TEST_FAILURE'
+  ...
+# Shopping intelligence: OK
+# Subtest: tests/shopping-intelligence.test.cjs
+ok 47 - tests/shopping-intelligence.test.cjs
+  ---
+  duration_ms: 23.706508
+  type: 'test'
+  ...
+# node:internal/assert/utils:281
+#     throw err;
+#     ^
+# AssertionError [ERR_ASSERTION]: Shopping hub tile missing
+#     at Object.<anonymous> (/mnt/data/luvia_132751_fix/tests/shopping-place-integration.test.cjs:16:1)
+#     at Module._compile (node:internal/modules/cjs/loader:1730:14)
+#     at Object..js (node:internal/modules/cjs/loader:1895:10)
+#     at Module.load (node:internal/modules/cjs/loader:1465:32)
+#     at Function._load (node:internal/modules/cjs/loader:1282:12)
+#     at TracingChannel.traceSync (node:diagnostics_channel:322:14)
+#     at wrapModuleLoad (node:internal/modules/cjs/loader:235:24)
+#     at Function.executeUserEntryPoint [as runMain] (node:internal/modules/run_main:171:5)
+#     at node:internal/main/run_main_module:36:49 {
+#   generatedMessage: false,
+#   code: 'ERR_ASSERTION',
+#   actual: false,
+#   expected: true,
+#   operator: '=='
+# }
+# Node.js v22.16.0
+# Subtest: tests/shopping-place-integration.test.cjs
+not ok 48 - tests/shopping-place-integration.test.cjs
+  ---
+  duration_ms: 28.209474
+  type: 'test'
+  location: '/mnt/data/luvia_132751_fix/tests/shopping-place-integration.test.cjs:1:1'
+  failureType: 'testCodeFailure'
+  exitCode: 1
+  signal: ~
+  error: 'test failed'
+  code: 'ERR_TEST_FAILURE'
+  ...
+# Transport intelligence: OK
+# Subtest: tests/transport-intelligence.test.cjs
+ok 49 - tests/transport-intelligence.test.cjs
+  ---
+  duration_ms: 23.691666
+  type: 'test'
+  ...
+# Universal multi-step AI orchestration and read-only tool registry: OK
+# Subtest: tests/universal-ai-orchestrator.test.cjs
+ok 50 - tests/universal-ai-orchestrator.test.cjs
+  ---
+  duration_ms: 19.796004
+  type: 'test'
+  ...
+# Central user preference runtime and rollback: OK
+# Subtest: tests/user-preference-core.test.cjs
+ok 51 - tests/user-preference-core.test.cjs
+  ---
+  duration_ms: 26.858996
+  type: 'test'
+  ...
+1..51
+# tests 51
+# suites 0
+# pass 33
+# fail 18
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 858.472422

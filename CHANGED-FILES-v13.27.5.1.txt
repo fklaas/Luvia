@@ -1,0 +1,15 @@
+TEST-v13.27.5.1.md
+COMMIT-v13.27.5.1.txt
+force-update.html
+sw.js
+RELEASE-v13.27.5.1.md
+DEPLOYMENT-v13.27.5.1.md
+index.html
+intelligence/test.html
+intelligence/console.html
+tests/diagnostics-correction-v13.27.5.1.test.cjs
+tests/media-readiness-v13.27.5.test.cjs
+intelligence/kernel/version.js
+intelligence/services/base-services.js
+core/diagnostics/media-readiness.js
+core/diagnostics/core-v4-finalization.js
