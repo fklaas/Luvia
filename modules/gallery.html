@@ -1,34 +1,4 @@
-<section class="app-section reveal motion-card trip-gallery" id="reisegalerie">
-<div class="gallery-head">
-<div class="gallery-head-copy">
-<span class="gallery-privacy">☁️ Fotos werden gemeinsam synchronisiert</span>
-<h2>Unsere Reisegalerie</h2>
-<p class="section-intro">Einmal mehrere Fotos auswählen – danach werden sie anhand ihres Aufnahmedatums automatisch dem passenden Reisetag zugeordnet, benannt und für euer späteres Reisebuch vorbereitet.</p>
-</div>
-<div class="gallery-toolbar">
-<label class="premium-button gallery-upload">📷 <span id="galleryUploadText">Fotos auswählen</span><input accept="image/*,.jpg,.jpeg,.png,.webp,.heic,.heif" id="galleryInput" multiple="" type="file"/></label>
-<button class="premium-button secondary-button" id="galleryExport" type="button">Reisebuch-Daten sichern</button>
-<button class="premium-button secondary-button" id="galleryClear" type="button">Galerie leeren</button>
-</div>
-</div>
-<div aria-label="Galerieübersicht" class="gallery-status">
-<div class="gallery-stat"><span>Fotos</span><strong id="galleryTotal">0</strong></div>
-<div class="gallery-stat"><span>Favoriten</span><strong id="galleryFavorites">0</strong></div>
-<div class="gallery-stat"><span>Tagesnotizen</span><strong id="galleryNotes">0</strong></div>
-</div>
-<div class="gallery-empty" id="galleryEmpty">
-<div class="gallery-empty-icon">🖼️</div>
-<h3>Noch keine Reisefotos ausgewählt</h3>
-<p>Ihr könnt später alle Bilder der Reise auf einmal auswählen. Die Galerie liest – soweit vorhanden – das originale Aufnahmedatum aus und sortiert die Bilder automatisch auf den 31. Juli, 1. August und 2. August.</p>
-</div>
-<div id="galleryHighlights"></div>
-<section aria-live="polite" id="smartPhotoMoments"></section>
-<div class="gallery-days" id="galleryDays"></div>
-<div class="gallery-book-ready">
-<div><strong>📖 Bereit für das spätere Reisebuch</strong><small id="galleryBookSummary">0 Fotos, 0 Favoriten und 0 Tagesnotizen sind lokal vorbereitet.</small></div>
-<small>Herz = Favorit · Stern = Polaroid des Moments</small>
-</div>
-<div class="gallery-toast" id="galleryToast" role="status"></div>
+<section class="luvia-module" data-module="gallery" hidden>
+  <header class="luvia-module__header"><p>Luvia Modul</p><h2>Galerie</h2></header>
+  <div class="luvia-module__mount" data-module-mount="gallery"></div>
 </section>
-
-<section aria-live="polite" id="smartPhotoMoments"></section>
