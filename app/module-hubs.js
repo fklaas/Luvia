@@ -1,6 +1,6 @@
 (() => {
   'use strict';
-  const VERSION='4.26.0';
+  const VERSION='4.26.1';
   const esc=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot',"'":'&#39;'}[c]));
   const tile=(x)=>`<button type="button" class="lv-hub-tile ${x.primary?'is-primary':''} ${x.preview?'is-preview':''}" data-hub-action="${esc(x.action||'')}" ${x.disabled?'disabled':''}><span class="lv-hub-icon">${x.icon}</span><span class="lv-hub-copy"><strong>${esc(x.title)}</strong><small>${esc(x.description)}</small>${x.meta?`<em>${esc(x.meta)}</em>`:''}</span><span class="lv-hub-arrow">${x.preview?'Demnächst':'→'}</span></button>`;
   function tripStats(trip){const id=trip?.id||trip?.tripId;const places=window.LuviaPlaceCore?.getPlaces?.({tripId:id})||[];const planned=places.filter(p=>p?.metadata?.plannedAt||p?.metadata?.tripPlace?.planned_at).length;return {places:places.length,planned};}
@@ -15,7 +15,7 @@
     {icon:'☀️',title:'Wetter',description:'Vorbereitung und passende Hinweise für eure Tage.',action:'weather'},
     {icon:'🤝',title:'Community',description:'Reisende mit ähnlichen Interessen entdecken.',preview:true,disabled:true}
   ]});}
-  function trip(trip){return shell({eyebrow:'Unterwegs zusammen',title:'Eure Reise im Moment.',description:'Tagesablauf, Teilnehmer und Erlebnisse an einem Ort.',tiles:[
+  function tripHub(activeTrip){return shell({eyebrow:'Unterwegs zusammen',title:'Eure Reise im Moment.',description:'Tagesablauf, Teilnehmer und Erlebnisse an einem Ort.',tiles:[
     {icon:'🗓️',title:'Tagesübersicht',description:'Was heute ansteht und was als Nächstes kommt.',action:'today',primary:true},
     {icon:'📅',title:'Timeline',description:'Alle Reisetage und geplanten Orte.',action:'timeline'},
     {icon:'👥',title:'Teilnehmer',description:'Gemeinsam planen und den Reisestatus sehen.',action:'participants'},
@@ -38,6 +38,6 @@
     {icon:'📤',title:'Export',description:'Reisedaten und Erinnerungen später exportieren.',preview:true,disabled:true},
     {icon:'❓',title:'Hilfe',description:'Antworten und Unterstützung rund um Luvia.',preview:true,disabled:true}
   ]});}
-  function render(view,trip){if(view==='plan')return plan(trip);if(view==='trip')return trip(trip);if(view==='memories')return memories();if(view==='more')return more();return '';}
+  function render(view,activeTrip){if(view==='plan')return plan(activeTrip);if(view==='trip')return tripHub(activeTrip);if(view==='memories')return memories();if(view==='more')return more();return '';}
   window.LuviaModuleHubs=Object.freeze({version:VERSION,render,diagnostics:()=>({version:VERSION,hubs:['plan','trip','memories','more']})});
 })();

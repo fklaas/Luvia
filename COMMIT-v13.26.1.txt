@@ -1,0 +1,1 @@
+fix(places): restore gateway search timeline sync and trip navigation
