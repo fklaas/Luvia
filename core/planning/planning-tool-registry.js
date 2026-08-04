@@ -1,6 +1,6 @@
 (() => {
   'use strict';
-  const VERSION='4.22.1';
+  const VERSION='4.23.0';
   const tools=new Map();
   function register(definition={}){
     if(!definition.id || typeof definition.execute!=='function') throw new Error('Planning tool requires id and execute');
@@ -12,6 +12,8 @@
   async function invoke(id,input={},context={}){const tool=tools.get(id); if(!tool) throw new Error(`Unknown planning tool: ${id}`); return tool.execute(input,context)}
   function registerCoreAdapters(){
     if(!has('journey.read')) register({id:'journey.read',domain:'journey',description:'Read compact journey context',execute:async(input)=>window.LuviaJourneyKnowledgeGraph?.load?.({force:Boolean(input?.force)})||null});
+    if(!has('places.searchCandidates')) register({id:'places.searchCandidates',domain:'places',description:'Research canonical provider candidates for a confirmed planning session',execute:async(input,context)=>window.LuviaPlanningResearch.run(input.session,context.trip||{},context)});
+    if(!has('move.compareCandidates')) register({id:'move.compareCandidates',domain:'move',description:'Resolve mobility candidates and optional routes',execute:async(input,context)=>window.LuviaPlanningResearch.run(input.session,context.trip||{},context)});
     if(!has('places.openCatalog')) register({id:'places.openCatalog',domain:'places',legacyAdapter:true,description:'Open the canonical legacy Places catalog on explicit request',execute:async()=>({ok:true,action:'open-catalog'})});
     if(!has('move.openCatalog')) register({id:'move.openCatalog',domain:'move',legacyAdapter:true,description:'Open the canonical legacy Move catalog on explicit request',execute:async()=>({ok:true,action:'open-catalog'})});
   }

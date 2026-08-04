@@ -1,0 +1,17 @@
+core/planning/planning-candidate-research.js
+core/planning/planning-session.js
+core/planning/planning-tool-registry.js
+core/planning/planning-foundation.js
+core/planning/planning-foundation.css
+modules/places-shell.js
+modules/move-shell.js
+intelligence/kernel/version.js
+index.html
+sw.js
+force-update.html
+RELEASE-v13.23.0.md
+DEPLOYMENT-v13.23.0.md
+TEST-v13.23.0.md
+COMMIT-v13.23.0.txt
+tests/candidate-research-v13.23.0.test.cjs
+CHANGED-FILES-v13.23.0.txt

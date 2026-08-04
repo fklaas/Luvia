@@ -1,0 +1,13 @@
+const fs=require('fs');const assert=require('assert');
+const research=fs.readFileSync('core/planning/planning-candidate-research.js','utf8');
+const session=fs.readFileSync('core/planning/planning-session.js','utf8');
+const foundation=fs.readFileSync('core/planning/planning-foundation.js','utf8');
+assert(research.includes("maxPlaces:5"));
+assert(research.includes("maxMove:3"));
+assert(research.includes('LuviaPlaceEntities.searchPlaces'));
+assert(research.includes('evidence'));
+assert(session.includes('startResearch'));
+assert(session.includes('completeResearch'));
+assert(foundation.includes('Candidate Research Engine'));
+assert(foundation.includes('LuviaPlanningResearch.run'));
+console.log('candidate research v13.23.0 ok');

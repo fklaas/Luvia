@@ -1,7 +1,7 @@
 (() => {
   'use strict';
-  const VERSION = '4.22.1';
-  const SCHEMA_VERSION = 3;
+  const VERSION = '4.23.0';
+  const SCHEMA_VERSION = 4;
   const memory = new Map();
   const clean = value => JSON.parse(JSON.stringify(value ?? null));
   const key = (tripId, surface='plan') => `luvia:planning-session:${tripId || 'unknown'}:${surface}`;
@@ -33,7 +33,7 @@
   }
   function create({tripId=null, surface='plan', participants=[], userGoal='', context={}}={}) {
     const now = new Date().toISOString();
-    const session = migrate({id:uid(),tripId,surface,status:'draft',createdAt:now,updatedAt:now,userGoal:String(userGoal||''),goals:[],constraints:{hard:{},soft:{}},preferenceLayers:{globalProfile:{},trip:{},moment:{},session:{}},participants:clean(participants),context:clean(context),decisions:[],rejectedOptions:[],candidateSets:[],draftPlan:null,research:{status:'idle',startedAt:null,completedAt:null},legacy:{catalogOpened:false,source:null}});
+    const session = migrate({id:uid(),tripId,surface,status:'draft',createdAt:now,updatedAt:now,userGoal:String(userGoal||''),goals:[],constraints:{hard:{},soft:{}},preferenceLayers:{globalProfile:{},trip:{},moment:{},session:{}},participants:clean(participants),context:clean(context),decisions:[],rejectedOptions:[],candidateSets:[],draftPlan:null,research:{status:'idle',startedAt:null,completedAt:null,progress:null,error:null},legacy:{catalogOpened:false,source:null}});
     memory.set(key(tripId,surface),session);persist(session);emit('created',session);return clean(session);
   }
   function persist(session){session.updatedAt=new Date().toISOString();memory.set(key(session.tripId,session.surface),session);try{sessionStorage.setItem(key(session.tripId,session.surface),JSON.stringify(session))}catch{}return session}
@@ -43,11 +43,15 @@
   function setGoal(tripId,surface,userGoal){const current=load(tripId,surface)||create({tripId,surface});current.userGoal=String(userGoal||'');current.status=userGoal?'clarifying':'draft';current.goals=[];current.constraints={hard:{},soft:{}};current.dialogue={status:userGoal?'understanding':'idle',turns:userGoal?[{role:'user',content:String(userGoal),at:new Date().toISOString()}]:[],pendingQuestion:null,summary:null,confidence:0};persist(current);emit('goal-set',current);return clean(current)}
   function applyDialogue(tripId,surface,result={}){const current=load(tripId,surface)||create({tripId,surface});current.goals=(result.goals||[]).map(normalizeGoal);current.constraints={hard:clean(result.hardConstraints||[]),soft:clean(result.softPreferences||[])};current.dialogue={...current.dialogue,status:result.followUpQuestion?'question':'ready',pendingQuestion:normalizeQuestion(result.followUpQuestion),summary:clean(result.summary||null),confidence:Number(result.confidence||0),understanding:String(result.understanding||''),unknowns:clean(result.unknowns||[]),source:String(result.source||'unknown'),aiAvailable:Boolean(result.aiAvailable),errorCode:result.errorCode||null};current.status=result.followUpQuestion?'clarifying':'ready';persist(current);emit('dialogue-updated',current);return clean(current)}
   function answerQuestion(tripId,surface,answer){const current=load(tripId,surface)||create({tripId,surface});const question=current.dialogue?.pendingQuestion;if(question){question.answer=clean(answer);question.answeredAt=new Date().toISOString();current.dialogue.turns=[...(current.dialogue.turns||[]),{role:'assistant',content:question.text,at:new Date().toISOString()},{role:'user',content:typeof answer==='string'?answer:JSON.stringify(answer),at:new Date().toISOString()}];current.preferenceLayers.session={...(current.preferenceLayers.session||{}),[question.id]:clean(answer)};current.dialogue.pendingQuestion=null;current.dialogue.status='understanding';current.status='clarifying';persist(current);emit('question-answered',current)}return clean(current)}
+  function startResearch(tripId,surface){const current=load(tripId,surface)||create({tripId,surface});current.status='researching';current.research={...current.research,status:'running',startedAt:new Date().toISOString(),completedAt:null,error:null};persist(current);emit('research-started',current);return clean(current)}
+  function setResearchProgress(tripId,surface,progress){const current=load(tripId,surface)||create({tripId,surface});current.research={...current.research,status:'running',progress:clean(progress)};persist(current);return clean(current)}
+  function completeResearch(tripId,surface,result){const current=load(tripId,surface)||create({tripId,surface});current.candidateSets=[{id:uid(),createdAt:new Date().toISOString(),...clean(result)}];current.research={...current.research,status:result?.status||'ready',completedAt:new Date().toISOString(),progress:null,error:null};current.status=result?.status==='empty'?'research-empty':'candidates-ready';persist(current);emit('research-completed',current);return clean(current)}
+  function failResearch(tripId,surface,error){const current=load(tripId,surface)||create({tripId,surface});current.research={...current.research,status:'error',completedAt:new Date().toISOString(),progress:null,error:{code:error?.code||'RESEARCH_FAILED',message:error?.message||String(error)}};current.status='research-error';persist(current);emit('research-failed',current);return clean(current)}
   function confirm(tripId,surface){const current=load(tripId,surface)||create({tripId,surface});current.status='ready-for-research';current.dialogue.status='confirmed';current.decisions=[...(current.decisions||[]),{type:'dialogue-confirmed',at:new Date().toISOString()}];persist(current);emit('confirmed',current);return clean(current)}
   function setPreferenceLayer(tripId,surface,layer,value){const current=load(tripId,surface)||create({tripId,surface});if(!Object.hasOwn(current.preferenceLayers,layer))throw new Error(`Unknown preference layer: ${layer}`);current.preferenceLayers[layer]=clean(value||{});persist(current);emit('preferences-updated',current);return clean(current)}
   function markLegacyCatalog(tripId,surface,source){const current=load(tripId,surface)||create({tripId,surface});current.legacy={catalogOpened:true,source:source||surface};persist(current);emit('legacy-opened',current);return clean(current)}
   function clear(tripId,surface='plan'){memory.delete(key(tripId,surface));try{sessionStorage.removeItem(key(tripId,surface))}catch{}emit('cleared',{tripId,surface})}
   function emit(type,detail){window.dispatchEvent(new CustomEvent(`luvia:planning-session-${type}`,{detail:clean(detail)}))}
   function diagnostics(){return{version:VERSION,schemaVersion:SCHEMA_VERSION,inMemory:memory.size}}
-  window.LuviaPlanningSession=Object.freeze({version:VERSION,create,ensure,load,update,setGoal,applyDialogue,answerQuestion,confirm,setPreferenceLayer,markLegacyCatalog,clear,diagnostics});
+  window.LuviaPlanningSession=Object.freeze({version:VERSION,create,ensure,load,update,setGoal,applyDialogue,answerQuestion,confirm,startResearch,setResearchProgress,completeResearch,failResearch,setPreferenceLayer,markLegacyCatalog,clear,diagnostics});
 })();

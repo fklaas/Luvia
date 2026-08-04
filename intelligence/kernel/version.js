@@ -1,1 +1,1 @@
-(() => {'use strict';window.LuviaKernelVersion=Object.freeze({core:'4.22.0',build:'13.22.0',name:'AI Planning Dialogue',channel:'production',builtAt:'2026-08-04T11:28:00+02:00'});window.LuviaCoreVersion=window.LuviaKernelVersion;window.LUVIA_RELEASE=window.LuviaKernelVersion;})();
+(() => {'use strict';window.LuviaKernelVersion=Object.freeze({core:'4.23.0',build:'13.23.0',name:'Candidate Research Engine',channel:'production',builtAt:'2026-08-04T12:43:00+02:00'});window.LuviaCoreVersion=window.LuviaKernelVersion;window.LUVIA_RELEASE=window.LuviaKernelVersion;})();
