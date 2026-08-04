@@ -1,4 +1,4 @@
-# Luvia 13.24.0 – Journey Planning Deck
+# Luvia 13.24.1 – Journey Planning Deck
 
 - Maximal drei vollständige Planvarianten statt einer technischen Kandidatenliste.
 - Restaurant und Folgeerlebnis werden zu Abläufen kombiniert.

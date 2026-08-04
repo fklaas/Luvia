@@ -1,0 +1,15 @@
+const fs=require('fs'),assert=require('assert');
+const research=fs.readFileSync('core/planning/planning-candidate-research.js','utf8');
+const foundation=fs.readFileSync('core/planning/planning-foundation.js','utf8');
+const session=fs.readFileSync('core/planning/planning-session.js','utf8');
+assert(research.includes("window.LuviaPlaces.details"),'Place Details missing');
+assert(research.includes("genericNames"),'generic-name guard missing');
+assert(research.includes("kind==='cinema'&&!hasType(place,['movie_theater'])"),'cinema contract missing');
+assert(research.includes("MOVE_ACCOMMODATION_REQUIRED"),'accommodation hard resolution missing');
+assert(research.includes("railRequired")&&research.includes("hasRailLeg"),'rail semantics missing');
+assert(foundation.includes('Verbindung zwischen den Stationen konnte noch nicht zuverlässig geprüft werden'),'route transparency missing');
+assert(foundation.includes('Route im Detail'),'collapsed route details missing');
+assert(foundation.includes('Vorgemerkte Varianten'),'saved decisions area missing');
+assert(foundation.includes('In Reise übernehmen')&&foundation.includes('Verwerfen'),'decision actions missing');
+assert(session.includes('SCHEMA_VERSION = 6')&&session.includes('saveDecision'),'session decision persistence missing');
+console.log('planning deck reliability v13.24.1 ok');

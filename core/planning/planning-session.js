@@ -1,7 +1,7 @@
 (() => {
   'use strict';
-  const VERSION = '4.24.0';
-  const SCHEMA_VERSION = 5;
+  const VERSION = '4.24.1';
+  const SCHEMA_VERSION = 6;
   const memory = new Map();
   const clean = value => JSON.parse(JSON.stringify(value ?? null));
   const key = (tripId, surface='plan') => `luvia:planning-session:${tripId || 'unknown'}:${surface}`;
@@ -25,7 +25,7 @@
     return {id:question.id||uid(),text:String(question.text),reason:String(question.reason||''),options:(question.options||[]).slice(0,5).map(option=>({label:String(option.label||option.value||''),value:String(option.value||option.label||'')})),allowFreeText:question.allowFreeText!==false,answeredAt:question.answeredAt||null,answer:question.answer??null};
   }
   function migrate(session={}){
-    const migrated={...session,schemaVersion:SCHEMA_VERSION,dialogue:{status:'idle',turns:[],pendingQuestion:null,summary:null,confidence:0,...clean(session.dialogue||{})}};
+    const migrated={...session,schemaVersion:SCHEMA_VERSION,dialogue:{status:'idle',turns:[],pendingQuestion:null,summary:null,confidence:0,...clean(session.dialogue||{})},savedDecisions:clean(session.savedDecisions||[])};
     migrated.goals=(migrated.goals||[]).map(normalizeGoal);
     migrated.constraints={hard:constraintList(migrated.constraints?.hard),soft:constraintList(migrated.constraints?.soft)};
     migrated.dialogue.pendingQuestion=normalizeQuestion(migrated.dialogue.pendingQuestion);
@@ -50,8 +50,12 @@
   function confirm(tripId,surface){const current=load(tripId,surface)||create({tripId,surface});current.status='ready-for-research';current.dialogue.status='confirmed';current.decisions=[...(current.decisions||[]),{type:'dialogue-confirmed',at:new Date().toISOString()}];persist(current);emit('confirmed',current);return clean(current)}
   function setPreferenceLayer(tripId,surface,layer,value){const current=load(tripId,surface)||create({tripId,surface});if(!Object.hasOwn(current.preferenceLayers,layer))throw new Error(`Unknown preference layer: ${layer}`);current.preferenceLayers[layer]=clean(value||{});persist(current);emit('preferences-updated',current);return clean(current)}
   function markLegacyCatalog(tripId,surface,source){const current=load(tripId,surface)||create({tripId,surface});current.legacy={catalogOpened:true,source:source||surface};persist(current);emit('legacy-opened',current);return clean(current)}
+
+  function saveDecision(tripId,surface,planId,action='save',payload={}){const current=load(tripId,surface)||create({tripId,surface});current.savedDecisions=(current.savedDecisions||[]).filter(x=>x.planId!==planId);if(action!=='discard')current.savedDecisions.push({planId,action,payload:clean(payload),at:new Date().toISOString()});current.decisions=[...(current.decisions||[]),{type:`planning-${action}`,planId,at:new Date().toISOString()}];persist(current);emit('decision-saved',current);return clean(current)}
+  function getSavedDecisions(tripId,surface='plan'){return clean((load(tripId,surface)||{}).savedDecisions||[])}
+
   function clear(tripId,surface='plan'){memory.delete(key(tripId,surface));try{sessionStorage.removeItem(key(tripId,surface))}catch{}emit('cleared',{tripId,surface})}
   function emit(type,detail){window.dispatchEvent(new CustomEvent(`luvia:planning-session-${type}`,{detail:clean(detail)}))}
   function diagnostics(){return{version:VERSION,schemaVersion:SCHEMA_VERSION,inMemory:memory.size}}
-  window.LuviaPlanningSession=Object.freeze({version:VERSION,create,ensure,load,update,setGoal,applyDialogue,answerQuestion,confirm,startResearch,setResearchProgress,completeResearch,failResearch,setPreferenceLayer,markLegacyCatalog,clear,diagnostics});
+  window.LuviaPlanningSession=Object.freeze({version:VERSION,create,ensure,load,update,setGoal,applyDialogue,answerQuestion,confirm,startResearch,setResearchProgress,completeResearch,failResearch,setPreferenceLayer,markLegacyCatalog,saveDecision,getSavedDecisions,clear,diagnostics});
 })();

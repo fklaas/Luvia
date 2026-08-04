@@ -1,4 +1,4 @@
-# Deployment 13.24.0
+# Deployment 13.24.1
 
 ## Google Cloud
 1. Im Google-Cloud-Projekt die **Routes API** aktivieren.
