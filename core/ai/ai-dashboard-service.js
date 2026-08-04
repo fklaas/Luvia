@@ -1,6 +1,6 @@
 (() => {
   'use strict';
-  const VERSION='4.19.1';
+  const VERSION='4.20.2';
   const state=new Map();
   const esc=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
   const tripId=trip=>String(trip?.id||trip?.tripId||'');
@@ -13,8 +13,7 @@
   async function refresh(trip,{force=false}={}){
     const id=tripId(trip);if(!id)return null;const current=state.get(id);if(current?.loading)return current;if(current?.updatedAt&&!force&&Date.now()-current.updatedAt<60000)return current;
     state.set(id,{...(current||{}),data:current?.data||placeholder(),loading:true,error:null});window.dispatchEvent(new CustomEvent('luvia:dashboard-widget-refresh',{detail:{id:'aiBrain'}}));
-    const journey=await window.LuviaJourneyKnowledgeGraph?.load?.({force}).catch(()=>null);
-    const response=await window.LuviaAI.run('dashboard.brief',{currentMoment:{surface:'dashboard'},journey,plannedVisits:journey?.plannedVisits||[],instruction:'Nenne alle geplanten Einträge des relevanten Tages vollständig und chronologisch. Ein Timeline-Eintrag ist ein geplanter Besuch. Fehlende Buchungsdaten sind niemals eine Warnung.'},{fallback:true});
+    const response=await window.LuviaAI.run('dashboard.brief',{currentMoment:{surface:'dashboard',force:Boolean(force)}},{fallback:true});
     const next={data:response.data,loading:false,error:response.meta?.fallback?'Die Cloud-KI war nicht erreichbar.':'' ,updatedAt:Date.now()};state.set(id,next);window.dispatchEvent(new CustomEvent('luvia:dashboard-widget-refresh',{detail:{id:'aiBrain'}}));return next;
   }
   function askModal(){
@@ -30,6 +29,6 @@
     if(button.matches('[data-ai-brief-refresh]')){button.disabled=true;await refresh(trip,{force:true}).catch(error=>window.LuviaUIKit?.toast?.(error.message,{type:'error'}));button.disabled=false;return}
     if(button.matches('[data-ai-timeline-check]')){button.disabled=true;button.textContent='Luvia prüft …';try{await window.LuviaAI.proposeAction({currentMoment:{surface:'dashboard',intent:'optimize-today'}})}catch(error){window.LuviaUIKit?.toast?.(error.message||'Der Tag konnte nicht geprüft werden.',{type:'error'})}finally{button.disabled=false;button.textContent='Tag gemeinsam prüfen'}}
   });
-  window.addEventListener('luvia:journey-context-changed',()=>{const trip=window.LuviaTripContext?.getActiveTrip?.()||{};if(tripId(trip))refresh(trip,{force:true}).catch(()=>{})});
+  window.addEventListener('luvia:journey-context-changed',()=>{const trip=window.LuviaTripContext?.getActiveTrip?.()||{};const id=tripId(trip);if(!id)return;const current=state.get(id);state.set(id,{...(current||{}),data:current?.data||placeholder(),loading:false,error:null,updatedAt:0,stale:true});});
   window.LuviaAIDashboard=Object.freeze({version:VERSION,render,refresh,openChat:askModal,diagnostics:()=>({version:VERSION,entries:state.size,widget:'aiBrain'})});
 })();

@@ -2,7 +2,7 @@
   'use strict';
   // Compatibility marker only: planDiscovery('move') is intentionally not called in the primary flow.
 
-  const VERSION = '4.20.1';
+  const VERSION = '4.20.2';
   // LuviaGuidedDiscovery compatibility · hideBrowse:true · LuviaUserPreferences?.get · the former fixed slide flow is retained as a legacy API, while the primary UI is conversational.
   const TILES = Object.freeze({
     flights:{title:'Flüge',icon:'✈️',description:'Flughäfen und Terminals für eure An- oder Abreise.',tags:['Flughäfen','Terminals','Anreise'],preset:'flights'},

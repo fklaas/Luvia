@@ -1,4 +1,4 @@
-# Luvia 13.20.1 – Reliable Conversational Results
+# Luvia 13.20.2 – Reliable Conversational Results
 
 - Eliminates oversized discovery payloads and redundant AI planning requests.
 - Uses deterministic domain-first intent parsing before provider search.

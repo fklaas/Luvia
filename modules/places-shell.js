@@ -2,7 +2,7 @@
   'use strict';
   // Compatibility marker only: planDiscovery('places') is intentionally not called in the primary flow.
 
-  const VERSION = '4.20.1';
+  const VERSION = '4.20.2';
   // LuviaGuidedDiscovery compatibility · hideBrowse:true · LuviaUserPreferences?.get · the former fixed slide flow is retained as a legacy API, while the primary UI is conversational.
   const PLACE_MODULES = {
     photo_spots:{type:'photo_spot',title:'Fotospots',icon:'📸',description:'Aussichten, Lichtstimmungen und besondere Fotomomente entdecken.',tags:['Golden Hour','Aussicht','Erinnerungen'],host:'photo-spots-module'},

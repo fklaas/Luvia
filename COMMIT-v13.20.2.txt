@@ -1,0 +1,1 @@
+fix(discovery): stop oversized dashboard requests and restore dietary results
