@@ -1,0 +1,15 @@
+const fs=require('fs');
+const assert=require('assert');
+const read=p=>fs.readFileSync(p,'utf8');
+const service=read('core/places/place-lifecycle-service.js');
+const hub=read('core/places/place-lifecycle-hub.js');
+const resolver=read('core/places/place-lifecycle-resolver.js');
+const data=read('core/places/trip-place-data-service.js');
+assert(!service.includes("onConflict:'trip_id,place_id,participant_id'"));
+assert(service.includes("from('place_visits').insert"));
+assert(hub.includes('loadPromise'));
+assert(!hub.includes("'luvia:timeline-cloud-changed'"));
+assert(resolver.includes("from('trip_place_data')"));
+assert(resolver.includes('hydratesTimeline:false'));
+assert(data.includes("key:'planned_at'"));
+console.log('13.27.3 lifecycle reliability checks passed');

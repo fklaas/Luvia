@@ -1,6 +1,6 @@
 (function(){
 'use strict';
-const VERSION='4.19.1';
+const VERSION='4.27.3';
 const labels=Object.freeze({favorite:'Favorit',unfavorite:'Favorit',plan:'Zur Timeline',planned:'In Timeline',changeDate:'Zeitpunkt ändern',removePlanning:'Planung löschen',open:'Details öffnen',route:'Navigation',call:'Anrufen',website:'Website öffnen',reserve:'Reservieren'});
 const esc=v=>window.LuviaPlaceExperience?.esc?.(v)||String(v??'');
 const pendingDialogs=new Map();
@@ -9,7 +9,7 @@ function schema(type){const c=window.LuviaPlaceTypeContracts?.get?.(type);return
 async function waitForSchema(type,timeout=4000){
  let fields=schema(type);if(fields.length)return fields;
  await new Promise(resolve=>{let done=false;const finish=()=>{if(done)return;done=true;clearTimeout(timer);window.removeEventListener('luvia:place-definitions-ready',check);window.removeEventListener('luvia:place-contract-registered',check);resolve()};const check=event=>{if(!event?.detail?.type||event.detail.type===type||event.type==='luvia:place-definitions-ready'){fields=schema(type);if(fields.length)finish()}};const timer=setTimeout(finish,timeout);window.addEventListener('luvia:place-definitions-ready',check);window.addEventListener('luvia:place-contract-registered',check)});
- fields=schema(type);if(!fields.length)throw new Error(`Das Timeline-Schema für ${type} konnte nicht geladen werden. Bitte Luvia einmal vollständig neu öffnen.`);return fields;
+ fields=schema(type);if(!fields.length)return [{key:'planned_at',label:'Datum und Uhrzeit',type:'datetime',timelineRole:'point',required:true}];return fields;
 }
 function dialogTitle(type){return type==='accommodation'?'Aufenthalt einplanen':'Wann möchtet ihr hier sein?'}
 async function openTimelineDialogInternal({type,tripId,place,entity,tripPlace,importEntity,onSaved,validateValues,successMessage}={}){
