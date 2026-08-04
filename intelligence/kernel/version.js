@@ -1,1 +1,1 @@
-(() => {'use strict';window.LuviaKernelVersion=Object.freeze({core:'4.27.0',build:'13.27.0',name:'Places Lifecycle',channel:'production',builtAt:'2026-08-04T16:32:00+02:00'});window.LuviaCoreVersion=window.LuviaKernelVersion;window.LUVIA_RELEASE=window.LuviaKernelVersion;})();
+(() => {'use strict';window.LuviaKernelVersion=Object.freeze({core:'4.27.1',build:'13.27.1',name:'Places Lifecycle Realtime',channel:'production',builtAt:'2026-08-04T16:32:00+02:00'});window.LuviaCoreVersion=window.LuviaKernelVersion;window.LUVIA_RELEASE=window.LuviaKernelVersion;})();
