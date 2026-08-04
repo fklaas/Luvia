@@ -1,4 +1,12 @@
-<section class="luvia-module" data-module="budget" hidden>
-  <header class="luvia-module__header"><p>Luvia Modul</p><h2>Budget</h2></header>
-  <div class="luvia-module__mount" data-module-mount="budget"></div>
+<section class="app-section reveal motion-card" id="budget-tracker">
+<h2>Budget-Tracker</h2>
+<p class="section-intro">Geplante und tatsächliche Reisekosten direkt eintragen. Bereits bezahlte Positionen können trotzdem zur Gesamtsumme ergänzt werden.</p>
+<div class="budget-summary">
+<div class="budget-ring" id="budgetRing"><div class="budget-ring-inner"><small>Ausgaben</small><b id="budgetTotal">0,00 €</b><small id="budgetHint">Budget frei wählbar</small></div></div>
+<div>
+<label style="display:block;margin-bottom:10px;font-weight:900">Gesamtbudget <input id="budgetLimit" min="0" step="10" style="margin-left:8px;padding:9px;border-radius:10px;border:1px solid #dfe5e9;width:110px" type="number" value="600"/> €</label>
+<div class="budget-list" id="budgetList"></div>
+<button class="premium-button secondary-button budget-add" id="addBudgetRow">＋ Position ergänzen</button>
+</div>
+</div>
 </section>

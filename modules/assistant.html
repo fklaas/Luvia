@@ -1,4 +1,63 @@
-<section class="luvia-module" data-module="assistant" hidden>
-  <header class="luvia-module__header"><p>Luvia Modul</p><h2>Reiseassistent</h2></header>
-  <div class="luvia-module__mount" data-module-mount="assistant"></div>
+<section aria-labelledby="assistantTitle" class="travel-assistant" id="travelAssistant">
+<div class="assistant-ribbon">
+<div class="assistant-status"><span aria-hidden="true" class="assistant-status-dot"></span><span id="assistantStatusLabel">Persönlicher Reiseassistent</span></div>
+<div class="assistant-date" id="assistantDate">Paris 2026</div>
+</div>
+<div class="assistant-main">
+<div class="assistant-copy">
+<span class="assistant-kicker" id="assistantKicker">✨ Heute wichtig</span>
+<h2 id="assistantTitle">Ein kleiner Blick auf das, was jetzt zählt.</h2>
+<p id="assistantIntro">Der Assistent stellt euch passend zum Reisetag die nächsten Termine, hilfreiche Hinweise und eine kleine persönliche Empfehlung zusammen.</p>
+<div aria-live="polite" class="assistant-live-note" id="assistantLiveNote"></div>
+</div>
+<div aria-hidden="true" class="assistant-illustration" id="assistantIllustration">
+<svg viewbox="0 0 320 220">
+<defs>
+<lineargradient id="assistantSky" x1="0" x2="0" y1="0" y2="1"><stop offset="0" stop-color="#fff8e9"></stop><stop offset="1" stop-color="#dceff2"></stop></lineargradient>
+<lineargradient id="assistantRoad" x1="0" x2="1" y1="0" y2="1"><stop offset="0" stop-color="#dcae80"></stop><stop offset="1" stop-color="#b97d77"></stop></lineargradient>
+</defs>
+<circle cx="170" cy="108" fill="url(#assistantSky)" r="92"></circle>
+<g fill="#fff" opacity=".9"><ellipse cx="87" cy="63" rx="31" ry="12"></ellipse><ellipse cx="109" cy="58" rx="19" ry="14"></ellipse><ellipse cx="245" cy="73" rx="29" ry="11"></ellipse></g>
+<path d="M25 196 Q119 154 294 188" fill="none" stroke="url(#assistantRoad)" stroke-linecap="round" stroke-width="20"></path>
+<path d="M159 42 L127 168 M159 42 L191 168 M139 116 H179 M130 146 H188 M118 170 H201" fill="none" stroke="#966e63" stroke-linecap="round" stroke-linejoin="round" stroke-width="5"></path>
+<path d="M159 32 l9 9-9 9-9-9z" fill="#efbd62"></path>
+<g transform="translate(205 137)"><rect fill="#fff" height="43" rx="13" width="66" x="0" y="0"></rect><rect fill="#dceff2" height="19" rx="7" width="50" x="8" y="8"></rect><circle cx="15" cy="45" fill="#5f5158" r="7"></circle><circle cx="52" cy="45" fill="#5f5158" r="7"></circle><path d="M18 12h24l9 13H9z" fill="#e59a9b" opacity=".9"></path></g>
+<path d="M69 103 C69 92 83 89 89 100 C94 89 109 92 109 103 C109 115 89 126 89 126 C89 126 69 115 69 103Z" fill="#ef7890"></path>
+<circle cx="55" cy="155" fill="#ef7890" r="4"></circle><circle cx="271" cy="114" fill="#efbd62" r="4"></circle>
+</svg>
+</div>
+</div>
+<div aria-live="polite" class="assistant-quick-grid">
+<article class="assistant-quick-card">
+<div class="assistant-card-top"><span class="assistant-card-icon" id="assistantNextIcon">🕒</span><span class="assistant-card-label">Nächster Termin</span></div>
+<div><strong id="assistantNextTitle">Reisevorbereitung</strong><p id="assistantNextText">Alles in Ruhe für Paris bereitlegen.</p><span class="assistant-card-time" id="assistantNextTime">Vor der Reise</span></div>
+</article>
+<article class="assistant-quick-card">
+<div class="assistant-card-top"><span class="assistant-card-icon is-weather" id="assistantWeatherIcon">🌤️</span><span class="assistant-card-label">Wetter &amp; Licht</span></div>
+<div><strong id="assistantWeatherTitle">Prognose im Blick</strong><p id="assistantWeatherText">Die Tagesprognose erscheint kurz vor dem jeweiligen Reisetag.</p><span class="assistant-card-time" id="assistantWeatherTime">Paris</span></div>
+</article>
+<article class="assistant-quick-card">
+<div class="assistant-card-top"><span class="assistant-card-icon" id="assistantMobilityIcon">🧭</span><span class="assistant-card-label">Unterwegs</span></div>
+<div><strong id="assistantMobilityTitle">Gut vorbereitet starten</strong><p id="assistantMobilityText">Tickets, Navigation und Powerbank griffbereit halten.</p><span class="assistant-card-time" id="assistantMobilityTime">Hinweis</span></div>
+</article>
+</div>
+<div class="assistant-details" id="assistantDetails">
+<div class="assistant-details-inner">
+<div class="assistant-details-content">
+<div class="assistant-panel">
+<h3><span>🗓️</span> Alles für heute</h3>
+<ul class="assistant-list" id="assistantList"></ul>
+</div>
+<div class="assistant-tip">
+<span aria-hidden="true" class="assistant-tip-icon">💡</span>
+<small>Persönlicher Tipp</small>
+<strong id="assistantTipTitle">Vorfreude gehört schon zur Reise.</strong>
+<p id="assistantTipText">Legt die wichtigsten Unterlagen an einen festen Platz und speichert Tickets zusätzlich offline auf beiden iPhones.</p>
+</div>
+</div>
+</div>
+</div>
+<div class="assistant-actions">
+<button aria-controls="assistantDetails" aria-expanded="false" class="assistant-toggle" id="assistantToggle" type="button"><span id="assistantToggleText">Alles für heute anzeigen</span><span aria-hidden="true" class="assistant-toggle-arrow">⌄</span></button>
+</div>
 </section>

@@ -1,4 +1,45 @@
-<section class="luvia-module" data-module="language" hidden>
-  <header class="luvia-module__header"><p>Luvia Modul</p><h2>Sprachtrainer</h2></header>
-  <div class="luvia-module__mount" data-module-mount="language"></div>
+<section aria-labelledby="sprachcoachTitle" class="language-coach reveal" data-mode="browse" id="sprachcoach">
+<div class="language-coach-head">
+<div class="language-coach-copy">
+<span class="language-coach-eyebrow">🗣️ Lernen · anhören · unterwegs zeigen</span>
+<h2 id="sprachcoachTitle">Sicher sprechen in Paris</h2>
+<p>Die wichtigsten Sätze für Hotel, Restaurant, Café, Metro, Disneyland und euren Alltag mit Livi – auf Deutsch, Französisch und Englisch.</p>
+</div>
+<div class="language-coach-badge"><strong>3 Ansichten</strong><span>Französisch · Englisch · alle Sprachen</span></div>
+</div>
+<div class="coach-context" id="coachContext">
+<span class="coach-context-icon" id="coachContextIcon">✨</span>
+<div><small>Heute wahrscheinlich hilfreich</small><strong id="coachContextTitle">Reisevorbereitung</strong><p id="coachContextText">Übt vor der Abfahrt eure wichtigsten Favoriten und speichert sie für unterwegs.</p></div>
+<div class="coach-context-actions"><button aria-label="Standort für passende Sprachsituationen aktivieren" class="coach-location-state" id="coachLocationState" type="button">📍 Standort optional</button><button id="coachContextButton" type="button">Sätze anzeigen</button></div>
+</div>
+<div aria-label="Angezeigte Sprache" class="coach-language-switch" role="group">
+<button data-coach-language="fr" type="button">🇫🇷 Französisch</button>
+<button data-coach-language="en" type="button">🇬🇧 Englisch</button>
+<button data-coach-language="all" type="button">🌍 Alle</button>
+</div>
+<div class="coach-toolbar">
+<div aria-label="Sprachcoach-Modus" class="coach-mode" role="group">
+<button class="is-active" data-coach-mode="browse" type="button">⚡ Unterwegs</button>
+<button data-coach-mode="study" type="button">🧠 Jetzt üben</button>
+</div>
+<button class="coach-favorites-toggle" id="coachFavorites" type="button">♡ Meine Sätze</button>
+</div>
+<div aria-label="Sprachkategorien" class="coach-categories" id="coachCategories"></div>
+<div class="coach-main">
+<div class="coach-browse">
+<div id="coachPhraseList"></div>
+<div aria-live="polite" class="coach-dialogs" id="coachDialogs"></div>
+</div>
+<div class="coach-study">
+<div class="study-card" id="studyCard">
+<div class="study-progress" id="studyProgress">Karte 1</div>
+<div class="study-prompt" id="studyPrompt">Wir haben eine Reservierung.</div>
+<div class="study-hint">Überlegt kurz – tippt dann auf „Lösung zeigen“.</div>
+<div class="study-answer"><strong id="studyAnswer">Nous avons une réservation.</strong><span id="studyPronunciation">Nu sawong ün reserwassjong.</span></div>
+<div class="study-controls"><button class="study-reveal" id="studyReveal" type="button">Lösung zeigen</button><button class="study-next" id="studyNext" type="button">Nächste Karte</button></div>
+<div class="study-feedback" id="studyFeedback"></div>
+</div>
+</div>
+</div>
+<div class="coach-note"><span>🔊</span><span>Die Aussprache wird direkt über die Sprachausgabe des iPhones wiedergegeben. Je nach installierter Stimme kann sie leicht unterschiedlich klingen. Favoriten bleiben lokal auf eurem Gerät gespeichert.</span></div>
 </section>
