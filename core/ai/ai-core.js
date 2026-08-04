@@ -1,6 +1,6 @@
 (() => {
   'use strict';
-  const VERSION='4.22.0';
+  const VERSION='4.22.1';
   const listeners=new Set();
   const cache=new Map();
   let metrics={requests:0,successes:0,fallbacks:0,failures:0,lastRequestAt:null,lastSuccessAt:null,lastError:null};

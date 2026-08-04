@@ -1,14 +1,16 @@
 (() => {
   'use strict';
-  const VERSION='4.22.0';
+  const VERSION='4.22.1';
   const clone=v=>v==null?v:JSON.parse(JSON.stringify(v));
   const text=(v,fallback='')=>String(v??fallback).trim();
   const list=(v,max=20)=>[...new Set((Array.isArray(v)?v:[]).map(x=>text(x)).filter(Boolean))].slice(0,max);
   const number=(v,min,max,fallback=0)=>{v=Number(v);return Number.isFinite(v)?Math.max(min,Math.min(max,v)):fallback};
 
   function planningDialogue(value={}){
+    const item=x=>({key:text(x?.key),value:text(x?.value),label:text(x?.label)});
+    const items=(v,max=20)=>(Array.isArray(v)?v:[]).slice(0,max).map(item).filter(x=>x.key&&x.label);
     const question=value.followUpQuestion&&value.followUpQuestion.text?{text:text(value.followUpQuestion.text),reason:text(value.followUpQuestion.reason),options:(Array.isArray(value.followUpQuestion.options)?value.followUpQuestion.options:[]).slice(0,5).map(option=>({label:text(option.label),value:text(option.value)})).filter(option=>option.label&&option.value),allowFreeText:value.followUpQuestion.allowFreeText!==false}:null;
-    return{understanding:text(value.understanding),goals:(Array.isArray(value.goals)?value.goals:[]).slice(0,8).map(goal=>({type:text(goal.type,'open'),label:text(goal.label),hardConstraints:clone(goal.hardConstraints||{}),softPreferences:clone(goal.softPreferences||{}),timeWindow:clone(goal.timeWindow||null),source:text(goal.source,'ai')})).filter(goal=>goal.label),hardConstraints:clone(value.hardConstraints||{}),softPreferences:clone(value.softPreferences||{}),followUpQuestion:question,summary:{headline:text(value.summary?.headline,'So habe ich euch verstanden'),intro:text(value.summary?.intro),goalLabels:list(value.summary?.goalLabels,8),hardLabels:list(value.summary?.hardLabels,10),softLabels:list(value.summary?.softLabels,10)},unknowns:list(value.unknowns,10),confidence:number(value.confidence,0,1,.5)}
+    return{understanding:text(value.understanding),goals:(Array.isArray(value.goals)?value.goals:[]).slice(0,8).map(goal=>({type:text(goal.type,'open'),label:text(goal.label),hardConstraints:items(goal.hardConstraints,10),softPreferences:items(goal.softPreferences,10),timeWindow:goal.timeWindow?{label:text(goal.timeWindow.label),start:text(goal.timeWindow.start),end:text(goal.timeWindow.end),flexible:Boolean(goal.timeWindow.flexible)}:null,source:text(goal.source,'ai')})).filter(goal=>goal.label),hardConstraints:items(value.hardConstraints),softPreferences:items(value.softPreferences),followUpQuestion:question,summary:{headline:text(value.summary?.headline,'So habe ich euch verstanden'),intro:text(value.summary?.intro),goalLabels:list(value.summary?.goalLabels,8),hardLabels:list(value.summary?.hardLabels,10),softLabels:list(value.summary?.softLabels,10)},unknowns:list(value.unknowns,10),confidence:number(value.confidence,0,1,.5)}
   }
   function discoveryPlan(value={}){return{
     searchPlans:(Array.isArray(value.searchPlans)?value.searchPlans:[]).slice(0,6).map(plan=>({query:text(plan.query),includedTypes:list(plan.includedTypes,12),weight:number(plan.weight,0,1,1)})).filter(plan=>plan.query),

@@ -1,0 +1,11 @@
+const fs=require('fs'),vm=require('vm'),assert=require('assert'),root=__dirname+'/..';
+const service=fs.readFileSync(root+'/core/planning/planning-dialogue-service.js','utf8');
+const sandbox={window:{},globalThis:{crypto:{randomUUID:()=> 'x'}},console,CustomEvent:function(){}};sandbox.window=sandbox.window;vm.createContext(sandbox);vm.runInContext(service,sandbox);
+const result=sandbox.window.LuviaPlanningDialogue.localDecompose({surface:'places',userGoal:'Vegetarisch essen und danach etwas Schönes erleben'});
+assert.equal(result.followUpQuestion,null,'Places must not ask for time before research');
+assert(result.goals.some(g=>g.type==='meal'));
+assert(result.hardConstraints.some(x=>x.key==='dietary'&&x.value==='vegetarian'));
+const cap=fs.readFileSync(root+'/core/ai/ai-capability-registry.js','utf8');assert(cap.includes("id:'planning.dialogue'")&&cap.includes("tools:[]"));
+const ctx=fs.readFileSync(root+'/core/ai/ai-context-service.js','utf8');assert(ctx.includes('wantsJourney'));
+const schema=fs.readFileSync(root+'/supabase/functions/luvia-intelligence/schemas/index.ts','utf8');const section=schema.slice(schema.indexOf('planning_dialogue:'),schema.indexOf('discovery_plan:'));assert(!section.includes('additionalProperties:true'));
+console.log('planning dialogue reliability 13.22.1 ok');

@@ -1,6 +1,6 @@
 (() => {
   'use strict';
-  const VERSION='4.22.0';
+  const VERSION='4.22.1';
   const clone=value=>value==null?value:JSON.parse(JSON.stringify(value));
   const pick=(source,keys)=>Object.fromEntries(keys.filter(key=>source?.[key]!=null).map(key=>[key,clone(source[key])]));
   function tripContext(trip={}){
@@ -24,7 +24,8 @@
     if(!definition)throw new Error(`AI_CAPABILITY_UNKNOWN:${capability}`);
     const evidence=await window.LuviaAITools.collect(definition.tools,{capability});
     const trip=evidence['trip.current']||{};
-    const graph=evidence['journey.context']||await window.LuviaJourneyKnowledgeGraph?.load?.().catch(()=>null)||null;
+    const wantsJourney=(definition.tools||[]).includes('journey.context');
+    const graph=evidence['journey.context']||(wantsJourney?await window.LuviaJourneyKnowledgeGraph?.load?.().catch(()=>null):null)||null;
     if(graph?.evidence)window.LuviaAIEvidence?.put?.(graph.evidence,{capability});
     const travel=evidence['travel.context']||{};
     const context={

@@ -1,6 +1,6 @@
 (() => {
   'use strict';
-  const VERSION='4.22.0';
+  const VERSION='4.22.1';
   const tools=new Map();
   function register(definition={}){
     if(!definition.id || typeof definition.execute!=='function') throw new Error('Planning tool requires id and execute');
