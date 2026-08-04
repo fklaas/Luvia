@@ -1,0 +1,25 @@
+const fs=require('fs');
+const path=require('path');
+const assert=require('assert');
+const root=path.resolve(__dirname,'..');
+const read=p=>fs.readFileSync(path.join(root,p),'utf8');
+
+assert.match(read('intelligence/kernel/version.js'),/core:'4\.28\.0'.*build:'13\.28\.0'/s);
+assert.match(read('index.html'),/core\/media\/media-metadata\.js\?v=13\.28\.0/);
+assert.match(read('index.html'),/core\/media\/media-core\.js\?v=13\.28\.0/);
+assert.match(read('sw.js'),/luvia-shell-v13\.28\.0/);
+assert.match(read('sw.js'),/core\/media\/media-core\.js/);
+assert.match(read('core/media/media-core.js'),/const VERSION='4\.28\.0',BUILD='13\.28\.0',BUCKET='luvia-media'/);
+assert.match(read('core/media/media-core.js'),/content_hash/);
+assert.match(read('core/media/media-core.js'),/media_place_links/);
+assert.match(read('core/media/media-core.js'),/live_moment_media/);
+assert.match(read('core/media/media-metadata.js'),/parseJpegExif/);
+assert.match(read('sync/gallery.js'),/window\.LuviaMediaCore\.upload/);
+assert.match(read('sync/gallery.js'),/LEGACY_BUCKET='paris-gallery'/);
+const migration=read('supabase/migrations/20260804232500_media_smart_photo_foundation.sql');
+assert.match(migration,/create table if not exists public\.media_place_links/i);
+assert.match(migration,/create table if not exists public\.live_moment_media/i);
+assert.match(migration,/insert into storage\.buckets/i);
+assert.match(migration,/public\.luvia_is_trip_member/i);
+assert.doesNotMatch(migration,/trip_place_id/);
+console.log('media-smart-photo-foundation-v13.28.0: ok');

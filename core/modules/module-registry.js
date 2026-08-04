@@ -13,7 +13,7 @@
     {id:'budget',title:'Budget',longTitle:'Budget & Ausgaben',icon:'💶',description:'Reisekosten, Kategorien und gemeinsame Ausgaben.',status:'planned',defaultEnabled:false,order:40},
     {id:'checklist',title:'Packliste',longTitle:'Packlisten & Aufgaben',icon:'✓',description:'Gemeinsame Vorbereitungen, Zuständigkeiten und Fortschritt.',status:'planned',defaultEnabled:false,order:50},
     {id:'memories',title:'Erinnerungen',longTitle:'Erinnerungen & Bucketlist',icon:'♡',description:'Wünsche, besondere Momente und gemeinsame Vorhaben.',status:'planned',defaultEnabled:false,order:60},
-    {id:'gallery',title:'Fotos',longTitle:'Fotos & gemeinsame Galerie',icon:'📸',description:'Fotos sammeln, sortieren und später im Reisebuch nutzen.',status:'planned',defaultEnabled:false,order:70},
+    {id:'gallery',title:'Fotos',longTitle:'Fotos & gemeinsame Galerie',icon:'📸',description:'Fotos zentral speichern, nach Reisetagen sortieren und mit Orten sowie Momenten verbinden.',status:'available',defaultEnabled:true,order:70},
     {id:'live',title:'Live',longTitle:'Live Moments & Standort',icon:'📍',description:'Gemeinsame Live-Momente und spätere Standortfreigaben.',status:'planned',defaultEnabled:false,order:80},
     {id:'documents',title:'Dokumente',longTitle:'Dokumente & Buchungen',icon:'📄',description:'Tickets, Reservierungen und wichtige Reisedokumente.',status:'planned',defaultEnabled:false,order:90},
     {id:'timeline',title:'Timeline',longTitle:'Reise-Timeline',icon:'🕘',description:'Der chronologische Ablauf eurer gemeinsamen Reise.',status:'planned',defaultEnabled:false,order:100}
@@ -28,5 +28,5 @@
   function get(id){return catalog.get(id)||null}
   function isEnabled(trip,id){return enabledForTrip(trip).includes(id)}
   function updateTripModules(trip,ids){const modules=normalize(ids);return {...trip,modules,selectedModules:modules,updatedAt:new Date().toISOString()}}
-  window.LuviaModuleRegistry=Object.freeze({version:'4.19.1',list,get,normalize,enabledForTrip,isEnabled,updateTripModules,domains:Object.freeze({places:CORE_PLACE_MODULES,move:CORE_MOVE_MODULES})});
+  window.LuviaModuleRegistry=Object.freeze({version:'4.28.0',list,get,normalize,enabledForTrip,isEnabled,updateTripModules,domains:Object.freeze({places:CORE_PLACE_MODULES,move:CORE_MOVE_MODULES})});
 })();

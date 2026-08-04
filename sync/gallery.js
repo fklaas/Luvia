@@ -1,181 +1,26 @@
 (() => {
   'use strict';
-
-  const BUCKET = 'paris-gallery';
-  let channel = null;
-  let channelStatus = 'CLOSED';
-
-  function extensionFor(photo) {
-    return (photo.originalName?.split('.').pop() || photo.blob?.type?.split('/').pop() || 'jpg')
-      .replace(/[^a-z0-9]/gi, '').toLowerCase() || 'jpg';
-  }
-
-  function rowToPhoto(row, blob) {
-    const taken = row.taken_at || row.created_at;
-    const date = new Date(taken);
-    const dateKey = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`;
-    return {
-      id: row.id,
-      blob,
-      storagePath: row.storage_path,
-      originalName: row.original_filename || row.storage_path.split('/').pop(),
-      size: row.file_size ?? blob.size,
-      lastModified: new Date(row.created_at).getTime(),
-      takenAt: taken,
-      dateKey,
-      group: ['2026-07-31', '2026-08-01', '2026-08-02'].includes(dateKey) ? dateKey : 'other',
-      favorite: Boolean(row.is_favorite),
-      polaroid: Boolean(row.is_polaroid),
-      caption: row.description ?? row.caption ?? '',
-      createdAt: row.created_at
-    };
-  }
-
-  async function context() {
-    return window.ParisSync.requireReady();
-  }
-
-  async function downloadRow(client, row) {
-    const file = await client.storage.from(BUCKET).download(row.storage_path);
-    if (file.error) throw file.error;
-    return rowToPhoto(row, file.data);
-  }
-
-  const api = {
-    bucket: BUCKET,
-
-    async listRows() {
-      const { client, tripId } = await context();
-      const { data, error } = await client.from('gallery_photos')
-        .select('*')
-        .eq('trip_id', tripId)
-        .order('taken_at', { ascending: true });
-      if (error) throw error;
-      return data || [];
-    },
-
-    async list() {
-      const { client } = await context();
-      const rows = await this.listRows();
-      const photos = [];
-      for (const row of rows) {
-        try { photos.push(await downloadRow(client, row)); }
-        catch (error) { console.warn(`Cloud-Foto ${row.id} konnte nicht geladen werden:`, error.message); }
-      }
-      return photos;
-    },
-
-    async get(id) {
-      const { client, tripId } = await context();
-      const result = await client.from('gallery_photos').select('*').eq('trip_id', tripId).eq('id', id).maybeSingle();
-      if (result.error) throw result.error;
-      if (!result.data) return null;
-      return downloadRow(client, result.data);
-    },
-
-    async upload(photo) {
-      const { client, tripId, userId } = await context();
-      if (!(photo.blob instanceof Blob)) throw new Error('Das Foto enthält keine gültige Bilddatei.');
-      const path = `${tripId}/${photo.id}.${extensionFor(photo)}`;
-      const upload = await client.storage.from(BUCKET).upload(path, photo.blob, {
-        upsert: true,
-        contentType: photo.blob.type || (/\.(?:heic|heif)$/i.test(photo.originalName || '') ? 'image/heic' : 'image/jpeg'),
-        cacheControl: '3600'
-      });
-      if (upload.error) throw upload.error;
-
-      const record = {
-        id: photo.id,
-        trip_id: tripId,
-        created_by: userId,
-        storage_path: path,
-        original_filename: photo.originalName || null,
-        mime_type: photo.blob.type || null,
-        file_size: photo.blob.size || photo.size || null,
-        caption: photo.caption || '',
-        description: photo.caption || '',
-        is_favorite: Boolean(photo.favorite),
-        is_polaroid: Boolean(photo.polaroid),
-        taken_at: photo.takenAt || new Date().toISOString(),
-        created_at: photo.createdAt || new Date().toISOString()
-      };
-      const saved = await client.from('gallery_photos').upsert(record, { onConflict: 'id' });
-      if (saved.error) {
-        await client.storage.from(BUCKET).remove([path]);
-        throw saved.error;
-      }
-      photo.storagePath = path;
-      return photo;
-    },
-
-    async update(id, patch) {
-      const { client, tripId } = await context();
-      const mapped = {};
-      if ('favorite' in patch) mapped.is_favorite = Boolean(patch.favorite);
-      if ('polaroid' in patch) mapped.is_polaroid = Boolean(patch.polaroid);
-      if ('caption' in patch) {
-        mapped.caption = patch.caption || '';
-        mapped.description = patch.caption || '';
-      }
-      if (!Object.keys(mapped).length) return;
-      const result = await client.from('gallery_photos').update(mapped).eq('trip_id', tripId).eq('id', id);
-      if (result.error) throw result.error;
-    },
-
-    async remove(photo) {
-      const { client, tripId } = await context();
-      let path = photo.storagePath;
-      if (!path) {
-        const lookup = await client.from('gallery_photos').select('storage_path').eq('trip_id', tripId).eq('id', photo.id).maybeSingle();
-        if (lookup.error) throw lookup.error;
-        path = lookup.data?.storage_path;
-      }
-      if (path) {
-        const storageResult = await client.storage.from(BUCKET).remove([path]);
-        if (storageResult.error) throw storageResult.error;
-      }
-      const result = await client.from('gallery_photos').delete().eq('trip_id', tripId).eq('id', photo.id);
-      if (result.error) throw result.error;
-    },
-
-    async clear() {
-      const { client, tripId } = await context();
-      const lookup = await client.from('gallery_photos').select('storage_path').eq('trip_id', tripId);
-      if (lookup.error) throw lookup.error;
-      const paths = (lookup.data || []).map(row => row.storage_path).filter(Boolean);
-      if (paths.length) {
-        const storageResult = await client.storage.from(BUCKET).remove(paths);
-        if (storageResult.error) throw storageResult.error;
-      }
-      const result = await client.from('gallery_photos').delete().eq('trip_id', tripId);
-      if (result.error) throw result.error;
-    },
-
-    async subscribe(callback, statusCallback) {
-      const { client, tripId } = await context();
-      if (channel) await client.removeChannel(channel);
-      channelStatus = 'CONNECTING';
-      const channelName = `paris-sync-gallery-${tripId}-${Math.random().toString(36).slice(2)}`;
-      channel = client.channel(channelName, { config: { broadcast: { self: true } } })
-        .on('postgres_changes', {
-          event: '*', schema: 'public', table: 'gallery_photos', filter: `trip_id=eq.${tripId}`
-        }, payload => callback(payload))
-        .subscribe(status => {
-          channelStatus = status;
-          if (statusCallback) statusCallback(status);
-        });
-      return () => {
-        const current = channel;
-        channel = null;
-        channelStatus = 'CLOSED';
-        return current ? client.removeChannel(current) : Promise.resolve();
-      };
-    },
-
-    getRealtimeStatus() {
-      return channelStatus;
-    }
+  const LEGACY_BUCKET='paris-gallery';
+  let channelStatus='CLOSED';
+  const dateKey=iso=>{const d=new Date(iso);return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`};
+  async function context(){return window.ParisSync.requireReady()}
+  function canonicalPhoto(entity,blob){const taken=entity.capturedAt||entity.createdAt,date=dateKey(taken),meta=entity.metadata||{};return{id:entity.id,blob,storagePath:entity.storagePath,storageBucket:entity.storageBucket,originalName:entity.originalName||entity.storagePath?.split('/').pop(),size:entity.fileSize??blob?.size??0,lastModified:new Date(entity.createdAt||taken).getTime(),takenAt:taken,dateKey:date,group:['2026-07-31','2026-08-01','2026-08-02'].includes(date)?date:'other',favorite:Boolean(meta.favorite),polaroid:Boolean(meta.polaroid),caption:meta.caption||'',createdAt:entity.createdAt,placeId:entity.placeId||null,latitude:entity.latitude,longitude:entity.longitude,mediaEntity:true}}
+  function legacyPhoto(row,blob){const taken=row.taken_at||row.created_at,date=dateKey(taken);return{id:row.id,blob,storagePath:row.storage_path,storageBucket:LEGACY_BUCKET,originalName:row.original_filename||row.storage_path?.split('/').pop(),size:row.file_size??blob?.size??0,lastModified:new Date(row.created_at).getTime(),takenAt:taken,dateKey:date,group:['2026-07-31','2026-08-01','2026-08-02'].includes(date)?date:'other',favorite:Boolean(row.is_favorite),polaroid:Boolean(row.is_polaroid),caption:row.description??row.caption??'',createdAt:row.created_at,legacySource:'gallery_photos'}}
+  async function downloadCanonical(entity){const{client}=await context(),r=await client.storage.from(entity.storageBucket||window.LuviaMediaCore.bucket).download(entity.storagePath);if(r.error)throw r.error;return canonicalPhoto(entity,r.data)}
+  async function legacyRows(){const{client,tripId}=await context(),r=await client.from('gallery_photos').select('*').eq('trip_id',tripId).order('taken_at',{ascending:true});if(r.error){if(['42P01','PGRST205'].includes(r.error.code))return[];throw r.error}return r.data||[]}
+  async function downloadLegacy(row){const{client}=await context(),r=await client.storage.from(LEGACY_BUCKET).download(row.storage_path);if(r.error)throw r.error;return legacyPhoto(row,r.data)}
+  async function canonicalRows(){return window.LuviaMediaCore.list({type:'image'})}
+  const api={
+    bucket:window.LuviaMediaCore?.bucket||'luvia-media',legacyBucket:LEGACY_BUCKET,
+    async listRows(){const canonical=await canonicalRows(),legacy=await legacyRows();const mapped=canonical.map(x=>({id:x.id,trip_id:x.tripId,created_by:x.userId,storage_path:x.storagePath,storage_bucket:x.storageBucket,original_filename:x.originalName,mime_type:x.mimeType,file_size:x.fileSize,taken_at:x.capturedAt,created_at:x.createdAt,updated_at:x.updatedAt,is_favorite:Boolean(x.metadata?.favorite),is_polaroid:Boolean(x.metadata?.polaroid),caption:x.metadata?.caption||'',description:x.metadata?.caption||'',place_id:x.placeId,latitude:x.latitude,longitude:x.longitude,_source:'media'}));return[...mapped,...legacy.filter(x=>!canonical.some(m=>m.id===x.id)).map(x=>({...x,_source:'gallery_photos'}))]},
+    async list(){const out=[];for(const item of await canonicalRows()){try{out.push(await downloadCanonical(item))}catch(e){console.warn(`Media ${item.id} konnte nicht geladen werden:`,e.message)}}for(const row of await legacyRows()){if(out.some(x=>x.id===row.id))continue;try{out.push(await downloadLegacy(row))}catch(e){console.warn(`Legacy-Foto ${row.id} konnte nicht geladen werden:`,e.message)}}return out.sort((a,b)=>new Date(a.takenAt)-new Date(b.takenAt))},
+    async get(id){const canonical=await window.LuviaMediaCore.get(id);if(canonical)return downloadCanonical(canonical);const{client,tripId}=await context(),r=await client.from('gallery_photos').select('*').eq('trip_id',tripId).eq('id',id).maybeSingle();if(r.error)throw r.error;return r.data?downloadLegacy(r.data):null},
+    async upload(photo){if(!(photo.blob instanceof Blob))throw new Error('Das Foto enthält keine gültige Bilddatei.');const result=await window.LuviaMediaCore.upload(photo.blob,{id:photo.id,originalName:photo.originalName,capturedAt:photo.takenAt,caption:photo.caption,favorite:photo.favorite,polaroid:photo.polaroid,metadata:{legacyGalleryCompatible:true}});photo.id=result.entity.id;photo.storagePath=result.entity.storagePath;photo.storageBucket=result.entity.storageBucket;photo.mediaEntity=true;return photo},
+    async update(id,patch){const item=await window.LuviaMediaCore.get(id);if(item){const meta={...(item.metadata||{})};if('favorite'in patch)meta.favorite=Boolean(patch.favorite);if('polaroid'in patch)meta.polaroid=Boolean(patch.polaroid);if('caption'in patch)meta.caption=patch.caption||'';await window.LuviaMediaCore.update(id,{metadata:meta});return}const{client,tripId}=await context(),mapped={};if('favorite'in patch)mapped.is_favorite=Boolean(patch.favorite);if('polaroid'in patch)mapped.is_polaroid=Boolean(patch.polaroid);if('caption'in patch){mapped.caption=patch.caption||'';mapped.description=patch.caption||''}if(Object.keys(mapped).length){const r=await client.from('gallery_photos').update(mapped).eq('trip_id',tripId).eq('id',id);if(r.error)throw r.error}},
+    async remove(photo){if(await window.LuviaMediaCore.get(photo.id)){await window.LuviaMediaCore.remove(photo.id);return}const{client,tripId}=await context();let path=photo.storagePath;if(!path){const q=await client.from('gallery_photos').select('storage_path').eq('trip_id',tripId).eq('id',photo.id).maybeSingle();if(q.error)throw q.error;path=q.data?.storage_path}if(path){const s=await client.storage.from(LEGACY_BUCKET).remove([path]);if(s.error)throw s.error}const r=await client.from('gallery_photos').delete().eq('trip_id',tripId).eq('id',photo.id);if(r.error)throw r.error},
+    async clear(){for(const photo of await this.list())await this.remove(photo)},
+    async subscribe(callback,statusCallback){channelStatus='CONNECTING';const stop=await window.LuviaMediaCore.subscribe(payload=>callback(payload));channelStatus='SUBSCRIBED';statusCallback?.('SUBSCRIBED');return async()=>{channelStatus='CLOSED';await stop()}},
+    getRealtimeStatus(){return channelStatus}
   };
-
-  window.ParisSync.register('gallery', api);
+  window.ParisSync.register('gallery',api);
 })();

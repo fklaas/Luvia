@@ -1,0 +1,19 @@
+{
+  "appVersion": "13.28.0",
+  "coreVersion": "4.28.0",
+  "build": "Smart Photo Foundation",
+  "changedFiles": 30,
+  "tests": {
+    "total": 52,
+    "passed": 35,
+    "failed": 17
+  },
+  "targetedMediaTest": "passed",
+  "javascriptSyntax": "passed",
+  "jsonValidation": "passed",
+  "htmlLocalReferences": "passed",
+  "databaseMigration": "created_not_live_executed",
+  "edgeFunctionsChanged": false,
+  "liveBrowserTested": false,
+  "liveStorageUploadTested": false
+}

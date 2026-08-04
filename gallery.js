@@ -591,15 +591,20 @@
 
 
   function applyRowMetadata(photo, row) {
-    photo.favorite = Boolean(row.is_favorite);
-    photo.polaroid = Boolean(row.is_polaroid);
-    photo.caption = row.description ?? row.caption ?? '';
-    photo.storagePath = row.storage_path;
-    photo.originalName = row.original_filename || photo.originalName;
-    photo.size = row.file_size ?? photo.size;
-    photo.takenAt = row.taken_at || row.created_at;
-    photo.createdAt = row.created_at;
-    photo.updatedAt = row.updated_at || row.created_at;
+    const mediaMeta = row.metadata || {};
+    photo.favorite = Boolean(row.is_favorite ?? mediaMeta.favorite);
+    photo.polaroid = Boolean(row.is_polaroid ?? mediaMeta.polaroid);
+    photo.caption = row.description ?? row.caption ?? mediaMeta.caption ?? '';
+    photo.storagePath = row.storage_path || row.storagePath;
+    photo.storageBucket = row.storage_bucket || row.storageBucket || photo.storageBucket;
+    photo.originalName = row.original_filename || row.original_name || row.originalName || photo.originalName;
+    photo.size = row.file_size ?? row.fileSize ?? photo.size;
+    photo.takenAt = row.taken_at || row.captured_at || row.capturedAt || row.created_at || row.createdAt;
+    photo.createdAt = row.created_at || row.createdAt;
+    photo.updatedAt = row.updated_at || row.updatedAt || photo.createdAt;
+    photo.placeId = row.place_id || row.placeId || photo.placeId || null;
+    photo.latitude = row.latitude ?? photo.latitude ?? null;
+    photo.longitude = row.longitude ?? photo.longitude ?? null;
     photo.syncPending = false;
     const key = dateKey(new Date(photo.takenAt));
     photo.dateKey = key;
@@ -651,9 +656,9 @@
         const remoteStamp = String(row.updated_at || row.created_at || '');
         const localStamp = String(local.updatedAt || local.createdAt || '');
         const metadataChanged = remoteStamp !== localStamp ||
-          local.favorite !== Boolean(row.is_favorite) ||
-          local.polaroid !== Boolean(row.is_polaroid) ||
-          local.caption !== (row.description ?? row.caption ?? '');
+          local.favorite !== Boolean(row.is_favorite ?? row.metadata?.favorite) ||
+          local.polaroid !== Boolean(row.is_polaroid ?? row.metadata?.polaroid) ||
+          local.caption !== (row.description ?? row.caption ?? row.metadata?.caption ?? '');
         if (metadataChanged) {
           applyRowMetadata(local, row);
           await put(local);
