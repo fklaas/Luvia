@@ -9,7 +9,7 @@ intelligence/services/base-services.js
 sw.js
 force-update.html
 supabase/migrations/20260804235600_media_smart_photo_clustering.sql
-RELEASE-v13.28.1.md
-DEPLOYMENT-v13.28.1.md
-TEST-v13.28.1.md
-tests/media-clustering-v13.28.1.test.cjs
+RELEASE-v13.28.1.1.md
+DEPLOYMENT-v13.28.1.1.md
+TEST-v13.28.1.1.md
+tests/media-clustering-v13.28.1.1.test.cjs

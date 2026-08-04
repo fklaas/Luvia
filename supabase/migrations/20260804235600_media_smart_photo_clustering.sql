@@ -1,4 +1,4 @@
--- Luvia 13.28.1 / Core 4.28.1 - Smart Photo Clustering
+-- Luvia 13.28.1.1 / Core 4.28.1.1 - Smart Photo Clustering
 begin;
 create table if not exists public.media_clusters (
  id uuid primary key default gen_random_uuid(), trip_id uuid not null references public.trips(id) on delete cascade,

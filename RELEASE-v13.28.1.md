@@ -1,4 +1,4 @@
-# Luvia 13.28.1 – Smart Photo Clustering
+# Luvia 13.28.1.1 – Smart Photo Clustering
 
 ## Sichtbares Frontend
 - Gemeinsame Fotomomente als Collage-Karten

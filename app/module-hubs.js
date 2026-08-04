@@ -24,7 +24,7 @@
     {icon:'✨',title:'Live-Momente',description:'Kleine gemeinsame Momente während der Reise.',preview:true,disabled:true},
     {icon:'ℹ️',title:'Reisedaten',description:'Ziel, Zeitraum und zentrale Informationen.',action:'trip-settings'}
   ]});}
-  function memories(){return shell({eyebrow:'Für immer erinnern',title:'Aus Momenten wird eure Geschichte.',description:'Fotos, Orte und gemeinsame Erinnerungen werden später automatisch zusammengeführt.',tiles:[
+  function memories(){return shell({eyebrow:'Für immer erinnern',title:'Aus Momenten wird eure Geschichte.',description:'Fotos, Orte und gemeinsame Erinnerungen werden automatisch zu eurer Reisegeschichte zusammengeführt.',tiles:[
     {icon:'📸',title:'Fotogalerie',description:'Alle Reisefotos nach Tag und Ort sortiert.',action:'gallery',primary:true},
     {icon:'🖼️',title:'Alben',description:'Automatische Cluster aus Fotos am gleichen Ort.',preview:true,disabled:true},
     {icon:'📖',title:'Reisebuch',description:'Aus Timeline, Orten und Momenten entsteht euer Buch.',action:'travel-book'},

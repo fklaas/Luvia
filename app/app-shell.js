@@ -1,6 +1,6 @@
 (() => {
   'use strict';
-  let root,activeView='today',mountedPlaces=false,mountedMove=false,mountedLifecycle=false,lastRenderedTripId=null,tripSwitchToken=0,overlayPortal=null,unsubscribeTrip=null,unsubscribeAuth=null,unsubscribeProfile=null,unsubscribeCollaboration=null,collaborationFrame=0,authHydration=0,lastAuthUserId=null,hydratedAuthUserId=null,pendingPlaceOpen=null,todayRenderFrame=0,todayRenderTimer=0,todayLastHtml='',lastTripRenderSignature='',showSequence=0,shellInitialized=false,bootComplete=false,subscriptionsBound=false;
+  let root,activeView='today',mountedPlaces=false,mountedMove=false,mountedLifecycle=false,mountedGallery=false,lastRenderedTripId=null,tripSwitchToken=0,overlayPortal=null,unsubscribeTrip=null,unsubscribeAuth=null,unsubscribeProfile=null,unsubscribeCollaboration=null,collaborationFrame=0,authHydration=0,lastAuthUserId=null,hydratedAuthUserId=null,pendingPlaceOpen=null,todayRenderFrame=0,todayRenderTimer=0,todayLastHtml='',lastTripRenderSignature='',showSequence=0,shellInitialized=false,bootComplete=false,subscriptionsBound=false;
   const esc=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot',"'":'&#39;'}[c]));
   const snap=()=>window.LuviaTripStore.snapshot(),activeTrip=()=>snap().activeTrip,profile=()=>window.LuviaProfileService?.snapshot?.().profile||{};
   const date=v=>v?new Date(v+'T12:00:00').toLocaleDateString('de-DE',{day:'2-digit',month:'2-digit',year:'numeric'}):'';
@@ -114,7 +114,7 @@
   const updateTodayWidget=()=>updateDashboardWidget('today');
 
 
-  async function unmountCurrent(){if(mountedPlaces){await window.LuviaPlacesShell?.unmount?.();mountedPlaces=false}if(mountedMove){await window.LuviaMoveShell?.unmount?.();mountedMove=false}if(mountedLifecycle){window.LuviaPlaceLifecycleHub?.unmount?.();mountedLifecycle=false}}
+  async function unmountCurrent(){if(mountedGallery){await window.LuviaGalleryView?.unmount?.();mountedGallery=false}if(mountedPlaces){await window.LuviaPlacesShell?.unmount?.();mountedPlaces=false}if(mountedMove){await window.LuviaMoveShell?.unmount?.();mountedMove=false}if(mountedLifecycle){window.LuviaPlaceLifecycleHub?.unmount?.();mountedLifecycle=false}}
   function transitionMeta(view){
     if(view==='today')return{icon:'🏠',title:'Heute',subtitle:'Eure Reise auf einen Blick.'};
     if(view==='plan')return{icon:'✨',title:'Planen',subtitle:'Alles für eure gemeinsame Vorbereitung.'};
@@ -124,6 +124,7 @@
     if(view==='places')return{icon:'📍',title:'Places',subtitle:'Orte entdecken, planen und erleben.'};
     if(view==='places-lifecycle')return{icon:'🧭',title:'Meine Orte',subtitle:'Entdeckt, geplant, besucht und erinnert.'};
     if(view==='routes')return{icon:'🗺️',title:'Routen',subtitle:'Etappen einfach in Google Maps öffnen.'};
+    if(view==='gallery')return{icon:'📸',title:'Fotogalerie',subtitle:'Fotos und gemeinsame Fotomomente.'};
     return{icon:'✨',title:'Luvia',subtitle:'Eure Reise wird vorbereitet.'};
   }
 
@@ -149,12 +150,14 @@
     if(view==='places')content='<div id="places-module"></div>';
     else if(view==='places-lifecycle')content='<div id="places-lifecycle-module"></div>';
     else if(view==='routes')content=routeHelper(t);
+    else if(view==='gallery')content='<div id="gallery-module"></div>';
     else if(['plan','trip','memories','more'].includes(view))content=window.LuviaModuleHubs?.render?.(view,t)||'';
     else {view='today';activeView='today';content=dashboard(t);}
     stage.innerHTML=wrap(view,content);const host=stage.querySelector('.lv-view-host');host?.setAttribute('data-view',view);host?.setAttribute('data-trip-id',requestedTripId);
     if(view==='places'){
       try{window.LuviaDestination?.refresh?.();await window.LuviaPlacesShell.mount(stage.querySelector('#places-module'),t,{...options,focusReset:true});if(sequence!==showSequence)return;mountedPlaces=true;if(pendingPlaceOpen&&pendingPlaceOpen.type!=='mobility'){const payload=pendingPlaceOpen;pendingPlaceOpen=null;requestAnimationFrame(()=>window.LuviaPlacesShell.openPlace(payload));}}catch(error){console.error(error);stage.innerHTML='<section class="lv-card" style="padding:24px"><h2>Places</h2><div class="lv-error">Das Places-Modul konnte nicht geöffnet werden.</div></section>'}
     }
+    if(view==='gallery'){try{await window.LuviaGalleryView.mount(stage.querySelector('#gallery-module'),t);mountedGallery=true}catch(error){console.error(error);stage.innerHTML='<section class="lv-card" style="padding:24px"><h2>Fotogalerie</h2><div class="lv-error">Die Fotogalerie konnte nicht geöffnet werden.</div></section>'}}
     if(view==='places-lifecycle'){try{await window.LuviaPlaceLifecycleHub.mount(stage.querySelector('#places-lifecycle-module'),t);mountedLifecycle=true}catch(error){console.error(error);stage.innerHTML='<section class="lv-card" style="padding:24px"><h2>Meine Orte</h2><div class="lv-error">Der Places-Lifecycle konnte nicht geöffnet werden.</div></section>'}}
     if(view==='today'){lastRenderedTripId=requestedTripId;requestAnimationFrame(()=>window.LuviaTimelineCore?.bindCalendar?.(stage));}
     if(animate)completeTransition(stage);
@@ -172,7 +175,7 @@
   function toast(message){const old=document.querySelector('.lv-preview-toast');old?.remove();const el=document.createElement('div');el.className='lv-preview-toast';el.textContent=message;document.body.appendChild(el);setTimeout(()=>el.remove(),2800)}
   function handleHubAction(action){
     if(!action)return;
-    if(['today','plan','trip','memories','more','places','places-lifecycle','routes'].includes(action))return show(action);
+    if(['today','plan','trip','memories','more','places','places-lifecycle','routes','gallery'].includes(action))return show(action);
     if(action==='timeline')return show('today').then(()=>setTimeout(()=>root.querySelector('[data-widget-id="today"]')?.scrollIntoView({behavior:'smooth',block:'start'}),120));
     if(action==='profile')return window.LuviaProfileFoundation.open('hub');
     if(action==='preferences')return window.LuviaProfileFoundation.open('preferences');
