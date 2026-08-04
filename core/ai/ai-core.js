@@ -1,6 +1,6 @@
 (() => {
   'use strict';
-  const VERSION='4.21.0';
+  const VERSION='4.22.0';
   const listeners=new Set();
   const cache=new Map();
   let metrics={requests:0,successes:0,fallbacks:0,failures:0,lastRequestAt:null,lastSuccessAt:null,lastError:null};
@@ -10,6 +10,7 @@
   const hash=value=>{const text=JSON.stringify(value);let h=2166136261;for(let i=0;i<text.length;i++){h^=text.charCodeAt(i);h=Math.imul(h,16777619)}return(h>>>0).toString(36)};
   function emit(reason,detail={}){listeners.forEach(fn=>{try{fn({reason,...detail})}catch{}});window.dispatchEvent(new CustomEvent('luvia:ai-changed',{detail:{reason,...detail}}))}
   function fallback(capability,input={},context={}){
+    if(capability==='planning.dialogue')return window.LuviaPlanningDialogue?.localDecompose?.(input)||{understanding:String(input.userGoal||''),goals:[{type:'open',label:String(input.userGoal||'Reisemoment planen'),source:'user'}],hardConstraints:{},softPreferences:{},followUpQuestion:null,summary:{headline:'So habe ich euch verstanden',intro:'Euer Planungswunsch ist erfasst.',goalLabels:[String(input.userGoal||'Reisemoment planen')],hardLabels:[],softLabels:[]},unknowns:[],confidence:.5};
     if(capability==='discovery.plan')return{searchPlans:[{query:String(input.contract?.query||input.query||''),includedTypes:[...(input.contract?.includedTypes||[])],weight:1}],preferredSignals:[...(input.contract?.labels?.context||[]),...(input.contract?.labels?.priorities||[])],mustHave:['correct_category','inside_destination'],excludedSignals:[...(input.contract?.excludedTypes||[])],reasoningSummary:'Regelbasierter Luvia-Fallback – die strikten Provider- und Qualitätsregeln bleiben aktiv.',confidence:.55};
     if(capability==='discovery.rank')return{rankings:(input.candidates||[]).map(place=>({entityId:idOf(place),score:Math.max(0,Math.min(100,Number(place.discoveryScore||50))),confidence:.45,reasons:['Erfüllt den strikten Kategorie- und Qualitätsvertrag.'],unknowns:['Semantische KI-Bewertung war nicht verfügbar.']})),summary:'Deterministische Sortierung ohne KI.'};
     if(capability==='dashboard.brief'){const graph=input.journey||context?.journey?.knowledgeGraph||{};const events=(graph.plannedVisits||graph.events||[]).filter(e=>e.startAt||e.date).sort((a,b)=>new Date(a.startAt||`${a.date}T${a.time||'00:00'}`)-new Date(b.startAt||`${b.date}T${b.time||'00:00'}`));const now=new Date();const upcoming=events.filter(e=>!e.startAt||new Date(e.startAt)>=now);const next=upcoming[0]||events[0];return{headline:next?'Euer nächster Reisemoment ist vorbereitet.':'Eure Reise nimmt weiter Form an.',message:events.length?`Luvia kennt ${events.length} geplante ${events.length===1?'Eintragung':'Einträge'} und ordnet sie chronologisch ein.${next?` Als Nächstes: ${next.title}${next.time?` um ${next.time}`:''}.`:''}`:'Sobald ihr einen Ort oder Reisemoment plant, erscheint er hier automatisch.',highlights:events.slice(0,8).map(e=>`${e.date||''} ${e.time||''} · ${e.title}`.trim()),suggestedActions:[{id:'refresh',label:'Neu denken',capability:'dashboard.brief',kind:'refresh'}]};}

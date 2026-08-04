@@ -1,6 +1,6 @@
 (() => {
   'use strict';
-  const VERSION='4.19.1';
+  const VERSION='4.22.0';
   const entries=new Map();
   const clone=value=>value==null?value:JSON.parse(JSON.stringify(value));
   function register(definition={}){
@@ -20,6 +20,7 @@
   }
   [
     {id:'brain.ask',tier:'default',mode:'READ',schema:'assistant_response',tools:['trip.current','preferences.current','travel.context','journey.context','journey.evidence','memory.signals'],timeoutMs:30000,description:'Allgemeines kontextbezogenes Luvia-Gespräch.'},
+    {id:'planning.dialogue',tier:'default',mode:'READ',schema:'planning_dialogue',tools:['trip.current','preferences.current','travel.context','journey.context','memory.signals'],cacheTtlMs:0,description:'Zerlegt einen Planungswunsch, stellt höchstens eine gezielte Rückfrage und startet keine Recherche.'},
     {id:'discovery.plan',tier:'default',mode:'READ',schema:'discovery_plan',tools:['trip.current','preferences.current','travel.context','memory.signals'],cacheTtlMs:300000,description:'Erzeugt kontrollierte Suchstrategien aus Guided Discovery.'},
     {id:'discovery.rank',tier:'default',mode:'READ',schema:'candidate_ranking',tools:['trip.current','preferences.current','travel.context','memory.signals'],cacheTtlMs:180000,description:'Ordnet bereits fachlich validierte Providerkandidaten persönlich.'},
     {id:'dashboard.brief',tier:'default',mode:'READ',schema:'dashboard_brief',tools:['trip.current','preferences.current','travel.context','journey.context','journey.events','journey.reservations','journey.evidence','schedule.current','today.current','recommendations.current','memory.signals'],cacheTtlMs:300000,description:'Erstellt ein ehrliches Reisebriefing für das Dashboard.'},
