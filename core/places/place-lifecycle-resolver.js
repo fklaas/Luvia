@@ -1,6 +1,6 @@
 (() => {
 'use strict';
-const VERSION='4.27.3';
+const VERSION='4.27.4';
 const clean=v=>String(v??'').trim();
 const provider=e=>clean(e?.place?.provider_place_id||e?.place?.source_id||e?.providerPlaceId).replace(/^places\//,'');
 const client=()=>window.LuviaSupabaseService?.getClient?.();
@@ -12,14 +12,14 @@ async function loadEvidence(tripId){
  const empty={visits:new Map(),planned:new Map(),memories:new Map()};
  if(!db||!tripId||!navigator.onLine)return empty;
  const [visitsResult,dataResult,eventsResult]=await Promise.all([
-  db.from('place_visits').select('place_id,trip_place_id,arrived_at,state,is_confirmed').eq('trip_id',tripId).order('arrived_at',{ascending:false}),
+  db.from('place_visits').select('place_id,arrived_at,state,is_confirmed').eq('trip_id',tripId).order('arrived_at',{ascending:false}),
   db.from('trip_place_data').select('trip_place_id,place_id,place_type,fields').eq('trip_id',tripId),
   db.from('timeline_events').select('place_id,event_type,title,occurred_at,metadata').eq('trip_id',tripId).order('occurred_at',{ascending:false})
  ]);
  for(const result of [visitsResult,dataResult,eventsResult])if(result.error)throw result.error;
  const visits=new Map(),planned=new Map(),memories=new Map();
  for(const row of visitsResult.data||[]){
-  const keys=[clean(row.trip_place_id),clean(row.place_id)].filter(Boolean);
+  const keys=[clean(row.place_id)].filter(Boolean);
   for(const key of keys)if(!visits.has(key))visits.set(key,row);
  }
  for(const row of dataResult.data||[]){
@@ -52,6 +52,6 @@ function project(entity,evidence={visits:new Map(),planned:new Map(),memories:ne
 }
 
 async function resolve({tripId,entities=[]}={}){const evidence=await loadEvidence(tripId);return entities.map(e=>project(e,evidence));}
-function diagnostics(){return{version:VERSION,status:'ready',cloudAuthoritative:true,sources:['trip_places','trip_place_data','place_visits','timeline_events'],optimisticLifecycle:false,hydratesTimeline:false,queryCount:3};}
+function diagnostics(){return{version:VERSION,status:'ready',cloudAuthoritative:true,sources:['trip_places','trip_place_data','place_visits','timeline_events'],placeVisitsJoin:'place_id',optimisticLifecycle:false,hydratesTimeline:false,queryCount:3};}
 window.LuviaPlaceLifecycleResolver=Object.freeze({version:VERSION,resolve,project,diagnostics});
 })();

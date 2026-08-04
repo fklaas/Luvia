@@ -1,6 +1,6 @@
 (() => {
 'use strict';
-const VERSION='4.27.3';
+const VERSION='4.27.4';
 const esc=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const labels={all:'Alle',discovered:'Entdeckt',planned:'Geplant',visited:'Besucht',remembered:'Erinnert'};
 const icons={discovered:'✨',planned:'📅',visited:'📍',remembered:'💛'};
