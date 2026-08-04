@@ -1,6 +1,6 @@
 (() => {
   'use strict';
-  const VERSION='4.23.0';
+  const VERSION='4.24.0';
   const MODULES={photo_spots:{title:'Fotospots',host:'photo-spots-module'},attractions:{title:'Sehenswürdigkeiten & Aktivitäten',host:'attractions-module'},restaurants:{title:'Restaurants',host:'restaurants-module'},accommodations:{title:'Unterkünfte',host:'accommodations-module'},nature:{title:'Natur & Ausflüge',host:'nature-module'},shopping:{title:'Shopping',host:'shopping-module'}};
   let state={root:null,trip:null,mounted:null,view:'planning'};
   const enabled=()=> (window.LuviaModuleRegistry?.enabledForTrip?.(state.trip)||[]).filter(id=>MODULES[id]);

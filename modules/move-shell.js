@@ -1,6 +1,6 @@
 (() => {
   'use strict';
-  const VERSION='4.23.0';
+  const VERSION='4.24.0';
   const TILES={flights:{title:'Flüge',preset:'airport'},rail:{title:'Bahn',preset:'rail'},coaches:{title:'Fernbus',preset:'coach'},ferries:{title:'Fähren',preset:'ferry'},local:{title:'ÖPNV',preset:'transit'},taxi:{title:'Taxi',preset:'taxi'},rental:{title:'Mietwagen & Sharing',preset:'rental'},parking:{title:'Parken & Laden',preset:'parking'}};
   let state={root:null,trip:null,mounted:false,view:'planning',active:null};
   const esc=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));

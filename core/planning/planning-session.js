@@ -1,7 +1,7 @@
 (() => {
   'use strict';
-  const VERSION = '4.23.0';
-  const SCHEMA_VERSION = 4;
+  const VERSION = '4.24.0';
+  const SCHEMA_VERSION = 5;
   const memory = new Map();
   const clean = value => JSON.parse(JSON.stringify(value ?? null));
   const key = (tripId, surface='plan') => `luvia:planning-session:${tripId || 'unknown'}:${surface}`;

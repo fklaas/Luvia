@@ -1,0 +1,14 @@
+const fs=require('fs');
+const assert=require('assert');
+const research=fs.readFileSync('core/planning/planning-candidate-research.js','utf8');
+const foundation=fs.readFileSync('core/planning/planning-foundation.js','utf8');
+const routes=fs.readFileSync('supabase/functions/luvia-gateway/_shared/routes.ts','utf8');
+assert(research.includes("moveProvider:'google-routes'"));
+assert(research.includes("includedType:'movie_theater'"));
+assert(research.includes("kind:'mobility_itinerary'"));
+assert(!research.includes("type:'mobility',includedType:''"));
+assert(routes.includes("'TRANSIT'"));
+assert(routes.includes('transitDetails'));
+assert(foundation.includes('Journey Planning Deck'));
+assert(foundation.includes('Echte Wege für euch.'));
+console.log('domain-correct research & journey deck: ok');
