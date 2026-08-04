@@ -1,0 +1,17 @@
+const fs=require('fs');
+const assert=require('assert');
+const nav=fs.readFileSync('app/navigation-registry.js','utf8');
+const hubs=fs.readFileSync('app/module-hubs.js','utf8');
+const shell=fs.readFileSync('app/app-shell.js','utf8');
+const index=fs.readFileSync('index.html','utf8');
+const reset=fs.readFileSync('core/planning/product-focus-reset.js','utf8');
+for(const label of ['Heute','Planen','Reise','Erinnerungen','Mehr'])assert(nav.includes(`label:'${label}'`),`Navigation fehlt: ${label}`);
+assert(!shell.includes('data-view="move"'),'Move darf nicht in der neuen Navigation erscheinen');
+assert(shell.includes("if(view==='routes')content=routeHelper(t)"),'Routen-Helfer fehlt');
+assert(fs.readFileSync('modules/places-shell.js','utf8').includes('Aktivitäten'),'Aktivitäten müssen im Places-Fokus sichtbar sein');
+assert(hubs.includes("title:'Places'"),'Places-Kachel fehlt');
+assert(index.includes('app/navigation-registry.js?v=13.25.0'),'Navigation Registry nicht eingebunden');
+assert(index.includes('app/module-hubs.js?v=13.25.0'),'Module Hubs nicht eingebunden');
+assert(!index.includes('modules/move-shell.js'),'Experimentelles Move Shell muss deaktiviert sein');
+assert(reset.includes('/planning|candidate|research|journey-deck/i'),'Planning Session Invalidation fehlt');
+console.log('13.25.0 Product Focus & Navigation Reset: OK');
