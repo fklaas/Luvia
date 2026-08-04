@@ -1,0 +1,17 @@
+const fs=require('fs');
+const read=p=>fs.readFileSync(p,'utf8');
+const ok=(v,m)=>{if(!v)throw new Error(m)};
+const places=read('core/places/places-final-foundation.js');
+const hub=read('core/places/place-lifecycle-hub.js');
+const service=read('core/places/place-lifecycle-service.js');
+const index=read('index.html');
+const sw=read('sw.js');
+ok(places.includes("const VERSION='4.27.1'"),'Places-Version fehlt');
+ok(places.includes("split(/\\b(?:danach|anschließend")&&places.includes("[,;]+"),'Mehrziel-Split fehlt');
+ok(places.includes("await continueFlow(place)"),'Sequenz-Fortsetzung fehlt');
+ok(places.includes("lifecycle:'planned'"),'Planning-Lifecycle-Event fehlt');
+ok(hub.includes('applyLifecycleChange')&&hub.includes('scheduleRefresh'),'Realtime-Projektion fehlt');
+ok(hub.includes("'luvia:place-plan-changed'")&&hub.includes("'luvia:place-memory-linked'"),'Lifecycle-Listener fehlen');
+ok(service.includes("lifecycle:'visited'")&&service.includes("lifecycle:'remembered'"),'Optimistische Statusdetails fehlen');
+ok(index.includes('13.27.1')&&sw.includes('luvia-shell-v13.27.1'),'Build/Cache nicht aktualisiert');
+console.log('places lifecycle realtime v13.27.1 ok');
