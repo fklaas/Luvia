@@ -1,6 +1,6 @@
 (() => {
   'use strict';
-  const VERSION='4.20.2';
+  const VERSION='4.21.0';
   const clone=value=>value==null?value:JSON.parse(JSON.stringify(value));
   const pick=(source,keys)=>Object.fromEntries(keys.filter(key=>source?.[key]!=null).map(key=>[key,clone(source[key])]));
   function tripContext(trip={}){

@@ -1,6 +1,6 @@
 (() => {
 'use strict';
-const VERSION='4.20.2';
+const VERSION='4.20.1';
 const sessions=new Map();
 const esc=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const profile=()=>window.LuviaUserPreferences?.get?.()||window.LuviaProfileService?.snapshot?.().profile||{};

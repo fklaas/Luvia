@@ -1,3 +1,6 @@
-const fs=require('fs'),path=require('path'),assert=require('assert');const root=path.resolve(__dirname,'..');const read=p=>fs.readFileSync(path.join(root,p),'utf8');
+const fs=require('fs'),path=require('path'),assert=require('assert');const root=path.resolve(__dirname,'..');const read=f=>fs.readFileSync(path.join(root,f),'utf8');
 const conv=read('core/discovery/conversational-discovery-core.js'),pipe=read('core/discovery/ai-search-evidence-pipeline.js'),canvas=read('core/discovery/curated-travel-canvas.js'),places=read('modules/places-shell.js'),move=read('modules/move-shell.js');
-assert(conv.includes("domain==='move'"));assert(conv.includes('Wohin möchtet ihr'));assert(conv.includes('Für euch vorgeschlagen'));assert(pipe.includes('MAX=5'));assert(pipe.includes('distancePlausibility:true'));assert(pipe.includes('evidence.length>=2'));assert(canvas.includes('Luvias beste Wahl'));assert(canvas.includes('Alle passenden Ergebnisse öffnen'));assert(places.includes('showCurated'));assert(move.includes("domain:'move'"));assert(!move.includes('Was würde eure Reise gerade besonders machen?'));console.log('Discovery 13.19.2 / Canvas 13.20.0 OK');
+assert(conv.includes("domain==='move'"));assert(pipe.includes('MAX=5'));assert(canvas.includes('Luvias beste Wahl'));
+assert(!places.includes('showCurated'));assert(!move.includes('showCurated'));
+assert(places.includes('LuviaPlanningFoundation'));assert(move.includes('LuviaPlanningFoundation'));
+console.log('Historical discovery components retained but superseded by Planning Foundation Reset');

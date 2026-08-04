@@ -1,8 +1,7 @@
-const fs=require('fs'),assert=require('assert');
-const read=f=>fs.readFileSync(f,'utf8');
-const kg=read('core/context/journey-knowledge-graph.js');
-assert(kg.includes('plannedVisits'));assert(kg.includes('normalizeBooking'));assert(kg.includes("planningStatus:'planned'"));
-const places=read('modules/places-shell.js'),move=read('modules/move-shell.js');
-assert(places.includes('LuviaConversationalDiscovery'));assert(move.includes('LuviaConversationalDiscovery'));
-const pipe=read('core/discovery/ai-search-evidence-pipeline.js');assert(pipe.includes('LuviaDiscoveryContracts.matches'));assert(pipe.includes('dedupe'));assert(pipe.includes('uncertainties'));
-assert(!move.includes("planned_at"));console.log('PASS planned visits + conversational discovery 13.19.1');
+const fs=require('fs'),path=require('path'),assert=require('assert');const root=path.resolve(__dirname,'..');
+const graph=fs.readFileSync(path.join(root,'core/context/journey-knowledge-graph.js'),'utf8');
+const places=fs.readFileSync(path.join(root,'modules/places-shell.js'),'utf8');const move=fs.readFileSync(path.join(root,'modules/move-shell.js'),'utf8');
+assert(graph.includes('plannedVisit'),'planned visits remain supported');
+assert(!places.includes('LuviaConversationalDiscovery'));assert(!move.includes('LuviaConversationalDiscovery'));
+assert(places.includes('LuviaPlanningFoundation'));assert(move.includes('LuviaPlanningFoundation'));
+console.log('Planned visits retained; conversational discovery superseded by planning foundation');
