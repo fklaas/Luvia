@@ -1,7 +1,7 @@
 (() => {
   'use strict';
 
-  const VERSION = '4.19.1';
+  const VERSION = '4.20.0';
   // LuviaGuidedDiscovery compatibility · hideBrowse:true · LuviaUserPreferences?.get · the former fixed slide flow is retained as a legacy API, while the primary UI is conversational.
   const TILES = Object.freeze({
     flights:{title:'Flüge',icon:'✈️',description:'Flughäfen und Terminals für eure An- oder Abreise.',tags:['Flughäfen','Terminals','Anreise'],preset:'flights'},
@@ -40,7 +40,14 @@
   function renderGuided() {
     state.active = null; state.contract = null; state.view = 'guided'; if (!state.root) return;
     state.root.innerHTML = '<div class="move-guided-host" data-move-guided></div>';
-    const host=state.root.querySelector('[data-move-guided]'); const complete=async result => { const contract=window.LuviaAI?.planDiscovery ? await window.LuviaAI.planDiscovery('move',{contract:result.contract,answers:result.answers||{},freeText:result.freeText}) : result.contract; return open(contract.moveTile||contract.mobilityTile||'local',null,contract); }; if(window.LuviaConversationalDiscovery?.mount) window.LuviaConversationalDiscovery.mount(host,{domain:'move',trip:state.trip,onComplete:complete}); else window.LuviaGuidedDiscovery?.mount?.(host,{domain:'move',trip:state.trip,hideBrowse:true,initialPreferences:window.LuviaUserPreferences?.get?.()||profile(),onComplete:complete});
+    const host=state.root.querySelector('[data-move-guided]'); const complete=async result => { const contract=window.LuviaAI?.planDiscovery ? await window.LuviaAI.planDiscovery('move',{contract:result.contract,answers:result.answers||{},freeText:result.freeText}) : result.contract; return showCurated(contract.moveTile||contract.mobilityTile||'local',contract); }; if(window.LuviaConversationalDiscovery?.mount) window.LuviaConversationalDiscovery.mount(host,{domain:'move',trip:state.trip,onComplete:complete}); else window.LuviaGuidedDiscovery?.mount?.(host,{domain:'move',trip:state.trip,hideBrowse:true,initialPreferences:window.LuviaUserPreferences?.get?.()||profile(),onComplete:complete});
+  }
+
+  async function showCurated(id,contract) {
+    state.active=id; state.contract=contract; state.view='curated';
+    state.root.innerHTML='<div class="move-curated-host" data-move-curated></div>';
+    let result; try { result=await window.LuviaAISearchEvidencePipeline.execute({domain:'move',contract,destination:state.trip?.destination||{},maxResultCount:3}); } catch(error) { result={ok:false,data:{places:[],insufficientQuality:true},error}; }
+    window.LuviaCuratedTravelCanvas.render(state.root.querySelector('[data-move-curated]'),{domain:'move',result,contract,onSelect:option=>open(id,option,null),onRefine:()=>renderGuided(),onCatalog:()=>open(id,null,null)});
   }
 
   function renderBrowseHub() {
