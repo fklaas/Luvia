@@ -1,0 +1,13 @@
+const fs=require('fs');
+const path=require('path');
+const root=path.resolve(__dirname,'..');
+const shell=fs.readFileSync(path.join(root,'core/places/places-final-foundation.js'),'utf8');
+const css=fs.readFileSync(path.join(root,'app/module-hubs.css'),'utf8');
+const index=fs.readFileSync(path.join(root,'index.html'),'utf8');
+for(const label of ['Essen & Trinken','Aktivitäten','Sehenswürdigkeiten','Kultur','Natur & Erholung','Shopping','Nachtleben','Praktisch unterwegs'])if(!shell.includes(label))throw new Error('Kategorie fehlt: '+label);
+if(!shell.includes('MAX_RESULTS=5'))throw new Error('Maximal fünf Ergebnisse nicht festgeschrieben.');
+if(!shell.includes('pendingGoals'))throw new Error('Sequenzielle Ziele fehlen.');
+for(const action of ['Zur Timeline','In Google Maps','Nicht passend','Als entdeckt merken'])if(!shell.includes(action))throw new Error('Aktion fehlt: '+action);
+if(!index.includes('places-final-foundation.js?v=13.26.0'))throw new Error('Foundation nicht eingebunden.');
+if(!css.includes('width:max-content'))throw new Error('Navigation nicht kompakt zentriert.');
+console.log('places-final-foundation-v13.26.0: ok');

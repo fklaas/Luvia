@@ -1,6 +1,6 @@
 (() => {
   'use strict';
-  const VERSION='4.25.0';
+  const VERSION='4.26.0';
   const items=Object.freeze([
     {id:'today',label:'Heute',icon:'🏠',description:'Tagesbriefing und das Wichtigste für heute.'},
     {id:'plan',label:'Planen',icon:'✨',description:'Orte, Timeline, Checklisten und Reisevorbereitung.'},
