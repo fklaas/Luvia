@@ -123,7 +123,7 @@
     if (needsText || !useNearby) requests.push(...await textPlans(contract, destination, maxResultCount, searchOptions));
     const responses = (await Promise.all(requests.filter(Boolean).map(request => Promise.resolve(request).catch(error => ({ ok: false, error, data: { places: [] } }))))).filter(Boolean);
     responses.forEach(response => normalizeResponse(response, contract, merged));
-    let places = [...merged.values()]
+    let places = [...merged.values()].map(place=>({...place,evidence:window.LuviaAISearchEvidencePipeline?.evidenceFor?.(place,contract)||[],uncertainties:window.LuviaAISearchEvidencePipeline?.uncertainty?.(place)||[]}))
       .sort((a, b) => Number(b.discoveryScore || 0) - Number(a.discoveryScore || 0) || Number(a.distanceMeters ?? Infinity) - Number(b.distanceMeters ?? Infinity));
     if (places.length && window.LuviaAI?.rankCandidates) {
       try { places = await window.LuviaAI.rankCandidates({ domain:contract.domain || type || 'places', contract, candidates:places }); }

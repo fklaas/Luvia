@@ -1,14 +1,14 @@
-# Deployment 13.18.0
+# Deployment 13.19.1
 
 ## Voraussetzung
 Die Datenbank-Baseline muss in `supabase migration list --linked` lokal und remote denselben 14-stelligen Zeitstempel zeigen.
 
 ## Migrationen
-Build 13.18.0 ergänzt:
+Build 13.19.1 ergänzt:
 
 `20260803213000_core_v4_18_0_journey_knowledge_graph_universal_ai_orchestrator.sql`
 
-Falls Migration 038 aus 13.17.0 noch nicht angewendet wurde, muss sie vor 13.18.0 mit einem eigenen eindeutigen 14-stelligen Timestamp in den aktiven Migrationsordner aufgenommen werden.
+Falls Migration 038 aus 13.17.0 noch nicht angewendet wurde, muss sie vor 13.19.1 mit einem eigenen eindeutigen 14-stelligen Timestamp in den aktiven Migrationsordner aufgenommen werden.
 
 ```powershell
 supabase db push --dry-run
@@ -38,4 +38,4 @@ git push
 ```
 
 ## PWA
-Cache: `luvia-shell-v13.18.0`. Danach Tabs schließen, PWA beenden, `force-update.html` öffnen und App neu starten.
+Cache: `luvia-shell-v13.19.1`. Danach Tabs schließen, PWA beenden, `force-update.html` öffnen und App neu starten.

@@ -1,4 +1,4 @@
-# Luvia 13.18.0 / Core 4.18.0
+# Luvia 13.19.1 / Core 4.19.1
 
 ## Journey Knowledge Graph & Universal AI Orchestrator
 

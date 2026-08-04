@@ -1,6 +1,6 @@
 (() => {
   'use strict';
-  const VERSION='4.18.0';
+  const VERSION='4.19.1';
   const state=new Map();
   const esc=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
   const tripId=trip=>String(trip?.id||trip?.tripId||'');
@@ -13,8 +13,8 @@
   async function refresh(trip,{force=false}={}){
     const id=tripId(trip);if(!id)return null;const current=state.get(id);if(current?.loading)return current;if(current?.updatedAt&&!force&&Date.now()-current.updatedAt<60000)return current;
     state.set(id,{...(current||{}),data:current?.data||placeholder(),loading:true,error:null});window.dispatchEvent(new CustomEvent('luvia:dashboard-widget-refresh',{detail:{id:'aiBrain'}}));
-    await window.LuviaJourneyKnowledgeGraph?.load?.({force}).catch(()=>null);
-    const response=await window.LuviaAI.run('dashboard.brief',{currentMoment:{surface:'dashboard'}},{fallback:true});
+    const journey=await window.LuviaJourneyKnowledgeGraph?.load?.({force}).catch(()=>null);
+    const response=await window.LuviaAI.run('dashboard.brief',{currentMoment:{surface:'dashboard'},journey,plannedVisits:journey?.plannedVisits||[],instruction:'Nenne alle geplanten Einträge des relevanten Tages vollständig und chronologisch. Ein Timeline-Eintrag ist ein geplanter Besuch. Fehlende Buchungsdaten sind niemals eine Warnung.'},{fallback:true});
     const next={data:response.data,loading:false,error:response.meta?.fallback?'Die Cloud-KI war nicht erreichbar.':'' ,updatedAt:Date.now()};state.set(id,next);window.dispatchEvent(new CustomEvent('luvia:dashboard-widget-refresh',{detail:{id:'aiBrain'}}));return next;
   }
   function askModal(){

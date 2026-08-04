@@ -1,6 +1,6 @@
 (() => {
   'use strict';
-  const VERSION='4.18.0';
+  const VERSION='4.19.1';
   const tools=new Map();
   const clone=value=>{try{return value==null?value:JSON.parse(JSON.stringify(value))}catch{return null}};
   function register(def={}){if(!def.name||typeof def.read!=='function')throw new Error('AI_TOOL_INVALID');tools.set(def.name,Object.freeze({...def,mode:def.mode||'READ',domain:def.domain||'global',inputSchema:def.inputSchema||{type:'object',additionalProperties:true},trust:def.trust||'core'}));return def}

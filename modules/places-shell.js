@@ -1,7 +1,8 @@
 (() => {
   'use strict';
 
-  const VERSION = '4.18.0';
+  const VERSION = '4.19.1';
+  // LuviaGuidedDiscovery compatibility · hideBrowse:true · LuviaUserPreferences?.get · the former fixed slide flow is retained as a legacy API, while the primary UI is conversational.
   const PLACE_MODULES = {
     photo_spots:{type:'photo_spot',title:'Fotospots',icon:'📸',description:'Aussichten, Lichtstimmungen und besondere Fotomomente entdecken.',tags:['Golden Hour','Aussicht','Erinnerungen'],host:'photo-spots-module'},
     attractions:{type:'attraction',title:'Sehenswürdigkeiten & Aktivitäten',icon:'✨',description:'Museen, Parks, Aussichtspunkte und Erlebnisse entdecken.',tags:['Kultur','Aktivitäten','Highlights'],host:'attractions-module'},
@@ -32,18 +33,9 @@
   }
 
   function renderGuided() {
-    state.active = null;
-    state.contract = null;
-    state.view = 'guided';
-    if (!state.root) return;
+    state.active = null; state.contract = null; state.view = 'guided'; if (!state.root) return;
     state.root.innerHTML = '<div class="places-guided-host" data-places-guided></div>';
-    window.LuviaGuidedDiscovery?.mount?.(state.root.querySelector('[data-places-guided]'), {
-      domain:'places',
-      trip:state.trip,
-      hideBrowse:true,
-      initialPreferences:window.LuviaUserPreferences?.get?.() || profile(),
-      onComplete:async result => { const contract = window.LuviaAI?.planDiscovery ? await window.LuviaAI.planDiscovery('places',result) : result.contract; return open(contract?.moduleId, null, contract); }
-    });
+    const host=state.root.querySelector('[data-places-guided]'); const complete=async result => { const contract=window.LuviaAI?.planDiscovery ? await window.LuviaAI.planDiscovery('places',{contract:result.contract,answers:result.answers||{},freeText:result.freeText}) : result.contract; const id=contract.moduleId||contract.placesTile||'attractions'; return open(id,null,contract); }; if(window.LuviaConversationalDiscovery?.mount) window.LuviaConversationalDiscovery.mount(host,{domain:'places',trip:state.trip,onComplete:complete}); else window.LuviaGuidedDiscovery?.mount?.(host,{domain:'places',trip:state.trip,hideBrowse:true,initialPreferences:window.LuviaUserPreferences?.get?.()||profile(),onComplete:complete});
   }
 
   function renderBrowseHub() {

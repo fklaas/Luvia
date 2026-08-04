@@ -1,7 +1,8 @@
 (() => {
   'use strict';
 
-  const VERSION = '4.18.0';
+  const VERSION = '4.19.1';
+  // LuviaGuidedDiscovery compatibility · hideBrowse:true · LuviaUserPreferences?.get · the former fixed slide flow is retained as a legacy API, while the primary UI is conversational.
   const TILES = Object.freeze({
     flights:{title:'Flüge',icon:'✈️',description:'Flughäfen und Terminals für eure An- oder Abreise.',tags:['Flughäfen','Terminals','Anreise'],preset:'flights'},
     rail:{title:'Bahn',icon:'🚆',description:'Fern-, Regional- und wichtige Umsteigebahnhöfe.',tags:['Fernverkehr','Regionalbahn','Bahnhöfe'],preset:'rail'},
@@ -37,18 +38,9 @@
   }
 
   function renderGuided() {
-    state.active = null;
-    state.contract = null;
-    state.view = 'guided';
-    if (!state.root) return;
+    state.active = null; state.contract = null; state.view = 'guided'; if (!state.root) return;
     state.root.innerHTML = '<div class="move-guided-host" data-move-guided></div>';
-    window.LuviaGuidedDiscovery?.mount?.(state.root.querySelector('[data-move-guided]'), {
-      domain:'move',
-      trip:state.trip,
-      hideBrowse:true,
-      initialPreferences:window.LuviaUserPreferences?.get?.() || profile(),
-      onComplete:async result => { const contract = window.LuviaAI?.planDiscovery ? await window.LuviaAI.planDiscovery('move',result) : result.contract; return open(contract?.moveTile,null,contract); }
-    });
+    const host=state.root.querySelector('[data-move-guided]'); const complete=async result => { const contract=window.LuviaAI?.planDiscovery ? await window.LuviaAI.planDiscovery('move',{contract:result.contract,answers:result.answers||{},freeText:result.freeText}) : result.contract; return open(contract.moveTile||contract.mobilityTile||'local',null,contract); }; if(window.LuviaConversationalDiscovery?.mount) window.LuviaConversationalDiscovery.mount(host,{domain:'move',trip:state.trip,onComplete:complete}); else window.LuviaGuidedDiscovery?.mount?.(host,{domain:'move',trip:state.trip,hideBrowse:true,initialPreferences:window.LuviaUserPreferences?.get?.()||profile(),onComplete:complete});
   }
 
   function renderBrowseHub() {

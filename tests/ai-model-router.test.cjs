@@ -1,4 +1,4 @@
-/* Build 13.18.0 – provider-independent Luvia model tiers */
+/* Build 13.19.1 – provider-independent Luvia model tiers */
 const fs=require('fs'),vm=require('vm'),assert=require('assert');
 const window={};const context=vm.createContext({window,console,Object,Array,Map,Set,JSON,String,Number,Boolean});
 vm.runInContext(fs.readFileSync('core/ai/ai-capability-registry.js','utf8'),context);
