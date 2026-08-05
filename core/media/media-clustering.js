@@ -1,6 +1,6 @@
 (() => {
   'use strict';
-  const VERSION='4.28.2', BUILD='13.28.2';
+  const VERSION='4.28.2.1', BUILD='13.28.2.1';
   const MAX_GAP_MS=20*60*1000, MAX_DISTANCE_M=300;
   const radians=v=>v*Math.PI/180;
   const distance=(a,b)=>{if([a.latitude,a.longitude,b.latitude,b.longitude].some(v=>v===null||v===undefined))return null;const R=6371000,dLat=radians(b.latitude-a.latitude),dLon=radians(b.longitude-a.longitude),x=Math.sin(dLat/2)**2+Math.cos(radians(a.latitude))*Math.cos(radians(b.latitude))*Math.sin(dLon/2)**2;return 2*R*Math.asin(Math.sqrt(x))};

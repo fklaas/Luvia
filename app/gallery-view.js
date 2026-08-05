@@ -1,6 +1,6 @@
 (() => {
   'use strict';
-  const VERSION='4.28.2',BUILD='13.28.2';
+  const VERSION='4.28.2.1',BUILD='13.28.2.1';
   let host=null,items=[],clusters=[],urls=[],unsubscribe=null,busy=false;
   const esc=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
   const fmt=v=>v?new Intl.DateTimeFormat('de-DE',{day:'2-digit',month:'short',year:'numeric',hour:'2-digit',minute:'2-digit'}).format(new Date(v)):'Ohne Aufnahmedatum';
@@ -22,7 +22,7 @@
   }
 
   function status(text,type=''){const el=host?.querySelector('[data-gallery-status]');if(el){el.textContent=text;el.dataset.state=type}}
-  function showError(e){console.error('[LuviaGalleryView]',e);status(e?.message||'Galerie konnte nicht geladen werden.','error')}
+  function showError(e){console.error('[LuviaGalleryView]',e);const msg=e?.code==='MEMORY_BRIDGE_DB_GRANT_REQUIRED'?'Datenbank-Update für „Erinnerung prüfen“ fehlt. Bitte Migration 13.28.2.1 ausführen.':(e?.message||'Galerie konnte nicht geladen werden.');status(msg,'error')}
   async function load(){if(!host||busy)return;busy=true;status('Galerie wird geladen …');try{items=await window.LuviaMediaCore.list({type:'image'});const generated=window.LuviaMediaClustering.generate(items);clusters=await window.LuviaMediaClustering.syncGenerated(generated);host.querySelector('[data-gallery-count]').textContent=`${items.length} Foto${items.length===1?'':'s'}`;await Promise.all([renderPhotos(),renderClusters()]);status(`${items.length} Fotos · ${clusters.filter(c=>c.state!=='dismissed').length} Fotomomente`,'ready')}catch(e){showError(e)}finally{busy=false}}
   async function upload(files){const list=[...files];if(!list.length)return;status(`0 von ${list.length} Fotos hochgeladen …`);let done=0,duplicates=0;for(const file of list){try{const r=await window.LuviaMediaCore.upload(file);done++;if(r.duplicate)duplicates++;status(`${done} von ${list.length} Fotos verarbeitet …`)}catch(e){showError(e);break}}await load();if(duplicates)status(`${done} Fotos verarbeitet · ${duplicates} bereits vorhanden`,'ready')}
   async function remove(id){if(!confirm('Dieses Foto aus der Reisegalerie entfernen?'))return;try{await window.LuviaMediaCore.remove(id);await load()}catch(e){showError(e)}}

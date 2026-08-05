@@ -1,6 +1,6 @@
 (() => {
   'use strict';
-  const VERSION='4.28.2',BUILD='13.28.2';
+  const VERSION='4.28.2.1',BUILD='13.28.2.1';
   const isHeic=file=>/hei[cf]/i.test(file?.type||'')||/\.hei[cf]$/i.test(file?.name||'');
   async function decodedBlob(file){
     if(isHeic(file)&&typeof window.heic2any==='function'){
