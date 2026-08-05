@@ -1,0 +1,6 @@
+const test=require('node:test'),assert=require('node:assert/strict'),fs=require('node:fs'),path=require('node:path');
+const root=path.resolve(__dirname,'..');
+const read=f=>fs.readFileSync(path.join(root,f),'utf8');
+test('HEIC metadata pipeline is loaded before Media Core',()=>{const html=read('index.html');assert.match(html,/exifr@7\.1\.3/);assert.ok(html.indexOf('exifr@7.1.3')<html.indexOf('core\/media\/media-metadata.js'));const metadata=read('core/media/media-metadata.js');assert.match(metadata,/exif-heic/);assert.match(metadata,/originalGpsFound/);assert.match(metadata,/heic2any/)});
+test('capture GPS is resolved through secure Places Gateway',()=>{const core=read('core/media/media-core.js');assert.match(core,/resolveCaptureLocation/);assert.match(core,/LuviaPlaces\.nearbySearch/);assert.match(core,/resolvedLocation/);assert.match(core,/reanalyze/)});
+test('studio is light and overlays use image-v2 coordinates',()=>{const js=read('app/gallery-view.js'),css=read('app/gallery-view.css');assert.match(js,/schema:'image-v2'/);assert.match(js,/syncOverlayGeometry/);assert.match(js,/data-reanalyze/);assert.match(css,/Photo Metadata & Studio Reconstruction/);assert.match(css,/background:#fffdf9/);assert.match(css,/object-fit:contain!important/);assert.match(css,/--overlay-size/)});

@@ -1,0 +1,1 @@
+feat(media): reconstruct light photo studio, HEIC metadata and image-space overlays

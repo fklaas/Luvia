@@ -1,8 +1,8 @@
-# Test 13.28.5.3
+# Test 13.28.6
 
 ## Lokal geprüft
 - JavaScript-Syntax: gallery-view, media-metadata, media-core, ai-memory-bridge.
-- App-/Core-/Service-Worker-Version 13.28.5.3 / 4.28.5.3.
+- App-/Core-/Service-Worker-Version 13.28.6 / 4.28.6.
 - Lokale Referenzen aus `index.html` vorhanden.
 - ZIP-Integrität nach Erstellung.
 

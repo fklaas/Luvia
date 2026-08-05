@@ -8,8 +8,8 @@ intelligence/test.html
 intelligence/kernel/version.js
 sw.js
 force-update.html
-RELEASE-v13.28.5.3.md
-DEPLOYMENT-v13.28.5.3.md
-TEST-v13.28.5.3.md
-COMMIT-v13.28.5.3.txt
-CHANGED-FILES-v13.28.5.3.txt
+RELEASE-v13.28.6.md
+DEPLOYMENT-v13.28.6.md
+TEST-v13.28.6.md
+COMMIT-v13.28.6.txt
+CHANGED-FILES-v13.28.6.txt

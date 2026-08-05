@@ -1,4 +1,4 @@
-# Luvia 13.28.5.3 / Core 4.28.5.3
+# Luvia 13.28.6 / Core 4.28.6
 
 ## Photo Studio Workspace & EXIF Reliability
 
