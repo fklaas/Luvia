@@ -1,4 +1,4 @@
-# Deployment 13.28.6.3
+# Deployment 13.28.6.5
 
 1. Vollständigen Projektstand deployen.
 2. Keine Supabase-Migration erforderlich.

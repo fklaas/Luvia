@@ -1,4 +1,4 @@
-# Deployment 13.28.6.4
+# Deployment 13.28.6.5
 
 1. Web-Build deployen.
 2. `supabase functions deploy luvia-intelligence` ausführen.
