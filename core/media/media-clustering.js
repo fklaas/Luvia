@@ -1,6 +1,6 @@
 (() => {
   'use strict';
-  const VERSION='4.28.3', BUILD='13.28.3';
+  const VERSION='4.28.4.1', BUILD='13.28.4.1';
   const MAX_GAP_MS=20*60*1000, MAX_DISTANCE_M=300, channels=new Map();
   const radians=v=>v*Math.PI/180;
   const distance=(a,b)=>{if([a.latitude,a.longitude,b.latitude,b.longitude].some(v=>v===null||v===undefined))return null;const R=6371000,dLat=radians(b.latitude-a.latitude),dLon=radians(b.longitude-a.longitude),x=Math.sin(dLat/2)**2+Math.cos(radians(a.latitude))*Math.cos(radians(b.latitude))*Math.sin(dLon/2)**2;return 2*R*Math.asin(Math.sqrt(x))};
@@ -14,8 +14,8 @@
   async function syncGenerated(generated){const{client,tripId,userId}=await ctx();const persisted=await listPersisted();const manualMedia=new Set(persisted.filter(x=>!x.is_automatic&&x.state!=='dismissed').flatMap(x=>x.mediaIds));const activeSignatures=new Set();for(const cluster of generated){const ids=cluster.mediaIds.filter(id=>!manualMedia.has(id));if(ids.length<2&&cluster.kind==='moment')continue;const stable=`${tripId}:media:${signature(ids)}`;activeSignatures.add(stable);let existing=persisted.find(x=>x.source_key===stable);if(existing?.state==='dismissed')continue;const payload={trip_id:tripId,title:cluster.title,kind:cluster.kind,start_at:cluster.startAt,end_at:cluster.endAt,is_automatic:true,confidence:cluster.confidence,source_key:stable,state:'active',updated_by:userId};let row;if(existing){const r=await client.from('media_clusters').update(payload).eq('id',existing.id).select('*').single();if(r.error)throw r.error;row=r.data}else{const r=await client.from('media_clusters').insert({...payload,created_by:userId}).select('*').single();if(r.error){if(r.error.code==='23505'){continue}throw r.error}row=r.data}
       const oldAutomatic=persisted.filter(x=>x.is_automatic&&x.id!==row.id&&x.mediaIds.some(id=>ids.includes(id))).map(x=>x.id);
       if(oldAutomatic.length){const del=await client.from('media_cluster_items').delete().in('cluster_id',oldAutomatic).in('media_id',ids);if(del.error)throw del.error}
-      const ownDelete=await client.from('media_cluster_items').delete().eq('cluster_id',row.id);if(ownDelete.error)throw ownDelete.error;
-      const ins=ids.map((media_id,position)=>({cluster_id:row.id,media_id,position,created_by:userId}));if(ins.length){const r=await client.from('media_cluster_items').upsert(ins,{onConflict:'cluster_id,media_id',ignoreDuplicates:true});if(r.error)throw r.error}
+      const ownDelete=await client.from('media_cluster_items').delete().in('media_id',ids);if(ownDelete.error)throw ownDelete.error;
+      const ins=ids.map((media_id,position)=>({cluster_id:row.id,media_id,position,created_by:userId}));if(ins.length){let r=await client.from('media_cluster_items').insert(ins);if(r.error?.code==='23505'){await client.from('media_cluster_items').delete().in('media_id',ids);r=await client.from('media_cluster_items').insert(ins)}if(r.error)throw r.error}
     }
     const stale=persisted.filter(x=>x.is_automatic&&x.state!=='dismissed'&&x.source_key?.includes(':media:')&&!activeSignatures.has(x.source_key)).map(x=>x.id);if(stale.length)await client.from('media_clusters').update({state:'dismissed'}).in('id',stale).eq('trip_id',tripId);
     return listPersisted()}

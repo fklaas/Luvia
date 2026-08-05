@@ -1,8 +1,8 @@
 (() => {
   'use strict';
 
-  const VERSION = '4.28.4';
-  const BUILD = '13.28.4';
+  const VERSION = '4.28.4.1';
+  const BUILD = '13.28.4.1';
   const REALTIME_DEBOUNCE_MS = 650;
   const FILTERS = {
     none: ['Original', ''], warm: ['Golden Hour', 'sepia(.18) saturate(1.15) contrast(1.04)'], cool: ['Blue Sky', 'hue-rotate(10deg) saturate(1.08)'], vivid: ['Pop', 'saturate(1.45) contrast(1.1)'], soft: ['Soft', 'contrast(.92) saturate(.88) brightness(1.04)'], mono: ['Mono', 'grayscale(1) contrast(1.08)'],
@@ -24,6 +24,7 @@
   let loadTimer = null;
   let suppressRealtimeUntil = 0;
   let lastFingerprint = '';
+  let dayLimit = 10;
   const urlCache = new Map();
 
   const esc = value => String(value ?? '').replace(/[&<>"']/g, char => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[char]));
@@ -34,14 +35,8 @@
   };
   const fmtDate = value => value ? new Intl.DateTimeFormat('de-DE',{weekday:'long',day:'2-digit',month:'long',year:'numeric'}).format(new Date(value)) : 'Ohne Datum';
   const fmtTime = value => value ? new Intl.DateTimeFormat('de-DE',{hour:'2-digit',minute:'2-digit'}).format(new Date(value)) : '–';
-  const suggestName = item => {
-    const date = new Date(item.capturedAt);
-    if (Number.isNaN(date.getTime())) return 'Reisefoto';
-    const hour = date.getHours();
-    const part = hour < 6 ? 'Nachtmoment' : hour < 11 ? 'Morgenmoment' : hour < 14 ? 'Mittagsmoment' : hour < 18 ? 'Nachmittagsmoment' : hour < 22 ? 'Abendmoment' : 'Nachtmoment';
-    return `${part} · ${new Intl.DateTimeFormat('de-DE',{day:'2-digit',month:'2-digit'}).format(date)}`;
-  };
-  const displayName = item => item.displayName || suggestName(item);
+  const suggestName = () => '';
+  const displayName = item => item.displayName || 'Titel hinzufügen';
   const settings = item => ({brightness:100,contrast:100,saturation:100,temperature:0,blur:0,vignette:0,filter:'none',rotation:0,frame:'',sticker:'',caption:'',...item.editSettings});
   const editCss = item => {
     const edit = settings(item);
@@ -92,8 +87,8 @@
   }
   function fingerprint() {
     return JSON.stringify({
-      items: items.map(item => [item.id,item.updatedAt,item.favorite,item.displayName,item.dayKey,item.previewPath,item.editSettings]),
-      clusters: clusters.map(cluster => [cluster.id,cluster.updated_at,cluster.state,cluster.mediaIds]),
+      items: items.map(item => [item.id,item.favorite,item.displayName,item.dayKey,item.previewPath,item.editSettings,item.status]),
+      clusters: clusters.map(cluster => [cluster.id,cluster.title,cluster.state,cluster.mediaIds]),
       polaroids
     });
   }
@@ -168,7 +163,8 @@
   }
 
   async function renderDays() {
-    const root = host.querySelector('[data-gallery-days]');
+    const root = host?.querySelector('[data-gallery-days]');
+    if (!root) return;
     const groups = await dayGroups();
     if (!groups.length) { root.innerHTML = '<div class="lv-gallery-empty"><b>📷</b><h3>Noch keine Reisefotos</h3></div>'; return; }
     if (activeDay) {
@@ -176,17 +172,20 @@
       if (!group) activeDay = null;
       else {
         const hero = group.key !== 'other' && polaroids[group.key] ? group.items.find(item => item.id === polaroids[group.key]) : null;
-        root.innerHTML = `<div class="lv-day-page is-entering"><button type="button" class="lv-day-back" data-day-back>← Alle Reisetage</button><header><div><span>${group.key==='other'?'📷':'🗓️'}</span><h3>${esc(group.label)}</h3><p>${group.items.length} Foto${group.items.length===1?'':'s'}</p></div></header>${hero?`<button type="button" class="lv-polaroid-card" data-photo-open="${esc(hero.id)}">${photoVisual(hero,`data-photo-image="${esc(hero.id)}"`)}<b>Polaroid des Tages</b><small>${esc(displayName(hero))}</small></button>`:''}<div class="lv-gallery-grid">${group.items.map(item=>card(item)).join('')}</div></div>`;
+        root.innerHTML = `<div class="lv-day-page is-entering"><div class="lv-day-page-toolbar"><button type="button" class="lv-day-back" data-day-back>← Alle Fototage</button><span>${group.items.length} Foto${group.items.length===1?'':'s'}</span></div><header class="lv-day-page-hero"><div><small>${group.key==='other'?'WEITERE AUFNAHMEN':'EUER REISETAG'}</small><h3>${esc(group.label)}</h3><p>${group.items.length ? 'Alle Bilder dieses Tages – gemeinsam, bearbeitbar und in Echtzeit.' : 'Für diesen Tag wurden noch keine Fotos gespeichert.'}</p></div></header>${hero?`<button type="button" class="lv-polaroid-card" data-photo-open="${esc(hero.id)}">${photoVisual(hero,`data-photo-image="${esc(hero.id)}"`)}<b>Polaroid des Tages</b><small>${esc(displayName(hero))}</small></button>`:''}<div class="lv-gallery-grid">${group.items.map(item=>card(item)).join('')}</div></div>`;
         root.querySelector('[data-day-back]').onclick = () => { root.querySelector('.lv-day-page')?.classList.add('is-leaving'); setTimeout(()=>{activeDay=null;renderDays();},180); };
         await hydrateImages(root,group.items); bindPhotoActions(root); return;
       }
     }
-    root.innerHTML = `<div class="lv-day-tiles">${groups.map(group => {
+    const visible = groups.slice(0, dayLimit);
+    const hidden = Math.max(0, groups.length-visible.length);
+    root.innerHTML = `<div class="lv-day-tiles">${visible.map(group => {
       const cover = (group.key!=='other' && polaroids[group.key] ? group.items.find(item=>item.id===polaroids[group.key]) : null) || group.items[0] || null;
-      return `<button type="button" class="lv-day-tile" data-day-open="${esc(group.key)}"><span class="lv-day-tile-cover" ${cover?`data-photo-image="${esc(cover.id)}"`:''}><i>${cover?'Bild wird geladen …':'Noch keine Fotos'}</i></span><div><small>${group.key==='other'?'Weitere Aufnahmen':'Reisetag'}</small><strong>${esc(group.label)}</strong><em>${group.items.length} Foto${group.items.length===1?'':'s'}</em></div><b>→</b></button>`;
-    }).join('')}</div>`;
-    await hydrateImages(root, groups.flatMap(group=>group.items.slice(0,1)));
+      return `<button type="button" class="lv-day-tile ${group.items.length?'has-photos':'is-empty'}" data-day-open="${esc(group.key)}"><span class="lv-day-tile-cover" ${cover?`data-photo-image="${esc(cover.id)}"`:''}><i>${cover?'Bild wird geladen …':'Noch frei'}</i></span><div><small>${group.key==='other'?'WEITERE AUFNAHMEN':'REISETAG'}</small><strong>${esc(group.label)}</strong><em>${group.items.length} Foto${group.items.length===1?'':'s'}</em></div><b>→</b></button>`;
+    }).join('')}</div>${groups.length>10?`<div class="lv-day-more"><button type="button" data-days-toggle>${dayLimit<groups.length?`Mehr Tage anzeigen (${hidden})`:'Weniger Tage anzeigen'}</button></div>`:''}`;
+    await hydrateImages(root, visible.flatMap(group=>group.items.slice(0,1)));
     root.querySelectorAll('[data-day-open]').forEach(button => button.onclick = () => { activeDay=button.dataset.dayOpen; renderDays(); });
+    root.querySelector('[data-days-toggle]')?.addEventListener('click',()=>{dayLimit=dayLimit<groups.length?groups.length:10;renderDays()});
   }
 
   function clusterReason(cluster) {
@@ -209,7 +208,7 @@
     root.querySelectorAll('[data-memory-bridge]').forEach(button => button.onclick = () => openMemoryBridge(button.dataset.memoryBridge));
     root.querySelectorAll('[data-cluster-dismiss]').forEach(button => button.onclick = async () => {
       if (!confirm('Automatische Gruppierung auflösen?')) return;
-      suppressRealtimeUntil=Date.now()+1600; await window.LuviaMediaClustering.dissolve(button.dataset.clusterDismiss); await load({silent:true,analyze:false,force:true});
+      suppressRealtimeUntil=Date.now()+1600; await window.LuviaMediaClustering.dissolve(button.dataset.clusterDismiss); await window.LuviaTimelineCore?.removePhotoMemoryByCluster?.(button.dataset.clusterDismiss); await load({silent:true,analyze:false,force:true});
     });
   }
 
@@ -233,13 +232,21 @@
 
   function editorControls(edit) {
     const filterButtons=Object.entries(FILTERS).map(([key,[label]])=>`<button type="button" class="lv-filter-chip ${edit.filter===key?'is-active':''}" data-filter="${key}">${esc(label)}</button>`).join('');
-    return `<div class="lv-editor-sliders"><label>Helligkeit <input type="range" min="50" max="150" value="${Number(edit.brightness)}" data-ed="brightness"><output>${Number(edit.brightness)}%</output></label><label>Kontrast <input type="range" min="50" max="160" value="${Number(edit.contrast)}" data-ed="contrast"><output>${Number(edit.contrast)}%</output></label><label>Sättigung <input type="range" min="0" max="200" value="${Number(edit.saturation)}" data-ed="saturation"><output>${Number(edit.saturation)}%</output></label><label>Wärme <input type="range" min="-50" max="50" value="${Number(edit.temperature)}" data-ed="temperature"><output>${Number(edit.temperature)}</output></label><label>Weichzeichnen <input type="range" min="0" max="8" step=".5" value="${Number(edit.blur)}" data-ed="blur"><output>${Number(edit.blur)}</output></label><label>Vignette <input type="range" min="0" max="100" value="${Number(edit.vignette)}" data-ed="vignette"><output>${Number(edit.vignette)}%</output></label></div><div class="lv-filter-browser"><h3>Filter</h3><div>${filterButtons}</div></div><div class="lv-editor-fun"><label>Rahmen <select data-ed="frame">${FRAMES.map(frame=>`<option value="${frame}">${frame?frame[0].toUpperCase()+frame.slice(1):'Kein Rahmen'}</option>`).join('')}</select></label><label>Sticker <select data-ed="sticker">${STICKERS.map(sticker=>`<option value="${esc(sticker)}">${sticker||'Kein Sticker'}</option>`).join('')}</select></label><label>Text im Bild <input type="text" maxlength="60" value="${esc(edit.caption||'')}" data-ed="caption" placeholder="Euer Moment …"></label></div>`;
+    return `<div class="lv-studio-tabs"><button type="button" class="is-active" data-studio-tab="look">Look</button><button type="button" data-studio-tab="adjust">Anpassen</button><button type="button" data-studio-tab="decorate">Kreativ</button></div><div class="lv-studio-pane is-active" data-studio-pane="look"><div class="lv-filter-browser"><div>${filterButtons}</div></div></div><div class="lv-studio-pane" data-studio-pane="adjust"><div class="lv-editor-sliders"><label>Helligkeit <input type="range" min="50" max="150" value="${Number(edit.brightness)}" data-ed="brightness"><output>${Number(edit.brightness)}%</output></label><label>Kontrast <input type="range" min="50" max="160" value="${Number(edit.contrast)}" data-ed="contrast"><output>${Number(edit.contrast)}%</output></label><label>Sättigung <input type="range" min="0" max="200" value="${Number(edit.saturation)}" data-ed="saturation"><output>${Number(edit.saturation)}%</output></label><label>Wärme <input type="range" min="-50" max="50" value="${Number(edit.temperature)}" data-ed="temperature"><output>${Number(edit.temperature)}</output></label><label>Weichzeichnen <input type="range" min="0" max="8" step=".5" value="${Number(edit.blur)}" data-ed="blur"><output>${Number(edit.blur)}</output></label><label>Vignette <input type="range" min="0" max="100" value="${Number(edit.vignette)}" data-ed="vignette"><output>${Number(edit.vignette)}%</output></label></div></div><div class="lv-studio-pane" data-studio-pane="decorate"><div class="lv-editor-fun"><label>Rahmen <select data-ed="frame">${FRAMES.map(frame=>`<option value="${frame}">${frame?frame[0].toUpperCase()+frame.slice(1):'Kein Rahmen'}</option>`).join('')}</select></label><label>Sticker <select data-ed="sticker">${STICKERS.map(sticker=>`<option value="${esc(sticker)}">${sticker||'Kein Sticker'}</option>`).join('')}</select></label><label>Text im Bild <input type="text" maxlength="60" value="${esc(edit.caption||'')}" data-ed="caption" placeholder="Euer Moment …"></label><button type="button" data-rotate>↻ 90° drehen</button></div></div>`;
+  }
+
+  async function aiTitleFor(item) {
+    const url = await urlFor(item);
+    if (!url) throw new Error('Für dieses Foto ist keine sichere Vorschau verfügbar.');
+    if (!window.LuviaOpenAIProvider?.run) throw new Error('Luvia Bildanalyse ist noch nicht geladen.');
+    const result = await window.LuviaOpenAIProvider.run({capability:'media.describe',tier:'fast',input:{imageUrl:url,language:'de',instruction:'Erzeuge einen kurzen, warmen und konkreten Fototitel. Keine Tageszeit-Titel und nichts erfinden.'},context:{capturedAt:item.capturedAt,latitude:item.latitude,longitude:item.longitude,dayKey:item.dayKey}} ,{timeoutMs:45000});
+    return result?.data?.result?.title || result?.result?.title || '';
   }
 
   async function openEditor(id) {
     const item=items.find(entry=>entry.id===id); if(!item)return;
     const validPolaroid=(await tripDays()).includes(item.dayKey),url=await urlFor(item),edit=settings(item),state={...edit},overlay=document.createElement('div'); overlay.className='lv-photo-overlay';
-    overlay.innerHTML=`<section class="lv-editor-dialog lv-editor-pro"><button data-close>×</button><span>🎨 Luvia Photo Studio</span><h2>Foto kreativ bearbeiten</h2><div class="lv-editor-layout"><div class="lv-editor-preview frame-${esc(edit.frame||'none')}"><img src="${esc(url)}"><b class="lv-photo-vignette"></b><em class="lv-photo-sticker"></em><strong class="lv-photo-caption"></strong></div><div class="lv-editor-panel"><div class="lv-editor-name"><input value="${esc(item.displayName||'')}" placeholder="Titel des Fotos" data-edit-name><button type="button" data-name-suggestion>✨ ${esc(suggestName(item))}</button></div>${editorControls(edit)}<button type="button" data-rotate>↻ 90° drehen</button></div></div><div class="lv-editor-actions"><button data-reset>Zurücksetzen</button><button data-polaroid ${validPolaroid?'':'disabled'}>Polaroid des Tages</button><button class="primary" data-save>Speichern</button></div></section>`;
+    overlay.innerHTML=`<section class="lv-editor-dialog lv-editor-pro"><button data-close>×</button><span>🎨 Luvia Photo Studio</span><h2>Foto kreativ bearbeiten</h2><div class="lv-editor-layout"><div class="lv-editor-preview frame-${esc(edit.frame||'none')}"><img src="${esc(url)}"><b class="lv-photo-vignette"></b><em class="lv-photo-sticker"></em><strong class="lv-photo-caption"></strong></div><div class="lv-editor-panel"><div class="lv-editor-name"><input value="${esc(item.displayName||'')}" placeholder="Eigener Fototitel" data-edit-name><button type="button" data-ai-title>✨ KI-Titel erkennen</button></div>${editorControls(edit)}<button type="button" data-rotate>↻ 90° drehen</button></div></div><div class="lv-editor-actions"><button data-reset>Zurücksetzen</button><button data-polaroid ${validPolaroid?'':'disabled'}>Polaroid des Tages</button><button class="primary" data-save>Speichern</button></div></section>`;
     document.body.appendChild(overlay);
     const preview=overlay.querySelector('.lv-editor-preview'),img=preview.querySelector('img'),vignette=preview.querySelector('.lv-photo-vignette'),sticker=preview.querySelector('.lv-photo-sticker'),caption=preview.querySelector('.lv-photo-caption');
     overlay.querySelector('[data-ed="frame"]').value=state.frame||''; overlay.querySelector('[data-ed="sticker"]').value=state.sticker||'';
@@ -248,9 +255,10 @@
     overlay.querySelectorAll('[data-filter]').forEach(button=>button.onclick=()=>{state.filter=button.dataset.filter;overlay.querySelectorAll('[data-filter]').forEach(x=>x.classList.toggle('is-active',x===button));apply()});
     ['frame','sticker','caption'].forEach(key=>{const control=overlay.querySelector(`[data-ed="${key}"]`);control.oninput=control.onchange=()=>{state[key]=control.value;apply()}});
     overlay.querySelector('[data-rotate]').onclick=()=>{state.rotation=(Number(state.rotation||0)+90)%360;apply()};
-    overlay.querySelector('[data-name-suggestion]').onclick=()=>overlay.querySelector('[data-edit-name]').value=suggestName(item);
+    overlay.querySelectorAll('[data-studio-tab]').forEach(button=>button.onclick=()=>{overlay.querySelectorAll('[data-studio-tab]').forEach(x=>x.classList.toggle('is-active',x===button));overlay.querySelectorAll('[data-studio-pane]').forEach(x=>x.classList.toggle('is-active',x.dataset.studioPane===button.dataset.studioTab))});
+    overlay.querySelector('[data-ai-title]').onclick=async()=>{const button=overlay.querySelector('[data-ai-title]');button.disabled=true;button.textContent='✨ Bild wird erkannt …';try{const title=await aiTitleFor(item);overlay.querySelector('[data-edit-name]').value=title||''}catch(error){showError(error)}finally{button.disabled=false;button.textContent='✨ KI-Titel erkennen'}};
     overlay.querySelector('[data-reset]').onclick=()=>{Object.assign(state,{brightness:100,contrast:100,saturation:100,temperature:0,blur:0,vignette:0,filter:'none',rotation:0,frame:'',sticker:'',caption:''});apply();overlay.querySelectorAll('[data-filter]').forEach(x=>x.classList.toggle('is-active',x.dataset.filter==='none'))};
-    overlay.querySelector('[data-polaroid]').onclick=async()=>{suppressRealtimeUntil=Date.now()+1200;await window.LuviaMediaCore.setPolaroid(id,item.dayKey);overlay.remove();await load({silent:true,force:true});status('Polaroid des Tages gespeichert.','ready')};
+    const polaroidButton=overlay.querySelector('[data-polaroid]'); if(polaroidButton&&!polaroidButton.disabled)polaroidButton.onclick=async()=>{suppressRealtimeUntil=Date.now()+1200;await window.LuviaMediaCore.setPolaroid(id,item.dayKey);overlay.remove();await load({silent:true,force:true});status('Polaroid des Tages gespeichert.','ready')};
     overlay.querySelector('[data-save]').onclick=async()=>{suppressRealtimeUntil=Date.now()+1200;await window.LuviaMediaCore.update(id,{displayName:overlay.querySelector('[data-edit-name]').value,editSettings:state});overlay.remove();await load({silent:true,force:true});status('Fotoänderungen gespeichert.','ready')};
     const close=()=>overlay.remove(); overlay.querySelector('[data-close]').onclick=close; overlay.onclick=e=>{if(e.target===overlay)close()};
   }
@@ -274,7 +282,7 @@
   }
   async function renderAll({force=false}={}) {
     const next=fingerprint(); if(!force && next===lastFingerprint)return; lastFingerprint=next;
-    host.querySelector('[data-gallery-count]').textContent=`${items.length} Foto${items.length===1?'':'s'}`;
+    const countNode=host?.querySelector('[data-gallery-count]'); if(!countNode)return; countNode.textContent=`${items.length} Foto${items.length===1?'':'s'}`;
     await renderClusters(); await renderFavorites(); await renderDays();
   }
   async function load(options={}) {
@@ -295,8 +303,8 @@
   async function upload(files,{camera=false}={}) {
     const list=[...files]; if(!list.length)return;
     suppressRealtimeUntil=Date.now()+10000;
-    let location=null;
-    if(camera){status('Aufnahmestandort wird ermittelt …');location=await currentLocation()}
+    let location=window.LuviaPresenceVisitCore?.diagnostics?.()?.lastPosition||null;
+    if(camera&&!location) location=await currentLocation();
     status(`${list.length} Foto${list.length===1?'':'s'} werden hochgeladen …`);
     for(let i=0;i<list.length;i++){
       status(`Upload ${i+1}/${list.length}: ${list[i].name||'Foto'}`);
@@ -310,9 +318,9 @@
     if(!relevant)return;
     const event=payload?.eventType || payload?.event;
     const analyze=event==='INSERT'||event==='DELETE'||(event==='UPDATE'&&['captured_at','day_key','status'].some(key=>payload?.old?.[key]!==payload?.new?.[key]));
-    scheduleLoad('Media Realtime',{realtime:true,silent:true,analyze,force:true});
+    scheduleLoad('Media Realtime',{realtime:true,silent:true,analyze,force:false});
   }
-  function clusterRealtime() { scheduleLoad('Cluster Realtime',{realtime:true,silent:true,analyze:false,force:true}); }
+  function clusterRealtime() { scheduleLoad('Cluster Realtime',{realtime:true,silent:true,analyze:false,force:false}); }
 
   async function mount(target) {
     host=target; host.innerHTML=shell();
