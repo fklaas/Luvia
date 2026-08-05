@@ -1,6 +1,6 @@
 (() => {
 'use strict';
-const VERSION='4.29.1',BUILD='13.29.1',channels=new Map();
+const VERSION='4.29.2',BUILD='13.29.2',channels=new Map();
 let localWriteDepth=0;
 async function ctx(){const media=window.LuviaMediaCore;if(!media)throw new Error('Media Core ist nicht geladen.');return{...(await media.getContext()),media}}
 const missing=e=>['42P01','PGRST205'].includes(e?.code);

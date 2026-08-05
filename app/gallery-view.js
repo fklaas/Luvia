@@ -1,8 +1,8 @@
 (() => {
   'use strict';
 
-  const VERSION = '4.29.0';
-  const BUILD = '13.29.0';
+  const VERSION = '4.29.2';
+  const BUILD = '13.29.2';
   const REALTIME_DEBOUNCE_MS = 650;
   const FILTERS = {
     none: ['Original', ''], warm: ['Golden Hour', 'sepia(.18) saturate(1.15) contrast(1.04)'], cool: ['Blue Sky', 'hue-rotate(10deg) saturate(1.08)'], vivid: ['Pop', 'saturate(1.45) contrast(1.1)'], soft: ['Soft', 'contrast(.92) saturate(.88) brightness(1.04)'], mono: ['Mono', 'grayscale(1) contrast(1.08)'],
@@ -90,7 +90,7 @@
     if (urlCache.has(cacheKey)) return urlCache.get(cacheKey);
     if ((urlFailureCache.get(item.id)||0)>Date.now()) return '';
     try {
-      const url = await window.LuviaMediaCore.signedUrl(item, 1800);
+      const url = await window.LuviaMediaCore.cachedPreviewUrl(item);
       if (url) {urlCache.set(cacheKey, url);urlFailureCache.delete(item.id);return url}
       urlFailureCache.set(item.id,Date.now()+300000);return '';
     } catch {urlFailureCache.set(item.id,Date.now()+300000);return ''}
@@ -233,13 +233,13 @@
     const visible = clusters.filter(cluster => cluster.state !== 'dismissed' && cluster.mediaIds?.length);
     if (!visible.length) { root.innerHTML = '<div class="lv-gallery-empty compact"><b>✨</b><h3>Noch keine Fotomomente</h3><p>Mehrere Fotos innerhalb von 20 Minuten werden automatisch gruppiert.</p></div>'; return; }
     root.innerHTML = `<div class="lv-cluster-grid">${visible.map(cluster => {const memory=memoryAlbums.find(a=>String(a.source_cluster_id)===String(cluster.id));return `<article class="lv-cluster-card ${memory?'is-memory':''}"><button class="lv-cluster-collage" data-cluster-open="${esc(cluster.id)}">${cluster.mediaIds.slice(0,4).map(id=>`<span data-cluster-image="${esc(id)}"></span>`).join('')}<b>${memory?'💛 Erinnerung':`${cluster.mediaIds.length} Fotos`}</b></button><div class="lv-cluster-copy"><small>${esc(fmtDate(cluster.start_at))} · ${esc(fmtTime(cluster.start_at))}</small><h3>${esc(memory?.title||cluster.title||'Gemeinsamer Fotomoment')}</h3><p>${esc(memory?'Dieser Fotomoment wurde als Memory Album festgehalten.':clusterReason(cluster))}</p><div>${memory?`<button type="button" data-memory-open>💛 Memory Album öffnen</button>`:`<button type="button" data-memory-create="${esc(cluster.id)}">✨ Daraus eine Erinnerung machen</button><button type="button" data-cluster-dismiss="${esc(cluster.id)}">Auflösen</button>`}</div></div></article>`}).join('')}</div>`;
+    root.querySelectorAll('[data-cluster-open]').forEach(button => button.onclick = () => openCluster(button.dataset.clusterOpen));
+    root.querySelectorAll('[data-memory-create]').forEach(button => button.onclick = () => window.LuviaAlbumsView?.startFromCluster?.(button.dataset.memoryCreate,{cluster:clusters.find(x=>String(x.id)===String(button.dataset.memoryCreate)),items:items.filter(x=>(clusters.find(c=>String(c.id)===String(button.dataset.memoryCreate))?.mediaIds||[]).includes(x.id))}));
+    root.querySelectorAll('[data-memory-open]').forEach(button => button.onclick = () => window.LuviaApp?.show?.('albums'));
     await Promise.all(visible.flatMap(cluster => cluster.mediaIds.slice(0,4).map(async id => {
       const item = items.find(entry=>entry.id===id), node = root.querySelector(`[data-cluster-image="${cssEsc(id)}"]`);
       if (!item || !node) return; node.innerHTML=photoVisual(item,`data-photo-image="${esc(item.id)}"`); await hydrateImages(node,[item]);
     })));
-    root.querySelectorAll('[data-cluster-open]').forEach(button => button.onclick = () => openCluster(button.dataset.clusterOpen));
-    root.querySelectorAll('[data-memory-create]').forEach(button => button.onclick = () => window.LuviaAlbumsView?.startFromCluster?.(button.dataset.memoryCreate,{cluster:clusters.find(x=>String(x.id)===String(button.dataset.memoryCreate)),items:items.filter(x=>(clusters.find(c=>String(c.id)===String(button.dataset.memoryCreate))?.mediaIds||[]).includes(x.id))}));
-    root.querySelectorAll('[data-memory-open]').forEach(button => button.onclick = () => window.LuviaApp?.show?.('albums'));
     root.querySelectorAll('[data-cluster-dismiss]').forEach(button => button.onclick = async () => {
       if (!confirm('Automatische Gruppierung auflösen?')) return;
       suppressRealtimeUntil=Date.now()+1600; await window.LuviaMediaClustering.dissolve(button.dataset.clusterDismiss); await window.LuviaTimelineCore?.removePhotoMemoryByCluster?.(button.dataset.clusterDismiss); await load({silent:true,analyze:false,force:true});
@@ -332,15 +332,19 @@
   }
 
   async function readData({analyze=false}={}) {
-    items=await window.LuviaMediaCore.list({type:'image'});
-    memoryAlbums=await window.LuviaMemoryAlbums?.list?.().catch(()=>[])||[];
-    const pendingMetadata=items.filter(item=>!item.metadata?.captureEvidence&&!item.metadata?.metadataAutoCheckedAt).slice(0,4);
-    for(const candidate of pendingMetadata){try{const refreshed=await window.LuviaMediaCore.reanalyze(candidate.id);items=items.map(x=>x.id===refreshed.id?refreshed:x)}catch{}}
-    polaroids=await window.LuviaMediaCore.listPolaroids();
-    if (analyze) {
-      const generated=window.LuviaMediaClustering.generate(items);
-      clusters=await window.LuviaMediaClustering.syncGenerated(generated);
-    } else clusters=await window.LuviaMediaClustering.listPersisted();
+    const started=performance.now();
+    const [mediaRows,albumRows,polaroidRows,clusterRows]=await Promise.all([
+      window.LuviaMediaCore.list({type:'image'}),
+      window.LuviaMemoryAlbums?.list?.().catch(()=>[])||[],
+      window.LuviaMediaCore.listPolaroids(),
+      analyze?Promise.resolve(null):window.LuviaMediaClustering.listPersisted()
+    ]);
+    items=mediaRows;memoryAlbums=albumRows;polaroids=polaroidRows;
+    clusters=analyze?await window.LuviaMediaClustering.syncGenerated(window.LuviaMediaClustering.generate(items)):clusterRows;
+    const visibleIds=[...new Set(clusters.filter(c=>c.state!=='dismissed').slice(0,8).flatMap(c=>(c.preview_media_ids||c.mediaIds||[]).slice(0,4)))];
+    const visibleMedia=visibleIds.map(id=>items.find(x=>String(x.id)===String(id))).filter(Boolean);
+    void window.LuviaMediaCore.prewarm(visibleMedia,24);
+    console.debug('[LuviaMemoryPerf] gallery-data-ready',{durationMs:Math.round(performance.now()-started),media:items.length,clusters:clusters.length,requestBudget:4});
   }
   async function renderAll({force=false}={}) {
     const next=fingerprint(); if(!force && next===lastFingerprint)return; lastFingerprint=next;
