@@ -155,7 +155,7 @@ body.lv-photo-modal-open{position:fixed!important;width:100%!important;overflow:
 }
 
 
-/* 13.29.3 — instant first paint, warm travel placeholders and timeline actions */
+/* 13.29.4 — instant first paint, warm travel placeholders and timeline actions */
 .lv-photo-media-canvas,.lv-day-tile-cover{background:linear-gradient(145deg,#fff5ef 0%,#f8e9f1 48%,#eaf5fb 100%);position:relative;overflow:hidden}
 .lv-photo-media-canvas:before,.lv-day-tile-cover:before{content:"";position:absolute;inset:auto -12% -38% 18%;height:75%;border-radius:50% 50% 0 0;background:linear-gradient(160deg,rgba(255,184,147,.34),rgba(236,148,181,.2));transform:rotate(-5deg)}
 .lv-photo-placeholder,.lv-day-tile-cover>i{position:absolute;inset:0;display:grid!important;place-content:center;gap:6px;text-align:center;color:#8d7180;font-style:normal;font-weight:700;z-index:1}

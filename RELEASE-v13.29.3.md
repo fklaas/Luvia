@@ -1,4 +1,4 @@
-# Luvia 13.29.3 — Instant Gallery & Warm Memories
+# Luvia 13.29.4 — Instant Gallery & Warm Memories
 
 - First-load image pipeline no longer blocks on fetch-to-blob conversion.
 - Gallery controls render before image hydration.

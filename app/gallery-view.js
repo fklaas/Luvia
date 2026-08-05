@@ -1,8 +1,8 @@
 (() => {
   'use strict';
 
-  const VERSION = '4.29.3';
-  const BUILD = '13.29.3';
+  const VERSION = '4.29.4';
+  const BUILD = '13.29.4';
   const REALTIME_DEBOUNCE_MS = 650;
   const FILTERS = {
     none: ['Original', ''], warm: ['Golden Hour', 'sepia(.18) saturate(1.15) contrast(1.04)'], cool: ['Blue Sky', 'hue-rotate(10deg) saturate(1.08)'], vivid: ['Pop', 'saturate(1.45) contrast(1.1)'], soft: ['Soft', 'contrast(.92) saturate(.88) brightness(1.04)'], mono: ['Mono', 'grayscale(1) contrast(1.08)'],
@@ -158,14 +158,19 @@
       <div class="lv-photo-actions"><button type="button" data-photo-favorite="${esc(item.id)}" class="${item.favorite?'is-on':''}" title="Favorit">${item.favorite?'★':'☆'}</button><button type="button" data-photo-timeline="${esc(item.id)}" title="Zur Dashboard-Timeline hinzufügen">⌁</button><button type="button" data-photo-polaroid="${esc(item.id)}" title="Polaroid des Tages">▣</button><button type="button" data-photo-edit="${esc(item.id)}" title="Bearbeiten">✎</button><button type="button" data-photo-remove="${esc(item.id)}" title="Löschen">×</button></div>
     </article>`;
   }
-  async function hydrateImages(root, list) {
-    await Promise.all(list.map(async item => {
-      const url = await urlFor(item);
-      root.querySelectorAll(`[data-photo-image="${cssEsc(item.id)}"]`).forEach(node => {
-        if (url) { const image=node.querySelector('img'); if(image) image.src=url; else node.style.backgroundImage = `url("${url}")`; node.querySelector('i')?.remove(); }
-        else node.innerHTML = '<i>Vorschau nicht verfügbar</i>';
+  async function hydrateImages(root, list, size='thumb640') {
+    const unique=[...new Map((list||[]).filter(Boolean).map(item=>[String(item.id),item])).values()];
+    if(!unique.length)return;
+    let urls=new Map();
+    try{urls=await window.LuviaMediaCore.signedUrls(unique,size,86400)}catch(error){console.warn('[LuviaGalleryView] thumbnail batch failed',error)}
+    unique.forEach(item=>{
+      const url=urls.get(String(item.id))||'';
+      root.querySelectorAll(`[data-photo-image="${cssEsc(item.id)}"]`).forEach(node=>{
+        const image=node.querySelector('img');
+        if(url&&image){image.loading='eager';image.decoding='async';image.fetchPriority='high';image.width=item.width||640;image.height=item.height||480;image.src=url;image.addEventListener('load',()=>node.classList.add('is-loaded'),{once:true});image.addEventListener('error',()=>node.classList.add('is-failed'),{once:true});}
+        else if(!url)node.classList.add('is-failed');
       });
-    }));
+    });
     syncOverlayGeometry(root);
   }
   function bindPhotoActions(root) {
@@ -332,23 +337,29 @@
 
   async function readData({analyze=false}={}) {
     const started=performance.now();
+    if(!analyze&&window.LuviaMediaCore?.galleryBootstrap){
+      try{
+        const bootstrap=await window.LuviaMediaCore.galleryBootstrap();
+        items=bootstrap.media||[];clusters=bootstrap.clusters||[];memoryAlbums=bootstrap.albums||[];polaroids=bootstrap.polaroids||{};
+        console.debug('[LuviaMemoryPerf] gallery-bootstrap-ready',{durationMs:Math.round(performance.now()-started),media:items.length,clusters:clusters.length,requestBudget:1});
+        return;
+      }catch(error){console.warn('[LuviaGalleryView] bootstrap fallback',error)}
+    }
     const [mediaRows,albumRows,polaroidRows,clusterRows]=await Promise.all([
       window.LuviaMediaCore.list({type:'image'}),
       window.LuviaMemoryAlbums?.list?.().catch(()=>[])||[],
       window.LuviaMediaCore.listPolaroids(),
-      analyze?Promise.resolve(null):window.LuviaMediaClustering.listPersisted()
+      analyze?Promise.resolve(null):window.LuviaMediaClustering.listPersisted().catch(()=>[])
     ]);
-    items=mediaRows;memoryAlbums=albumRows;polaroids=polaroidRows;
-    clusters=analyze?await window.LuviaMediaClustering.syncGenerated(window.LuviaMediaClustering.generate(items)):clusterRows;
-    const visibleIds=[...new Set(clusters.filter(c=>c.state!=='dismissed').slice(0,8).flatMap(c=>(c.preview_media_ids||c.mediaIds||[]).slice(0,4)))];
-    const visibleMedia=visibleIds.map(id=>items.find(x=>String(x.id)===String(id))).filter(Boolean);
-    void window.LuviaMediaCore.prewarm(visibleMedia,24);
+    items=mediaRows;memoryAlbums=albumRows;polaroids=polaroidRows;clusters=analyze?await window.LuviaMediaClustering.syncGenerated(window.LuviaMediaClustering.generate(items)):clusterRows;
     console.debug('[LuviaMemoryPerf] gallery-data-ready',{durationMs:Math.round(performance.now()-started),media:items.length,clusters:clusters.length,requestBudget:4});
   }
   async function renderAll({force=false}={}) {
     const next=fingerprint(); if(!force && next===lastFingerprint)return; lastFingerprint=next;
     const countNode=host?.querySelector('[data-gallery-count]'); if(!countNode)return; countNode.textContent=`${items.length} Foto${items.length===1?'':'s'}`;
     await renderFavorites(); await renderClusters(); await renderDays();
+    const backfill=()=>window.LuviaMediaCore?.backfillDeliveryVariants?.(items,2).catch(()=>{});
+    if('requestIdleCallback'in window)requestIdleCallback(backfill,{timeout:5000});else setTimeout(backfill,1800);
   }
   async function load(options={}) {
     if(!host)return;
@@ -376,7 +387,7 @@
       status(`Upload ${i+1}/${list.length}: ${list[i].name||'Foto'}`);
       await window.LuviaMediaCore.upload(list[i],{source:camera?'app_camera':'user_upload',captureSource:camera?'app_camera':'file_picker',capturedAt:camera?new Date().toISOString():undefined,captureLocation:location,deviceMetadata:camera?{userAgent:navigator.userAgent,platform:navigator.platform,language:navigator.language}:null});
     }
-    await load({silent:false,analyze:true,force:true});
+    await load({silent:false,analyze:false,force:true});
   }
 
   function mediaRealtime(payload) {
