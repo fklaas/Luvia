@@ -1,4 +1,4 @@
-# Luvia 13.28.6.5 / Core 4.28.6.5
+# Luvia 13.28.6.6 / Core 4.28.6.6
 
 ## Photo Surface & Album Intelligence Recovery
 

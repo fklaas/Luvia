@@ -1,4 +1,4 @@
-# Deployment 13.28.6.5
+# Deployment 13.28.6.6
 
 1. Gesamten Build deployen.
 2. Edge Function neu deployen: `supabase functions deploy luvia-intelligence`

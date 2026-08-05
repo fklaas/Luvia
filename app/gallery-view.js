@@ -1,8 +1,8 @@
 (() => {
   'use strict';
 
-  const VERSION = '4.28.6.5';
-  const BUILD = '13.28.6.5';
+  const VERSION = '4.28.6.6';
+  const BUILD = '13.28.6.6';
   const REALTIME_DEBOUNCE_MS = 650;
   const FILTERS = {
     none: ['Original', ''], warm: ['Golden Hour', 'sepia(.18) saturate(1.15) contrast(1.04)'], cool: ['Blue Sky', 'hue-rotate(10deg) saturate(1.08)'], vivid: ['Pop', 'saturate(1.45) contrast(1.1)'], soft: ['Soft', 'contrast(.92) saturate(.88) brightness(1.04)'], mono: ['Mono', 'grayscale(1) contrast(1.08)'],
