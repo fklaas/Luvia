@@ -1,6 +1,6 @@
 (() => {
   'use strict';
-  const VERSION='4.27.1';
+  const VERSION='4.28.5';
   const esc=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot',"'":'&#39;'}[c]));
   const tile=(x)=>`<button type="button" class="lv-hub-tile ${x.primary?'is-primary':''} ${x.preview?'is-preview':''}" data-hub-action="${esc(x.action||'')}" ${x.disabled?'disabled':''}><span class="lv-hub-icon">${x.icon}</span><span class="lv-hub-copy"><strong>${esc(x.title)}</strong><small>${esc(x.description)}</small>${x.meta?`<em>${esc(x.meta)}</em>`:''}</span><span class="lv-hub-arrow">${x.preview?'Demnächst':'→'}</span></button>`;
   function tripStats(trip){const id=trip?.id||trip?.tripId;const places=window.LuviaPlaceCore?.getPlaces?.({tripId:id})||[];const planned=places.filter(p=>p?.metadata?.plannedAt||p?.metadata?.tripPlace?.planned_at).length;return {places:places.length,planned};}
@@ -26,7 +26,7 @@
   ]});}
   function memories(){return shell({eyebrow:'Für immer erinnern',title:'Aus Momenten wird eure Geschichte.',description:'Fotos, Orte und gemeinsame Erinnerungen werden automatisch zu eurer Reisegeschichte zusammengeführt.',tiles:[
     {icon:'📸',title:'Fotogalerie',description:'Alle Reisefotos nach Tag und Ort sortiert.',action:'gallery',primary:true},
-    {icon:'🖼️',title:'Alben',description:'Automatische Cluster aus Fotos am gleichen Ort.',preview:true,disabled:true},
+    {icon:'🖼️',title:'Alben',description:'Automatisch erkannte Fotomomente und gemeinsame Cluster.',action:'albums'},
     {icon:'📖',title:'Reisebuch',description:'Aus Timeline, Orten und Momenten entsteht euer Buch.',action:'travel-book'},
     {icon:'🎞️',title:'Reise-Revue',description:'Eure Reise wie ein persönlicher Jahresrückblick.',action:'review'},
     {icon:'⭐',title:'Highlights',description:'Lieblingsorte und besondere gemeinsame Momente.',preview:true,disabled:true}

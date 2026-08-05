@@ -1,4 +1,4 @@
-# Test 13.28.4.1
+# Test 13.28.5
 
 Statisch geprüft: Versionen, Script-Ladefolge, JavaScript-Syntax, Realtime-Fingerprint, Tageslimit, Editor-Tabs, globaler Location-Bootstrap, Timeline-Cleanup, KI-Capability und ZIP-Integrität.
 

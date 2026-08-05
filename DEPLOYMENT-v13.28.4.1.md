@@ -1,4 +1,4 @@
-# Deployment 13.28.4.1
+# Deployment 13.28.5
 
 Keine Datenbankmigration.
 
@@ -16,4 +16,4 @@ git commit -m "fix: polish gallery realtime timeline and global location"
 git push
 ```
 
-Keine Secrets ändern. Danach `force-update.html` ausführen und App 13.28.4.1 / Core 4.28.4.1 prüfen.
+Keine Secrets ändern. Danach `force-update.html` ausführen und App 13.28.5 / Core 4.28.5 prüfen.

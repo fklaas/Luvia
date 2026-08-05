@@ -1,6 +1,6 @@
 (() => {
   'use strict';
-  const VERSION='4.28.4.1';
+  const VERSION='4.28.5';
   const ascii=(v,o,n)=>{let s='';for(let i=0;i<n;i++){const c=v.getUint8(o+i);if(!c)break;s+=String.fromCharCode(c)}return s};
   const exifDate=value=>{const m=String(value||'').trim().match(/^(\d{4}):(\d{2}):(\d{2})\s+(\d{2}):(\d{2}):(\d{2})$/);if(!m)return null;const d=new Date(+m[1],+m[2]-1,+m[3],+m[4],+m[5],+m[6]);return Number.isNaN(d.getTime())?null:d.toISOString()};
   const rational=(v,o,le)=>{const d=v.getUint32(o+4,le);return d?v.getUint32(o,le)/d:0};

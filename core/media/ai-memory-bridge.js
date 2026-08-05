@@ -1,6 +1,6 @@
 (() => {
 'use strict';
-const VERSION='4.28.4.1',BUILD='13.28.4.1';
+const VERSION='4.28.5',BUILD='13.28.5';
 const clone=v=>v==null?v:JSON.parse(JSON.stringify(v));
 const rad=v=>v*Math.PI/180;
 const distance=(a,b)=>{if([a.latitude,a.longitude,b.latitude,b.longitude].some(v=>v==null))return null;const R=6371000,dLat=rad(b.latitude-a.latitude),dLon=rad(b.longitude-a.longitude),x=Math.sin(dLat/2)**2+Math.cos(rad(a.latitude))*Math.cos(rad(b.latitude))*Math.sin(dLon/2)**2;return 2*R*Math.asin(Math.sqrt(x))};

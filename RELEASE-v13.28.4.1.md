@@ -1,4 +1,4 @@
-# Luvia 13.28.4.1 – Gallery Polish & Global Presence
+# Luvia 13.28.5 – Gallery Polish & Global Presence
 
 - Studio-Dialog ohne horizontales Scrollen; kompakte Tabs Look, Anpassen, Kreativ.
 - Realtime rendert nur bei inhaltlich verändertem Fingerprint.

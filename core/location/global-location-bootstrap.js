@@ -1,6 +1,6 @@
 (() => {
   'use strict';
-  const VERSION='4.28.4.1';
+  const VERSION='4.28.5';
   let requested=false;
   async function start(){
     if(requested||!navigator.geolocation||!window.LuviaPresenceVisitCore)return;
