@@ -15,7 +15,7 @@
       const oldAutomatic=persisted.filter(x=>x.is_automatic&&x.id!==row.id&&x.mediaIds.some(id=>ids.includes(id))).map(x=>x.id);
       if(oldAutomatic.length){const del=await client.from('media_cluster_items').delete().in('cluster_id',oldAutomatic).in('media_id',ids);if(del.error)throw del.error}
       const ownDelete=await client.from('media_cluster_items').delete().in('media_id',ids);if(ownDelete.error)throw ownDelete.error;
-      const ins=ids.map((media_id,position)=>({cluster_id:row.id,media_id,position,created_by:userId}));if(ins.length){let r=await client.from('media_cluster_items').insert(ins);if(r.error?.code==='23505'){await client.from('media_cluster_items').delete().in('media_id',ids);r=await client.from('media_cluster_items').insert(ins)}if(r.error)throw r.error}
+      const ins=ids.map((media_id,position)=>({cluster_id:row.id,media_id,position,created_by:userId}));if(ins.length){const r=await client.from('media_cluster_items').upsert(ins,{onConflict:'media_id'});if(r.error)throw r.error}
     }
     const stale=persisted.filter(x=>x.is_automatic&&x.state!=='dismissed'&&x.source_key?.includes(':media:')&&!activeSignatures.has(x.source_key)).map(x=>x.id);if(stale.length)await client.from('media_clusters').update({state:'dismissed'}).in('id',stale).eq('trip_id',tripId);
     return listPersisted()}

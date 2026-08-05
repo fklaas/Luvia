@@ -1,8 +1,8 @@
 (() => {
   'use strict';
 
-  const VERSION = '4.28.5.1';
-  const BUILD = '13.28.5.1';
+  const VERSION = '4.28.5.2';
+  const BUILD = '13.28.5.2';
   const REALTIME_DEBOUNCE_MS = 650;
   const FILTERS = {
     none: ['Original', ''], warm: ['Golden Hour', 'sepia(.18) saturate(1.15) contrast(1.04)'], cool: ['Blue Sky', 'hue-rotate(10deg) saturate(1.08)'], vivid: ['Pop', 'saturate(1.45) contrast(1.1)'], soft: ['Soft', 'contrast(.92) saturate(.88) brightness(1.04)'], mono: ['Mono', 'grayscale(1) contrast(1.08)'],
@@ -30,6 +30,7 @@
   function unlockPageScroll(){if(!document.body.classList.contains('lv-photo-modal-open'))return;document.body.classList.remove('lv-photo-modal-open');document.body.style.top='';window.scrollTo(0,modalScrollY);}
   function mountOverlay(overlay){lockPageScroll();document.body.appendChild(overlay);return()=>{overlay.remove();if(!document.querySelector('.lv-photo-overlay'))unlockPageScroll()}}
   const urlCache = new Map();
+  const urlFailureCache = new Map();
 
   const esc = value => String(value ?? '').replace(/[&<>"']/g, char => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[char]));
   const cssEsc = value => window.CSS?.escape ? CSS.escape(String(value)) : String(value).replace(/[^a-zA-Z0-9_-]/g, '\\$&');
@@ -41,27 +42,26 @@
   const fmtTime = value => value ? new Intl.DateTimeFormat('de-DE',{hour:'2-digit',minute:'2-digit'}).format(new Date(value)) : '–';
   const suggestName = () => '';
   const displayName = item => item.displayName || 'Titel hinzufügen';
-  const settings = item => ({brightness:100,contrast:100,saturation:100,temperature:0,blur:0,vignette:0,filter:'none',rotation:0,frame:'',sticker:'',caption:'',overlays:[],...item.editSettings});
+  const settings = item => ({brightness:100,contrast:100,saturation:100,temperature:0,blur:0,vignette:0,exposure:0,highlights:0,shadows:0,clarity:0,hue:0,grain:0,filter:'none',rotation:0,frame:'',sticker:'',caption:'',overlays:[],...item.editSettings});
   const editCss = item => {
     const edit = settings(item);
     const preset = FILTERS[edit.filter]?.[1] || '';
     const temperature = Number(edit.temperature || 0);
     const temperatureFilter = temperature > 0 ? `sepia(${Math.min(.35,temperature/180)}) hue-rotate(${-temperature/6}deg)` : temperature < 0 ? `hue-rotate(${Math.abs(temperature)/4}deg)` : '';
-    return `brightness(${Number(edit.brightness)}%) contrast(${Number(edit.contrast)}%) saturate(${Number(edit.saturation)}%) blur(${Number(edit.blur)}px) ${temperatureFilter} ${preset}`.trim();
+    const exposure=100+Number(edit.exposure||0),contrast=Number(edit.contrast)+Number(edit.clarity||0)*.25,shadowBoost=Math.max(0,Number(edit.shadows||0))*.12,highlightCut=Math.max(0,-Number(edit.highlights||0))*.08;return `brightness(${exposure*Number(edit.brightness)/100+shadowBoost-highlightCut}%) contrast(${contrast}%) saturate(${Number(edit.saturation)}%) hue-rotate(${Number(edit.hue||0)}deg) blur(${Number(edit.blur)}px) ${temperatureFilter} ${preset}`.trim();
   };
   const overlayMarkup = edit => `<span class="lv-saved-overlays">${(edit.overlays||[]).map(o=>`<span class="lv-saved-overlay ${o.type==='text'?'is-text':'is-sticker'}" style="left:${Number(o.x??50)}%;top:${Number(o.y??50)}%;transform:translate(-50%,-50%) rotate(${Number(o.rotation||0)}deg) scale(${Number(o.scale||1)})">${esc(o.value||'')}</span>`).join('')}</span>`;
   const photoVisual = (item, attrs='') => {
     const edit = settings(item);
-    return `<span class="lv-photo-visual frame-${esc(edit.frame||'none')}" ${attrs} style="filter:${esc(editCss(item))};transform:rotate(${Number(edit.rotation||0)}deg)"><i>Bild wird geladen …</i>${edit.vignette?`<b class="lv-photo-vignette" style="opacity:${Math.min(.8,Number(edit.vignette)/100)}"></b>`:''}${overlayMarkup(edit)}${edit.sticker?`<em class="lv-photo-sticker">${esc(edit.sticker)}</em>`:''}${edit.caption?`<strong class="lv-photo-caption">${esc(edit.caption)}</strong>`:''}</span>`;
+    return `<span class="lv-photo-visual frame-${esc(edit.frame||'none')}" ${attrs} style="filter:${esc(editCss(item))};transform:rotate(${Number(edit.rotation||0)}deg)"><i>Bild wird geladen …</i>${edit.vignette?`<b class="lv-photo-vignette" style="opacity:${Math.min(.8,Number(edit.vignette)/100)}"></b>`:''}${overlayMarkup(edit)}</span>`;
   };
 
   function shell() {
     return `<section class="lv-gallery-view">
       <header class="lv-gallery-hero">
         <div><span>📸 Realtime Galerie</span><h1>Eure gemeinsamen Reisefotos</h1><p>Momente, Reisetage, Favoriten und kreative Bearbeitung – ohne sichtbares Neuladen.</p></div>
-        <div class="lv-gallery-upload-actions"><button type="button" data-gallery-camera>Foto aufnehmen</button><button type="button" class="lv-gallery-upload" data-gallery-add>Fotos hinzufügen</button></div>
+        <div class="lv-gallery-upload-actions"><button type="button" class="lv-gallery-upload" data-gallery-add>Fotos hinzufügen</button></div>
         <input class="lv-gallery-file-input" type="file" accept="image/*,.jpg,.jpeg,.png,.webp,.heic,.heif,.avif" multiple data-gallery-input>
-        <input class="lv-gallery-file-input" type="file" accept="image/*" capture="environment" data-gallery-camera-input>
       </header>
       <div class="lv-gallery-status" data-gallery-status>Galerie wird geladen …</div>
       <section class="lv-gallery-section"><div class="lv-gallery-section-head"><div><span>⭐ Auswahl</span><h2>Favoriten</h2></div><strong data-favorite-count>0</strong></div><div class="lv-favorites" data-gallery-favorites></div></section>
@@ -71,13 +71,12 @@
 
   async function urlFor(item) {
     if (urlCache.has(item.id)) return urlCache.get(item.id);
+    if ((urlFailureCache.get(item.id)||0)>Date.now()) return '';
     try {
       const url = await window.LuviaMediaCore.signedUrl(item, 1800);
-      if (url) urlCache.set(item.id, url);
-      return url || '';
-    } catch {
-      return '';
-    }
+      if (url) {urlCache.set(item.id, url);urlFailureCache.delete(item.id);return url}
+      urlFailureCache.set(item.id,Date.now()+300000);return '';
+    } catch {urlFailureCache.set(item.id,Date.now()+300000);return ''}
   }
   function status(text, type='') {
     const node = host?.querySelector('[data-gallery-status]');
@@ -100,7 +99,7 @@
     if (Date.now() < suppressRealtimeUntil && options.realtime) return;
     clearTimeout(loadTimer);
     pending = {reason, ...options};
-    loadTimer = setTimeout(() => load(pending || {}), options.immediate ? 0 : REALTIME_DEBOUNCE_MS);
+    loadTimer = setTimeout(() => {const queued=pending||{};pending=null;load(queued)}, options.immediate ? 0 : REALTIME_DEBOUNCE_MS);
   }
 
   async function tripDays() {
@@ -228,7 +227,7 @@
 
   async function openLightbox(id) {
     let item=items.find(entry=>entry.id===id); if(!item){item=await window.LuviaMediaCore.get(id).catch(()=>null);if(item)items=[...items,item]} if(!item)return; const url=await urlFor(item),edit=settings(item),overlay=document.createElement('div'); overlay.className='lv-photo-overlay';
-    overlay.innerHTML=`<section class="lv-photo-dialog frame-${esc(edit.frame||'none')}"><button data-close>×</button><div class="lv-photo-large"><img src="${esc(url)}" alt="${esc(displayName(item))}" style="filter:${esc(editCss(item))};transform:rotate(${Number(edit.rotation||0)}deg)">${edit.vignette?`<b class="lv-photo-vignette" style="opacity:${Math.min(.8,Number(edit.vignette)/100)}"></b>`:''}${overlayMarkup(edit)}${edit.sticker?`<em class="lv-photo-sticker">${esc(edit.sticker)}</em>`:''}${edit.caption?`<strong class="lv-photo-caption">${esc(edit.caption)}</strong>`:''}</div><footer><div><strong>${esc(displayName(item))}</strong><small>${esc(fmtDate(item.capturedAt))} · ${esc(fmtTime(item.capturedAt))}${item.latitude!=null?' · Standort gespeichert':''}</small></div><button data-light-fav>${item.favorite?'★ Favorit':'☆ Favorit'}</button><button data-light-edit>✎ Bearbeiten</button></footer></section>`;
+    overlay.innerHTML=`<section class="lv-photo-dialog frame-${esc(edit.frame||'none')}"><button data-close>×</button><div class="lv-photo-large"><img src="${esc(url)}" alt="${esc(displayName(item))}" style="filter:${esc(editCss(item))};transform:rotate(${Number(edit.rotation||0)}deg)">${edit.vignette?`<b class="lv-photo-vignette" style="opacity:${Math.min(.8,Number(edit.vignette)/100)}"></b>`:''}${overlayMarkup(edit)}</div><footer><div><strong>${esc(displayName(item))}</strong><small>${esc(fmtDate(item.capturedAt))} · ${esc(fmtTime(item.capturedAt))}${item.latitude!=null?' · Standort gespeichert':''}</small></div><button data-light-fav>${item.favorite?'★ Favorit':'☆ Favorit'}</button><button data-light-edit>✎ Bearbeiten</button></footer></section>`;
     const removeOverlay=mountOverlay(overlay); const close=()=>removeOverlay(); overlay.querySelector('[data-close]').onclick=close; overlay.onclick=e=>{if(e.target===overlay)close()};
     overlay.querySelector('[data-light-fav]').onclick=async()=>{suppressRealtimeUntil=Date.now()+1200;await window.LuviaMediaCore.toggleFavorite(id);close();await load({silent:true,force:true})};
     overlay.querySelector('[data-light-edit]').onclick=()=>{close();openEditor(id)};
@@ -236,7 +235,7 @@
 
   function editorControls(edit) {
     const filterButtons=Object.entries(FILTERS).map(([key,[label]])=>`<button type="button" class="lv-filter-chip ${edit.filter===key?'is-active':''}" data-filter="${key}">${esc(label)}</button>`).join('');
-    return `<div class="lv-studio-tabs"><button type="button" class="is-active" data-studio-tab="look">Look</button><button type="button" data-studio-tab="adjust">Anpassen</button><button type="button" data-studio-tab="decorate">Kreativ</button></div><div class="lv-studio-pane is-active" data-studio-pane="look"><div class="lv-filter-browser"><div>${filterButtons}</div></div></div><div class="lv-studio-pane" data-studio-pane="adjust"><div class="lv-editor-sliders"><label>Helligkeit <input type="range" min="50" max="150" value="${Number(edit.brightness)}" data-ed="brightness"><output>${Number(edit.brightness)}%</output></label><label>Kontrast <input type="range" min="50" max="160" value="${Number(edit.contrast)}" data-ed="contrast"><output>${Number(edit.contrast)}%</output></label><label>Sättigung <input type="range" min="0" max="200" value="${Number(edit.saturation)}" data-ed="saturation"><output>${Number(edit.saturation)}%</output></label><label>Wärme <input type="range" min="-50" max="50" value="${Number(edit.temperature)}" data-ed="temperature"><output>${Number(edit.temperature)}</output></label><label>Weichzeichnen <input type="range" min="0" max="8" step=".5" value="${Number(edit.blur)}" data-ed="blur"><output>${Number(edit.blur)}</output></label><label>Vignette <input type="range" min="0" max="100" value="${Number(edit.vignette)}" data-ed="vignette"><output>${Number(edit.vignette)}%</output></label></div></div><div class="lv-studio-pane" data-studio-pane="decorate"><div class="lv-editor-fun"><label>Rahmen <select data-ed="frame">${FRAMES.map(frame=>`<option value="${frame}">${frame?frame[0].toUpperCase()+frame.slice(1):'Kein Rahmen'}</option>`).join('')}</select></label><label>Sticker <select data-ed="sticker">${STICKERS.map(sticker=>`<option value="${esc(sticker)}">${sticker||'Sticker wählen'}</option>`).join('')}</select></label><button type="button" data-add-sticker>Sticker hinzufügen</button><button type="button" data-add-text>Text hinzufügen</button><label>Text im Bild <input type="text" maxlength="60" value="${esc(edit.caption||'')}" data-ed="caption" placeholder="Euer Moment …"></label><button type="button" data-rotate>↻ 90° drehen</button></div></div>`;
+    return `<div class="lv-studio-tabs"><button type="button" class="is-active" data-studio-tab="look">Look</button><button type="button" data-studio-tab="adjust">Anpassen</button><button type="button" data-studio-tab="decorate">Kreativ</button></div><div class="lv-studio-pane is-active" data-studio-pane="look"><div class="lv-filter-browser"><div>${filterButtons}</div></div></div><div class="lv-studio-pane" data-studio-pane="adjust"><div class="lv-editor-sliders"><label>Helligkeit <input type="range" min="50" max="150" value="${Number(edit.brightness)}" data-ed="brightness"><output>${Number(edit.brightness)}%</output></label><label>Kontrast <input type="range" min="50" max="160" value="${Number(edit.contrast)}" data-ed="contrast"><output>${Number(edit.contrast)}%</output></label><label>Sättigung <input type="range" min="0" max="200" value="${Number(edit.saturation)}" data-ed="saturation"><output>${Number(edit.saturation)}%</output></label><label>Wärme <input type="range" min="-50" max="50" value="${Number(edit.temperature)}" data-ed="temperature"><output>${Number(edit.temperature)}</output></label><label>Weichzeichnen <input type="range" min="0" max="8" step=".5" value="${Number(edit.blur)}" data-ed="blur"><output>${Number(edit.blur)}</output></label><label>Vignette <input type="range" min="0" max="100" value="${Number(edit.vignette)}" data-ed="vignette"><output>${Number(edit.vignette)}%</output></label><label>Belichtung <input type="range" min="-40" max="40" value="${Number(edit.exposure||0)}" data-ed="exposure"><output>${Number(edit.exposure||0)}</output></label><label>Lichter <input type="range" min="-50" max="50" value="${Number(edit.highlights||0)}" data-ed="highlights"><output>${Number(edit.highlights||0)}</output></label><label>Schatten <input type="range" min="-50" max="50" value="${Number(edit.shadows||0)}" data-ed="shadows"><output>${Number(edit.shadows||0)}</output></label><label>Klarheit <input type="range" min="-40" max="40" value="${Number(edit.clarity||0)}" data-ed="clarity"><output>${Number(edit.clarity||0)}</output></label><label>Farbton <input type="range" min="-180" max="180" value="${Number(edit.hue||0)}" data-ed="hue"><output>${Number(edit.hue||0)}</output></label></div></div><div class="lv-studio-pane" data-studio-pane="decorate"><div class="lv-editor-fun"><label>Rahmen <select data-ed="frame">${FRAMES.map(frame=>`<option value="${frame}">${frame?frame[0].toUpperCase()+frame.slice(1):'Kein Rahmen'}</option>`).join('')}</select></label><label>Sticker <select data-ed="sticker">${STICKERS.map(sticker=>`<option value="${esc(sticker)}">${sticker||'Sticker wählen'}</option>`).join('')}</select></label><button type="button" data-add-sticker>Sticker hinzufügen</button><button type="button" data-add-text>Text hinzufügen</button><label>Text im Bild <input type="text" maxlength="60" value="${esc(edit.caption||'')}" data-ed="caption" placeholder="Euer Moment …"></label><button type="button" data-rotate>↻ 90° drehen</button></div></div>`;
   }
 
   function placeContextFor(item){const trip=window.LuviaTripStore?.snapshot?.().activeTrip||{};const known=item.placeId&&window.LuviaPlaceCore?.getPlace?.(item.placeId);const destination=trip.destination||{};return{placeName:known?.name||known?.title||null,destinationName:destination.name||trip.destinationName||null,destinationLatitude:destination.latitude??null,destinationLongitude:destination.longitude??null};}
@@ -250,24 +249,27 @@
 
   async function openEditor(id) {
     let item=items.find(entry=>entry.id===id); if(!item){item=await window.LuviaMediaCore.get(id).catch(()=>null);if(item)items=[...items,item]} if(!item)return;
-    const validPolaroid=(await tripDays()).includes(item.dayKey),url=await urlFor(item),edit=settings(item),state={...edit},overlay=document.createElement('div'); overlay.className='lv-photo-overlay';
+    const validPolaroid=(await tripDays()).includes(item.dayKey),url=await urlFor(item),edit=settings(item),state={...edit,overlays:[...(edit.overlays||[])]},overlay=document.createElement('div');
+    if(edit.sticker && !(edit.overlays||[]).length)state.overlays.push({type:'sticker',value:edit.sticker,x:84,y:16,scale:1,rotation:0});
+    if(edit.caption && !(edit.overlays||[]).some(x=>x.type==='text'))state.overlays.push({type:'text',value:edit.caption,x:50,y:78,scale:1,rotation:0});
+    state.sticker=''; state.caption=''; overlay.className='lv-photo-overlay';
     overlay.innerHTML=`<section class="lv-editor-dialog lv-editor-pro"><button data-close>×</button><span>🎨 Luvia Photo Studio</span><h2>Foto kreativ bearbeiten</h2><div class="lv-editor-layout"><div class="lv-editor-preview frame-${esc(edit.frame||'none')}"><img src="${esc(url)}"><b class="lv-photo-vignette"></b><div class="lv-editor-overlay-stage" data-overlay-stage></div></div><div class="lv-editor-panel"><div class="lv-editor-name"><input value="${esc(item.displayName||'')}" placeholder="Eigener Fototitel" data-edit-name><button type="button" data-ai-title>✨ KI-Titel erkennen</button></div>${editorControls(edit)}<button type="button" data-rotate>↻ 90° drehen</button></div></div><div class="lv-editor-actions"><button data-reset>Zurücksetzen</button><button data-polaroid ${validPolaroid?'':'disabled'}>Polaroid des Tages</button><button class="primary" data-save>Speichern</button></div></section>`;
     const removeOverlay=mountOverlay(overlay);
     const preview=overlay.querySelector('.lv-editor-preview'),img=preview.querySelector('img'),vignette=preview.querySelector('.lv-photo-vignette'),overlayStage=preview.querySelector('[data-overlay-stage]');
-    const syncOverlayStage=()=>{const pr=preview.getBoundingClientRect(),ir=img.getBoundingClientRect();overlayStage.style.left=`${ir.left-pr.left}px`;overlayStage.style.top=`${ir.top-pr.top}px`;overlayStage.style.width=`${ir.width}px`;overlayStage.style.height=`${ir.height}px`;};img.addEventListener('load',()=>requestAnimationFrame(syncOverlayStage));new ResizeObserver(()=>syncOverlayStage()).observe(preview);
-    overlay.querySelector('[data-ed="frame"]').value=state.frame||''; overlay.querySelector('[data-ed="sticker"]').value=state.sticker||'';
+    const syncOverlayStage=()=>{const pr=preview.getBoundingClientRect(),ir=img.getBoundingClientRect();overlayStage.style.left=`${ir.left-pr.left}px`;overlayStage.style.top=`${ir.top-pr.top}px`;overlayStage.style.width=`${ir.width}px`;overlayStage.style.height=`${ir.height}px`;};img.addEventListener('load',()=>requestAnimationFrame(syncOverlayStage));if(img.complete)requestAnimationFrame(syncOverlayStage);img.addEventListener('error',()=>{if(!img.alt)img.alt='Vorschau nicht verfügbar'});new ResizeObserver(()=>syncOverlayStage()).observe(preview);
+    overlay.querySelector('[data-ed="frame"]').value=state.frame||''; overlay.querySelector('[data-ed="sticker"]').value='';
     const renderOverlays=()=>{overlayStage.innerHTML=(state.overlays||[]).map((o,i)=>`<div class="lv-canvas-item ${o.type==='text'?'is-text':'is-sticker'}" data-overlay-index="${i}" style="left:${Number(o.x??50)}%;top:${Number(o.y??50)}%;transform:translate(-50%,-50%) rotate(${Number(o.rotation||0)}deg) scale(${Number(o.scale||1)})"><span>${esc(o.value||'')}</span><button type="button" data-overlay-delete="${i}">×</button><i data-overlay-handle="${i}">↻</i></div>`).join('');bindCanvasItems()};
     const bindCanvasItems=()=>{overlayStage.querySelectorAll('.lv-canvas-item').forEach(node=>{let start=null;node.onpointerdown=e=>{if(e.target.closest('button,i'))return;node.setPointerCapture(e.pointerId);const r=overlayStage.getBoundingClientRect(),o=state.overlays[Number(node.dataset.overlayIndex)];start={x:e.clientX,y:e.clientY,ox:o.x,oy:o.y,r};};node.onpointermove=e=>{if(!start)return;const o=state.overlays[Number(node.dataset.overlayIndex)];o.x=Math.max(0,Math.min(100,start.ox+(e.clientX-start.x)/start.r.width*100));o.y=Math.max(0,Math.min(100,start.oy+(e.clientY-start.y)/start.r.height*100));node.style.left=o.x+'%';node.style.top=o.y+'%'};node.onpointerup=()=>start=null;});overlayStage.querySelectorAll('[data-overlay-delete]').forEach(b=>b.onclick=()=>{state.overlays.splice(Number(b.dataset.overlayDelete),1);renderOverlays()});overlayStage.querySelectorAll('[data-overlay-handle]').forEach(h=>{let sy=0,base=1;h.onpointerdown=e=>{e.stopPropagation();sy=e.clientY;base=state.overlays[Number(h.dataset.overlayHandle)].scale||1;h.setPointerCapture(e.pointerId)};h.onpointermove=e=>{if(!h.hasPointerCapture(e.pointerId))return;const o=state.overlays[Number(h.dataset.overlayHandle)];o.scale=Math.max(.35,Math.min(3,base+(sy-e.clientY)/120));h.parentElement.style.transform=`translate(-50%,-50%) rotate(${Number(o.rotation||0)}deg) scale(${o.scale})`};h.ondblclick=()=>{const o=state.overlays[Number(h.dataset.overlayHandle)];o.rotation=(Number(o.rotation||0)+15)%360;renderOverlays()}})};
     const apply=()=>{img.style.filter=editCss({editSettings:state});img.style.transform=`rotate(${Number(state.rotation||0)}deg)`;preview.className=`lv-editor-preview frame-${state.frame||'none'}`;vignette.style.opacity=Math.min(.8,Number(state.vignette||0)/100);syncOverlayStage();renderOverlays()}; apply();
     overlay.querySelectorAll('input[type=range]').forEach(input=>input.oninput=()=>{state[input.dataset.ed]=Number(input.value);input.nextElementSibling.textContent=input.dataset.ed==='temperature'||input.dataset.ed==='blur'?input.value:`${input.value}%`;apply()});
     overlay.querySelectorAll('[data-filter]').forEach(button=>button.onclick=()=>{state.filter=button.dataset.filter;overlay.querySelectorAll('[data-filter]').forEach(x=>x.classList.toggle('is-active',x===button));apply()});
-    ['frame','sticker','caption'].forEach(key=>{const control=overlay.querySelector(`[data-ed="${key}"]`);control.oninput=control.onchange=()=>{state[key]=control.value;apply()}});
+    {const control=overlay.querySelector('[data-ed="frame"]');control.onchange=()=>{state.frame=control.value;apply()}}
     overlay.querySelector('[data-rotate]').onclick=()=>{state.rotation=(Number(state.rotation||0)+90)%360;apply()};
     overlay.querySelectorAll('[data-studio-tab]').forEach(button=>button.onclick=()=>{overlay.querySelectorAll('[data-studio-tab]').forEach(x=>x.classList.toggle('is-active',x===button));overlay.querySelectorAll('[data-studio-pane]').forEach(x=>x.classList.toggle('is-active',x.dataset.studioPane===button.dataset.studioTab))});
     overlay.querySelector('[data-ai-title]').onclick=async()=>{const button=overlay.querySelector('[data-ai-title]');button.disabled=true;button.textContent='✨ Bild wird erkannt …';try{const title=await aiTitleFor(item);overlay.querySelector('[data-edit-name]').value=title||''}catch(error){showError(error)}finally{button.disabled=false;button.textContent='✨ KI-Titel erkennen'}};
-    overlay.querySelector('[data-add-sticker]')?.addEventListener('click',()=>{const value=overlay.querySelector('[data-ed="sticker"]')?.value||'✨';state.overlays=[...(state.overlays||[]),{type:'sticker',value,x:50,y:50,scale:1,rotation:0}];apply()});
+    overlay.querySelector('[data-add-sticker]')?.addEventListener('click',()=>{const value=overlay.querySelector('[data-ed="sticker"]')?.value||'✨';if(!value)return;state.overlays=[...(state.overlays||[]),{type:'sticker',value,x:50,y:50,scale:1,rotation:0}];apply()});
     overlay.querySelector('[data-add-text]')?.addEventListener('click',()=>{const value=overlay.querySelector('[data-ed="caption"]')?.value?.trim()||'Euer Moment';state.overlays=[...(state.overlays||[]),{type:'text',value,x:50,y:78,scale:1,rotation:0}];apply()});
-    overlay.querySelector('[data-reset]').onclick=()=>{Object.assign(state,{brightness:100,contrast:100,saturation:100,temperature:0,blur:0,vignette:0,filter:'none',rotation:0,frame:'',sticker:'',caption:'',overlays:[]});apply();overlay.querySelectorAll('[data-filter]').forEach(x=>x.classList.toggle('is-active',x.dataset.filter==='none'))};
+    overlay.querySelector('[data-reset]').onclick=()=>{Object.assign(state,{brightness:100,contrast:100,saturation:100,temperature:0,blur:0,vignette:0,exposure:0,highlights:0,shadows:0,clarity:0,hue:0,grain:0,filter:'none',rotation:0,frame:'',sticker:'',caption:'',overlays:[]});const stickerPicker=overlay.querySelector('[data-ed="sticker"]'); if(stickerPicker) stickerPicker.value=''; const textInput=overlay.querySelector('[data-ed="caption"]'); if(textInput) textInput.value=''; apply();overlay.querySelectorAll('[data-filter]').forEach(x=>x.classList.toggle('is-active',x.dataset.filter==='none'))};
     const polaroidButton=overlay.querySelector('[data-polaroid]'); if(polaroidButton&&!polaroidButton.disabled)polaroidButton.onclick=async()=>{suppressRealtimeUntil=Date.now()+1200;await window.LuviaMediaCore.setPolaroid(id,item.dayKey);removeOverlay();await load({silent:true,force:true});status('Polaroid des Tages gespeichert.','ready')};
     overlay.querySelector('[data-save]').onclick=async()=>{suppressRealtimeUntil=Date.now()+1200;await window.LuviaMediaCore.update(id,{displayName:overlay.querySelector('[data-edit-name]').value,editSettings:state});removeOverlay();await load({silent:true,force:true});status('Fotoänderungen gespeichert.','ready')};
     const close=()=>removeOverlay(); overlay.querySelector('[data-close]').onclick=close; overlay.onclick=e=>{if(e.target===overlay)close()};
@@ -308,6 +310,7 @@
 
   async function currentLocation() {
     if(!navigator.geolocation)return null;
+    if(window.LuviaTravelContext?.requestLocation){try{return await window.LuviaTravelContext.requestLocation()}catch{}}
     return new Promise(resolve=>navigator.geolocation.getCurrentPosition(position=>resolve({latitude:position.coords.latitude,longitude:position.coords.longitude,accuracy:position.coords.accuracy,capturedAt:new Date().toISOString()}),()=>resolve(null),{enableHighAccuracy:true,timeout:8000,maximumAge:30000}));
   }
   async function upload(files,{camera=false}={}) {
@@ -318,13 +321,13 @@
     status(`${list.length} Foto${list.length===1?'':'s'} werden hochgeladen …`);
     for(let i=0;i<list.length;i++){
       status(`Upload ${i+1}/${list.length}: ${list[i].name||'Foto'}`);
-      await window.LuviaMediaCore.upload(list[i],{source:'user_upload',captureSource:camera?'app_camera':'file_picker',capturedAt:camera?new Date().toISOString():undefined,captureLocation:location,deviceMetadata:camera?{userAgent:navigator.userAgent,platform:navigator.platform,language:navigator.language}:null});
+      await window.LuviaMediaCore.upload(list[i],{source:camera?'app_camera':'user_upload',captureSource:camera?'app_camera':'file_picker',capturedAt:camera?new Date().toISOString():undefined,captureLocation:location,deviceMetadata:camera?{userAgent:navigator.userAgent,platform:navigator.platform,language:navigator.language}:null});
     }
     await load({silent:false,analyze:true,force:true});
   }
 
   function mediaRealtime(payload) {
-    const relevant=payload?.table==='media' || payload?.schema==='public';
+    const relevant=['media','media_day_polaroids'].includes(payload?.table||'');
     if(!relevant)return;
     const event=payload?.eventType || payload?.event;
     const analyze=event==='INSERT'||event==='DELETE'||(event==='UPDATE'&&['captured_at','day_key','status'].some(key=>payload?.old?.[key]!==payload?.new?.[key]));
@@ -334,17 +337,15 @@
 
   async function mount(target) {
     host=target; host.innerHTML=shell();
-    const input=host.querySelector('[data-gallery-input]'),cameraInput=host.querySelector('[data-gallery-camera-input]');
+    const input=host.querySelector('[data-gallery-input]');
     host.querySelector('[data-gallery-add]').onclick=()=>{try{input.showPicker?input.showPicker():input.click()}catch{input.click()}};
-    host.querySelector('[data-gallery-camera]').onclick=()=>{try{cameraInput.showPicker?cameraInput.showPicker():cameraInput.click()}catch{cameraInput.click()}};
     input.onchange=async()=>{const files=[...input.files];input.value='';try{await upload(files)}catch(error){showError(error)}};
-    cameraInput.onchange=async()=>{const files=[...cameraInput.files];cameraInput.value='';try{await upload(files,{camera:true})}catch(error){showError(error)}};
         unsubMedia=await window.LuviaMediaCore.subscribe(mediaRealtime);
     unsubClusters=await window.LuviaMediaClustering.subscribe(clusterRealtime);
     await load({silent:false,analyze:true,force:true});
     return ()=>unmount();
   }
-  async function unmount(){clearTimeout(loadTimer);await unsubMedia?.();await unsubClusters?.();unsubMedia=unsubClusters=null;urlCache.clear();if(host)host.innerHTML='';host=null;activeDay=null;lastFingerprint=''}
+  async function unmount(){clearTimeout(loadTimer);await unsubMedia?.();await unsubClusters?.();unsubMedia=unsubClusters=null;urlCache.clear();urlFailureCache.clear();if(host)host.innerHTML='';host=null;activeDay=null;lastFingerprint=''}
 
   window.LuviaGalleryView=Object.freeze({version:VERSION,build:BUILD,mount,unmount,refresh:options=>load({silent:false,force:true,...options}),openPhoto:openLightbox,openEditor});
 })();
