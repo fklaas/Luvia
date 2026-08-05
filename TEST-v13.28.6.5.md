@@ -1,4 +1,4 @@
-# Test 13.28.6.6
+# Test 13.28.6.7
 
 - Upload erzeugt keine 400er-AI-Anfragen.
 - Titel wählen liefert bis zu zehn unterschiedliche Vorschläge.

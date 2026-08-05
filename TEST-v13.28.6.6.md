@@ -1,4 +1,4 @@
-# Test 13.28.6.6
+# Test 13.28.6.7
 
 - Cluster-Album öffnen: alle Fotos sichtbar.
 - Desktop: drei Spalten, keine kollabierten Flächen.
