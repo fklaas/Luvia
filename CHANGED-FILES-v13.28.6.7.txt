@@ -1,0 +1,16 @@
+app/gallery-view.css
+intelligence/pwa-service.js
+index.html
+force-update.html
+sw.js
+intelligence/kernel/version.js
+core/media/media-core.js
+core/media/media-clustering.js
+core/media/ai-memory-bridge.js
+core/media/media-metadata.js
+core/ai/providers/openai-provider.js
+core/diagnostics/media-readiness.js
+RELEASE-v13.28.6.7.md
+TEST-v13.28.6.7.md
+DEPLOYMENT-v13.28.6.7.md
+CHANGED-FILES-v13.28.6.7.txt

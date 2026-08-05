@@ -1,4 +1,4 @@
-# Deployment 13.28.6.6
+# Deployment 13.28.6.7
 
 Keine Datenbankmigration und kein Edge-Function-Deployment erforderlich.
 

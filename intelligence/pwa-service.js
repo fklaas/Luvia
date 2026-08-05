@@ -1,6 +1,6 @@
 (function(){
 'use strict';
-const VERSION='4.17.0-gateway-runtime';
+const VERSION='4.28.6.7-native-install-runtime';
 const SCRIPT_URL=new URL(document.currentScript?.src||'intelligence/pwa-service.js',document.baseURI);
 const APP_ROOT_URL=new URL('../',SCRIPT_URL);
 const SW_URL=new URL('sw.js',APP_ROOT_URL).toString();
@@ -22,7 +22,7 @@ async function activateUpdate(){if(!registration?.waiting)return false;activateW
 async function install(){if(!deferredPrompt)return{available:false,reason:ios()?'ios-manual':'prompt-unavailable'};deferredPrompt.prompt();const choice=await deferredPrompt.userChoice;deferredPrompt=null;emit();return{available:true,outcome:choice.outcome}}
 async function cacheInfo(){if(!('caches'in window))return[];const keys=await caches.keys();return Promise.all(keys.map(async name=>{const cache=await caches.open(name),requests=await cache.keys();return{name,entries:requests.length}}))}
 function subscribe(fn){listeners.add(fn);return()=>listeners.delete(fn)}
-window.addEventListener('beforeinstallprompt',e=>{e.preventDefault();deferredPrompt=e;emit()});window.addEventListener('appinstalled',()=>{deferredPrompt=null;emit()});window.addEventListener('online',emit);window.addEventListener('offline',emit);
+window.addEventListener('beforeinstallprompt',()=>{deferredPrompt=null;emit()});window.addEventListener('appinstalled',()=>{deferredPrompt=null;emit()});window.addEventListener('online',emit);window.addEventListener('offline',emit);
 if('serviceWorker'in navigator)navigator.serviceWorker.addEventListener('controllerchange',()=>{if(sessionStorage.getItem('luvia-pwa-reloading')){sessionStorage.removeItem('luvia-pwa-reloading');location.reload()}else emit()});
 window.LuviaPWA=Object.freeze({version:VERSION,register,checkForUpdate,activateUpdate,install,snapshot,cacheInfo,clearOldCaches,subscribe});
 })();

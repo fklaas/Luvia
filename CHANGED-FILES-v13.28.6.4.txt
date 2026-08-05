@@ -10,7 +10,7 @@ force-update.html
 sw.js
 supabase/functions/luvia-intelligence/capabilities/registry.ts
 supabase/functions/luvia-intelligence/schemas/index.ts
-RELEASE-v13.28.6.6.md
-DEPLOYMENT-v13.28.6.6.md
-TEST-v13.28.6.6.md
-COMMIT-v13.28.6.6.txt
+RELEASE-v13.28.6.7.md
+DEPLOYMENT-v13.28.6.7.md
+TEST-v13.28.6.7.md
+COMMIT-v13.28.6.7.txt
