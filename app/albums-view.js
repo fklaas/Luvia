@@ -1,6 +1,6 @@
 (() => {
 'use strict';
-const VERSION='4.28.6.1',BUILD='13.28.6.1';let host=null,clusters=[],items=[],unsub=null,timer=null;const esc=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const VERSION='4.28.6.2',BUILD='13.28.6.2';let host=null,clusters=[],items=[],unsub=null,timer=null;const esc=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 async function urlFor(item){try{return await window.LuviaMediaCore.signedUrl(item,1800)||''}catch{return''}}
 const itemLocation=x=>x?.metadata?.resolvedLocation?.name||x?.metadata?.resolvedLocation?.address||null;
 function clusterLocation(c){const names=items.filter(x=>c.mediaIds?.includes(x.id)).map(itemLocation).filter(Boolean);return names.sort((a,b)=>names.filter(x=>x===b).length-names.filter(x=>x===a).length)[0]||null}

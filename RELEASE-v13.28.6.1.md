@@ -1,4 +1,4 @@
-# Luvia 13.28.6.1 / Core 4.28.6.1
+# Luvia 13.28.6.2 / Core 4.28.6.2
 
 - AI-gestützte Albumtitel mit drei Vorschlägen und manueller Bearbeitung
 - EXIF-resolvedLocation wird in Album- und Memory-Bridge-Kontext übernommen
