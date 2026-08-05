@@ -25,7 +25,7 @@
       id,tripId:id,ownerId:text(row.ownerId,row.owner_id),title:text(row.title,row.tripName,row.trip_name)||'Unsere Reise',tripName:text(row.tripName,row.trip_name,row.title)||'Unsere Reise',
       destination:dest,destinationName:dest.name,joinCode:text(row.joinCode,row.join_code),memberName:text(row.memberName,row.member_name,localStorage.getItem(OLD.owner))||'Mitreisend',
       role:text(row.role,row.member_role)||(row.is_owner?'owner':'member'),isOwner:Boolean(row.isOwner||row.is_owner||['owner','admin'].includes(row.role||row.member_role)),mode:row.mode||'shared',
-      symbol:row.symbol||'❤️',accent:row.accent||'#e76f91',tripType:row.tripType||row.trip_type||'couple',startDate:row.startDate||row.start_date||'',endDate:row.endDate||row.end_date||'',
+      symbol:row.symbol||'❤️',accent:row.accent||row.accent_color||row.themeColor||row.theme_color||row.color||row.settings?.accent||row.settings?.themeColor||row.settings?.theme_color||'#e76f91',tripType:row.tripType||row.trip_type||'couple',startDate:row.startDate||row.start_date||'',endDate:row.endDate||row.end_date||'',
       modules:Array.isArray(row.modules)?row.modules:(Array.isArray(row.selectedModules)?row.selectedModules:(Array.isArray(row.selected_modules)?row.selected_modules:[])),
       moduleSettings:row.moduleSettings||row.module_settings||{},dashboardWidgets:row.dashboardWidgets||[],createdAt:row.createdAt||row.created_at||null,updatedAt:row.updatedAt||row.updated_at||null,lastOpenedAt:row.lastOpenedAt||null,cloud:Boolean(row.cloud||row.trip_id)
     };
