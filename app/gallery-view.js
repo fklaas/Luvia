@@ -1,8 +1,8 @@
 (() => {
   'use strict';
 
-  const VERSION = '4.29.2';
-  const BUILD = '13.29.2';
+  const VERSION = '4.29.3';
+  const BUILD = '13.29.3';
   const REALTIME_DEBOUNCE_MS = 650;
   const FILTERS = {
     none: ['Original', ''], warm: ['Golden Hour', 'sepia(.18) saturate(1.15) contrast(1.04)'], cool: ['Blue Sky', 'hue-rotate(10deg) saturate(1.08)'], vivid: ['Pop', 'saturate(1.45) contrast(1.1)'], soft: ['Soft', 'contrast(.92) saturate(.88) brightness(1.04)'], mono: ['Mono', 'grayscale(1) contrast(1.08)'],
@@ -56,7 +56,7 @@
   const overlayMarkup = edit => `<span class="lv-saved-overlays" style="--image-rotation:${Number(edit.rotation||0)}deg">${(edit.overlays||[]).map(raw=>{const o=normalizeOverlay(raw);return `<span class="lv-saved-overlay ${o.type==='text'?'is-text':'is-sticker'}" style="--overlay-x:${o.x*100};--overlay-y:${o.y*100};--overlay-rotation:${o.rotation}deg;--overlay-size:${o.size}">${esc(o.value||'')}</span>`}).join('')}</span>`;
   const photoVisual = (item, attrs='') => {
     const edit = settings(item),baked=Boolean(item?.metadata?.renderedPreviewPath||item?.renderedPreviewPath);
-    return `<span class="lv-photo-visual ${baked?'is-baked':`frame-${esc(edit.frame||'none')}`}" ${attrs}><span class="lv-photo-media-canvas"><img alt="${esc(displayName(item))}" ${baked?'':`style="filter:${esc(editCss(item))};transform:rotate(${Number(edit.rotation||0)}deg)"`}><i>Bild wird geladen …</i>${baked?'':`${edit.vignette?`<b class="lv-photo-vignette" style="opacity:${Math.min(.8,Number(edit.vignette)/100)}"></b>`:''}${overlayMarkup(edit)}`}</span></span>`;
+    return `<span class="lv-photo-visual ${baked?'is-baked':`frame-${esc(edit.frame||'none')}`}" ${attrs}><span class="lv-photo-media-canvas"><img alt="${esc(displayName(item))}" ${baked?'':`style="filter:${esc(editCss(item))};transform:rotate(${Number(edit.rotation||0)}deg)"`}><i class="lv-photo-placeholder"><b>✦</b><span>Euer Reisemoment</span></i>${baked?'':`${edit.vignette?`<b class="lv-photo-vignette" style="opacity:${Math.min(.8,Number(edit.vignette)/100)}"></b>`:''}${overlayMarkup(edit)}`}</span></span>`;
   };
 
   function syncOverlayGeometry(scope=document){scope.querySelectorAll('.lv-photo-media-canvas,.lv-lightbox-canvas').forEach(canvas=>{const img=canvas.querySelector(':scope > img'),stage=canvas.querySelector(':scope > .lv-saved-overlays');if(!img||!stage)return;const sync=()=>{const bw=img.clientWidth,bh=img.clientHeight,nw=img.naturalWidth,nh=img.naturalHeight;if(!bw||!bh||!nw||!nh)return;const scale=Math.min(bw/nw,bh/nh),w=nw*scale,h=nh*scale;stage.style.left=`${(bw-w)/2}px`;stage.style.top=`${(bh-h)/2}px`;stage.style.width=`${w}px`;stage.style.height=`${h}px`};img.addEventListener('load',sync,{once:true});if(img.complete)requestAnimationFrame(sync);if(!img.dataset.overlayObserved){img.dataset.overlayObserved='1';new ResizeObserver(sync).observe(img)}})}
@@ -155,7 +155,7 @@
     return `<article class="lv-gallery-photo ${compact?'is-compact':''}" data-photo="${esc(item.id)}">
       <button type="button" class="lv-photo-open" data-photo-open="${esc(item.id)}">${photoVisual(item,`data-photo-image="${esc(item.id)}"`)}</button>
       <div class="lv-photo-meta"><strong>${esc(displayName(item))}</strong><small>${esc(fmtTime(item.capturedAt))}</small></div>
-      <div class="lv-photo-actions"><button type="button" data-photo-favorite="${esc(item.id)}" class="${item.favorite?'is-on':''}" title="Favorit">${item.favorite?'★':'☆'}</button><button type="button" data-photo-polaroid="${esc(item.id)}" title="Polaroid des Tages">▣</button><button type="button" data-photo-edit="${esc(item.id)}" title="Bearbeiten">✎</button><button type="button" data-photo-remove="${esc(item.id)}" title="Löschen">×</button></div>
+      <div class="lv-photo-actions"><button type="button" data-photo-favorite="${esc(item.id)}" class="${item.favorite?'is-on':''}" title="Favorit">${item.favorite?'★':'☆'}</button><button type="button" data-photo-timeline="${esc(item.id)}" title="Zur Dashboard-Timeline hinzufügen">⌁</button><button type="button" data-photo-polaroid="${esc(item.id)}" title="Polaroid des Tages">▣</button><button type="button" data-photo-edit="${esc(item.id)}" title="Bearbeiten">✎</button><button type="button" data-photo-remove="${esc(item.id)}" title="Löschen">×</button></div>
     </article>`;
   }
   async function hydrateImages(root, list) {
@@ -175,6 +175,7 @@
       await window.LuviaMediaCore.toggleFavorite(button.dataset.photoFavorite);
       await load({reason:'Favorit',silent:true,analyze:false,force:true});
     });
+    root.querySelectorAll('[data-photo-timeline]').forEach(button => button.onclick = async event => {event.stopPropagation();const item=items.find(x=>x.id===button.dataset.photoTimeline);if(!item)return;button.disabled=true;try{await window.LuviaTimelineCore?.record?.({type:'photo_memory',title:item.displayName||'Reisefoto',description:'Ein Foto aus eurer gemeinsamen Reise.',occurredAt:item.capturedAt||new Date().toISOString(),source:'media_gallery',automatic:false,metadata:{mediaId:item.id,mediaIds:[item.id],dayKey:item.dayKey}});await window.LuviaTimelineCore?.hydrate?.();status('Foto wurde zur Dashboard-Timeline hinzugefügt.','ready');button.textContent='✓'}catch(e){showError(e)}finally{button.disabled=false}});
     root.querySelectorAll('[data-photo-polaroid]').forEach(button => button.onclick = async event => {event.stopPropagation();const item=items.find(x=>x.id===button.dataset.photoPolaroid);if(!item?.dayKey)return showError(new Error('Dieses Foto ist keinem Reisetag zugeordnet.'));suppressRealtimeUntil=Date.now()+1400;await window.LuviaMediaCore.setPolaroid(item.id,item.dayKey);await load({reason:'Polaroid',silent:true,analyze:false,force:true});status('Polaroid des Tages wurde in die Timeline übernommen.','ready')});
     root.querySelectorAll('[data-photo-edit]').forEach(button => button.onclick = event => { event.stopPropagation(); openEditor(button.dataset.photoEdit); });
     root.querySelectorAll('[data-photo-remove]').forEach(button => button.onclick = async event => {
@@ -192,7 +193,7 @@
     host.querySelector('[data-favorite-count]').textContent = String(favorites.length);
     if (!favorites.length) { root.innerHTML = '<div class="lv-inline-empty">Noch keine Favoriten – tippe bei einem Foto auf ☆.</div>'; return; }
     root.innerHTML = favorites.map(item => card(item,true)).join('');
-    await hydrateImages(root,favorites); bindPhotoActions(root);
+    bindPhotoActions(root); void hydrateImages(root,favorites);
   }
 
   async function renderDays() {
@@ -207,16 +208,16 @@
         const hero = group.key !== 'other' && polaroids[group.key] ? group.items.find(item => item.id === polaroids[group.key]) : null;
         root.innerHTML = `<div class="lv-day-page is-entering"><div class="lv-day-page-toolbar"><button type="button" class="lv-day-back" data-day-back>← Alle Fototage</button><span>${group.items.length} Foto${group.items.length===1?'':'s'}</span></div><header class="lv-day-page-hero"><div><small>${group.key==='other'?'WEITERE AUFNAHMEN':'EUER REISETAG'}</small><h3>${esc(group.label)}</h3><p>${group.items.length ? 'Alle Bilder dieses Tages – gemeinsam, bearbeitbar und in Echtzeit.' : 'Für diesen Tag wurden noch keine Fotos gespeichert.'}</p></div></header>${hero?`<button type="button" class="lv-polaroid-card" data-photo-open="${esc(hero.id)}">${photoVisual(hero,`data-photo-image="${esc(hero.id)}"`)}<b>Polaroid des Tages</b><small>${esc(displayName(hero))}</small></button>`:''}<div class="lv-gallery-grid">${group.items.map(item=>card(item)).join('')}</div></div>`;
         root.querySelector('[data-day-back]').onclick = () => { root.querySelector('.lv-day-page')?.classList.add('is-leaving'); setTimeout(()=>{activeDay=null;renderDays();},180); };
-        await hydrateImages(root,group.items); bindPhotoActions(root); return;
+        bindPhotoActions(root); void hydrateImages(root,group.items); return;
       }
     }
     const visible = groups.slice(0, dayLimit);
     const hidden = Math.max(0, groups.length-visible.length);
     root.innerHTML = `<div class="lv-day-tiles">${visible.map(group => {
       const cover = (group.key!=='other' && polaroids[group.key] ? group.items.find(item=>item.id===polaroids[group.key]) : null) || group.items[0] || null;
-      return `<button type="button" class="lv-day-tile ${group.items.length?'has-photos':'is-empty'}" data-day-open="${esc(group.key)}"><span class="lv-day-tile-cover" ${cover?`data-photo-image="${esc(cover.id)}"`:''}><i>${cover?'Bild wird geladen …':'Noch frei'}</i></span><div><small>${group.key==='other'?'WEITERE AUFNAHMEN':'REISETAG'}</small><strong>${esc(group.label)}</strong><em>${group.items.length} Foto${group.items.length===1?'':'s'}</em></div><b>→</b></button>`;
+      return `<button type="button" class="lv-day-tile ${group.items.length?'has-photos':'is-empty'}" data-day-open="${esc(group.key)}"><span class="lv-day-tile-cover" ${cover?`data-photo-image="${esc(cover.id)}"`:''}><i>${cover?'<b>✦</b><span>Euer Reisemoment</span>':'<b>♡</b><span>Hier wartet euer nächster Moment</span>'}</i></span><div><small>${group.key==='other'?'WEITERE AUFNAHMEN':'REISETAG'}</small><strong>${esc(group.label)}</strong><em>${group.items.length} Foto${group.items.length===1?'':'s'}</em></div><b>→</b></button>`;
     }).join('')}</div>${groups.length>10?`<div class="lv-day-more"><button type="button" data-days-toggle>${dayLimit<groups.length?`Mehr Tage anzeigen (${hidden})`:'Weniger Tage anzeigen'}</button></div>`:''}`;
-    await hydrateImages(root, visible.flatMap(group=>group.items.slice(0,1)));
+    void hydrateImages(root, visible.flatMap(group=>group.items.slice(0,1)));
     root.querySelectorAll('[data-day-open]').forEach(button => button.onclick = () => { activeDay=button.dataset.dayOpen; renderDays(); });
     root.querySelector('[data-days-toggle]')?.addEventListener('click',()=>{dayLimit=dayLimit<groups.length?groups.length:10;renderDays()});
   }
@@ -232,14 +233,12 @@
     const root = host.querySelector('[data-gallery-clusters]');
     const visible = clusters.filter(cluster => cluster.state !== 'dismissed' && cluster.mediaIds?.length);
     if (!visible.length) { root.innerHTML = '<div class="lv-gallery-empty compact"><b>✨</b><h3>Noch keine Fotomomente</h3><p>Mehrere Fotos innerhalb von 20 Minuten werden automatisch gruppiert.</p></div>'; return; }
-    root.innerHTML = `<div class="lv-cluster-grid">${visible.map(cluster => {const memory=memoryAlbums.find(a=>String(a.source_cluster_id)===String(cluster.id));return `<article class="lv-cluster-card ${memory?'is-memory':''}"><button class="lv-cluster-collage" data-cluster-open="${esc(cluster.id)}">${cluster.mediaIds.slice(0,4).map(id=>`<span data-cluster-image="${esc(id)}"></span>`).join('')}<b>${memory?'💛 Erinnerung':`${cluster.mediaIds.length} Fotos`}</b></button><div class="lv-cluster-copy"><small>${esc(fmtDate(cluster.start_at))} · ${esc(fmtTime(cluster.start_at))}</small><h3>${esc(memory?.title||cluster.title||'Gemeinsamer Fotomoment')}</h3><p>${esc(memory?'Dieser Fotomoment wurde als Memory Album festgehalten.':clusterReason(cluster))}</p><div>${memory?`<button type="button" data-memory-open>💛 Memory Album öffnen</button>`:`<button type="button" data-memory-create="${esc(cluster.id)}">✨ Daraus eine Erinnerung machen</button><button type="button" data-cluster-dismiss="${esc(cluster.id)}">Auflösen</button>`}</div></div></article>`}).join('')}</div>`;
+    root.innerHTML = `<div class="lv-cluster-grid">${visible.map(cluster => {const memory=memoryAlbums.find(a=>String(a.source_cluster_id)===String(cluster.id));return `<article class="lv-cluster-card ${memory?'is-memory':''}"><button class="lv-cluster-collage" data-cluster-open="${esc(cluster.id)}">${cluster.mediaIds.slice(0,4).map(id=>`<span data-cluster-image="${esc(id)}"></span>`).join('')}<b>${memory?'💛 Erinnerung':`${cluster.mediaIds.length} Fotos`}</b></button><div class="lv-cluster-copy"><small>${esc(fmtDate(cluster.start_at))} · ${esc(fmtTime(cluster.start_at))}</small><h3>${esc(memory?.title||cluster.title||'Gemeinsamer Fotomoment')}</h3><p>${esc(memory?'Dieser Fotomoment wurde als Memory Album festgehalten.':clusterReason(cluster))}</p><div>${memory?`<button type="button" data-memory-open>💛 Memory Album öffnen</button>`:`<button type="button" data-memory-create="${esc(cluster.id)}">✨ Daraus eine Erinnerung machen</button><button type="button" data-cluster-timeline="${esc(cluster.id)}">⌁ Zur Timeline</button><button type="button" data-cluster-dismiss="${esc(cluster.id)}">Auflösen</button>`}</div></div></article>`}).join('')}</div>`;
     root.querySelectorAll('[data-cluster-open]').forEach(button => button.onclick = () => openCluster(button.dataset.clusterOpen));
     root.querySelectorAll('[data-memory-create]').forEach(button => button.onclick = () => window.LuviaAlbumsView?.startFromCluster?.(button.dataset.memoryCreate,{cluster:clusters.find(x=>String(x.id)===String(button.dataset.memoryCreate)),items:items.filter(x=>(clusters.find(c=>String(c.id)===String(button.dataset.memoryCreate))?.mediaIds||[]).includes(x.id))}));
     root.querySelectorAll('[data-memory-open]').forEach(button => button.onclick = () => window.LuviaApp?.show?.('albums'));
-    await Promise.all(visible.flatMap(cluster => cluster.mediaIds.slice(0,4).map(async id => {
-      const item = items.find(entry=>entry.id===id), node = root.querySelector(`[data-cluster-image="${cssEsc(id)}"]`);
-      if (!item || !node) return; node.innerHTML=photoVisual(item,`data-photo-image="${esc(item.id)}"`); await hydrateImages(node,[item]);
-    })));
+    root.querySelectorAll('[data-cluster-timeline]').forEach(button=>button.onclick=async()=>{const cluster=clusters.find(x=>String(x.id)===String(button.dataset.clusterTimeline));if(!cluster)return;button.disabled=true;try{await window.LuviaTimelineCore?.record?.({type:'photo_memory',title:cluster.title||'Gemeinsamer Fotomoment',description:clusterReason(cluster),occurredAt:cluster.start_at||new Date().toISOString(),source:'media_cluster',automatic:false,metadata:{clusterId:cluster.id,mediaIds:cluster.mediaIds}});await window.LuviaTimelineCore?.hydrate?.();button.textContent='✓ In Timeline';status('Fotomoment wurde zur Dashboard-Timeline hinzugefügt.','ready')}catch(e){showError(e)}finally{button.disabled=false}});
+    visible.flatMap(cluster => cluster.mediaIds.slice(0,4)).forEach(id=>{const item=items.find(entry=>entry.id===id),node=root.querySelector(`[data-cluster-image="${cssEsc(id)}"]`);if(!item||!node)return;node.innerHTML=photoVisual(item,`data-photo-image="${esc(item.id)}"`);void hydrateImages(node,[item])});
     root.querySelectorAll('[data-cluster-dismiss]').forEach(button => button.onclick = async () => {
       if (!confirm('Automatische Gruppierung auflösen?')) return;
       suppressRealtimeUntil=Date.now()+1600; await window.LuviaMediaClustering.dissolve(button.dataset.clusterDismiss); await window.LuviaTimelineCore?.removePhotoMemoryByCluster?.(button.dataset.clusterDismiss); await load({silent:true,analyze:false,force:true});
@@ -251,7 +250,7 @@
     const selected = items.filter(item=>cluster.mediaIds.includes(item.id));
     const overlay=document.createElement('div'); overlay.className='lv-photo-overlay';
     overlay.innerHTML=`<section class="lv-cluster-dialog"><button data-close>×</button><span>✨ Fotomoment</span><h2>${esc(cluster.title||'Gemeinsamer Fotomoment')}</h2><p>${esc(clusterReason(cluster))}</p><div class="lv-cluster-detail-grid">${selected.map(item=>`<button type="button" data-cluster-photo="${esc(item.id)}">${photoVisual(item,`data-photo-image="${esc(item.id)}"`)}</button>`).join('')}</div></section>`;
-    const removeOverlay=mountOverlay(overlay); await hydrateImages(overlay,selected);
+    const removeOverlay=mountOverlay(overlay); void hydrateImages(overlay,selected);
     overlay.querySelector('[data-close]').onclick=()=>removeOverlay(); overlay.onclick=e=>{if(e.target===overlay)removeOverlay()};
     overlay.querySelectorAll('[data-cluster-photo]').forEach(button=>button.onclick=()=>{removeOverlay();openLightbox(button.dataset.clusterPhoto)});
   }

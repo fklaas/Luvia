@@ -1,0 +1,1 @@
+fix(media): make first gallery paint instant and restore timeline memories

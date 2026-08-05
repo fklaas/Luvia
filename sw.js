@@ -1,4 +1,4 @@
-const CACHE='luvia-shell-v13.29.2';
+const CACHE='luvia-shell-v13.29.3';
 const SCOPE=new URL(self.registration.scope);
 const scoped=path=>new URL(path.replace(/^\/+/,''),SCOPE).toString();
 const OFFLINE=scoped('offline.html');
@@ -19,7 +19,7 @@ self.addEventListener('install',event=>{
 self.addEventListener('activate',event=>{
   event.waitUntil((async()=>{
     const keys=await caches.keys();
-    await Promise.all(keys.filter(key=>key.startsWith('luvia-')&&key!==CACHE&&key!=='luvia-media-previews-v13.29.2').map(key=>caches.delete(key)));
+    await Promise.all(keys.filter(key=>key.startsWith('luvia-')&&key!==CACHE&&key!=='luvia-media-previews-v13.29.3').map(key=>caches.delete(key)));
     await self.clients.claim();
   })());
 });

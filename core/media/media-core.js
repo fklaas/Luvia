@@ -1,7 +1,7 @@
 (() => {
   'use strict';
-  const VERSION='4.29.2',BUILD='13.29.2',BUCKET='luvia-media',channels=new Map();
-  const queryCache=new Map(),queryTtlMs=15000,previewObjectUrls=new Map(),previewFetches=new Map(),PREVIEW_CACHE='luvia-media-previews-v13.29.2';
+  const VERSION='4.29.3',BUILD='13.29.3',BUCKET='luvia-media',channels=new Map();
+  const queryCache=new Map(),queryTtlMs=15000,previewObjectUrls=new Map(),previewFetches=new Map(),PREVIEW_CACHE='luvia-media-previews-v13.29.3';
   const id=()=>crypto?.randomUUID?.()||`${Date.now()}-${Math.random().toString(16).slice(2)}`;
   const ext=f=>(f?.name?.split('.').pop()||f?.type?.split('/').pop()||'jpg').replace(/[^a-z0-9]/gi,'').toLowerCase()||'jpg';
   const day=iso=>{const d=new Date(iso);return Number.isNaN(d.getTime())?null:`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`};
@@ -53,7 +53,12 @@
     if(!item?.id)return'';const key=`${item.id}:${previewVersion(item)}`;
     if(previewObjectUrls.has(key))return previewObjectUrls.get(key);
     if('caches'in window){try{const cache=await caches.open(PREVIEW_CACHE),hit=await cache.match(previewCacheRequest(item));if(hit){const blob=await hit.blob(),url=URL.createObjectURL(blob);previewObjectUrls.set(key,url);if(refresh)void refreshPreview(item,key,cache);return url}}catch{}}
-    return refreshPreview(item,key);
+    // First load must never wait for a JS fetch + blob conversion. Give the browser the signed URL
+    // immediately, let its native image pipeline download in parallel, and fill Cache Storage later.
+    try{const remote=await signedUrl(item,86400);if(!remote)return'';void cacheRemotePreview(item,key,remote);return remote}catch{return''}
+  }
+  async function cacheRemotePreview(item,key,remote){
+    if(!('caches'in window)||previewFetches.has(key))return;const task=(async()=>{try{const response=await fetch(remote,{cache:'force-cache',priority:'low'});if(!response.ok)return;const blob=await response.blob(),cache=await caches.open(PREVIEW_CACHE);await cache.put(previewCacheRequest(item),new Response(blob,{headers:{'Content-Type':blob.type||'image/jpeg','Cache-Control':'public,max-age=31536000,immutable'}}))}catch{}finally{previewFetches.delete(key)}})();previewFetches.set(key,task)
   }
   async function refreshPreview(item,key,providedCache=null){
     if(previewFetches.has(key))return previewFetches.get(key);const task=(async()=>{try{const remote=await signedUrl(item,86400);if(!remote)return'';const response=await fetch(remote,{cache:'force-cache'});if(!response.ok)return'';const blob=await response.blob();if('caches'in window){const cache=providedCache||await caches.open(PREVIEW_CACHE);await cache.put(previewCacheRequest(item),new Response(blob,{headers:{'Content-Type':blob.type||'image/jpeg','Cache-Control':'public,max-age=31536000,immutable'}}))}const url=URL.createObjectURL(blob),old=previewObjectUrls.get(key);if(old)URL.revokeObjectURL(old);previewObjectUrls.set(key,url);return url}catch{return''}finally{previewFetches.delete(key)}})();previewFetches.set(key,task);return task
