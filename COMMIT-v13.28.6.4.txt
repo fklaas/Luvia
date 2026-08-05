@@ -1,0 +1,1 @@
+fix(media): persist canonical edited photos and expand album intelligence

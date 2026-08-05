@@ -10,3 +10,5 @@
 .lv-album-collage>span{position:relative;overflow:hidden}
 .lv-album-dialog [data-album-detail-visual]{border-radius:inherit}
 .lv-album-dialog [data-album-detail-visual] .lv-photo-media-canvas>i,.lv-album-collage [data-album-photo] .lv-photo-media-canvas>i{display:none}
+
+.lv-album-dialog-actions{display:flex;gap:10px;flex-wrap:wrap;margin:12px 0}.lv-album-title-dialog [data-suggestions]{display:grid;gap:8px;max-height:50vh;overflow:auto}
