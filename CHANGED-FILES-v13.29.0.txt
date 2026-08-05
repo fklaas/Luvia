@@ -1,0 +1,15 @@
+app/albums-view.js
+app/albums-view.css
+app/gallery-view.js
+app/module-hubs.js
+app/app-shell.js
+core/media/memory-albums.js
+supabase/migrations/20260805190000_memory_albums.sql
+intelligence/kernel/version.js
+index.html
+sw.js
+RELEASE-v13.29.0.md
+DEPLOYMENT-v13.29.0.md
+TEST-v13.29.0.md
+COMMIT-v13.29.0.txt
+CHANGED-FILES-v13.29.0.txt

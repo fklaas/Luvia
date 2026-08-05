@@ -1,8 +1,8 @@
 (() => {
   'use strict';
 
-  const VERSION = '4.28.6.7';
-  const BUILD = '13.28.6.7';
+  const VERSION = '4.29.0';
+  const BUILD = '13.29.0';
   const REALTIME_DEBOUNCE_MS = 650;
   const FILTERS = {
     none: ['Original', ''], warm: ['Golden Hour', 'sepia(.18) saturate(1.15) contrast(1.04)'], cool: ['Blue Sky', 'hue-rotate(10deg) saturate(1.08)'], vivid: ['Pop', 'saturate(1.45) contrast(1.1)'], soft: ['Soft', 'contrast(.92) saturate(.88) brightness(1.04)'], mono: ['Mono', 'grayscale(1) contrast(1.08)'],
@@ -19,6 +19,7 @@
   let activeDay = null;
   let unsubMedia = null;
   let unsubClusters = null;
+  let memoryAlbums = [];
   let busy = false;
   let pending = null;
   let loadTimer = null;
@@ -79,6 +80,7 @@
       </header>
       <div class="lv-gallery-status" data-gallery-status>Galerie wird geladen …</div>
       <section class="lv-gallery-section"><div class="lv-gallery-section-head"><div><span>⭐ Auswahl</span><h2>Favoriten</h2></div><strong data-favorite-count>0</strong></div><div class="lv-favorites" data-gallery-favorites></div></section>
+      <section class="lv-gallery-section"><div class="lv-gallery-section-head"><div><span>✨ Automatisch entdeckt</span><h2>Fotomomente</h2></div><strong>Cluster</strong></div><div data-gallery-clusters></div></section>
       <section class="lv-gallery-section"><div class="lv-gallery-section-head"><div><span>🗓️ Reisetage</span><h2>Fototage</h2></div><strong data-gallery-count>0 Fotos</strong></div><div data-gallery-days></div></section>
     </section>`;
   }
@@ -230,13 +232,14 @@
     const root = host.querySelector('[data-gallery-clusters]');
     const visible = clusters.filter(cluster => cluster.state !== 'dismissed' && cluster.mediaIds?.length);
     if (!visible.length) { root.innerHTML = '<div class="lv-gallery-empty compact"><b>✨</b><h3>Noch keine Fotomomente</h3><p>Mehrere Fotos innerhalb von 20 Minuten werden automatisch gruppiert.</p></div>'; return; }
-    root.innerHTML = `<div class="lv-cluster-grid">${visible.map(cluster => `<article class="lv-cluster-card"><button class="lv-cluster-collage" data-cluster-open="${esc(cluster.id)}">${cluster.mediaIds.slice(0,4).map(id=>`<span data-cluster-image="${esc(id)}"></span>`).join('')}<b>${cluster.mediaIds.length} Fotos</b></button><div class="lv-cluster-copy"><small>${esc(fmtDate(cluster.start_at))} · ${esc(fmtTime(cluster.start_at))}</small><h3>${esc(cluster.title||'Gemeinsamer Fotomoment')}</h3><p>${esc(clusterReason(cluster))}</p><div><button type="button" data-memory-bridge="${esc(cluster.id)}">Erinnerung prüfen</button><button type="button" data-cluster-dismiss="${esc(cluster.id)}">Auflösen</button></div></div></article>`).join('')}</div>`;
+    root.innerHTML = `<div class="lv-cluster-grid">${visible.map(cluster => {const memory=memoryAlbums.find(a=>String(a.source_cluster_id)===String(cluster.id));return `<article class="lv-cluster-card ${memory?'is-memory':''}"><button class="lv-cluster-collage" data-cluster-open="${esc(cluster.id)}">${cluster.mediaIds.slice(0,4).map(id=>`<span data-cluster-image="${esc(id)}"></span>`).join('')}<b>${memory?'💛 Erinnerung':`${cluster.mediaIds.length} Fotos`}</b></button><div class="lv-cluster-copy"><small>${esc(fmtDate(cluster.start_at))} · ${esc(fmtTime(cluster.start_at))}</small><h3>${esc(memory?.title||cluster.title||'Gemeinsamer Fotomoment')}</h3><p>${esc(memory?'Dieser Fotomoment wurde als Memory Album festgehalten.':clusterReason(cluster))}</p><div>${memory?`<button type="button" data-memory-open>💛 Memory Album öffnen</button>`:`<button type="button" data-memory-create="${esc(cluster.id)}">✨ Daraus eine Erinnerung machen</button><button type="button" data-cluster-dismiss="${esc(cluster.id)}">Auflösen</button>`}</div></div></article>`}).join('')}</div>`;
     await Promise.all(visible.flatMap(cluster => cluster.mediaIds.slice(0,4).map(async id => {
       const item = items.find(entry=>entry.id===id), node = root.querySelector(`[data-cluster-image="${cssEsc(id)}"]`);
       if (!item || !node) return; node.innerHTML=photoVisual(item,`data-photo-image="${esc(item.id)}"`); await hydrateImages(node,[item]);
     })));
     root.querySelectorAll('[data-cluster-open]').forEach(button => button.onclick = () => openCluster(button.dataset.clusterOpen));
-    root.querySelectorAll('[data-memory-bridge]').forEach(button => button.onclick = () => openMemoryBridge(button.dataset.memoryBridge));
+    root.querySelectorAll('[data-memory-create]').forEach(button => button.onclick = () => window.LuviaAlbumsView?.startFromCluster?.(button.dataset.memoryCreate));
+    root.querySelectorAll('[data-memory-open]').forEach(button => button.onclick = () => window.LuviaApp?.show?.('albums'));
     root.querySelectorAll('[data-cluster-dismiss]').forEach(button => button.onclick = async () => {
       if (!confirm('Automatische Gruppierung auflösen?')) return;
       suppressRealtimeUntil=Date.now()+1600; await window.LuviaMediaClustering.dissolve(button.dataset.clusterDismiss); await window.LuviaTimelineCore?.removePhotoMemoryByCluster?.(button.dataset.clusterDismiss); await load({silent:true,analyze:false,force:true});
@@ -330,6 +333,7 @@
 
   async function readData({analyze=false}={}) {
     items=await window.LuviaMediaCore.list({type:'image'});
+    memoryAlbums=await window.LuviaMemoryAlbums?.list?.().catch(()=>[])||[];
     const pendingMetadata=items.filter(item=>!item.metadata?.captureEvidence&&!item.metadata?.metadataAutoCheckedAt).slice(0,4);
     for(const candidate of pendingMetadata){try{const refreshed=await window.LuviaMediaCore.reanalyze(candidate.id);items=items.map(x=>x.id===refreshed.id?refreshed:x)}catch{}}
     polaroids=await window.LuviaMediaCore.listPolaroids();
@@ -341,7 +345,7 @@
   async function renderAll({force=false}={}) {
     const next=fingerprint(); if(!force && next===lastFingerprint)return; lastFingerprint=next;
     const countNode=host?.querySelector('[data-gallery-count]'); if(!countNode)return; countNode.textContent=`${items.length} Foto${items.length===1?'':'s'}`;
-    await renderFavorites(); await renderDays();
+    await renderFavorites(); await renderClusters(); await renderDays();
   }
   async function load(options={}) {
     if(!host)return;
