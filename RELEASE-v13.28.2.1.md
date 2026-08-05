@@ -1,4 +1,4 @@
-# Release 13.28.2.1 / Core 4.28.2.1
+# Release 13.28.2.2 / Core 4.28.2.2
 
 Korrektur der PostgREST-Berechtigungen für `media_memory_proposals`.
 
