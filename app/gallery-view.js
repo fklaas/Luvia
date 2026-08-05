@@ -238,7 +238,7 @@
       if (!item || !node) return; node.innerHTML=photoVisual(item,`data-photo-image="${esc(item.id)}"`); await hydrateImages(node,[item]);
     })));
     root.querySelectorAll('[data-cluster-open]').forEach(button => button.onclick = () => openCluster(button.dataset.clusterOpen));
-    root.querySelectorAll('[data-memory-create]').forEach(button => button.onclick = () => window.LuviaAlbumsView?.startFromCluster?.(button.dataset.memoryCreate));
+    root.querySelectorAll('[data-memory-create]').forEach(button => button.onclick = () => window.LuviaAlbumsView?.startFromCluster?.(button.dataset.memoryCreate,{cluster:clusters.find(x=>String(x.id)===String(button.dataset.memoryCreate)),items:items.filter(x=>(clusters.find(c=>String(c.id)===String(button.dataset.memoryCreate))?.mediaIds||[]).includes(x.id))}));
     root.querySelectorAll('[data-memory-open]').forEach(button => button.onclick = () => window.LuviaApp?.show?.('albums'));
     root.querySelectorAll('[data-cluster-dismiss]').forEach(button => button.onclick = async () => {
       if (!confirm('Automatische Gruppierung auflösen?')) return;
