@@ -1,1 +1,1 @@
-(()=>{'use strict';window.LuviaKernelVersion=Object.freeze({core:'4.28.6.7',build:'13.28.6.7',name:'Mobile Gallery Containment',channel:'production',builtAt:'2026-08-05T13:48:00+02:00'});window.LuviaCoreVersion=window.LuviaKernelVersion;window.LUVIA_RELEASE=window.LuviaKernelVersion;})();
+(()=>{'use strict';window.LuviaKernelVersion=Object.freeze({core:'4.28.6.8',build:'13.28.6.8',name:'Places Intent Intelligence',channel:'production',builtAt:'2026-08-05T13:48:00+02:00'});window.LuviaCoreVersion=window.LuviaKernelVersion;window.LUVIA_RELEASE=window.LuviaKernelVersion;})();

@@ -1,0 +1,12 @@
+core/places/global-place-contracts.js
+core/places/places-final-foundation.js
+core/places/places-final-foundation.css
+index.html
+force-update.html
+sw.js
+intelligence/kernel/version.js
+intelligence/pwa-service.js
+RELEASE-v13.28.6.8.md
+DEPLOYMENT-v13.28.6.8.md
+TEST-v13.28.6.8.md
+COMMIT-v13.28.6.8.txt
