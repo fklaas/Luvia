@@ -1,1 +1,1 @@
-(()=>{'use strict';window.LuviaKernelVersion=Object.freeze({core:'4.28.2.2',build:'13.28.2.2',name:'AI Memory Bridge',channel:'production',builtAt:'2026-08-05T00:45:00+02:00'});window.LuviaCoreVersion=window.LuviaKernelVersion;window.LUVIA_RELEASE=window.LuviaKernelVersion;})();
+(()=>{'use strict';window.LuviaKernelVersion=Object.freeze({core:'4.28.3',build:'13.28.3',name:'Realtime Gallery Experience',channel:'production',builtAt:'2026-08-05T00:45:00+02:00'});window.LuviaCoreVersion=window.LuviaKernelVersion;window.LUVIA_RELEASE=window.LuviaKernelVersion;})();
