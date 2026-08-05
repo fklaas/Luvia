@@ -1,8 +1,8 @@
 (() => {
   'use strict';
 
-  const VERSION = '4.28.6.2';
-  const BUILD = '13.28.6.2';
+  const VERSION = '4.28.6.3';
+  const BUILD = '13.28.6.3';
   const REALTIME_DEBOUNCE_MS = 650;
   const FILTERS = {
     none: ['Original', ''], warm: ['Golden Hour', 'sepia(.18) saturate(1.15) contrast(1.04)'], cool: ['Blue Sky', 'hue-rotate(10deg) saturate(1.08)'], vivid: ['Pop', 'saturate(1.45) contrast(1.1)'], soft: ['Soft', 'contrast(.92) saturate(.88) brightness(1.04)'], mono: ['Mono', 'grayscale(1) contrast(1.08)'],
@@ -232,8 +232,8 @@
 
   async function openLightbox(id) {
     let item=items.find(entry=>entry.id===id); if(!item){item=await window.LuviaMediaCore.get(id).catch(()=>null);if(item)items=[...items,item]} if(!item)return; const url=await urlFor(item),edit=settings(item),overlay=document.createElement('div'); overlay.className='lv-photo-overlay';
-    overlay.innerHTML=`<section class="lv-photo-dialog frame-${esc(edit.frame||'none')}"><button data-close>×</button><div class="lv-photo-large"><div class="lv-lightbox-canvas"><img src="${esc(url)}" alt="${esc(displayName(item))}" style="filter:${esc(editCss(item))};transform:rotate(${Number(edit.rotation||0)}deg)">${edit.vignette?`<b class="lv-photo-vignette" style="opacity:${Math.min(.8,Number(edit.vignette)/100)}"></b>`:''}${overlayMarkup(edit)}</div></div><footer><div><strong>${esc(displayName(item))}</strong><small>${esc(fmtDate(item.capturedAt))} · ${esc(fmtTime(item.capturedAt))}</small><small class="lv-photo-location">📍 ${esc(locationName(item))}</small></div><button data-light-fav>${item.favorite?'★ Favorit':'☆ Favorit'}</button><button data-light-edit>✎ Bearbeiten</button></footer></section>`;
-    const removeOverlay=mountOverlay(overlay); syncOverlayGeometry(overlay); const close=()=>removeOverlay(); overlay.querySelector('[data-close]').onclick=close; overlay.onclick=e=>{if(e.target===overlay)close()};
+    overlay.innerHTML=`<section class="lv-photo-dialog frame-${esc(edit.frame||'none')}"><button data-close>×</button><div class="lv-photo-large">${photoVisual(item,`data-photo-image="${esc(item.id)}"`)}</div><footer><div><strong>${esc(displayName(item))}</strong><small>${esc(fmtDate(item.capturedAt))} · ${esc(fmtTime(item.capturedAt))}</small><small class="lv-photo-location">📍 ${esc(locationName(item))}</small></div><button data-light-fav>${item.favorite?'★ Favorit':'☆ Favorit'}</button><button data-light-edit>✎ Bearbeiten</button></footer></section>`;
+    const removeOverlay=mountOverlay(overlay); await hydrateImages(overlay,[item]); const close=()=>removeOverlay(); overlay.querySelector('[data-close]').onclick=close; overlay.onclick=e=>{if(e.target===overlay)close()};
     overlay.querySelector('[data-light-fav]').onclick=async()=>{suppressRealtimeUntil=Date.now()+1200;await window.LuviaMediaCore.toggleFavorite(id);close();await load({silent:true,force:true})};
     overlay.querySelector('[data-light-edit]').onclick=()=>{close();openEditor(id)};
   }
@@ -368,5 +368,5 @@
   }
   async function unmount(){clearTimeout(loadTimer);await unsubMedia?.();await unsubClusters?.();unsubMedia=unsubClusters=null;urlCache.clear();urlFailureCache.clear();if(host)host.innerHTML='';host=null;activeDay=null;lastFingerprint=''}
 
-  window.LuviaGalleryView=Object.freeze({version:VERSION,build:BUILD,mount,unmount,refresh:options=>load({silent:false,force:true,...options}),openPhoto:openLightbox,openEditor});
+  window.LuviaGalleryView=Object.freeze({version:VERSION,build:BUILD,mount,unmount,refresh:options=>load({silent:false,force:true,...options}),openPhoto:openLightbox,openEditor,renderVisual:(item,attrs='')=>photoVisual(item,attrs),hydrateVisuals:(root,list)=>hydrateImages(root,list),locationName});
 })();

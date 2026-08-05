@@ -1,6 +1,6 @@
 (() => {
   'use strict';
-  const VERSION='4.28.6.2',BUILD='13.28.6.2',BUCKET='luvia-media',channels=new Map();
+  const VERSION='4.28.6.3',BUILD='13.28.6.3',BUCKET='luvia-media',channels=new Map();
   const id=()=>crypto?.randomUUID?.()||`${Date.now()}-${Math.random().toString(16).slice(2)}`;
   const ext=f=>(f?.name?.split('.').pop()||f?.type?.split('/').pop()||'jpg').replace(/[^a-z0-9]/gi,'').toLowerCase()||'jpg';
   const day=iso=>{const d=new Date(iso);return Number.isNaN(d.getTime())?null:`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`};

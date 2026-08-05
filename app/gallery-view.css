@@ -91,3 +91,15 @@ body.lv-photo-modal-open{position:fixed!important;width:100%!important;overflow:
 .lv-canvas-item>span{font-size:1em!important;line-height:1!important}
 .lv-canvas-item.is-text>span{font-size:1em!important}
 .lv-canvas-item [data-overlay-handle]{cursor:nwse-resize!important;touch-action:none!important}
+
+/* 13.28.6.3 — canonical photo surface: never cover the image with a presentation layer */
+.lv-photo-large{display:grid!important;place-items:center!important;overflow:auto!important;background:transparent!important}
+.lv-photo-large>.lv-photo-visual{display:inline-block!important;width:auto!important;height:auto!important;max-width:100%!important;max-height:100%!important;background:transparent!important}
+.lv-photo-large .lv-photo-media-canvas{display:inline-grid!important;place-items:center!important;width:auto!important;height:auto!important;max-width:100%!important;max-height:calc(100dvh - 190px)!important;background:transparent!important}
+.lv-photo-large .lv-photo-media-canvas>img{display:block!important;width:auto!important;height:auto!important;max-width:100%!important;max-height:calc(100dvh - 190px)!important;object-fit:contain!important;opacity:1!important;visibility:visible!important}
+.lv-photo-large .lv-photo-media-canvas>i{position:absolute!important}
+.lv-album-collage [data-album-photo],.lv-album-dialog [data-album-detail-visual]{display:block!important;position:relative!important;width:100%!important;height:100%!important;overflow:hidden!important;background:transparent!important}
+.lv-album-collage .lv-photo-visual,.lv-album-dialog .lv-photo-visual{display:block!important;width:100%!important;height:100%!important}
+.lv-album-collage .lv-photo-media-canvas,.lv-album-dialog .lv-photo-media-canvas{display:block!important;width:100%!important;height:100%!important;position:relative!important;overflow:hidden!important;background:transparent!important}
+.lv-album-collage .lv-photo-media-canvas>img,.lv-album-dialog .lv-photo-media-canvas>img{width:100%!important;height:100%!important;object-fit:cover!important;display:block!important}
+.lv-album-collage .lv-saved-overlays,.lv-album-dialog .lv-saved-overlays{z-index:2!important}

@@ -1,7 +1,7 @@
 (() => {
   'use strict';
-  const VERSION='4.28.6.2';
-  const BUILD='13.28.6.2';
+  const VERSION='4.28.6.3';
+  const BUILD='13.28.6.3';
   const now=()=>new Date().toISOString();
   const elapsed=start=>Math.max(0,Math.round((performance.now()-start)*100)/100);
   async function probeTable(client,table,columns='*'){

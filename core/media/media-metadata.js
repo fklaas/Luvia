@@ -1,6 +1,6 @@
 (() => {
   'use strict';
-  const VERSION='4.28.6.2';
+  const VERSION='4.28.6.3';
   const TYPE_SIZE={1:1,2:1,3:2,4:4,5:8,7:1,9:4,10:8};
   const isHeic=file=>/image\/(hei[cf]|heic-sequence|heif-sequence)/i.test(file?.type||'')||/\.hei[cf]$/i.test(file?.name||'');
   const isJpeg=file=>/image\/(jpeg|jpg)/i.test(file?.type||'')||/\.jpe?g$/i.test(file?.name||'');
