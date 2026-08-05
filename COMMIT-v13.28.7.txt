@@ -1,0 +1,1 @@
+feat(places): add Google and Foursquare multi-provider foundation

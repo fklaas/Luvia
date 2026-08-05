@@ -15,6 +15,7 @@ async function fetchDetails(id,options={}){
  detailInflight.set(key,task);return task;
 }
 async function resolvePhoto(photo,options={}){
+ if(photo?.uri||photo?.url)return{uri:photo.uri||photo.url,attribution:photo?.authorAttributions?.[0]?.displayName||photo?.attribution||''};
  const name=String(photo?.name||photo||'');if(!name)return null;const key=`${name}|${Number(options.maxWidthPx||1200)}|${Number(options.maxHeightPx||900)}`;
  if(photoCache.has(key))return photoCache.get(key);if(photoInflight.has(key))return photoInflight.get(key);
  const task=Promise.resolve(window.LuviaPlaces.photo(name,{maxWidthPx:Number(options.maxWidthPx||1200),maxHeightPx:Number(options.maxHeightPx||900)})).then(r=>{const value=r?.data?.photoUri?{uri:r.data.photoUri,attribution:photo?.authorAttributions?.[0]?.displayName||''}:null;photoInflight.delete(key);if(value)photoCache.set(key,value);return value}).catch(error=>{photoInflight.delete(key);throw error});

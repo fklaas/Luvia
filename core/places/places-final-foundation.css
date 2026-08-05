@@ -2,3 +2,5 @@
 @media(max-width:760px){.places-final{width:min(100% - 20px,1120px);padding-top:24px}.places-final-search{grid-template-columns:1fr}.places-final-category-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.places-final-result{grid-template-columns:1fr}.places-final-result img,.places-final-photo-fallback{height:220px;min-height:220px}.places-final-result-body{padding:22px}.places-final-question form{flex-direction:column}}
 
 .places-final-reasons{display:grid;gap:7px;margin:0 0 20px;padding:0;list-style:none}.places-final-reasons li{position:relative;padding:9px 12px 9px 32px;border-radius:14px;background:color-mix(in srgb,var(--trip-accent,#bd6b9f) 8%,#f7fafb);color:#40576a;font-size:14px;line-height:1.4}.places-final-reasons li:before{content:'✓';position:absolute;left:12px;top:9px;color:var(--trip-accent,#bd6b9f);font-weight:900}.places-final-inline-status:not(:empty){grid-column:1/-1;margin:0;color:#9d4155;font-weight:700}
+
+.places-final-provider{font-size:.75rem;color:var(--lv-muted);margin:.35rem 0}.places-final-reasons{margin:.5rem 0 1rem;padding-left:1.2rem}.places-final-reasons li{margin:.25rem 0}

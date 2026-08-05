@@ -1,6 +1,6 @@
 (() => {
 'use strict';
-const VERSION='4.28.6.8';
+const VERSION='4.28.7';
 const UI_CATEGORIES=Object.freeze({
 food:{key:'food',label:'Essen & Trinken',domainTypes:['restaurant'],includedTypes:['restaurant','cafe','bakery','bar','meal_takeaway','vegetarian_restaurant','vegan_restaurant'],excludedTypes:['hospital','movie_theater','locality'],synonyms:['Restaurant','Café','Bistro','Essen']},
 activities:{key:'activities',label:'Aktivitäten',domainTypes:['activity','attraction','family'],includedTypes:['amusement_park','aquarium','bowling_alley','escape_room','gym','spa','stadium','swimming_pool','water_park','zoo','tourist_attraction'],excludedTypes:['hospital','store','locality'],synonyms:['Aktivität','Erlebnis','Freizeit']},

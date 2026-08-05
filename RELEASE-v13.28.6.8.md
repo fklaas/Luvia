@@ -1,4 +1,4 @@
-# Luvia 13.28.6.8 / Core 4.28.6.8
+# Luvia 13.28.7 / Core 4.28.7
 
 ## Places Intent Intelligence
 - Suchbutton und Form-Submit stabilisiert.
