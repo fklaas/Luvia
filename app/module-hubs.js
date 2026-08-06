@@ -26,7 +26,7 @@
   ]});}
   function memories(){return shell({eyebrow:'Für immer erinnern',title:'Aus Momenten wird eure Geschichte.',description:'Fotos, Orte und gemeinsame Erinnerungen werden automatisch zu eurer Reisegeschichte zusammengeführt.',tiles:[
     {icon:'📸',title:'Fotogalerie',description:'Alle Reisefotos nach Tag und Ort sortiert.',action:'gallery',primary:true},
-    {icon:'🖼️',title:'Alben',description:'Automatisch erkannte Fotomomente und gemeinsame Cluster.',action:'albums'},
+    {icon:'💛',title:'Memory Albums',description:'Aus Fotomomenten bewusst gestaltete Erinnerungen machen.',action:'albums'},
     {icon:'📖',title:'Reisebuch',description:'Aus Timeline, Orten und Momenten entsteht euer Buch.',action:'travel-book'},
     {icon:'🎞️',title:'Reise-Revue',description:'Eure Reise wie ein persönlicher Jahresrückblick.',action:'review'},
     {icon:'⭐',title:'Highlights',description:'Lieblingsorte und besondere gemeinsame Momente.',preview:true,disabled:true}

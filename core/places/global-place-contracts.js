@@ -1,6 +1,6 @@
 (() => {
 'use strict';
-const VERSION='4.28.7.2';
+const VERSION='4.28.7';
 const UI_CATEGORIES=Object.freeze({
 food:{key:'food',label:'Essen & Trinken',domainTypes:['restaurant'],includedTypes:['restaurant','cafe','bakery','bar','meal_takeaway','vegetarian_restaurant','vegan_restaurant'],excludedTypes:['hospital','movie_theater','locality'],synonyms:['Restaurant','Café','Bistro','Essen']},
 activities:{key:'activities',label:'Aktivitäten',domainTypes:['activity','attraction','family'],includedTypes:['amusement_park','aquarium','bowling_alley','escape_room','gym','spa','stadium','swimming_pool','water_park','zoo','tourist_attraction'],excludedTypes:['hospital','store','locality'],synonyms:['Aktivität','Erlebnis','Freizeit']},
@@ -20,28 +20,11 @@ const INTENTS=Object.freeze({
 });
 function category(key){return UI_CATEGORIES[key]||UI_CATEGORIES.activities}
 function intentFor(text='',categoryKey=''){const value=String(text);for(const [key,intent] of Object.entries(INTENTS)){if(intent.patterns.some(rx=>rx.test(value)))return {key,...intent}}return {key:'generic',category:categoryKey||'activities',label:category(categoryKey).label,queries:[],match:null,exclude:null,niche:false}}
-function escapeRegExp(value=''){return String(value).replace(/[.*+?^${}()|[\]\\]/g,'\\$&')}
-function normalizeQueryText(text='',destination=''){
-  let value=String(text||'').replace(/\s+/g,' ').trim();
-  const dest=String(destination||'').replace(/\s+/g,' ').trim();
-  if(!dest)return value;
-  const rx=new RegExp(`(?:\\s+(?:in|bei|nahe|rund um)\\s+)?${escapeRegExp(dest)}(?:\\s+${escapeRegExp(dest)})*$`,'i');
-  value=value.replace(rx,'').trim();
-  const repeated=new RegExp(`(?:\\s+${escapeRegExp(dest)})+$`,'i');
-  value=value.replace(repeated,'').trim();
-  return value||String(text||'').trim();
-}
-function withDestination(query='',destination=''){
-  const q=String(query||'').replace(/\s+/g,' ').trim(),dest=String(destination||'').replace(/\s+/g,' ').trim();
-  if(!dest)return q;
-  if(new RegExp(`(?:^|\\s)${escapeRegExp(dest)}$`,'i').test(q))return q;
-  return `${q} ${dest}`.trim();
-}
 function queryCascade(goal={},destination='',preferences={}){
-  const original=String(goal.text||'').trim(),text=normalizeQueryText(original,destination),intent=intentFor(text,goal.category),def=category(intent.category||goal.category),diet=JSON.stringify(preferences||{}).toLowerCase();
-  let variants=intent.niche?[text,...intent.queries]:[text,...intent.queries,...def.synonyms];
+  const text=String(goal.text||'').trim(),intent=intentFor(text,goal.category),def=category(intent.category||goal.category),diet=JSON.stringify(preferences||{}).toLowerCase();
+  let variants=[text,...intent.queries,...def.synonyms];
   if((intent.category==='food'||goal.category==='food')&&diet.includes('vegetar')&&!/vegetar|vegan/i.test(text))variants=[text,'Vegetarisches Restaurant',...variants];
-  return [...new Set(variants.map(v=>withDestination(v,destination)).filter(Boolean))].slice(0,10)
+  return [...new Set(variants.map(v=>`${v} ${destination}`.trim()).filter(Boolean))].slice(0,10)
 }
 function accepts(place,categoryKey,goalText='',preferences={}){
   const intent=intentFor(goalText,categoryKey),def=category(intent.category||categoryKey),types=new Set((place?.types||[]).map(String)),name=String(place?.name||''),summary=String(place?.editorialSummary?.text||place?.editorialSummary||''),hay=`${name} ${summary} ${[...types].join(' ')}`;
@@ -60,5 +43,5 @@ function relevance(place,goalText='',categoryKey='',preferences={}){
   return {score,reasons,intent};
 }
 function diagnostics(){return{version:VERSION,status:'ready',uiCategories:Object.keys(UI_CATEGORIES).length,intents:Object.keys(INTENTS),singleRegistry:true}}
-window.LuviaGlobalPlaceContracts=Object.freeze({version:VERSION,categories:UI_CATEGORIES,intents:INTENTS,category,intentFor,normalizeQueryText,queryCascade,accepts,relevance,diagnostics});
+window.LuviaGlobalPlaceContracts=Object.freeze({version:VERSION,categories:UI_CATEGORIES,intents:INTENTS,category,intentFor,queryCascade,accepts,relevance,diagnostics});
 })();

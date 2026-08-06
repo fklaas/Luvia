@@ -1,6 +1,6 @@
 (function(){
 'use strict';
-const VERSION='4.28.7.2-native-install-runtime';
+const VERSION='4.28.7-native-install-runtime';
 const SCRIPT_URL=new URL(document.currentScript?.src||'intelligence/pwa-service.js',document.baseURI);
 const APP_ROOT_URL=new URL('../',SCRIPT_URL);
 const SW_URL=new URL('sw.js',APP_ROOT_URL).toString();
