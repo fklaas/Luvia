@@ -1,0 +1,1 @@
+refactor(gallery): reset media pipeline and consolidate realtime refresh

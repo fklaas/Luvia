@@ -1,9 +1,9 @@
 (() => {
   'use strict';
 
-  const VERSION = '4.29.5.4';
-  const BUILD = '13.29.5.4';
-  const REALTIME_DEBOUNCE_MS = 650;
+  const VERSION = '4.29.6';
+  const BUILD = '13.29.6';
+  const REALTIME_DEBOUNCE_MS = 800;
   const FILTERS = {
     none: ['Original', ''], warm: ['Golden Hour', 'sepia(.18) saturate(1.15) contrast(1.04)'], cool: ['Blue Sky', 'hue-rotate(10deg) saturate(1.08)'], vivid: ['Pop', 'saturate(1.45) contrast(1.1)'], soft: ['Soft', 'contrast(.92) saturate(.88) brightness(1.04)'], mono: ['Mono', 'grayscale(1) contrast(1.08)'],
     paris: ['Paris', 'sepia(.12) saturate(1.16) contrast(1.06) hue-rotate(-6deg)'], sunset: ['Sunset', 'sepia(.24) saturate(1.35) hue-rotate(-12deg)'], rose: ['Rosé', 'sepia(.12) saturate(1.2) hue-rotate(325deg)'], cinema: ['Cinema', 'contrast(1.2) saturate(.78) sepia(.1)'], noir: ['Noir', 'grayscale(1) contrast(1.35) brightness(.92)'], retro: ['Retro', 'sepia(.38) saturate(.82) contrast(.92)'], film: ['Film', 'contrast(1.12) saturate(.9) brightness(.98)'], dreamy: ['Dreamy', 'brightness(1.08) contrast(.88) saturate(.86)'], tropical: ['Tropical', 'saturate(1.45) hue-rotate(-8deg) contrast(1.04)'], aqua: ['Aqua', 'saturate(1.2) hue-rotate(18deg)'], candy: ['Candy', 'saturate(1.4) hue-rotate(335deg) brightness(1.04)'], matte: ['Matte', 'contrast(.86) saturate(.78) brightness(1.06)'],
@@ -37,9 +37,9 @@
   let bootstrapCount=0;
   let clusterSyncPromise=null;
   let lastClusterInputSignature='';
-  let realtimeRenderTimer=null;
-  let realtimeClusterTimer=null;
-  let realtimeSnapshotTimer=null;
+  let galleryRefreshTimer=null;
+  let galleryRefreshNeedsClusterSync=false;
+  let galleryRefreshReasons=new Set();
   function lockPageScroll(){if(document.body.classList.contains('lv-photo-modal-open'))return;modalScrollY=window.scrollY||0;document.body.style.top=`-${modalScrollY}px`;document.body.classList.add('lv-photo-modal-open');}
   function unlockPageScroll(){if(!document.body.classList.contains('lv-photo-modal-open'))return;document.body.classList.remove('lv-photo-modal-open');document.body.style.top='';window.scrollTo(0,modalScrollY);}
   function mountOverlay(overlay){lockPageScroll();document.body.appendChild(overlay);return()=>{overlay.remove();if(!document.querySelector('.lv-photo-overlay'))unlockPageScroll()}}
@@ -55,7 +55,8 @@
   const fmtDate = value => value ? new Intl.DateTimeFormat('de-DE',{weekday:'long',day:'2-digit',month:'long',year:'numeric'}).format(new Date(value)) : 'Ohne Datum';
   const fmtTime = value => value ? new Intl.DateTimeFormat('de-DE',{hour:'2-digit',minute:'2-digit'}).format(new Date(value)) : '–';
   const suggestName = () => '';
-  const displayName = item => item.displayName || 'Titel hinzufügen';
+  const displayName = item => String(item?.displayName||'').trim();
+  const accessibleName = item => displayName(item) || item?.originalName || 'Reisefoto';
   const locationName = item => item?.metadata?.resolvedLocation?.name || item?.metadata?.resolvedLocation?.address || item?.metadata?.captureLocation?.name || (item?.latitude!=null&&item?.longitude!=null?'GPS-Standort gespeichert':'Kein Standort gespeichert');
   const normalizeOverlay=o=>({type:o?.type==='text'?'text':'sticker',value:String(o?.value||''),x:Math.max(0,Math.min(1,Number(o?.x??.5)>1?Number(o.x)/100:Number(o?.x??.5))),y:Math.max(0,Math.min(1,Number(o?.y??.5)>1?Number(o.y)/100:Number(o?.y??.5))),size:Math.max(.025,Math.min(.5,Number(o?.size)||(((o?.type==='text') ? .07 : .13)*Number(o?.scale||1)))),rotation:Number(o?.rotation||0),schema:'image-v2'});
   const settings = item => {const value={brightness:100,contrast:100,saturation:100,temperature:0,blur:0,vignette:0,exposure:0,highlights:0,shadows:0,clarity:0,hue:0,grain:0,filter:'none',rotation:0,frame:'',sticker:'',caption:'',overlays:[],...item.editSettings};value.overlays=(value.overlays||[]).map(normalizeOverlay);return value};
@@ -69,8 +70,11 @@
   const overlayMarkup = edit => `<span class="lv-saved-overlays" style="--image-rotation:${Number(edit.rotation||0)}deg">${(edit.overlays||[]).map(raw=>{const o=normalizeOverlay(raw);return `<span class="lv-saved-overlay ${o.type==='text'?'is-text':'is-sticker'}" style="--overlay-x:${o.x*100};--overlay-y:${o.y*100};--overlay-rotation:${o.rotation}deg;--overlay-size:${o.size}">${esc(o.value||'')}</span>`}).join('')}</span>`;
   const directThumbUrl = item => window.LuviaMediaCore?.publicThumbnailUrl?.(item,'thumb640') || window.LuviaMediaCore?.publicThumbnailUrl?.(item,'thumb256') || '';
   const photoVisual = (item, attrs='') => {
-    const edit = settings(item),baked=Boolean(item?.metadata?.renderedPreviewPath||item?.renderedPreviewPath),direct=directThumbUrl(item);
-    return `<span class="lv-photo-visual ${direct?'is-loaded ':''}${baked?'is-baked':`frame-${esc(edit.frame||'none')}`}" ${attrs}><span class="lv-photo-media-canvas" ${direct?`style="background-image:url('${esc(direct)}')"`:''}><img ${direct?`src="${esc(direct)}"`:''} alt="${esc(displayName(item))}" loading="eager" decoding="async" fetchpriority="high" ${baked?'':`style="filter:${esc(editCss(item))};transform:rotate(${Number(edit.rotation||0)}deg)"`}><i class="lv-photo-placeholder" aria-hidden="true"></i>${baked?'':`${edit.vignette?`<b class="lv-photo-vignette" style="opacity:${Math.min(.8,Number(edit.vignette)/100)}"></b>`:''}${overlayMarkup(edit)}`}</span></span>`;
+    const edit=settings(item), baked=Boolean(item?.metadata?.renderedPreviewPath||item?.renderedPreviewPath), direct=directThumbUrl(item);
+    const image = direct
+      ? `<img src="${esc(direct)}" alt="${esc(accessibleName(item))}" loading="eager" decoding="async" fetchpriority="high" width="${Number(item?.width)||640}" height="${Number(item?.height)||480}" onload="this.closest('.lv-photo-visual')?.classList.add('is-loaded')" onerror="this.closest('.lv-photo-visual')?.classList.add('is-failed');this.remove()" ${baked?'':`style="filter:${esc(editCss(item))};transform:rotate(${Number(edit.rotation||0)}deg)"`}>`
+      : '';
+    return `<span class="lv-photo-visual ${direct?'':'is-missing '}${baked?'is-baked':`frame-${esc(edit.frame||'none')}`}" ${attrs}><span class="lv-photo-media-canvas">${image}<i class="lv-photo-placeholder" aria-hidden="true"></i>${baked?'':`${edit.vignette?`<b class="lv-photo-vignette" style="opacity:${Math.min(.8,Number(edit.vignette)/100)}"></b>`:''}${overlayMarkup(edit)}`}</span></span>`;
   };
 
   function syncOverlayGeometry(scope=document){scope.querySelectorAll('.lv-photo-media-canvas,.lv-lightbox-canvas').forEach(canvas=>{const img=canvas.querySelector(':scope > img'),stage=canvas.querySelector(':scope > .lv-saved-overlays');if(!img||!stage)return;const sync=()=>{const bw=img.clientWidth,bh=img.clientHeight,nw=img.naturalWidth,nh=img.naturalHeight;if(!bw||!bh||!nw||!nh)return;const scale=Math.min(bw/nw,bh/nh),w=nw*scale,h=nh*scale;stage.style.left=`${(bw-w)/2}px`;stage.style.top=`${(bh-h)/2}px`;stage.style.width=`${w}px`;stage.style.height=`${h}px`};img.addEventListener('load',sync,{once:true});if(img.complete)requestAnimationFrame(sync);if(!img.dataset.overlayObserved){img.dataset.overlayObserved='1';new ResizeObserver(sync).observe(img)}})}
@@ -175,27 +179,9 @@
   function card(item, compact=false) {
     return `<article class="lv-gallery-photo ${compact?'is-compact':''}" data-photo="${esc(item.id)}">
       <button type="button" class="lv-photo-open" data-photo-open="${esc(item.id)}">${photoVisual(item,`data-photo-image="${esc(item.id)}"`)}</button>
-      <div class="lv-photo-meta"><strong>${esc(displayName(item))}</strong><small>${esc(fmtTime(item.capturedAt))}</small></div>
+      <div class="lv-photo-meta">${displayName(item)?`${displayName(item)?`<strong>${esc(displayName(item))}</strong>`:''}`:''}<small>${esc(fmtTime(item.capturedAt))}</small></div>
       <div class="lv-photo-actions"><button type="button" data-photo-favorite="${esc(item.id)}" class="${item.favorite?'is-on':''}" title="Favorit">${item.favorite?'★':'☆'}</button><button type="button" data-photo-timeline="${esc(item.id)}" title="Zur Dashboard-Timeline hinzufügen">⌁</button><button type="button" data-photo-polaroid="${esc(item.id)}" title="Polaroid des Tages">▣</button><button type="button" data-photo-edit="${esc(item.id)}" title="Bearbeiten">✎</button><button type="button" data-photo-remove="${esc(item.id)}" title="Löschen">×</button></div>
     </article>`;
-  }
-  async function hydrateImages(root,list,size='thumb640'){
-    const unique=[...new Map((list||[]).filter(Boolean).map(item=>[String(item.id),item])).values()];
-    if(!root?.isConnected||!unique.length)return;
-    let urls=new Map();
-    try{urls=await window.LuviaMediaCore.signedUrls?.(unique,size,86400)||new Map()}catch(error){console.warn('[LuviaGalleryView] Bild-URLs konnten nicht vollständig aufgelöst werden.',error)}
-    if(!root?.isConnected)return;
-    for(const item of unique){const url=urls.get(String(item.id))||'';root.querySelectorAll(`[data-photo-image="${cssEsc(item.id)}"]`).forEach(node=>{
-      let image=node.matches('img')?node:node.querySelector('img');
-      if(!image){image=document.createElement('img');image.alt=displayName(item);node.prepend(image)}
-      node.classList.remove('is-loaded','is-failed');
-      if(!url){node.classList.add('is-failed');return}
-      const important=Boolean(node.closest('.lv-day-tiles,.lv-cluster-grid,.lv-favorites'));
-      image.loading='eager';image.decoding='async';image.fetchPriority=important?'high':'auto';image.width=item.width||640;image.height=item.height||480;
-      image.onload=()=>{node.classList.add('is-loaded');node.classList.remove('is-failed');node.querySelectorAll('.lv-photo-placeholder,:scope > i').forEach(x=>x.remove());syncOverlayGeometry(node)};
-      image.onerror=()=>{node.classList.add('is-failed');node.classList.remove('is-loaded');image.remove()};
-      const canvas=node.querySelector('.lv-photo-media-canvas')||node;canvas.style.backgroundImage=`url("${String(url).replace(/"/g,'%22')}")`;canvas.style.backgroundSize='cover';canvas.style.backgroundPosition='center';node.classList.add('is-loaded');if(image.src!==url)image.src=url;else if(image.complete&&image.naturalWidth)image.onload?.();
-    })}
   }
   function bindPhotoActions(root) {
     root.querySelectorAll('[data-photo-open]').forEach(button => button.onclick = () => openLightbox(button.dataset.photoOpen));
@@ -222,7 +208,7 @@
     host.querySelector('[data-favorite-count]').textContent = String(favorites.length);
     if (!favorites.length) { root.innerHTML = '<div class="lv-inline-empty">Noch keine Favoriten – tippe bei einem Foto auf ☆.</div>'; return; }
     root.innerHTML = favorites.map(item => card(item,true)).join('');
-    bindPhotoActions(root); void hydrateImages(root,favorites);
+    bindPhotoActions(root);
   }
 
   async function renderDays() {
@@ -235,18 +221,17 @@
       if (!group) activeDay = null;
       else {
         const hero = group.key !== 'other' && polaroids[group.key] ? group.items.find(item => item.id === polaroids[group.key]) : null;
-        root.innerHTML = `<div class="lv-day-page is-entering"><div class="lv-day-page-toolbar"><button type="button" class="lv-day-back" data-day-back>← Alle Fototage</button><span>${group.items.length} Foto${group.items.length===1?'':'s'}</span></div><header class="lv-day-page-hero"><div><small>${group.key==='other'?'WEITERE AUFNAHMEN':'EUER REISETAG'}</small><h3>${esc(group.label)}</h3><p>${group.items.length ? 'Alle Bilder dieses Tages – gemeinsam, bearbeitbar und in Echtzeit.' : 'Für diesen Tag wurden noch keine Fotos gespeichert.'}</p></div></header>${hero?`<button type="button" class="lv-polaroid-card" data-photo-open="${esc(hero.id)}">${photoVisual(hero,`data-photo-image="${esc(hero.id)}"`)}<b>Polaroid des Tages</b><small>${esc(displayName(hero))}</small></button>`:''}<div class="lv-gallery-grid">${group.items.map(item=>card(item)).join('')}</div></div>`;
+        root.innerHTML = `<div class="lv-day-page is-entering"><div class="lv-day-page-toolbar"><button type="button" class="lv-day-back" data-day-back>← Alle Fototage</button><span>${group.items.length} Foto${group.items.length===1?'':'s'}</span></div><header class="lv-day-page-hero"><div><small>${group.key==='other'?'WEITERE AUFNAHMEN':'EUER REISETAG'}</small><h3>${esc(group.label)}</h3><p>${group.items.length ? 'Alle Bilder dieses Tages – gemeinsam, bearbeitbar und in Echtzeit.' : 'Für diesen Tag wurden noch keine Fotos gespeichert.'}</p></div></header>${hero?`<button type="button" class="lv-polaroid-card" data-photo-open="${esc(hero.id)}">${photoVisual(hero,`data-photo-image="${esc(hero.id)}"`)}<b>Polaroid des Tages</b>${displayName(hero)?`<small>${esc(displayName(hero))}</small>`:''}</button>`:''}<div class="lv-gallery-grid">${group.items.map(item=>card(item)).join('')}</div></div>`;
         root.querySelector('[data-day-back]').onclick = () => { root.querySelector('.lv-day-page')?.classList.add('is-leaving'); setTimeout(()=>{activeDay=null;renderDays();},180); };
-        bindPhotoActions(root); void hydrateImages(root,group.items); return;
+        bindPhotoActions(root); return;
       }
     }
     const visible = groups.slice(0, dayLimit);
     const hidden = Math.max(0, groups.length-visible.length);
     root.innerHTML = `<div class="lv-day-tiles">${visible.map(group => {
       const cover = (group.key!=='other' && polaroids[group.key] ? group.items.find(item=>item.id===polaroids[group.key]) : null) || group.items[0] || null;
-      return `<button type="button" class="lv-day-tile ${group.items.length?'has-photos':'is-empty'}" data-day-open="${esc(group.key)}"><span class="lv-day-tile-cover" ${cover?`data-photo-image="${esc(cover.id)}"`:''}>${cover?'<i class="lv-photo-placeholder" aria-hidden="true"></i>':'<i><b>♡</b><span>Hier wartet euer nächster Moment</span></i>'}</span><div><small>${group.key==='other'?'WEITERE AUFNAHMEN':'REISETAG'}</small><strong>${esc(group.label)}</strong><em>${group.items.length} Foto${group.items.length===1?'':'s'}</em></div><b>→</b></button>`;
+      return `<button type="button" class="lv-day-tile ${group.items.length?'has-photos':'is-empty'}" data-day-open="${esc(group.key)}"><span class="lv-day-tile-cover">${cover?photoVisual(cover):'<i><b>♡</b><span>Hier wartet euer nächster Moment</span></i>'}</span><div><small>${group.key==='other'?'WEITERE AUFNAHMEN':'REISETAG'}</small><strong>${esc(group.label)}</strong><em>${group.items.length} Foto${group.items.length===1?'':'s'}</em></div><b>→</b></button>`;
     }).join('')}</div>${groups.length>10?`<div class="lv-day-more"><button type="button" data-days-toggle>${dayLimit<groups.length?`Mehr Tage anzeigen (${hidden})`:'Weniger Tage anzeigen'}</button></div>`:''}`;
-    void hydrateImages(root, visible.flatMap(group=>group.items.slice(0,1)));
     root.querySelectorAll('[data-day-open]').forEach(button => button.onclick = () => { activeDay=button.dataset.dayOpen; renderDays(); });
     root.querySelector('[data-days-toggle]')?.addEventListener('click',()=>{dayLimit=dayLimit<groups.length?groups.length:10;renderDays()});
   }
@@ -262,12 +247,11 @@
     const root = host.querySelector('[data-gallery-clusters]');
     const visible = clusters.filter(cluster => cluster.state !== 'dismissed' && cluster.mediaIds?.length);
     if (!visible.length) { root.innerHTML = '<div class="lv-gallery-empty compact"><b>✨</b><h3>Noch keine Fotomomente</h3><p>Mehrere Fotos innerhalb von 20 Minuten werden automatisch gruppiert.</p></div>'; return; }
-    root.innerHTML = `<div class="lv-cluster-grid">${visible.map(cluster => {const memory=memoryAlbums.find(a=>String(a.source_cluster_id)===String(cluster.id));return `<article class="lv-cluster-card ${memory?'is-memory':''}"><button class="lv-cluster-collage" data-cluster-open="${esc(cluster.id)}">${cluster.mediaIds.slice(0,4).map(id=>`<span data-cluster-image="${esc(id)}"></span>`).join('')}<b>${memory?'💛 Erinnerung':`${cluster.mediaIds.length} Fotos`}</b></button><div class="lv-cluster-copy"><small>${esc(fmtDate(cluster.start_at))} · ${esc(fmtTime(cluster.start_at))}</small><h3>${esc(memory?.title||cluster.title||'Gemeinsamer Fotomoment')}</h3><p>${esc(memory?'Dieser Fotomoment wurde als Memory Album festgehalten.':clusterReason(cluster))}</p><div>${memory?`<button type="button" data-memory-open>💛 Memory Album öffnen</button>`:`<button type="button" data-memory-create="${esc(cluster.id)}">✨ Daraus eine Erinnerung machen</button><button type="button" data-cluster-timeline="${esc(cluster.id)}">⌁ Zur Timeline</button><button type="button" data-cluster-dismiss="${esc(cluster.id)}">Auflösen</button>`}</div></div></article>`}).join('')}</div>`;
+    root.innerHTML = `<div class="lv-cluster-grid">${visible.map(cluster => {const memory=memoryAlbums.find(a=>String(a.source_cluster_id)===String(cluster.id));return `<article class="lv-cluster-card ${memory?'is-memory':''}"><button class="lv-cluster-collage" data-cluster-open="${esc(cluster.id)}">${cluster.mediaIds.slice(0,4).map(id=>{const media=items.find(item=>String(item.id)===String(id));return media?photoVisual(media):''}).join('')}<b>${memory?'💛 Erinnerung':`${cluster.mediaIds.length} Fotos`}</b></button><div class="lv-cluster-copy"><small>${esc(fmtDate(cluster.start_at))} · ${esc(fmtTime(cluster.start_at))}</small><h3>${esc(memory?.title||cluster.title||'Gemeinsamer Fotomoment')}</h3><p>${esc(memory?'Dieser Fotomoment wurde als Memory Album festgehalten.':clusterReason(cluster))}</p><div>${memory?`<button type="button" data-memory-open>💛 Memory Album öffnen</button>`:`<button type="button" data-memory-create="${esc(cluster.id)}">✨ Daraus eine Erinnerung machen</button><button type="button" data-cluster-timeline="${esc(cluster.id)}">⌁ Zur Timeline</button><button type="button" data-cluster-dismiss="${esc(cluster.id)}">Auflösen</button>`}</div></div></article>`}).join('')}</div>`;
     root.querySelectorAll('[data-cluster-open]').forEach(button => button.onclick = () => openCluster(button.dataset.clusterOpen));
     root.querySelectorAll('[data-memory-create]').forEach(button => button.onclick = () => window.LuviaAlbumsView?.startFromCluster?.(button.dataset.memoryCreate,{cluster:clusters.find(x=>String(x.id)===String(button.dataset.memoryCreate)),items:items.filter(x=>(clusters.find(c=>String(c.id)===String(button.dataset.memoryCreate))?.mediaIds||[]).includes(x.id))}));
     root.querySelectorAll('[data-memory-open]').forEach(button => button.onclick = () => window.LuviaApp?.show?.('albums'));
     root.querySelectorAll('[data-cluster-timeline]').forEach(button=>button.onclick=async()=>{const cluster=clusters.find(x=>String(x.id)===String(button.dataset.clusterTimeline));if(!cluster)return;button.disabled=true;try{await window.LuviaTimelineCore?.record?.({type:'photo_memory',title:cluster.title||'Gemeinsamer Fotomoment',description:clusterReason(cluster),occurredAt:cluster.start_at||new Date().toISOString(),source:'media_cluster',automatic:false,metadata:{clusterId:cluster.id,mediaIds:cluster.mediaIds}});await window.LuviaTimelineCore?.hydrate?.();button.textContent='✓ In Timeline';status('Fotomoment wurde zur Dashboard-Timeline hinzugefügt.','ready')}catch(e){showError(e)}finally{button.disabled=false}});
-    const clusterItems=[...new Set(visible.flatMap(cluster=>cluster.mediaIds.slice(0,4)))].map(id=>items.find(entry=>entry.id===id)).filter(Boolean);clusterItems.forEach(item=>{const node=root.querySelector(`[data-cluster-image="${cssEsc(item.id)}"]`);if(node)node.innerHTML=photoVisual(item,`data-photo-image="${esc(item.id)}"`)});hydrateImages(root,clusterItems);
     root.querySelectorAll('[data-cluster-dismiss]').forEach(button => button.onclick = async () => {
       if (!confirm('Automatische Gruppierung auflösen?')) return;
       suppressRealtimeUntil=Date.now()+1600; await window.LuviaMediaClustering.dissolve(button.dataset.clusterDismiss); await window.LuviaTimelineCore?.removePhotoMemoryByCluster?.(button.dataset.clusterDismiss); await load({silent:true,force:true});
@@ -279,7 +263,7 @@
     const selected = items.filter(item=>cluster.mediaIds.includes(item.id));
     const overlay=document.createElement('div'); overlay.className='lv-photo-overlay';
     overlay.innerHTML=`<section class="lv-cluster-dialog"><button data-close>×</button><span>✨ Fotomoment</span><h2>${esc(cluster.title||'Gemeinsamer Fotomoment')}</h2><p>${esc(clusterReason(cluster))}</p><div class="lv-cluster-detail-grid">${selected.map(item=>`<button type="button" data-cluster-photo="${esc(item.id)}">${photoVisual(item,`data-photo-image="${esc(item.id)}"`)}</button>`).join('')}</div></section>`;
-    const removeOverlay=mountOverlay(overlay); void hydrateImages(overlay,selected);
+    const removeOverlay=mountOverlay(overlay);
     overlay.querySelector('[data-close]').onclick=()=>removeOverlay(); overlay.onclick=e=>{if(e.target===overlay)removeOverlay()};
     overlay.querySelectorAll('[data-cluster-photo]').forEach(button=>button.onclick=()=>{removeOverlay();openLightbox(button.dataset.clusterPhoto)});
   }
@@ -288,7 +272,7 @@
     let item=items.find(entry=>entry.id===id);if(!item){item=await window.LuviaMediaCore.get(id).catch(()=>null);if(item)items=[...items,item]}if(!item)return;
     const immediate=directThumbUrl(item)||'';
     const overlay=document.createElement('div');overlay.className='lv-photo-overlay';
-    overlay.innerHTML=`<section class="lv-photo-dialog"><button data-close>×</button><div class="lv-photo-large"><div class="lv-progressive-image ${immediate?'has-thumb':'is-loading'}">${immediate?`<img class="lv-progressive-image__thumb" src="${esc(immediate)}" alt="" aria-hidden="true" loading="eager" decoding="async" fetchpriority="high">`:''}<img class="lv-progressive-image__full" alt="${esc(displayName(item))}" decoding="async" fetchpriority="high"><div class="lv-progressive-image__status">Foto wird in voller Qualität geladen …</div></div></div><footer><div><strong>${esc(displayName(item))}</strong><small>${esc(fmtDate(item.capturedAt))} · ${esc(fmtTime(item.capturedAt))}</small><small class="lv-photo-location">📍 ${esc(locationName(item))}</small></div><button data-light-download>⬇ Herunterladen</button><button data-light-polaroid>▣ Polaroid des Tages</button><button data-light-fav>${item.favorite?'★ Favorit':'☆ Favorit'}</button><button data-light-edit>✎ Bearbeiten</button></footer></section>`;
+    overlay.innerHTML=`<section class="lv-photo-dialog"><button data-close>×</button><div class="lv-photo-large"><div class="lv-progressive-image ${immediate?'has-thumb':'is-loading'}">${immediate?`<img class="lv-progressive-image__thumb" src="${esc(immediate)}" alt="" aria-hidden="true" loading="eager" decoding="async" fetchpriority="high">`:''}<img class="lv-progressive-image__full" alt="${esc(accessibleName(item))}" decoding="async" fetchpriority="high"><div class="lv-progressive-image__status">Foto wird in voller Qualität geladen …</div></div></div><footer><div>${displayName(item)?`<strong>${esc(displayName(item))}</strong>`:''}<small>${esc(fmtDate(item.capturedAt))} · ${esc(fmtTime(item.capturedAt))}</small><small class="lv-photo-location">📍 ${esc(locationName(item))}</small></div><button data-light-download>⬇ Herunterladen</button><button data-light-polaroid>▣ Polaroid des Tages</button><button data-light-fav>${item.favorite?'★ Favorit':'☆ Favorit'}</button><button data-light-edit>✎ Bearbeiten</button></footer></section>`;
     const removeOverlay=mountOverlay(overlay),close=()=>removeOverlay();overlay.querySelector('[data-close]').onclick=close;overlay.onclick=e=>{if(e.target===overlay)close()};
     void (async()=>{try{const original=await window.LuviaMediaCore.signedOriginalUrl(item,3600);if(!original||!overlay.isConnected)return;const stage=overlay.querySelector('.lv-progressive-image'),full=stage?.querySelector('.lv-progressive-image__full');if(!stage||!full)return;const preload=new Image();preload.decoding='async';preload.src=original;try{await preload.decode()}catch{await new Promise((resolve,reject)=>{preload.onload=resolve;preload.onerror=reject})}if(!overlay.isConnected)return;full.src=original;full.width=preload.naturalWidth||item.width||1600;full.height=preload.naturalHeight||item.height||1200;requestAnimationFrame(()=>stage.classList.add('is-full-ready'));stage.classList.remove('is-loading')}catch(error){const stage=overlay.querySelector('.lv-progressive-image');stage?.classList.add('is-full-failed');console.warn('[LuviaGalleryView] Originalfoto konnte nicht nachgeladen werden.',error)}})();
     overlay.querySelector('[data-light-download]').onclick=async()=>{try{await downloadPhotoAsset(item)}catch(error){showError(error)}};const pb=overlay.querySelector('[data-light-polaroid]');if(pb)pb.onclick=async()=>{try{await window.LuviaMediaCore.setPolaroid(item.id,item.dayKey);status('Polaroid des Tages wurde in die Timeline übernommen.','ready')}catch(error){showError(error)}};
@@ -329,7 +313,7 @@
     if(edit.sticker && !(edit.overlays||[]).length)state.overlays.push({type:'sticker',value:edit.sticker,x:.84,y:.16,size:.13,rotation:0,schema:'image-v2'});
     if(edit.caption && !(edit.overlays||[]).some(x=>x.type==='text'))state.overlays.push({type:'text',value:edit.caption,x:.5,y:.78,size:.07,rotation:0,schema:'image-v2'});
     state.sticker=''; state.caption=''; overlay.className='lv-photo-overlay';
-    overlay.innerHTML=`<section class="lv-editor-dialog lv-editor-pro"><header class="lv-editor-topbar"><div><span>🎨 Luvia Photo Studio</span><strong>Foto bearbeiten</strong></div><button data-close aria-label="Editor schließen">×</button></header><div class="lv-editor-workspace"><div class="lv-editor-preview-shell"><div class="lv-editor-preview frame-${esc(edit.frame||'none')}"><img src="${esc(url)}" alt="${esc(displayName(item))}"><b class="lv-photo-vignette"></b><div class="lv-editor-overlay-stage" data-overlay-stage></div></div></div><aside class="lv-editor-panel">${editorControls(edit)}</aside></div><div class="lv-editor-actions"><button data-reset>Zurücksetzen</button><button data-polaroid ${validPolaroid?'':'disabled'}>Polaroid des Tages</button><button class="primary" data-save>Speichern</button></div></section>`;
+    overlay.innerHTML=`<section class="lv-editor-dialog lv-editor-pro"><header class="lv-editor-topbar"><div><span>🎨 Luvia Photo Studio</span><strong>Foto bearbeiten</strong></div><button data-close aria-label="Editor schließen">×</button></header><div class="lv-editor-workspace"><div class="lv-editor-preview-shell"><div class="lv-editor-preview frame-${esc(edit.frame||'none')}"><img src="${esc(url)}" alt="${esc(accessibleName(item))}"><b class="lv-photo-vignette"></b><div class="lv-editor-overlay-stage" data-overlay-stage></div></div></div><aside class="lv-editor-panel">${editorControls(edit)}</aside></div><div class="lv-editor-actions"><button data-reset>Zurücksetzen</button><button data-polaroid ${validPolaroid?'':'disabled'}>Polaroid des Tages</button><button class="primary" data-save>Speichern</button></div></section>`;
     const removeOverlay=mountOverlay(overlay);
     const preview=overlay.querySelector('.lv-editor-preview'),img=preview.querySelector('img'),vignette=preview.querySelector('.lv-photo-vignette'),overlayStage=preview.querySelector('[data-overlay-stage]');
     const syncOverlayStage=()=>{overlayStage.style.left=`${img.offsetLeft}px`;overlayStage.style.top=`${img.offsetTop}px`;overlayStage.style.width=`${img.offsetWidth}px`;overlayStage.style.height=`${img.offsetHeight}px`;overlayStage.style.transform=`rotate(${Number(state.rotation||0)}deg)`;overlayStage.style.transformOrigin='center';};img.addEventListener('load',()=>requestAnimationFrame(syncOverlayStage));if(img.complete)requestAnimationFrame(syncOverlayStage);img.addEventListener('error',()=>{if(!img.alt)img.alt='Vorschau nicht verfügbar'});new ResizeObserver(()=>syncOverlayStage()).observe(preview);
@@ -419,37 +403,31 @@
     await load({silent:false,force:true});
   }
 
-  function scheduleRealtimeRender(){
-    clearTimeout(realtimeRenderTimer);
-    realtimeRenderTimer=setTimeout(async()=>{if(!host)return;try{lastFingerprint='';await renderAll({force:true})}catch(error){showError(error)}},120);
+  function queueGalleryRefresh(reason='Realtime',{clusterSync=false}={}){
+    if(!host||Date.now()<suppressRealtimeUntil)return;
+    galleryRefreshReasons.add(reason);
+    galleryRefreshNeedsClusterSync=galleryRefreshNeedsClusterSync||clusterSync;
+    clearTimeout(galleryRefreshTimer);
+    galleryRefreshTimer=setTimeout(async()=>{
+      if(!host)return;
+      const needsCluster=galleryRefreshNeedsClusterSync;
+      galleryRefreshNeedsClusterSync=false;
+      const reasons=[...galleryRefreshReasons];galleryRefreshReasons.clear();
+      try{
+        window.LuviaMediaCore?.invalidateQueries?.('gallery:');
+        await readData({force:true});
+        if(needsCluster){const changed=await rebuildClusters({force:true});if(changed)await readData({force:true})}
+        lastFingerprint='';await renderAll({force:true});updateSummary();
+        console.debug('[LuviaGalleryPerf] realtime-refresh',{reasons,media:items.length,clusters:clusters.length});
+      }catch(error){showError(error)}
+    },REALTIME_DEBOUNCE_MS);
   }
-  function applyMediaRealtime(payload){
+  function mediaRealtime(payload){
     const event=payload?.eventType||payload?.event||'';
-    const raw=event==='DELETE'?payload?.old:payload?.new;
-    if(!raw?.id)return false;
-    const id=String(raw.id),index=items.findIndex(item=>String(item.id)===id);
-    if(event==='DELETE'||raw.status==='deleted'){if(index>=0)items.splice(index,1);return true}
-    const entity=window.LuviaMediaCore?.rowToEntity?.(raw);if(!entity)return false;
-    if(index>=0)items[index]=entity;else items.push(entity);
-    items.sort((a,b)=>new Date(a.capturedAt||0)-new Date(b.capturedAt||0));
-    return true;
+    const structural=event==='INSERT'||event==='DELETE'||(event==='UPDATE'&&['captured_at','day_key','status'].some(key=>payload?.old?.[key]!==payload?.new?.[key]));
+    queueGalleryRefresh('media',{clusterSync:structural});
   }
-  function mediaRealtime(payload) {
-    if(Date.now()<suppressRealtimeUntil)return;
-    const table=payload?.table||'media';
-    if(table==='media'&&applyMediaRealtime(payload)){scheduleRealtimeRender();updateSummary()}
-    window.LuviaMediaCore?.invalidateQueries?.('gallery:');
-    const event=payload?.eventType||payload?.event;
-    const structural=table==='media'&&(event==='INSERT'||event==='DELETE'||(event==='UPDATE'&&['captured_at','day_key','status'].some(key=>payload?.old?.[key]!==payload?.new?.[key])));
-    if(structural){clearTimeout(realtimeClusterTimer);realtimeClusterTimer=setTimeout(()=>scheduleLoad('Media Cluster Sync',{realtime:true,silent:true,analyze:true,force:true}),1200)}
-    else {clearTimeout(realtimeSnapshotTimer);realtimeSnapshotTimer=setTimeout(()=>scheduleLoad('Media Snapshot',{realtime:true,silent:true,force:true}),500)}
-  }
-  function clusterRealtime(){
-    if(Date.now()<suppressRealtimeUntil)return;
-    window.LuviaMediaCore?.invalidateQueries?.('gallery:');
-    clearTimeout(realtimeSnapshotTimer);
-    realtimeSnapshotTimer=setTimeout(()=>scheduleLoad('Cluster Snapshot',{realtime:true,silent:true,force:true}),700);
-  }
+  function clusterRealtime(){queueGalleryRefresh('cluster')}
 
   async function bindRealtime(){
     if(unsubMedia||unsubClusters||unsubAlbums)return;
@@ -475,7 +453,7 @@
       await readData({force:true});const clustersChanged=await rebuildClusters({force:true});if(clustersChanged)await readData({force:true});await renderAll({force:true});updateSummary();return ()=>unmount();
     })().finally(()=>{mountPromise=null});return mountPromise;
   }
-  async function unmount(){clearTimeout(loadTimer);clearTimeout(realtimeRenderTimer);clearTimeout(realtimeClusterTimer);clearTimeout(realtimeSnapshotTimer);await stopRealtime();document.documentElement.classList.remove('lv-gallery-focus');if(host)host.innerHTML='';host=null;mountedTarget=null;activeDay=null;lastFingerprint='';busy=false;pending=null}
+  async function unmount(){clearTimeout(loadTimer);clearTimeout(galleryRefreshTimer);await stopRealtime();document.documentElement.classList.remove('lv-gallery-focus');if(host)host.innerHTML='';host=null;mountedTarget=null;activeDay=null;lastFingerprint='';busy=false;pending=null}
 
-  window.LuviaGalleryView=Object.freeze({version:VERSION,build:BUILD,mount,unmount,refresh:options=>load({silent:false,force:true,...options}),openPhoto:openLightbox,openEditor,renderVisual:(item,attrs='')=>photoVisual(item,attrs),hydrateVisuals:(root,list)=>hydrateImages(root,list),locationName,downloadPhoto:downloadPhotoAsset,downloadCollection,shareCollection,diagnostics:()=>({version:VERSION,build:BUILD,mountCount,bootstrapCount,snapshotTripId,snapshotLoadedAt,media:items.length,clusters:clusters.length})});
+  window.LuviaGalleryView=Object.freeze({version:VERSION,build:BUILD,mount,unmount,refresh:options=>load({silent:false,force:true,...options}),openPhoto:openLightbox,openEditor,renderVisual:(item,attrs='')=>photoVisual(item,attrs),locationName,downloadPhoto:downloadPhotoAsset,downloadCollection,shareCollection,diagnostics:()=>({version:VERSION,build:BUILD,mountCount,bootstrapCount,snapshotTripId,snapshotLoadedAt,media:items.length,clusters:clusters.length})});
 })();
