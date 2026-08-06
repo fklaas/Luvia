@@ -1,6 +1,6 @@
 (() => {
   'use strict';
-  const VERSION='4.29.4',BUILD='13.29.4',BUCKET='luvia-media',channels=new Map();
+  const VERSION='4.29.5',BUILD='13.29.5',BUCKET='luvia-media',THUMB_BUCKET='luvia-media-thumbnails',channels=new Map();
   const queryCache=new Map(),queryTtlMs=15000,signedBatchCache=new Map();
   const id=()=>crypto?.randomUUID?.()||`${Date.now()}-${Math.random().toString(16).slice(2)}`;
   const ext=f=>(f?.name?.split('.').pop()||f?.type?.split('/').pop()||'jpg').replace(/[^a-z0-9]/gi,'').toLowerCase()||'jpg';
@@ -32,58 +32,44 @@
   async function get(mediaId){const{client,tripId}=await context(),r=await client.from('media').select('*').eq('trip_id',tripId).eq('id',mediaId).maybeSingle();if(r.error)throw r.error;return r.data?entity(r.data):null}
   async function listByIds(ids=[]){const unique=[...new Set((ids||[]).map(String).filter(Boolean))];if(!unique.length)return[];const{client,tripId}=await context();const key=`media:ids:${tripId}:${[...unique].sort().join(',')}`;return cachedQuery(key,async()=>{const chunks=[];for(let i=0;i<unique.length;i+=100)chunks.push(unique.slice(i,i+100));const rows=[];for(const chunk of chunks){const r=await client.from('media').select('*').eq('trip_id',tripId).in('id',chunk).neq('status','deleted');if(r.error)throw r.error;rows.push(...(r.data||[]))}const map=new Map(rows.map(r=>[String(r.id),entity(r)]));return unique.map(id=>map.get(id)).filter(Boolean)})}
   function deliveryPath(item,size='thumb640'){
-    if(size==='thumb256')return item?.thumb256Path||item?.thumb640Path||item?.thumbnailPath||item?.preview1280Path||item?.previewPath||item?.renderedPreviewPath||item?.storagePath||null;
-    if(size==='preview')return item?.renderedPreviewPath||item?.preview1280Path||item?.previewPath||item?.thumb640Path||item?.thumbnailPath||item?.storagePath||null;
-    return item?.thumb640Path||item?.thumbnailPath||item?.preview1280Path||item?.previewPath||item?.renderedPreviewPath||item?.storagePath||null;
+    if(size==='thumb256')return item?.thumb256Path||null;
+    if(size==='preview')return item?.preview1280Path||item?.renderedPreviewPath||item?.previewPath||null;
+    return item?.thumb640Path||item?.thumb256Path||null;
+  }
+  function publicThumbnailUrl(item,size='thumb640'){
+    const path=deliveryPath(item,size);if(!path)return'';
+    const client=window.LuviaSupabaseService?.getClient?.()||window.LuviaSupabase?.getClient?.()||window.LuviaSupabase?.client?.()||window.ParisSupabaseClient||window.ParisCloud?.client;
+    return client?.storage?.from?.(THUMB_BUCKET)?.getPublicUrl?.(path)?.data?.publicUrl||'';
   }
   async function signPaths(paths,{expiresIn=86400,transform=null,bucket=BUCKET}={}){
     const unique=[...new Set((paths||[]).filter(Boolean))];if(!unique.length)return new Map();
     const cacheKey=`${bucket}:${expiresIn}:${JSON.stringify(transform||{})}:${unique.slice().sort().join('|')}`,cached=signedBatchCache.get(cacheKey);
     if(cached&&Date.now()-cached.at<Math.min(expiresIn*800,3600000))return cached.value;
-    const{client}=await context();let rows=[];
-    const storage=client.storage.from(bucket);
-    if(typeof storage.createSignedUrls==='function'){
-      const r=await storage.createSignedUrls(unique,expiresIn,transform?{transform}:undefined);if(r.error)throw r.error;rows=r.data||[];
-    }else{
-      rows=await Promise.all(unique.map(async path=>{const r=await storage.createSignedUrl(path,expiresIn,transform?{transform}:undefined);return{path,signedUrl:r.data?.signedUrl,error:r.error}}));
-    }
+    const{client}=await context();let rows=[];const storage=client.storage.from(bucket);
+    if(typeof storage.createSignedUrls==='function'){const r=await storage.createSignedUrls(unique,expiresIn,transform?{transform}:undefined);if(r.error)throw r.error;rows=r.data||[]}
+    else rows=await Promise.all(unique.map(async path=>{const r=await storage.createSignedUrl(path,expiresIn,transform?{transform}:undefined);return{path,signedUrl:r.data?.signedUrl,error:r.error}}));
     const map=new Map();rows.forEach((row,index)=>{const path=row.path||unique[index],url=row.signedUrl||row.signedURL;if(path&&url)map.set(path,url)});signedBatchCache.set(cacheKey,{value:map,at:Date.now()});return map;
   }
   async function signedUrls(items=[],size='thumb640',expiresIn=86400){
-    const grouped=new Map();for(const item of items||[]){const bucket=item?.storageBucket||BUCKET,path=deliveryPath(item,size);if(!path)continue;const key=bucket;if(!grouped.has(key))grouped.set(key,[]);grouped.get(key).push({item,path})}
-    const result=new Map();for(const [bucket,entries] of grouped){const legacy=entries.filter(x=>!x.item?.thumb640Path&&!x.item?.thumb256Path),native=entries.filter(x=>!legacy.includes(x));
-      if(native.length){const signed=await signPaths(native.map(x=>x.path),{expiresIn,bucket});native.forEach(x=>{const u=signed.get(x.path);if(u)result.set(String(x.item.id),u)})}
-      if(legacy.length){const width=size==='thumb256'?256:size==='preview'?1280:640,quality=size==='thumb256'?55:size==='preview'?72:62;const signed=await signPaths(legacy.map(x=>x.path),{expiresIn,bucket,transform:{width,height:width,resize:'contain',quality}}).catch(()=>null);if(signed)legacy.forEach(x=>{const u=signed.get(x.path);if(u)result.set(String(x.item.id),u)});const missing=legacy.filter(x=>!result.has(String(x.item.id)));if(missing.length){const plain=await signPaths(missing.map(x=>x.path),{expiresIn,bucket});missing.forEach(x=>{const u=plain.get(x.path);if(u)result.set(String(x.item.id),u)})}}
+    const result=new Map();
+    if(size==='thumb640'||size==='thumb256'){
+      for(const item of items||[]){const url=publicThumbnailUrl(item,size);if(url)result.set(String(item.id),url)}
+      return result;
     }
+    const grouped=new Map();for(const item of items||[]){const bucket=item?.storageBucket||BUCKET,path=deliveryPath(item,size);if(!path)continue;if(!grouped.has(bucket))grouped.set(bucket,[]);grouped.get(bucket).push({item,path})}
+    for(const [bucket,entries] of grouped){const signed=await signPaths(entries.map(x=>x.path),{expiresIn,bucket});entries.forEach(x=>{const u=signed.get(x.path);if(u)result.set(String(x.item.id),u)})}
     return result;
   }
   async function signedUrl(item,expiresIn=3600){return (await signedUrls([item],'preview',expiresIn)).get(String(item?.id))||null}
-  async function cachedPreviewUrl(item,{size='thumb640'}={}){return (await signedUrls([item],size,86400)).get(String(item?.id))||''}
+  async function cachedPreviewUrl(item,{size='thumb640'}={}){return size.startsWith('thumb')?publicThumbnailUrl(item,size):(await signedUrls([item],size,86400)).get(String(item?.id))||''}
   async function prewarm(items=[],limit=12){const list=(items||[]).slice(0,limit),urls=await signedUrls(list,'thumb640',86400);list.forEach(item=>{const url=urls.get(String(item.id));if(url){const img=new Image();img.decoding='async';img.src=url}});return urls}
   async function clearPreviewCache(){signedBatchCache.clear();return true}
+  async function ensureDeliveryVariants(item){return item}
+  async function backfillDeliveryVariants(){return 0}
 
-  async function ensureDeliveryVariants(item){
-    if(!item?.id||item.thumb256Path&&item.thumb640Path&&item.preview1280Path)return item;
-    const{client,tripId,userId}=await context();
-    const sourcePath=item.preview1280Path||item.previewPath||item.renderedPreviewPath||item.storagePath;if(!sourcePath)return item;
-    try{
-      const map=await signPaths([sourcePath],{expiresIn:900,bucket:item.storageBucket||BUCKET,transform:{width:1280,height:1280,resize:'contain',quality:72}}).catch(()=>signPaths([sourcePath],{expiresIn:900,bucket:item.storageBucket||BUCKET}));
-      const url=map.get(sourcePath);if(!url)return item;const response=await fetch(url,{cache:'force-cache'});if(!response.ok)return item;
-      const blob=await response.blob(),file=new File([blob],item.originalName||'photo.jpg',{type:blob.type||'image/jpeg'}),variants=await window.LuviaMediaPreview.makeVariants(file),base=`${tripId}/${item.userId||userId}/${item.id}`;
-      const specs=[['thumb_256_path',variants.thumb256,`${base}/thumb-256.webp`],['thumb_640_path',variants.thumb640,`${base}/thumb-640.webp`],['preview_1280_path',variants.preview1280,`${base}/preview-1280.webp`]],patch={};
-      await Promise.all(specs.map(async([column,variant,path])=>{const r=await client.storage.from(item.storageBucket||BUCKET).upload(path,variant.blob,{upsert:true,contentType:'image/webp',cacheControl:'31536000'});if(!r.error)patch[column]=path}));
-      if(Object.keys(patch).length){const r=await client.from('media').update({...patch,thumbnail_path:patch.thumb_640_path||item.thumbnailPath,preview_path:patch.preview_1280_path||item.previewPath}).eq('id',item.id).select('*').single();if(!r.error){invalidateQueries('media:');invalidateQueries('gallery:');return entity(r.data)}}
-    }catch(error){console.warn('[LuviaMediaCore] background delivery backfill skipped',item.id,error)}
-    return item;
-  }
-  async function backfillDeliveryVariants(items=[],limit=2){const pending=(items||[]).filter(x=>!x.thumb640Path||!x.thumb256Path||!x.preview1280Path).slice(0,limit);for(const item of pending)await ensureDeliveryVariants(item);return pending.length}
-
-  async function galleryBootstrap(){
-    const{client,tripId}=await context();const key=`gallery:bootstrap:${tripId}`;return cachedQuery(key,async()=>{
-      const r=await client.rpc('luvia_gallery_bootstrap',{p_trip_id:tripId});
-      if(r.error)throw r.error;const d=r.data||{};
-      return{media:(d.media||[]).map(entity),clusters:d.clusters||[],albums:d.albums||[],polaroids:Object.fromEntries((d.polaroids||[]).map(x=>[String(x.day_key),x.media_id]))};
-    },8000)
+  async function galleryBootstrap({force=false}={}){
+    const{client,tripId}=await context();const key=`gallery:bootstrap:${tripId}`;if(force)queryCache.delete(key);
+    return cachedQuery(key,async()=>{const r=await client.rpc('luvia_gallery_bootstrap',{p_trip_id:tripId});if(r.error)throw r.error;const d=r.data||{};return{tripId,loadedAt:Date.now(),media:(d.media||[]).map(entity),clusters:d.clusters||[],albums:d.albums||[],polaroids:Object.fromEntries((d.polaroids||[]).map(x=>[String(x.day_key),x.media_id]))}},60000)
   }
 
   async function signedOriginalUrl(item,expiresIn=3600){
@@ -115,7 +101,7 @@
     try{if(window.LuviaMediaPreview?.available?.()){
       const variants=await window.LuviaMediaPreview.makeVariants(file),base=`${tripId}/${userId}/${mediaId}`;
       const specs=[['thumb256',variants.thumb256,`${base}/thumb-256.webp`],['thumb640',variants.thumb640,`${base}/thumb-640.webp`],['preview1280',variants.preview1280,`${base}/preview-1280.webp`]];
-      const uploaded=await Promise.all(specs.map(async([name,variant,candidate])=>{const saved=await client.storage.from(BUCKET).upload(candidate,variant.blob,{upsert:true,contentType:'image/webp',cacheControl:'31536000'});return{name,path:saved.error?null:candidate,error:saved.error}}));
+      const uploaded=await Promise.all(specs.map(async([name,variant,candidate])=>{const saved=await client.storage.from(name==='preview1280'?BUCKET:THUMB_BUCKET).upload(candidate,variant.blob,{upsert:true,contentType:'image/webp',cacheControl:'31536000'});return{name,path:saved.error?null:candidate,error:saved.error}}));
       thumb256Path=uploaded.find(x=>x.name==='thumb256')?.path||null;thumb640Path=uploaded.find(x=>x.name==='thumb640')?.path||null;preview1280Path=uploaded.find(x=>x.name==='preview1280')?.path||null;
     }}catch(error){console.warn('[LuviaMediaCore] Delivery variants skipped',error)}
     const ready=await client.from('media').update({status:'ready',thumbnail_path:thumb640Path,preview_path:preview1280Path,thumb_256_path:thumb256Path,thumb_640_path:thumb640Path,preview_1280_path:preview1280Path}).eq('id',mediaId).select('*').single();if(ready.error)throw ready.error;
@@ -130,5 +116,5 @@
   async function subscribe(callback){const{client,tripId}=await context();if(channels.has(tripId))await channels.get(tripId)();const c=client.channel(`luvia-media-${tripId}-${Math.random().toString(36).slice(2)}`).on('postgres_changes',{event:'*',schema:'public',table:'media',filter:`trip_id=eq.${tripId}`},callback).on('postgres_changes',{event:'*',schema:'public',table:'media_day_polaroids',filter:`trip_id=eq.${tripId}`},callback).subscribe();const stop=async()=>{await client.removeChannel(c);channels.delete(tripId)};channels.set(tripId,stop);return stop}
   async function reanalyze(mediaId){const item=await get(mediaId);if(!item)throw new Error('Foto wurde nicht gefunden.');const url=await signedUrl({...item,previewPath:null,thumbnailPath:null},900);if(!url)throw new Error('Originaldatei ist nicht verfügbar.');const response=await fetch(url);if(!response.ok)throw new Error('Originaldatei konnte nicht geladen werden.');const blob=await response.blob();const file=new File([blob],item.originalName||`photo.${ext({name:item.storagePath,type:item.mimeType})}`,{type:item.mimeType||blob.type,lastModified:item.metadata?.originalLastModified||Date.now()});const meta=await window.LuviaMediaMetadata.extract(file,{source:item.source});const resolvedLocation=await resolveCaptureLocation(meta);return update(mediaId,{capturedAt:meta.capturedAt,latitude:meta.latitude,longitude:meta.longitude,width:meta.width,height:meta.height,metadata:{...(item.metadata||{}),captureEvidence:meta.evidence,exif:meta.exif||{},resolvedLocation,reanalyzedAt:new Date().toISOString(),isHeic:Boolean(meta.isHeic)}})}
   const diagnostics=()=>({service:'media-core',version:VERSION,build:BUILD,status:'active',ok:true,checkedAt:new Date().toISOString(),durationMs:0,dependencies:{metadata:Boolean(window.LuviaMediaMetadata),preview:Boolean(window.LuviaMediaPreview)},checks:{canonicalMediaEntity:true,realtime:true,favorites:true,nonDestructiveEditing:true,dayPolaroids:true},failedChecks:[],warnings:[]});
-  window.LuviaMediaCore=Object.freeze({version:VERSION,build:BUILD,bucket:BUCKET,getContext:context,list,listByIds,get,upload,update,reanalyze,toggleFavorite,listPolaroids,setPolaroid,linkPlace,remove,signedUrl,signedUrls,cachedPreviewUrl,prewarm,clearPreviewCache,galleryBootstrap,ensureDeliveryVariants,backfillDeliveryVariants,invalidateQueries,signedOriginalUrl,saveRenderedPreview,subscribe,diagnostics,rowToEntity:entity});
+  window.LuviaMediaCore=Object.freeze({version:VERSION,build:BUILD,bucket:BUCKET,thumbnailBucket:THUMB_BUCKET,getContext:context,list,listByIds,get,upload,update,reanalyze,toggleFavorite,listPolaroids,setPolaroid,linkPlace,remove,signedUrl,signedUrls,publicThumbnailUrl,cachedPreviewUrl,prewarm,clearPreviewCache,galleryBootstrap,ensureDeliveryVariants,backfillDeliveryVariants,invalidateQueries,signedOriginalUrl,saveRenderedPreview,subscribe,diagnostics,rowToEntity:entity});
 })();

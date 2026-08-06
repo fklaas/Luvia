@@ -29,5 +29,5 @@
   window.addEventListener('luvia:trip-context-changed',()=>emit('trip'));
   permission().then(()=>emit('ready'));
   window.addEventListener('luvia:global-location-updated',event=>{const position=event.detail?.position;if(position)ingestLocation(position,{reason:'global-location'})});
-  window.LuviaTravelContext=Object.freeze({version:'1.1.0',snapshot,subscribe(fn){listeners.add(fn);fn(snapshot());return()=>listeners.delete(fn)},requestLocation,ingestLocation,clearLocation,distanceTo(target){return haversine(state.location,target)},haversine,eventCountdown,phase,tripDay,daysUntil});
+  window.LuviaTravelContext=Object.freeze({version:'1.1.1',snapshot,subscribe(fn){listeners.add(fn);fn(snapshot());return()=>listeners.delete(fn)},requestLocation,ingestLocation,clearLocation,distanceTo(target){return haversine(state.location,target)},haversine,eventCountdown,phase,tripDay,daysUntil});
 })();
