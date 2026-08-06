@@ -1,0 +1,11 @@
+app/albums-view.js
+app/gallery-view.js
+index.html
+sw.js
+force-update.html
+intelligence/kernel/version.js
+RELEASE-v13.29.0.1.md
+DEPLOYMENT-v13.29.0.1.md
+TEST-v13.29.0.1.md
+COMMIT-v13.29.0.1.txt
+CHANGED-FILES-v13.29.0.1.txt

@@ -341,7 +341,7 @@
   async function renderAll({force=false}={}) {
     const next=fingerprint(); if(!force && next===lastFingerprint)return; lastFingerprint=next;
     const countNode=host?.querySelector('[data-gallery-count]'); if(!countNode)return; countNode.textContent=`${items.length} Foto${items.length===1?'':'s'}`;
-    await renderFavorites(); await renderDays();
+    await renderFavorites(); await renderClusters(); await renderDays();
   }
   async function load(options={}) {
     if(!host)return;
