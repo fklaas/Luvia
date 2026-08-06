@@ -1,0 +1,9 @@
+.git
+.git/**
+.wrangler
+.wrangler/**
+.github
+.github/**
+node_modules
+node_modules/**
+*.log
