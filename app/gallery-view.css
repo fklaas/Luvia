@@ -166,7 +166,7 @@ body.lv-photo-modal-open{position:fixed!important;width:100%!important;overflow:
 .lv-day-tile.is-empty .lv-day-tile-cover:after{content:"✈";position:absolute;right:16px;top:14px;font-size:24px;opacity:.2;transform:rotate(-12deg)}
 @media(max-width:640px){.lv-photo-actions{grid-template-columns:repeat(5,1fr)!important}.lv-photo-actions button{min-width:0}}
 
-/* 13.29.5.2 Gallery Stabilization */
+/* 13.29.5.3 Gallery Stabilization */
 .lv-photo-media-canvas>img,.lv-day-tile-cover>img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;display:block;z-index:2;background:transparent}
 .lv-photo-media-canvas.is-loaded .lv-photo-placeholder,.lv-photo-visual.is-loaded .lv-photo-placeholder,.lv-day-tile-cover.is-loaded>i{display:none!important}
 .lv-photo-media-canvas:has(>img[src]) .lv-photo-placeholder,.lv-photo-visual:has(img[src]) .lv-photo-placeholder{display:none!important}
@@ -178,5 +178,8 @@ body.lv-photo-modal-open{position:fixed!important;width:100%!important;overflow:
 @keyframes lvThumbPulse{0%{background-position:100% 0}100%{background-position:-100% 0}}
 @media(prefers-reduced-motion:reduce){.lv-photo-placeholder{animation:none}}
 
-/* 13.29.5.2 direct image state */
+/* 13.29.5.3 direct image state */
 .lv-photo-visual.is-loaded .lv-photo-placeholder,.lv-photo-visual:has(img[src]) .lv-photo-placeholder{display:none!important}.lv-photo-media-canvas>img[src]{opacity:1!important;visibility:visible!important}.lv-photo-large img{display:block;opacity:1!important;visibility:visible!important}
+
+/* 13.29.5.3: immediate direct thumbnail paint and progressive full-resolution lightbox */
+.lv-photo-media-canvas{background-size:cover!important;background-position:center!important;background-repeat:no-repeat!important}.lv-photo-visual.is-loaded .lv-photo-media-canvas:before{display:none!important}.lv-photo-large .lv-photo-direct-image{image-rendering:auto!important;object-fit:contain!important;width:auto!important;height:auto!important;max-width:100%!important;max-height:calc(100dvh - 190px)!important}.lv-photo-loading{color:#6d7f8c;font-weight:700}

@@ -1,8 +1,8 @@
 (() => {
   'use strict';
 
-  const VERSION = '4.29.5.2';
-  const BUILD = '13.29.5.2';
+  const VERSION = '4.29.5.3';
+  const BUILD = '13.29.5.3';
   const REALTIME_DEBOUNCE_MS = 650;
   const FILTERS = {
     none: ['Original', ''], warm: ['Golden Hour', 'sepia(.18) saturate(1.15) contrast(1.04)'], cool: ['Blue Sky', 'hue-rotate(10deg) saturate(1.08)'], vivid: ['Pop', 'saturate(1.45) contrast(1.1)'], soft: ['Soft', 'contrast(.92) saturate(.88) brightness(1.04)'], mono: ['Mono', 'grayscale(1) contrast(1.08)'],
@@ -35,6 +35,8 @@
   let snapshotLoadedAt=0;
   let mountCount=0;
   let bootstrapCount=0;
+  let clusterSyncPromise=null;
+  let lastClusterInputSignature='';
   function lockPageScroll(){if(document.body.classList.contains('lv-photo-modal-open'))return;modalScrollY=window.scrollY||0;document.body.style.top=`-${modalScrollY}px`;document.body.classList.add('lv-photo-modal-open');}
   function unlockPageScroll(){if(!document.body.classList.contains('lv-photo-modal-open'))return;document.body.classList.remove('lv-photo-modal-open');document.body.style.top='';window.scrollTo(0,modalScrollY);}
   function mountOverlay(overlay){lockPageScroll();document.body.appendChild(overlay);return()=>{overlay.remove();if(!document.querySelector('.lv-photo-overlay'))unlockPageScroll()}}
@@ -65,7 +67,7 @@
   const directThumbUrl = item => window.LuviaMediaCore?.publicThumbnailUrl?.(item,'thumb640') || window.LuviaMediaCore?.publicThumbnailUrl?.(item,'thumb256') || '';
   const photoVisual = (item, attrs='') => {
     const edit = settings(item),baked=Boolean(item?.metadata?.renderedPreviewPath||item?.renderedPreviewPath),direct=directThumbUrl(item);
-    return `<span class="lv-photo-visual ${direct?'is-loaded ':''}${baked?'is-baked':`frame-${esc(edit.frame||'none')}`}" ${attrs}><span class="lv-photo-media-canvas"><img ${direct?`src="${esc(direct)}"`:''} alt="${esc(displayName(item))}" loading="eager" decoding="async" fetchpriority="high" ${baked?'':`style="filter:${esc(editCss(item))};transform:rotate(${Number(edit.rotation||0)}deg)"`}><i class="lv-photo-placeholder" aria-hidden="true"></i>${baked?'':`${edit.vignette?`<b class="lv-photo-vignette" style="opacity:${Math.min(.8,Number(edit.vignette)/100)}"></b>`:''}${overlayMarkup(edit)}`}</span></span>`;
+    return `<span class="lv-photo-visual ${direct?'is-loaded ':''}${baked?'is-baked':`frame-${esc(edit.frame||'none')}`}" ${attrs}><span class="lv-photo-media-canvas" ${direct?`style="background-image:url('${esc(direct)}')"`:''}><img ${direct?`src="${esc(direct)}"`:''} alt="${esc(displayName(item))}" loading="eager" decoding="async" fetchpriority="high" ${baked?'':`style="filter:${esc(editCss(item))};transform:rotate(${Number(edit.rotation||0)}deg)"`}><i class="lv-photo-placeholder" aria-hidden="true"></i>${baked?'':`${edit.vignette?`<b class="lv-photo-vignette" style="opacity:${Math.min(.8,Number(edit.vignette)/100)}"></b>`:''}${overlayMarkup(edit)}`}</span></span>`;
   };
 
   function syncOverlayGeometry(scope=document){scope.querySelectorAll('.lv-photo-media-canvas,.lv-lightbox-canvas').forEach(canvas=>{const img=canvas.querySelector(':scope > img'),stage=canvas.querySelector(':scope > .lv-saved-overlays');if(!img||!stage)return;const sync=()=>{const bw=img.clientWidth,bh=img.clientHeight,nw=img.naturalWidth,nh=img.naturalHeight;if(!bw||!bh||!nw||!nh)return;const scale=Math.min(bw/nw,bh/nh),w=nw*scale,h=nh*scale;stage.style.left=`${(bw-w)/2}px`;stage.style.top=`${(bh-h)/2}px`;stage.style.width=`${w}px`;stage.style.height=`${h}px`};img.addEventListener('load',sync,{once:true});if(img.complete)requestAnimationFrame(sync);if(!img.dataset.overlayObserved){img.dataset.overlayObserved='1';new ResizeObserver(sync).observe(img)}})}
@@ -182,7 +184,7 @@
       image.loading='eager';image.decoding='async';image.fetchPriority=important?'high':'auto';image.width=item.width||640;image.height=item.height||480;
       image.onload=()=>{node.classList.add('is-loaded');node.classList.remove('is-failed');node.querySelectorAll('.lv-photo-placeholder,:scope > i').forEach(x=>x.remove());syncOverlayGeometry(node)};
       image.onerror=()=>{node.classList.add('is-failed');node.classList.remove('is-loaded');image.remove()};
-      if(image.src!==url)image.src=url;else if(image.complete&&image.naturalWidth)image.onload?.();
+      const canvas=node.querySelector('.lv-photo-media-canvas')||node;canvas.style.backgroundImage=`url("${String(url).replace(/"/g,'%22')}")`;canvas.style.backgroundSize='cover';canvas.style.backgroundPosition='center';node.classList.add('is-loaded');if(image.src!==url)image.src=url;else if(image.complete&&image.naturalWidth)image.onload?.();
     })}
   }
   function bindPhotoActions(root) {
@@ -274,9 +276,11 @@
 
   async function openLightbox(id) {
     let item=items.find(entry=>entry.id===id);if(!item){item=await window.LuviaMediaCore.get(id).catch(()=>null);if(item)items=[...items,item]}if(!item)return;
-    const url=await urlFor(item),overlay=document.createElement('div');overlay.className='lv-photo-overlay';
-    overlay.innerHTML=`<section class="lv-photo-dialog"><button data-close>×</button><div class="lv-photo-large">${url?`<img class="lv-photo-direct-image" src="${esc(url)}" alt="${esc(displayName(item))}" loading="eager" decoding="sync" fetchpriority="high">`:'<p>Bild konnte nicht geladen werden.</p>'}</div><footer><div><strong>${esc(displayName(item))}</strong><small>${esc(fmtDate(item.capturedAt))} · ${esc(fmtTime(item.capturedAt))}</small><small class="lv-photo-location">📍 ${esc(locationName(item))}</small></div><button data-light-download>⬇ Herunterladen</button><button data-light-polaroid>▣ Polaroid des Tages</button><button data-light-fav>${item.favorite?'★ Favorit':'☆ Favorit'}</button><button data-light-edit>✎ Bearbeiten</button></footer></section>`;
+    const immediate=directThumbUrl(item)||'';
+    const overlay=document.createElement('div');overlay.className='lv-photo-overlay';
+    overlay.innerHTML=`<section class="lv-photo-dialog"><button data-close>×</button><div class="lv-photo-large">${immediate?`<img class="lv-photo-direct-image" src="${esc(immediate)}" alt="${esc(displayName(item))}" loading="eager" decoding="async" fetchpriority="high">`:'<div class="lv-photo-loading">Foto wird geöffnet …</div>'}</div><footer><div><strong>${esc(displayName(item))}</strong><small>${esc(fmtDate(item.capturedAt))} · ${esc(fmtTime(item.capturedAt))}</small><small class="lv-photo-location">📍 ${esc(locationName(item))}</small></div><button data-light-download>⬇ Herunterladen</button><button data-light-polaroid>▣ Polaroid des Tages</button><button data-light-fav>${item.favorite?'★ Favorit':'☆ Favorit'}</button><button data-light-edit>✎ Bearbeiten</button></footer></section>`;
     const removeOverlay=mountOverlay(overlay),close=()=>removeOverlay();overlay.querySelector('[data-close]').onclick=close;overlay.onclick=e=>{if(e.target===overlay)close()};
+    void (async()=>{try{const original=await window.LuviaMediaCore.signedOriginalUrl(item,3600);if(!original||!overlay.isConnected)return;let img=overlay.querySelector('.lv-photo-large img');if(!img){img=document.createElement('img');img.className='lv-photo-direct-image';img.alt=displayName(item);img.loading='eager';img.decoding='async';img.fetchPriority='high';overlay.querySelector('.lv-photo-large').replaceChildren(img)}if(img.src!==original)img.src=original}catch(error){console.warn('[LuviaGalleryView] Originalfoto konnte nicht nachgeladen werden.',error)}})();
     overlay.querySelector('[data-light-download]').onclick=async()=>{try{await downloadPhotoAsset(item)}catch(error){showError(error)}};const pb=overlay.querySelector('[data-light-polaroid]');if(pb)pb.onclick=async()=>{try{await window.LuviaMediaCore.setPolaroid(item.id,item.dayKey);status('Polaroid des Tages wurde in die Timeline übernommen.','ready')}catch(error){showError(error)}};
     overlay.querySelector('[data-light-fav]').onclick=async()=>{suppressRealtimeUntil=Date.now()+1200;await window.LuviaMediaCore.toggleFavorite(id);close();await load({silent:true,force:true})};
     overlay.querySelector('[data-light-edit]').onclick=()=>{close();openEditor(id)};
@@ -347,6 +351,22 @@
     } catch(error) { showError(error); }
   }
 
+  async function rebuildClusters({force=false}={}) {
+    if(!window.LuviaMediaClustering?.generate||!window.LuviaMediaClustering?.syncGenerated)return false;
+    const signature=items.filter(x=>x.status!=='deleted').map(x=>`${x.id}:${x.capturedAt||''}:${x.dayKey||''}`).sort().join('|');
+    if(!force&&signature===lastClusterInputSignature)return false;
+    if(clusterSyncPromise)return clusterSyncPromise;
+    clusterSyncPromise=(async()=>{
+      lastClusterInputSignature=signature;
+      const generated=window.LuviaMediaClustering.generate(items);
+      suppressRealtimeUntil=Date.now()+2200;
+      await window.LuviaMediaClustering.syncGenerated(generated);
+      window.LuviaMediaCore?.invalidateQueries?.('gallery:');
+      return true;
+    })().catch(error=>{console.warn('[LuviaGalleryView] Fotomomente konnten nicht synchronisiert werden.',error);return false}).finally(()=>{clusterSyncPromise=null});
+    return clusterSyncPromise;
+  }
+
   async function readData({force=false}={}) {
     const started=performance.now();
     const bootstrap=await window.LuviaMediaCore.galleryBootstrap({force});bootstrapCount++;
@@ -365,7 +385,7 @@
     busy=true;
     const silent=options.silent!==false;
     if(!silent)status('Galerie wird aktualisiert …');
-    try { await readData({force:Boolean(options.force)}); await renderAll({force:Boolean(options.force)}); if(!silent)status(`${items.length} Fotos · ${clusters.filter(c=>c.state!=='dismissed'&&c.mediaIds?.length).length} Fotomomente`,'ready'); else if(host.querySelector('[data-gallery-status]')?.dataset.state!=='ready') status(`${items.length} Fotos`,'ready'); }
+    try { await readData({force:Boolean(options.force)}); if(options.analyze){const changed=await rebuildClusters({force:true});if(changed)await readData({force:true})} await renderAll({force:Boolean(options.force)}); status(`${items.length} Fotos · ${clusters.filter(c=>c.state!=='dismissed'&&c.mediaIds?.length).length} Fotomomente`,'ready'); }
     catch(error){showError(error)}
     finally {busy=false; if(pending){const next=pending;pending=null;scheduleLoad(next.reason||'Nachlauf',next)}}
   }
@@ -419,7 +439,7 @@
       host.querySelector('[data-gallery-add]').onclick=()=>{try{input.showPicker?input.showPicker():input.click()}catch{input.click()}};
       input.onchange=async()=>{const files=[...input.files];input.value='';try{await upload(files)}catch(error){showError(error)}};
       await bindRealtime();
-      await load({silent:false,force:true});return ()=>unmount();
+      await readData({force:true});const clustersChanged=await rebuildClusters({force:true});if(clustersChanged)await readData({force:true});await renderAll({force:true});status(`${items.length} Fotos · ${clusters.filter(c=>c.state!=='dismissed'&&c.mediaIds?.length).length} Fotomomente`,'ready');return ()=>unmount();
     })().finally(()=>{mountPromise=null});return mountPromise;
   }
   async function unmount(){clearTimeout(loadTimer);await stopRealtime();document.documentElement.classList.remove('lv-gallery-focus');if(host)host.innerHTML='';host=null;mountedTarget=null;activeDay=null;lastFingerprint='';busy=false;pending=null}

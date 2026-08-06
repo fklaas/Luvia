@@ -1,6 +1,6 @@
 (() => {
   'use strict';
-  const VERSION='4.29.5.2',BUILD='13.29.5.2',BUCKET='luvia-media',THUMB_BUCKET='luvia-media-thumbnails',channels=new Map();
+  const VERSION='4.29.5.3',BUILD='13.29.5.3',BUCKET='luvia-media',THUMB_BUCKET='luvia-media-thumbnails',channels=new Map();
   const queryCache=new Map(),queryTtlMs=15000,signedBatchCache=new Map();
   const id=()=>crypto?.randomUUID?.()||`${Date.now()}-${Math.random().toString(16).slice(2)}`;
   const ext=f=>(f?.name?.split('.').pop()||f?.type?.split('/').pop()||'jpg').replace(/[^a-z0-9]/gi,'').toLowerCase()||'jpg';
@@ -77,7 +77,7 @@
   }
 
   async function signedOriginalUrl(item,expiresIn=3600){
-    const bucket=item?.storageBucket||BUCKET,candidates=[item?.previewPath,item?.thumbnailPath,item?.storagePath].filter(Boolean);
+    const bucket=item?.storageBucket||BUCKET,candidates=[item?.renderedPreviewPath,item?.metadata?.renderedPreviewPath,item?.storagePath,item?.preview1280Path,item?.previewPath,item?.thumbnailPath].filter(Boolean);
     if(!candidates.length)return null;const{client}=await context();let lastError=null;
     for(const path of [...new Set(candidates)]){const r=await client.storage.from(bucket).createSignedUrl(path,expiresIn);if(!r.error&&r.data?.signedUrl)return r.data.signedUrl;lastError=r.error||null}
     if(lastError)throw lastError;return null;
