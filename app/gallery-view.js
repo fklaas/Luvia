@@ -1,8 +1,8 @@
 (() => {
   'use strict';
 
-  const VERSION = '4.29.3';
-  const BUILD = '13.29.3';
+  const VERSION = '4.29.3.1';
+  const BUILD = '13.29.3.1';
   const DIAGNOSTICS_LABEL = '[LuviaGalleryDiagnostics]';
   const diagnosticsState = {
     mountedAt: null, mountCount: 0, loadCount: 0, readDataCount: 0, renderAllCount: 0,

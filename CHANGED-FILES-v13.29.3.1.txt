@@ -1,7 +1,7 @@
 app/gallery-view.js
 app/gallery-view.css
 core/media/media-core.js
-core/media/media-clustering.js
+core/diagnostics/media-readiness.js
 index.html
 sw.js
 force-update.html
@@ -10,4 +10,3 @@ RELEASE-v13.29.3.1.md
 DEPLOYMENT-v13.29.3.1.md
 TEST-v13.29.3.1.md
 COMMIT-v13.29.3.1.txt
-CHANGED-FILES-v13.29.3.1.txt

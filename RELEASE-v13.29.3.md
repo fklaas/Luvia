@@ -1,4 +1,4 @@
-# Luvia 13.29.3 / Core 4.29.3
+# Luvia 13.29.3.1 / Core 4.29.3.1
 
 ## Quiet Upload Window & Complete Gallery Clear
 
