@@ -1,1 +1,0 @@
-fix(memories): restore instant interactions and add guided memory details

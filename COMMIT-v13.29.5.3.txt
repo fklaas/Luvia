@@ -1,1 +1,0 @@
-fix(gallery): restore clustering, day images and realtime counters

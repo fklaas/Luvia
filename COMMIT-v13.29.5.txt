@@ -1,1 +1,0 @@
-fix(gallery): stabilize snapshot rendering and deliver direct thumbnails

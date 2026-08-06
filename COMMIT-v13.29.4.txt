@@ -1,1 +1,0 @@
-refactor(media): rebuild thumbnail delivery and gallery bootstrap

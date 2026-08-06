@@ -1,7 +1,0 @@
-app/gallery-view.js
-core/media/media-core.js
-index.html
-sw.js
-force-update.html
-RELEASE-v13.29.7.1.md
-COMMIT-v13.29.7.1.txt
