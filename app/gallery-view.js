@@ -79,6 +79,7 @@
       </header>
       <div class="lv-gallery-status" data-gallery-status>Galerie wird geladen …</div>
       <section class="lv-gallery-section"><div class="lv-gallery-section-head"><div><span>⭐ Auswahl</span><h2>Favoriten</h2></div><strong data-favorite-count>0</strong></div><div class="lv-favorites" data-gallery-favorites></div></section>
+      <section class="lv-gallery-section"><div class="lv-gallery-section-head"><div><span>✨ Automatisch entdeckt</span><h2>Fotomomente</h2></div><strong data-cluster-count>0</strong></div><div data-gallery-clusters></div></section>
       <section class="lv-gallery-section"><div class="lv-gallery-section-head"><div><span>🗓️ Reisetage</span><h2>Fototage</h2></div><strong data-gallery-count>0 Fotos</strong></div><div data-gallery-days></div></section>
     </section>`;
   }
@@ -227,8 +228,10 @@
     return `${related.length} Fotos innerhalb weniger Minuten; keine Standortdaten vorhanden.`;
   }
   async function renderClusters() {
-    const root = host.querySelector('[data-gallery-clusters]');
+    const root = host?.querySelector('[data-gallery-clusters]');
+    if (!root) return;
     const visible = clusters.filter(cluster => cluster.state !== 'dismissed' && cluster.mediaIds?.length);
+    const countNode=host?.querySelector('[data-cluster-count]'); if(countNode) countNode.textContent=String(visible.length);
     if (!visible.length) { root.innerHTML = '<div class="lv-gallery-empty compact"><b>✨</b><h3>Noch keine Fotomomente</h3><p>Mehrere Fotos innerhalb von 20 Minuten werden automatisch gruppiert.</p></div>'; return; }
     root.innerHTML = `<div class="lv-cluster-grid">${visible.map(cluster => `<article class="lv-cluster-card"><button class="lv-cluster-collage" data-cluster-open="${esc(cluster.id)}">${cluster.mediaIds.slice(0,4).map(id=>`<span data-cluster-image="${esc(id)}"></span>`).join('')}<b>${cluster.mediaIds.length} Fotos</b></button><div class="lv-cluster-copy"><small>${esc(fmtDate(cluster.start_at))} · ${esc(fmtTime(cluster.start_at))}</small><h3>${esc(cluster.title||'Gemeinsamer Fotomoment')}</h3><p>${esc(clusterReason(cluster))}</p><div><button type="button" data-memory-bridge="${esc(cluster.id)}">Erinnerung prüfen</button><button type="button" data-cluster-dismiss="${esc(cluster.id)}">Auflösen</button></div></div></article>`).join('')}</div>`;
     await Promise.all(visible.flatMap(cluster => cluster.mediaIds.slice(0,4).map(async id => {

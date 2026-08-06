@@ -1,4 +1,4 @@
-# Luvia 13.29.0.1 – Memory Albums Entry and Cluster Visibility Fix
+# Luvia 13.29.0.2 – Memory Albums Entry and Cluster Visibility Fix
 
 - Memory-Album-Buttons use a dedicated `data-memory-create` action and no longer collide with the global trip-creation handler.
 - Click propagation is stopped before opening the Memory Album cluster picker.
