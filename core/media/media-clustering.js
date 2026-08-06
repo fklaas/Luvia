@@ -1,6 +1,6 @@
 (() => {
   'use strict';
-  const VERSION='4.29.5.3', BUILD='13.29.5.3';
+  const VERSION='4.29.5.4', BUILD='13.29.5.4';
   const MAX_GAP_MS=20*60*1000, MAX_DISTANCE_M=300, channels=new Map();
   let listCache=null,listCacheAt=0,listPromise=null;const LIST_TTL=12000;
   const radians=v=>v*Math.PI/180;

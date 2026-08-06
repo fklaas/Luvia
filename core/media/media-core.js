@@ -1,6 +1,6 @@
 (() => {
   'use strict';
-  const VERSION='4.29.5.3',BUILD='13.29.5.3',BUCKET='luvia-media',THUMB_BUCKET='luvia-media-thumbnails',channels=new Map();
+  const VERSION='4.29.5.4',BUILD='13.29.5.4',BUCKET='luvia-media',THUMB_BUCKET='luvia-media-thumbnails',channels=new Map();
   const queryCache=new Map(),queryTtlMs=15000,signedBatchCache=new Map();
   const id=()=>crypto?.randomUUID?.()||`${Date.now()}-${Math.random().toString(16).slice(2)}`;
   const ext=f=>(f?.name?.split('.').pop()||f?.type?.split('/').pop()||'jpg').replace(/[^a-z0-9]/gi,'').toLowerCase()||'jpg';
@@ -32,12 +32,15 @@
   async function get(mediaId){const{client,tripId}=await context(),r=await client.from('media').select('*').eq('trip_id',tripId).eq('id',mediaId).maybeSingle();if(r.error)throw r.error;return r.data?entity(r.data):null}
   async function listByIds(ids=[]){const unique=[...new Set((ids||[]).map(String).filter(Boolean))];if(!unique.length)return[];const{client,tripId}=await context();const key=`media:ids:${tripId}:${[...unique].sort().join(',')}`;return cachedQuery(key,async()=>{const chunks=[];for(let i=0;i<unique.length;i+=100)chunks.push(unique.slice(i,i+100));const rows=[];for(const chunk of chunks){const r=await client.from('media').select('*').eq('trip_id',tripId).in('id',chunk).neq('status','deleted');if(r.error)throw r.error;rows.push(...(r.data||[]))}const map=new Map(rows.map(r=>[String(r.id),entity(r)]));return unique.map(id=>map.get(id)).filter(Boolean)})}
   function deliveryPath(item,size='thumb640'){
-    if(size==='thumb256')return item?.thumb256Path||null;
-    if(size==='preview')return item?.preview1280Path||item?.renderedPreviewPath||item?.previewPath||null;
-    return item?.thumb640Path||item?.thumb256Path||null;
+    const raw=size==='thumb256'?item?.thumb256Path:size==='preview'?(item?.preview1280Path||item?.renderedPreviewPath||item?.previewPath):(item?.thumb640Path||item?.thumb256Path);
+    if(!raw)return null;
+    const value=String(raw).trim();
+    if(/^https?:\/\//i.test(value))return value;
+    return value.replace(/^\/+/, '').replace(/^luvia-media-thumbnails\//i,'');
   }
   function publicThumbnailUrl(item,size='thumb640'){
     const path=deliveryPath(item,size);if(!path)return'';
+    if(/^https?:\/\//i.test(path))return path;
     const client=window.LuviaSupabaseService?.getClient?.()||window.LuviaSupabase?.getClient?.()||window.LuviaSupabase?.client?.()||window.ParisSupabaseClient||window.ParisCloud?.client;
     return client?.storage?.from?.(THUMB_BUCKET)?.getPublicUrl?.(path)?.data?.publicUrl||'';
   }

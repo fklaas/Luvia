@@ -1,6 +1,6 @@
 (() => {
 'use strict';
-const VERSION='4.29.5.3',BUILD='13.29.5.3',PAGE=12;
+const VERSION='4.29.5.4',BUILD='13.29.5.4',PAGE=12;
 let host=null,albums=[],items=[],unsub=null,refreshTimer=null,renderToken=0,albumItemCache=new Map();
 const esc=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const css=v=>CSS?.escape?CSS.escape(String(v)):String(v).replace(/[^a-z0-9_-]/gi,'\\$&');
