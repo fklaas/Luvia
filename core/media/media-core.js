@@ -1,6 +1,6 @@
 (() => {
   'use strict';
-  const VERSION='4.29.6',BUILD='13.29.6',BUCKET='luvia-media',THUMB_BUCKET='luvia-media-thumbnails',channels=new Map();
+  const VERSION='4.29.7',BUILD='13.29.7',BUCKET='luvia-media',THUMB_BUCKET='luvia-media-thumbnails',channels=new Map();
   const queryCache=new Map(),queryTtlMs=15000,signedBatchCache=new Map();
   const id=()=>crypto?.randomUUID?.()||`${Date.now()}-${Math.random().toString(16).slice(2)}`;
   const ext=f=>(f?.name?.split('.').pop()||f?.type?.split('/').pop()||'jpg').replace(/[^a-z0-9]/gi,'').toLowerCase()||'jpg';
@@ -79,6 +79,34 @@
     return cachedQuery(key,async()=>{const r=await client.rpc('luvia_gallery_bootstrap',{p_trip_id:tripId});if(r.error)throw r.error;const d=r.data||{};return{tripId,loadedAt:Date.now(),media:(d.media||[]).map(entity),clusters:d.clusters||[],albums:d.albums||[],polaroids:Object.fromEntries((d.polaroids||[]).map(x=>[String(x.day_key),x.media_id]))}},5000)
   }
 
+
+  async function galleryDisplayUrls(items=[]){
+    const result=new Map(), thumbEntries=[], legacyGroups=new Map();
+    for(const item of items||[]){
+      const thumbPath=deliveryPath(item,'thumb640')||deliveryPath(item,'thumb256');
+      if(thumbPath){thumbEntries.push({item,path:thumbPath});continue}
+      const bucket=item?.storageBucket||BUCKET;
+      const path=item?.preview1280Path||item?.renderedPreviewPath||item?.previewPath||item?.storagePath;
+      if(!path)continue;
+      if(!legacyGroups.has(bucket))legacyGroups.set(bucket,[]);
+      legacyGroups.get(bucket).push({item,path});
+    }
+    if(thumbEntries.length){
+      try{
+        const signed=await signPaths(thumbEntries.map(x=>x.path),{expiresIn:86400,bucket:THUMB_BUCKET});
+        for(const x of thumbEntries){const url=signed.get(x.path)||publicThumbnailUrl(x.item,'thumb640')||publicThumbnailUrl(x.item,'thumb256');if(url)result.set(String(x.item.id),url)}
+      }catch(error){
+        console.warn('[LuviaMediaCore] Thumbnail-Batchsignierung fehlgeschlagen, öffentliche URLs werden versucht.',error);
+        for(const x of thumbEntries){const url=publicThumbnailUrl(x.item,'thumb640')||publicThumbnailUrl(x.item,'thumb256');if(url)result.set(String(x.item.id),url)}
+      }
+    }
+    for(const [bucket,entries] of legacyGroups){
+      try{const signed=await signPaths(entries.map(x=>x.path),{expiresIn:86400,bucket});for(const x of entries){const url=signed.get(x.path);if(url)result.set(String(x.item.id),url)}}
+      catch(error){console.warn('[LuviaMediaCore] Legacy-Vorschaubilder konnten nicht gebündelt signiert werden.',error)}
+    }
+    return result;
+  }
+
   async function signedOriginalUrl(item,expiresIn=3600){
     const bucket=item?.storageBucket||BUCKET,candidates=[item?.storagePath,item?.preview1280Path,item?.previewPath,item?.renderedPreviewPath,item?.metadata?.renderedPreviewPath,item?.thumbnailPath].filter(Boolean);
     if(!candidates.length)return null;const{client}=await context();let lastError=null;
@@ -123,5 +151,5 @@
   async function subscribe(callback){const{client,tripId}=await context();if(channels.has(tripId))await channels.get(tripId)();const c=client.channel(`luvia-media-${tripId}-${Math.random().toString(36).slice(2)}`).on('postgres_changes',{event:'*',schema:'public',table:'media',filter:`trip_id=eq.${tripId}`},callback).on('postgres_changes',{event:'*',schema:'public',table:'media_day_polaroids',filter:`trip_id=eq.${tripId}`},callback).subscribe();const stop=async()=>{await client.removeChannel(c);channels.delete(tripId)};channels.set(tripId,stop);return stop}
   async function reanalyze(mediaId){const item=await get(mediaId);if(!item)throw new Error('Foto wurde nicht gefunden.');const url=await signedUrl({...item,previewPath:null,thumbnailPath:null},900);if(!url)throw new Error('Originaldatei ist nicht verfügbar.');const response=await fetch(url);if(!response.ok)throw new Error('Originaldatei konnte nicht geladen werden.');const blob=await response.blob();const file=new File([blob],item.originalName||`photo.${ext({name:item.storagePath,type:item.mimeType})}`,{type:item.mimeType||blob.type,lastModified:item.metadata?.originalLastModified||Date.now()});const meta=await window.LuviaMediaMetadata.extract(file,{source:item.source});const resolvedLocation=await resolveCaptureLocation(meta);return update(mediaId,{capturedAt:meta.capturedAt,latitude:meta.latitude,longitude:meta.longitude,width:meta.width,height:meta.height,metadata:{...(item.metadata||{}),captureEvidence:meta.evidence,exif:meta.exif||{},resolvedLocation,reanalyzedAt:new Date().toISOString(),isHeic:Boolean(meta.isHeic)}})}
   const diagnostics=()=>({service:'media-core',version:VERSION,build:BUILD,status:'active',ok:true,checkedAt:new Date().toISOString(),durationMs:0,dependencies:{metadata:Boolean(window.LuviaMediaMetadata),preview:Boolean(window.LuviaMediaPreview)},checks:{canonicalMediaEntity:true,realtime:true,favorites:true,nonDestructiveEditing:true,dayPolaroids:true},failedChecks:[],warnings:[]});
-  window.LuviaMediaCore=Object.freeze({version:VERSION,build:BUILD,bucket:BUCKET,thumbnailBucket:THUMB_BUCKET,getContext:context,list,listByIds,get,upload,update,reanalyze,toggleFavorite,listPolaroids,setPolaroid,linkPlace,remove,signedUrl,signedUrls,publicThumbnailUrl,cachedPreviewUrl,prewarm,clearPreviewCache,galleryBootstrap,ensureDeliveryVariants,backfillDeliveryVariants,invalidateQueries,signedOriginalUrl,saveRenderedPreview,subscribe,diagnostics,rowToEntity:entity});
+  window.LuviaMediaCore=Object.freeze({version:VERSION,build:BUILD,bucket:BUCKET,thumbnailBucket:THUMB_BUCKET,getContext:context,list,listByIds,get,upload,update,reanalyze,toggleFavorite,listPolaroids,setPolaroid,linkPlace,remove,signedUrl,signedUrls,publicThumbnailUrl,cachedPreviewUrl,prewarm,clearPreviewCache,galleryBootstrap,ensureDeliveryVariants,backfillDeliveryVariants,invalidateQueries,galleryDisplayUrls,signedOriginalUrl,saveRenderedPreview,subscribe,diagnostics,rowToEntity:entity});
 })();

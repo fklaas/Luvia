@@ -1,8 +1,8 @@
 (() => {
   'use strict';
 
-  const VERSION = '4.29.6';
-  const BUILD = '13.29.6';
+  const VERSION = '4.29.7';
+  const BUILD = '13.29.7';
   const REALTIME_DEBOUNCE_MS = 800;
   const FILTERS = {
     none: ['Original', ''], warm: ['Golden Hour', 'sepia(.18) saturate(1.15) contrast(1.04)'], cool: ['Blue Sky', 'hue-rotate(10deg) saturate(1.08)'], vivid: ['Pop', 'saturate(1.45) contrast(1.1)'], soft: ['Soft', 'contrast(.92) saturate(.88) brightness(1.04)'], mono: ['Mono', 'grayscale(1) contrast(1.08)'],
@@ -45,6 +45,7 @@
   function mountOverlay(overlay){lockPageScroll();document.body.appendChild(overlay);return()=>{overlay.remove();if(!document.querySelector('.lv-photo-overlay'))unlockPageScroll()}}
   const urlCache = new Map();
   const urlFailureCache = new Map();
+  let galleryImageUrls = new Map();
 
   const esc = value => String(value ?? '').replace(/[&<>"']/g, char => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[char]));
   const cssEsc = value => window.CSS?.escape ? CSS.escape(String(value)) : String(value).replace(/[^a-zA-Z0-9_-]/g, '\\$&');
@@ -68,7 +69,7 @@
     const exposure=100+Number(edit.exposure||0),contrast=Number(edit.contrast)+Number(edit.clarity||0)*.25,shadowBoost=Math.max(0,Number(edit.shadows||0))*.12,highlightCut=Math.max(0,-Number(edit.highlights||0))*.08;return `brightness(${exposure*Number(edit.brightness)/100+shadowBoost-highlightCut}%) contrast(${contrast}%) saturate(${Number(edit.saturation)}%) hue-rotate(${Number(edit.hue||0)}deg) blur(${Number(edit.blur)}px) ${temperatureFilter} ${preset}`.trim();
   };
   const overlayMarkup = edit => `<span class="lv-saved-overlays" style="--image-rotation:${Number(edit.rotation||0)}deg">${(edit.overlays||[]).map(raw=>{const o=normalizeOverlay(raw);return `<span class="lv-saved-overlay ${o.type==='text'?'is-text':'is-sticker'}" style="--overlay-x:${o.x*100};--overlay-y:${o.y*100};--overlay-rotation:${o.rotation}deg;--overlay-size:${o.size}">${esc(o.value||'')}</span>`}).join('')}</span>`;
-  const directThumbUrl = item => window.LuviaMediaCore?.publicThumbnailUrl?.(item,'thumb640') || window.LuviaMediaCore?.publicThumbnailUrl?.(item,'thumb256') || '';
+  const directThumbUrl = item => galleryImageUrls.get(String(item?.id)) || window.LuviaMediaCore?.publicThumbnailUrl?.(item,'thumb640') || window.LuviaMediaCore?.publicThumbnailUrl?.(item,'thumb256') || '';
   const photoVisual = (item, attrs='') => {
     const edit=settings(item), baked=Boolean(item?.metadata?.renderedPreviewPath||item?.renderedPreviewPath), direct=directThumbUrl(item);
     const image = direct
@@ -364,7 +365,7 @@
   async function readData({force=false}={}) {
     const started=performance.now();
     const bootstrap=await window.LuviaMediaCore.galleryBootstrap({force});bootstrapCount++;
-    items=bootstrap.media||[];const validIds=new Set(items.map(x=>String(x.id)));const seenClusters=new Set();clusters=(bootstrap.clusters||[]).map(c=>({...c,mediaIds:[...new Set((c.mediaIds||c.media_ids||[]).map(String).filter(id=>validIds.has(id)))]})).filter(c=>{if(!c.mediaIds.length)return false;const key=[...c.mediaIds].sort().join('|');if(seenClusters.has(key))return false;seenClusters.add(key);return true});memoryAlbums=bootstrap.albums||[];polaroids=bootstrap.polaroids||{};snapshotTripId=bootstrap.tripId||'';snapshotLoadedAt=bootstrap.loadedAt||Date.now();
+    items=bootstrap.media||[];galleryImageUrls=await window.LuviaMediaCore.galleryDisplayUrls(items);const validIds=new Set(items.map(x=>String(x.id)));const seenClusters=new Set();clusters=(bootstrap.clusters||[]).map(c=>({...c,mediaIds:[...new Set((c.mediaIds||c.media_ids||[]).map(String).filter(id=>validIds.has(id)))]})).filter(c=>{if(!c.mediaIds.length)return false;const key=[...c.mediaIds].sort().join('|');if(seenClusters.has(key))return false;seenClusters.add(key);return true});memoryAlbums=bootstrap.albums||[];polaroids=bootstrap.polaroids||{};snapshotTripId=bootstrap.tripId||'';snapshotLoadedAt=bootstrap.loadedAt||Date.now();
     console.debug('[LuviaGalleryPerf] bootstrap',{durationMs:Math.round(performance.now()-started),mountCount,bootstrapCount,media:items.length,clusters:clusters.length});
   }
   async function renderAll({force=false}={}) {
@@ -453,7 +454,7 @@
       await readData({force:true});const clustersChanged=await rebuildClusters({force:true});if(clustersChanged)await readData({force:true});await renderAll({force:true});updateSummary();return ()=>unmount();
     })().finally(()=>{mountPromise=null});return mountPromise;
   }
-  async function unmount(){clearTimeout(loadTimer);clearTimeout(galleryRefreshTimer);await stopRealtime();document.documentElement.classList.remove('lv-gallery-focus');if(host)host.innerHTML='';host=null;mountedTarget=null;activeDay=null;lastFingerprint='';busy=false;pending=null}
+  async function unmount(){clearTimeout(loadTimer);clearTimeout(galleryRefreshTimer);await stopRealtime();document.documentElement.classList.remove('lv-gallery-focus');if(host)host.innerHTML='';host=null;mountedTarget=null;activeDay=null;lastFingerprint='';busy=false;pending=null;galleryImageUrls=new Map()}
 
   window.LuviaGalleryView=Object.freeze({version:VERSION,build:BUILD,mount,unmount,refresh:options=>load({silent:false,force:true,...options}),openPhoto:openLightbox,openEditor,renderVisual:(item,attrs='')=>photoVisual(item,attrs),locationName,downloadPhoto:downloadPhotoAsset,downloadCollection,shareCollection,diagnostics:()=>({version:VERSION,build:BUILD,mountCount,bootstrapCount,snapshotTripId,snapshotLoadedAt,media:items.length,clusters:clusters.length})});
 })();
