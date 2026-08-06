@@ -1,6 +1,6 @@
 (() => {
   'use strict';
-  const VERSION='4.29.5.1',BUILD='13.29.5.1',BUCKET='luvia-media',THUMB_BUCKET='luvia-media-thumbnails',channels=new Map();
+  const VERSION='4.29.5.2',BUILD='13.29.5.2',BUCKET='luvia-media',THUMB_BUCKET='luvia-media-thumbnails',channels=new Map();
   const queryCache=new Map(),queryTtlMs=15000,signedBatchCache=new Map();
   const id=()=>crypto?.randomUUID?.()||`${Date.now()}-${Math.random().toString(16).slice(2)}`;
   const ext=f=>(f?.name?.split('.').pop()||f?.type?.split('/').pop()||'jpg').replace(/[^a-z0-9]/gi,'').toLowerCase()||'jpg';
@@ -73,7 +73,7 @@
 
   async function galleryBootstrap({force=false}={}){
     const{client,tripId}=await context();const key=`gallery:bootstrap:${tripId}`;if(force)queryCache.delete(key);
-    return cachedQuery(key,async()=>{const r=await client.rpc('luvia_gallery_bootstrap',{p_trip_id:tripId});if(r.error)throw r.error;const d=r.data||{};return{tripId,loadedAt:Date.now(),media:(d.media||[]).map(entity),clusters:d.clusters||[],albums:d.albums||[],polaroids:Object.fromEntries((d.polaroids||[]).map(x=>[String(x.day_key),x.media_id]))}},60000)
+    return cachedQuery(key,async()=>{const r=await client.rpc('luvia_gallery_bootstrap',{p_trip_id:tripId});if(r.error)throw r.error;const d=r.data||{};return{tripId,loadedAt:Date.now(),media:(d.media||[]).map(entity),clusters:d.clusters||[],albums:d.albums||[],polaroids:Object.fromEntries((d.polaroids||[]).map(x=>[String(x.day_key),x.media_id]))}},5000)
   }
 
   async function signedOriginalUrl(item,expiresIn=3600){
