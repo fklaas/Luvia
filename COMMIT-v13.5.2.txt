@@ -1,1 +1,0 @@
-perf(places): unify favorite cards paginate discovery and prefetch details

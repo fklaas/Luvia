@@ -1,1 +1,0 @@
-fix(places): close remaining place conformance violations

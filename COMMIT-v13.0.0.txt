@@ -1,3 +1,0 @@
-feat(core): introduce universal place intelligence foundation
-
-Add the universal Place domain, registry, adapters, lifecycle foundation, restaurant compatibility mapping, diagnostics and database preparation for Core 4.0.

@@ -1,1 +1,0 @@
-fix: Luvia 11.8.1 Core 3.6.1 restore restaurant recommendation rendering

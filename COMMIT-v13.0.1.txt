@@ -1,3 +1,0 @@
-feat(ui): unify restaurant experience with place components
-
-Introduce shared universal Place cards, badges, lifecycle presentation and recommendation assessments, then migrate restaurant discovery and saved cards without replacing the existing Restaurant Intelligence or Schedule Intelligence flows.

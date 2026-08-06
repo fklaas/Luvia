@@ -1,9 +1,0 @@
-core/runtime/boot-coordinator.js
-app/app-shell.js
-app/app-shell.css
-intelligence/restaurant-service.js
-intelligence/place-entity-service.js
-modules/restaurants-v2/restaurant-module.js
-core/places/timeline-core.js
-sw.js
-index.html

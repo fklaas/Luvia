@@ -1,1 +1,0 @@
-feat(places): add attractions and activities through the global place contract

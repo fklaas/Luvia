@@ -1,1 +1,0 @@
-fix(gallery): keep realtime photo and cluster counters in sync

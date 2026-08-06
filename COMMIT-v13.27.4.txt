@@ -1,1 +1,0 @@
-fix(places): align lifecycle with deployed visit schema

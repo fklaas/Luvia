@@ -1,1 +1,0 @@
-fix(places): enforce compact fact slots and return dock to places hub

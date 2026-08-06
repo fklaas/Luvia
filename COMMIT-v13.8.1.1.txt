@@ -1,1 +1,0 @@
-fix(places): restore photo guidance across detail entry points

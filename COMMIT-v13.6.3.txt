@@ -1,1 +1,0 @@
-fix(places): restore attractions enforce global actions and stop duplicate boot reload

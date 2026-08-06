@@ -1,1 +1,0 @@
-feat(media): add intelligent album titles and correct photo overlays

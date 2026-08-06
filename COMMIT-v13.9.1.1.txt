@@ -1,1 +1,0 @@
-fix(places): harden contract bootstrap and shopping timeline schema

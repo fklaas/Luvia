@@ -1,3 +1,0 @@
-fix(today): connect suggestions visits and gps-only distance
-
-Connect free-window recommendations to Today Intelligence, make the visited action functional, retain the last complete Today snapshot during refreshes, and enforce global GPS as the only distance source for every Place type.

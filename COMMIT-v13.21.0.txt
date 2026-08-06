@@ -1,1 +1,0 @@
-feat(planning): reset discovery into a planning foundation

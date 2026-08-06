@@ -1,1 +1,0 @@
-feat(places): add contract-driven photo spots and solar intelligence

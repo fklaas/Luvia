@@ -1,1 +1,0 @@
-fix(places): enforce the canonical module shell for attractions

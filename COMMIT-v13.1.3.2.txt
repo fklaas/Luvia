@@ -1,3 +1,0 @@
-fix(today): update schedule entries and eliminate dashboard flicker
-
-Canonicalize schedule identities, make free-window suggestions open their Place, enforce daily food diversity and replace full dashboard rerenders with targeted stable widget updates.

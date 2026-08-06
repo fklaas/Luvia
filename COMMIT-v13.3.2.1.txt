@@ -1,1 +1,0 @@
-fix(places): enforce restaurant design contract for accommodations

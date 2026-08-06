@@ -1,3 +1,0 @@
-fix(context): use global gps for place distances
-
-Synchronize Presence GPS with Travel Context, recalculate universal Place distances, add profile location status and refresh control, and accept valid empty Today snapshots in Core health tests.

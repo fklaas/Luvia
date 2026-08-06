@@ -1,1 +1,0 @@
-fix(places): stop lifecycle request storm and persist visits reliably

@@ -1,1 +1,0 @@
-fix(diagnostics): boot developer tools without remote services

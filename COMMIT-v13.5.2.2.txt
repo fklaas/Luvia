@@ -1,1 +1,0 @@
-fix(places): unify favorite UI warm timeline media and preserve viewport

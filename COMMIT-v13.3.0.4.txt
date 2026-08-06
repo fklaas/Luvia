@@ -1,1 +1,0 @@
-fix(guided-journey): enforce contrast and cohesive cloud shapes

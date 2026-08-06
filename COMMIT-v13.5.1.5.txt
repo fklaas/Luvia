@@ -1,1 +1,0 @@
-fix(places): isolate dock navigation from module interactions

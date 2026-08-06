@@ -1,5 +1,0 @@
-feat(today): introduce intelligent realtime day companion
-
-Add deterministic Today Intelligence with current/next/upcoming classification,
-departure advice, free windows, conflicts, day-load rules, realtime dashboard
-updates, offline snapshots and diagnostics.

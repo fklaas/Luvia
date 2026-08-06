@@ -1,1 +1,0 @@
-style(app): warm ambient canvas and compact timeline calendar

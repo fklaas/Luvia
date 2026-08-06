@@ -1,1 +1,0 @@
-fix(places): unify favorite cards details and media loading

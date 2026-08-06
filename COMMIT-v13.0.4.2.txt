@@ -1,3 +1,0 @@
-fix(diagnostics): prevent console freezes with lazy bounded rendering
-
-Render diagnostics panels on demand, bound trace and storage output, and add startup timeouts for resilient developer tooling.

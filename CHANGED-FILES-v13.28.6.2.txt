@@ -1,7 +1,0 @@
-app/gallery-view.js
-app/gallery-view.css
-core/media/ai-memory-bridge.js
-core/media/media-clustering.js
-index.html
-sw.js
-force-update.html

@@ -1,1 +1,0 @@
-fix(timeline): keep place overlays in context and stabilize editors

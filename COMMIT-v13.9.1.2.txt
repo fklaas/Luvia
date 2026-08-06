@@ -1,1 +1,0 @@
-fix(places): restore global planning schemas for every place type

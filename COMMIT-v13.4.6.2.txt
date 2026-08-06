@@ -1,1 +1,0 @@
-fix(dashboard): apply widget preferences and paginate timeline calendar
