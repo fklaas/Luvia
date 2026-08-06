@@ -1,0 +1,1 @@
+fix(media): recover legacy photos and expose delivery errors

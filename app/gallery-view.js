@@ -1,8 +1,8 @@
 (() => {
   'use strict';
 
-  const VERSION = '4.29.5';
-  const BUILD = '13.29.5';
+  const VERSION = '4.29.5.1';
+  const BUILD = '13.29.5.1';
   const REALTIME_DEBOUNCE_MS = 650;
   const FILTERS = {
     none: ['Original', ''], warm: ['Golden Hour', 'sepia(.18) saturate(1.15) contrast(1.04)'], cool: ['Blue Sky', 'hue-rotate(10deg) saturate(1.08)'], vivid: ['Pop', 'saturate(1.45) contrast(1.1)'], soft: ['Soft', 'contrast(.92) saturate(.88) brightness(1.04)'], mono: ['Mono', 'grayscale(1) contrast(1.08)'],
@@ -164,18 +164,23 @@
       <div class="lv-photo-actions"><button type="button" data-photo-favorite="${esc(item.id)}" class="${item.favorite?'is-on':''}" title="Favorit">${item.favorite?'★':'☆'}</button><button type="button" data-photo-timeline="${esc(item.id)}" title="Zur Dashboard-Timeline hinzufügen">⌁</button><button type="button" data-photo-polaroid="${esc(item.id)}" title="Polaroid des Tages">▣</button><button type="button" data-photo-edit="${esc(item.id)}" title="Bearbeiten">✎</button><button type="button" data-photo-remove="${esc(item.id)}" title="Löschen">×</button></div>
     </article>`;
   }
-  function hydrateImages(root,list,size='thumb640'){
+  async function hydrateImages(root,list,size='thumb640'){
     const unique=[...new Map((list||[]).filter(Boolean).map(item=>[String(item.id),item])).values()];
-    for(const item of unique){const url=window.LuviaMediaCore.publicThumbnailUrl?.(item,size)||'';root.querySelectorAll(`[data-photo-image="${cssEsc(item.id)}"]`).forEach(node=>{
+    if(!root?.isConnected||!unique.length)return;
+    let urls=new Map();
+    try{urls=await window.LuviaMediaCore.signedUrls?.(unique,size,86400)||new Map()}catch(error){console.warn('[LuviaGalleryView] Bild-URLs konnten nicht vollständig aufgelöst werden.',error)}
+    if(!root?.isConnected)return;
+    for(const item of unique){const url=urls.get(String(item.id))||'';root.querySelectorAll(`[data-photo-image="${cssEsc(item.id)}"]`).forEach(node=>{
       let image=node.matches('img')?node:node.querySelector('img');
-      if(!image&&node.classList.contains('lv-day-tile-cover')){image=document.createElement('img');image.alt=displayName(item);node.prepend(image)}
+      if(!image){image=document.createElement('img');image.alt=displayName(item);node.prepend(image)}
+      node.classList.remove('is-loaded','is-failed');
       if(!url){node.classList.add('is-failed');return}
-      image.loading=node.closest('.lv-day-tiles,.lv-cluster-grid')?'eager':'lazy';image.decoding='async';image.fetchPriority=node.closest('.lv-day-tiles,.lv-cluster-grid')?'high':'auto';image.width=item.width||640;image.height=item.height||480;
-      image.onload=()=>{node.classList.add('is-loaded');node.classList.remove('is-failed');node.querySelector('.lv-photo-placeholder, :scope > i')?.remove()};
-      image.onerror=()=>{node.classList.add('is-failed');image.remove()};
-      image.src=url;
+      const important=Boolean(node.closest('.lv-day-tiles,.lv-cluster-grid,.lv-favorites'));
+      image.loading=important?'eager':'lazy';image.decoding='async';image.fetchPriority=important?'high':'auto';image.width=item.width||640;image.height=item.height||480;
+      image.onload=()=>{node.classList.add('is-loaded');node.classList.remove('is-failed');node.querySelectorAll('.lv-photo-placeholder,:scope > i').forEach(x=>x.remove());syncOverlayGeometry(node)};
+      image.onerror=()=>{node.classList.add('is-failed');node.classList.remove('is-loaded');image.remove()};
+      if(image.src!==url)image.src=url;else if(image.complete&&image.naturalWidth)image.onload?.();
     })}
-    syncOverlayGeometry(root);return Promise.resolve();
   }
   function bindPhotoActions(root) {
     root.querySelectorAll('[data-photo-open]').forEach(button => button.onclick = () => openLightbox(button.dataset.photoOpen));

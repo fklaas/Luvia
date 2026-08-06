@@ -1,6 +1,6 @@
 (() => {
   'use strict';
-  const VERSION='4.29.5',BUILD='13.29.5',BUCKET='luvia-media',THUMB_BUCKET='luvia-media-thumbnails',channels=new Map();
+  const VERSION='4.29.5.1',BUILD='13.29.5.1',BUCKET='luvia-media',THUMB_BUCKET='luvia-media-thumbnails',channels=new Map();
   const queryCache=new Map(),queryTtlMs=15000,signedBatchCache=new Map();
   const id=()=>crypto?.randomUUID?.()||`${Date.now()}-${Math.random().toString(16).slice(2)}`;
   const ext=f=>(f?.name?.split('.').pop()||f?.type?.split('/').pop()||'jpg').replace(/[^a-z0-9]/gi,'').toLowerCase()||'jpg';
@@ -51,9 +51,13 @@
     const map=new Map();rows.forEach((row,index)=>{const path=row.path||unique[index],url=row.signedUrl||row.signedURL;if(path&&url)map.set(path,url)});signedBatchCache.set(cacheKey,{value:map,at:Date.now()});return map;
   }
   async function signedUrls(items=[],size='thumb640',expiresIn=86400){
-    const result=new Map();
+    const result=new Map(),missing=[];
     if(size==='thumb640'||size==='thumb256'){
-      for(const item of items||[]){const url=publicThumbnailUrl(item,size);if(url)result.set(String(item.id),url)}
+      for(const item of items||[]){const url=publicThumbnailUrl(item,size);if(url)result.set(String(item.id),url);else missing.push(item)}
+      // Legacy recovery: old photos without delivery variants remain visible while the server backfill runs.
+      // All missing previews are signed in one batch per bucket; no per-card database request is created.
+      const grouped=new Map();for(const item of missing){const bucket=item?.storageBucket||BUCKET,path=item?.renderedPreviewPath||item?.preview1280Path||item?.previewPath||item?.thumbnailPath||item?.storagePath;if(!path)continue;if(!grouped.has(bucket))grouped.set(bucket,[]);grouped.get(bucket).push({item,path})}
+      for(const [bucket,entries] of grouped){const signed=await signPaths(entries.map(x=>x.path),{expiresIn,bucket});entries.forEach(x=>{const u=signed.get(x.path);if(u)result.set(String(x.item.id),u)})}
       return result;
     }
     const grouped=new Map();for(const item of items||[]){const bucket=item?.storageBucket||BUCKET,path=deliveryPath(item,size);if(!path)continue;if(!grouped.has(bucket))grouped.set(bucket,[]);grouped.get(bucket).push({item,path})}
