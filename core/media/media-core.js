@@ -1,6 +1,6 @@
 (() => {
   'use strict';
-  const VERSION='4.29.3.1',BUILD='13.29.3.1',BUCKET='luvia-media',channels=new Map();
+  const VERSION='4.29.4',BUILD='13.29.4',BUCKET='luvia-media',channels=new Map();
   const id=()=>crypto?.randomUUID?.()||`${Date.now()}-${Math.random().toString(16).slice(2)}`;
   const ext=f=>(f?.name?.split('.').pop()||f?.type?.split('/').pop()||'jpg').replace(/[^a-z0-9]/gi,'').toLowerCase()||'jpg';
   const day=iso=>{const d=new Date(iso);return Number.isNaN(d.getTime())?null:`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`};
@@ -97,9 +97,8 @@
     progress('Fotoeinträge werden aus der Timeline entfernt …');
     await safe(client.from('timeline_events').delete().eq('trip_id',tripId).eq('event_type','photo_memory'));
     if(mediaIds.length){
-      // Legacy timeline links are stored directly on live_moment_status in this project.
-      // Do not query optional relations that are not part of the deployed schema.
-      await safe(client.from('live_moment_status').update({linked_photo_id:null}).in('linked_photo_id',mediaIds));
+      await safe(client.from('media_place_links').delete().in('media_id',mediaIds));
+      await safe(client.from('live_moment_media').delete().in('media_id',mediaIds));
     }
     progress('Originale und Vorschaubilder werden aus dem Storage gelöscht …');
     const byBucket=new Map();

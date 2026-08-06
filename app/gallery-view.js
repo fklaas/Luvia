@@ -1,9 +1,10 @@
 (() => {
   'use strict';
 
-  const VERSION = '4.29.3.1';
-  const BUILD = '13.29.3.1';
+  const VERSION = '4.29.4';
+  const BUILD = '13.29.4';
   const DIAGNOSTICS_LABEL = '[LuviaGalleryDiagnostics]';
+  let diagnosticsEnabled = /(?:^|[?&])galleryDebug=1(?:&|$)/.test(location.search) || localStorage.getItem('luvia.gallery.debug') === '1';
   const diagnosticsState = {
     mountedAt: null, mountCount: 0, loadCount: 0, readDataCount: 0, renderAllCount: 0,
     renderFavoritesCount: 0, renderClustersCount: 0, renderDaysCount: 0,
@@ -13,7 +14,7 @@
   };
   const diag = (event, detail={}) => {
     diagnosticsState.reasons[event]=(diagnosticsState.reasons[event]||0)+1;
-    console.info(DIAGNOSTICS_LABEL,event,{...detail,snapshot:{...diagnosticsState}});
+    if (diagnosticsEnabled) console.info(DIAGNOSTICS_LABEL,event,{...detail,snapshot:{...diagnosticsState}});
   };
   const REALTIME_DEBOUNCE_MS = 3500;
   const REALTIME_MAX_WAIT_MS = 0;
@@ -40,6 +41,8 @@
   let clusterSyncInProgress = false;
   let muteClusterRealtimeUntil = 0;
   let lastFingerprint = '';
+  let lastClusterInputFingerprint = '';
+  let lastMediaRealtimeAt = 0;
   let dayLimit = 10;
   let modalScrollY = 0;
   function lockPageScroll(){if(document.body.classList.contains('lv-photo-modal-open'))return;modalScrollY=window.scrollY||0;document.body.style.top=`-${modalScrollY}px`;document.body.classList.add('lv-photo-modal-open');}
@@ -137,6 +140,12 @@
       clusters: clusters.map(cluster => [cluster.id,cluster.title,cluster.state,cluster.mediaIds]),
       polaroids
     });
+  }
+  function clusterInputFingerprint(list=items) {
+    return JSON.stringify(list.map(item => [
+      String(item.id), String(item.dayKey||''), String(item.capturedAt||item.createdAt||''), String(item.status||''),
+      item.latitude ?? null, item.longitude ?? null, item.metadata?.mediaKind || null
+    ]).sort((a,b)=>a[0].localeCompare(b[0])));
   }
   function scheduleLoad(reason='Realtime', options={}) {
     if (Date.now() < suppressRealtimeUntil && options.realtime) return;
@@ -406,20 +415,27 @@
     for(const candidate of pendingMetadata){try{const refreshed=await window.LuviaMediaCore.reanalyze(candidate.id);items=items.map(x=>x.id===refreshed.id?refreshed:x)}catch{}}
     polaroids=await window.LuviaMediaCore.listPolaroids();
     if (analyze) {
-      const generated=window.LuviaMediaClustering.generate(items);
-      clusterSyncInProgress = true;
-      muteClusterRealtimeUntil = Date.now() + 5000;
-      diagnosticsState.clusterSyncCount++;
-      diag('cluster-sync-start',{generated:generated.length});
-      try {
-        clusters=await window.LuviaMediaClustering.syncGenerated(generated);
-      } catch (error) {
-        console.warn('[LuviaGalleryView] Cluster-Synchronisierung übersprungen; Galerie bleibt aktuell.', error);
-        clusters=await window.LuviaMediaClustering.listPersisted().catch(()=>[]);
-      } finally {
-        clusterSyncInProgress = false;
-        muteClusterRealtimeUntil = Math.max(muteClusterRealtimeUntil, Date.now() + 2500);
-        diag('cluster-sync-finish',{clusters:clusters.length});
+      const clusterFingerprint=clusterInputFingerprint(items);
+      if (clusterFingerprint === lastClusterInputFingerprint) {
+        clusters=await window.LuviaMediaClustering.listPersisted();
+        diag('cluster-sync-skipped',{reason:'unchanged-media-input'});
+      } else {
+        const generated=window.LuviaMediaClustering.generate(items);
+        clusterSyncInProgress = true;
+        muteClusterRealtimeUntil = Date.now() + 5000;
+        diagnosticsState.clusterSyncCount++;
+        diag('cluster-sync-start',{generated:generated.length});
+        try {
+          clusters=await window.LuviaMediaClustering.syncGenerated(generated);
+          lastClusterInputFingerprint=clusterFingerprint;
+        } catch (error) {
+          console.warn('[LuviaGalleryView] Cluster-Synchronisierung übersprungen; Galerie bleibt aktuell.', error);
+          clusters=await window.LuviaMediaClustering.listPersisted().catch(()=>[]);
+        } finally {
+          clusterSyncInProgress = false;
+          muteClusterRealtimeUntil = Math.max(muteClusterRealtimeUntil, Date.now() + 2500);
+          diag('cluster-sync-finish',{clusters:clusters.length});
+        }
       }
     } else clusters=await window.LuviaMediaClustering.listPersisted();
     diagnosticsState.lastReadMs=Math.round(performance.now()-started);diag('read-data',{analyze,items:items.length,clusters:clusters.length,durationMs:diagnosticsState.lastReadMs});
@@ -467,7 +483,7 @@
     status('Galerie wird vollständig geleert …');
     try{
       const result=await window.LuviaMediaCore.clearTripGallery({onProgress:progress=>status(progress)});
-      urlCache.clear();urlFailureCache.clear();items=[];clusters=[];polaroids={};lastFingerprint='';
+      urlCache.clear();urlFailureCache.clear();items=[];clusters=[];polaroids={};lastFingerprint='';lastClusterInputFingerprint='';
       await renderAll({force:true});status('Galerie wurde vollständig geleert.','ready');
       window.dispatchEvent(new CustomEvent('luvia:gallery-cleared',{detail:result}));
       window.dispatchEvent(new CustomEvent('luvia:timeline-cloud-changed',{detail:{tripId:result.tripId}}));
@@ -496,6 +512,7 @@
 
   function mediaRealtime(payload) {
     diagnosticsState.mediaRealtimeCount++;
+    lastMediaRealtimeAt=Date.now();
     const table=payload?.table||'';
     const event=payload?.eventType || payload?.event;
     diag('media-realtime',{table,event});
@@ -514,9 +531,9 @@
     diagnosticsState.clusterRealtimeCount++;
     const muted = clusterSyncInProgress || Date.now() < muteClusterRealtimeUntil;
     diag('cluster-realtime',{table:payload?.table,event:payload?.eventType||payload?.event,muted});
-    if (muted) {
+    if (muted || (lastMediaRealtimeAt && Date.now()-lastMediaRealtimeAt < REALTIME_DEBOUNCE_MS+1200)) {
       diagnosticsState.ignoredClusterRealtimeCount++;
-      diag('cluster-realtime-ignored',{reason:clusterSyncInProgress?'own-sync':'grace-window'});
+      diag('cluster-realtime-ignored',{reason:clusterSyncInProgress?'own-sync':muted?'grace-window':'covered-by-media-batch'});
       return;
     }
     scheduleLoad('Cluster Realtime',{realtime:true,silent:true,analyze:false,force:false});
@@ -540,8 +557,8 @@
     const refresh=()=>scheduleLoad('Media-Ansicht aktualisiert',{immediate:true,force:true,analyze:false});window.addEventListener('luvia:media-composite-updated',refresh);window.addEventListener('luvia:media-view-refresh',refresh);window.addEventListener('luvia:media-deleted',refresh);host.__luviaMediaRefresh=refresh;await load({silent:false,analyze:true,force:true});
     return ()=>unmount();
   }
-  async function unmount(){if(host?.__luviaMediaRefresh){window.removeEventListener('luvia:media-composite-updated',host.__luviaMediaRefresh);window.removeEventListener('luvia:media-view-refresh',host.__luviaMediaRefresh);window.removeEventListener('luvia:media-deleted',host.__luviaMediaRefresh)}clearTimeout(loadTimer);await unsubMedia?.();await unsubClusters?.();unsubMedia=unsubClusters=null;urlCache.clear();urlFailureCache.clear();if(host){delete host.dataset.luviaGalleryMounted;host.innerHTML=''}host=null;activeDay=null;lastFingerprint=''}
+  async function unmount(){if(host?.__luviaMediaRefresh){window.removeEventListener('luvia:media-composite-updated',host.__luviaMediaRefresh);window.removeEventListener('luvia:media-view-refresh',host.__luviaMediaRefresh);window.removeEventListener('luvia:media-deleted',host.__luviaMediaRefresh)}clearTimeout(loadTimer);await unsubMedia?.();await unsubClusters?.();unsubMedia=unsubClusters=null;urlCache.clear();urlFailureCache.clear();if(host){delete host.dataset.luviaGalleryMounted;host.innerHTML=''}host=null;activeDay=null;lastFingerprint='';lastClusterInputFingerprint='';lastMediaRealtimeAt=0}
 
-  window.LuviaGalleryDiagnostics=Object.freeze({version:VERSION,build:BUILD,snapshot:()=>JSON.parse(JSON.stringify(diagnosticsState)),reset:()=>{for(const key of Object.keys(diagnosticsState)){if(typeof diagnosticsState[key]==='number')diagnosticsState[key]=0;else if(key==='reasons')diagnosticsState[key]={}}diag('reset')}});
+  window.LuviaGalleryDiagnostics=Object.freeze({version:VERSION,build:BUILD,snapshot:()=>JSON.parse(JSON.stringify({...diagnosticsState,enabled:diagnosticsEnabled})),reset:()=>{for(const key of Object.keys(diagnosticsState)){if(typeof diagnosticsState[key]==='number')diagnosticsState[key]=0;else if(key==='reasons')diagnosticsState[key]={}}diag('reset')},enable:()=>{diagnosticsEnabled=true;localStorage.setItem('luvia.gallery.debug','1');console.info(DIAGNOSTICS_LABEL,'enabled')},disable:()=>{diagnosticsEnabled=false;localStorage.removeItem('luvia.gallery.debug')},isEnabled:()=>diagnosticsEnabled});
   window.LuviaGalleryView=Object.freeze({version:VERSION,build:BUILD,mount,unmount,refresh:options=>load({silent:false,force:true,...options}),openPhoto:openLightbox,openEditor,renderVisual:(item,attrs='')=>photoVisual(item,attrs),hydrateVisuals:(root,list)=>hydrateImages(root,list),locationName,downloadPhoto:downloadPhotoAsset,downloadCollection,shareCollection,diagnostics:()=>window.LuviaGalleryDiagnostics.snapshot()});
 })();

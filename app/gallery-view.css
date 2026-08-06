@@ -169,7 +169,7 @@ body.lv-photo-modal-open{position:fixed!important;width:100%!important;overflow:
 .lv-photo-title-suggestions:empty{display:none}
 @media(max-width:760px){.lv-title-suggestions{grid-template-columns:1fr}.lv-photo-actions .lv-photo-timeline-action{width:38px!important;min-width:38px!important}.lv-editor-sliders label{grid-template-columns:86px minmax(0,1fr) 40px!important}}
 
-/* v13.29.3.1 — Quiet upload window + complete gallery clear */
+/* v13.29.4 — Quiet upload window + complete gallery clear */
 .lv-gallery-upload-actions .lv-gallery-danger{border-color:#e7a6aa!important;color:#9d3540!important;background:#fff7f7!important}
 .lv-gallery-upload-actions .lv-gallery-danger:hover{background:#ffecee!important;border-color:#d87e87!important}
 .lv-gallery-upload-actions .lv-gallery-danger:disabled{opacity:.55;cursor:wait}
