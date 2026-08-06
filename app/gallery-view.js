@@ -1,8 +1,8 @@
 (() => {
   'use strict';
 
-  const VERSION = '4.29.7';
-  const BUILD = '13.29.7';
+  const VERSION = '4.29.7.1';
+  const BUILD = '13.29.7.1';
   const REALTIME_DEBOUNCE_MS = 800;
   const FILTERS = {
     none: ['Original', ''], warm: ['Golden Hour', 'sepia(.18) saturate(1.15) contrast(1.04)'], cool: ['Blue Sky', 'hue-rotate(10deg) saturate(1.08)'], vivid: ['Pop', 'saturate(1.45) contrast(1.1)'], soft: ['Soft', 'contrast(.92) saturate(.88) brightness(1.04)'], mono: ['Mono', 'grayscale(1) contrast(1.08)'],
@@ -69,7 +69,7 @@
     const exposure=100+Number(edit.exposure||0),contrast=Number(edit.contrast)+Number(edit.clarity||0)*.25,shadowBoost=Math.max(0,Number(edit.shadows||0))*.12,highlightCut=Math.max(0,-Number(edit.highlights||0))*.08;return `brightness(${exposure*Number(edit.brightness)/100+shadowBoost-highlightCut}%) contrast(${contrast}%) saturate(${Number(edit.saturation)}%) hue-rotate(${Number(edit.hue||0)}deg) blur(${Number(edit.blur)}px) ${temperatureFilter} ${preset}`.trim();
   };
   const overlayMarkup = edit => `<span class="lv-saved-overlays" style="--image-rotation:${Number(edit.rotation||0)}deg">${(edit.overlays||[]).map(raw=>{const o=normalizeOverlay(raw);return `<span class="lv-saved-overlay ${o.type==='text'?'is-text':'is-sticker'}" style="--overlay-x:${o.x*100};--overlay-y:${o.y*100};--overlay-rotation:${o.rotation}deg;--overlay-size:${o.size}">${esc(o.value||'')}</span>`}).join('')}</span>`;
-  const directThumbUrl = item => galleryImageUrls.get(String(item?.id)) || window.LuviaMediaCore?.publicThumbnailUrl?.(item,'thumb640') || window.LuviaMediaCore?.publicThumbnailUrl?.(item,'thumb256') || '';
+  const directThumbUrl = item => galleryImageUrls.get(String(item?.id)) || '';
   const photoVisual = (item, attrs='') => {
     const edit=settings(item), baked=Boolean(item?.metadata?.renderedPreviewPath||item?.renderedPreviewPath), direct=directThumbUrl(item);
     const image = direct
@@ -451,7 +451,7 @@
       host.querySelector('[data-gallery-add]').onclick=()=>{try{input.showPicker?input.showPicker():input.click()}catch{input.click()}};
       input.onchange=async()=>{const files=[...input.files];input.value='';try{await upload(files)}catch(error){showError(error)}};
       await bindRealtime();
-      await readData({force:true});const clustersChanged=await rebuildClusters({force:true});if(clustersChanged)await readData({force:true});await renderAll({force:true});updateSummary();return ()=>unmount();
+      await readData({force:true});await renderAll({force:true});updateSummary();return ()=>unmount();
     })().finally(()=>{mountPromise=null});return mountPromise;
   }
   async function unmount(){clearTimeout(loadTimer);clearTimeout(galleryRefreshTimer);await stopRealtime();document.documentElement.classList.remove('lv-gallery-focus');if(host)host.innerHTML='';host=null;mountedTarget=null;activeDay=null;lastFingerprint='';busy=false;pending=null;galleryImageUrls=new Map()}

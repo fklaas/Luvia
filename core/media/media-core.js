@@ -1,6 +1,6 @@
 (() => {
   'use strict';
-  const VERSION='4.29.7',BUILD='13.29.7',BUCKET='luvia-media',THUMB_BUCKET='luvia-media-thumbnails',channels=new Map();
+  const VERSION='4.29.7.1',BUILD='13.29.7.1',BUCKET='luvia-media',THUMB_BUCKET='luvia-media-thumbnails',channels=new Map();
   const queryCache=new Map(),queryTtlMs=15000,signedBatchCache=new Map();
   const id=()=>crypto?.randomUUID?.()||`${Date.now()}-${Math.random().toString(16).slice(2)}`;
   const ext=f=>(f?.name?.split('.').pop()||f?.type?.split('/').pop()||'jpg').replace(/[^a-z0-9]/gi,'').toLowerCase()||'jpg';
@@ -81,28 +81,38 @@
 
 
   async function galleryDisplayUrls(items=[]){
-    const result=new Map(), thumbEntries=[], legacyGroups=new Map();
+    // Recovery rule: gallery cards never depend on the public thumbnail bucket.
+    // One batched signed transform per source bucket yields directly usable 640px images.
+    // If transformed signing is unavailable, fall back to one batched untransformed signing.
+    const result=new Map(),groups=new Map();
     for(const item of items||[]){
-      const thumbPath=deliveryPath(item,'thumb640')||deliveryPath(item,'thumb256');
-      if(thumbPath){thumbEntries.push({item,path:thumbPath});continue}
       const bucket=item?.storageBucket||BUCKET;
-      const path=item?.preview1280Path||item?.renderedPreviewPath||item?.previewPath||item?.storagePath;
+      const path=item?.preview1280Path||item?.previewPath||item?.renderedPreviewPath||item?.storagePath;
       if(!path)continue;
-      if(!legacyGroups.has(bucket))legacyGroups.set(bucket,[]);
-      legacyGroups.get(bucket).push({item,path});
+      if(!groups.has(bucket))groups.set(bucket,[]);
+      groups.get(bucket).push({item,path});
     }
-    if(thumbEntries.length){
+    for(const [bucket,entries] of groups){
+      let signed=new Map();
       try{
-        const signed=await signPaths(thumbEntries.map(x=>x.path),{expiresIn:86400,bucket:THUMB_BUCKET});
-        for(const x of thumbEntries){const url=signed.get(x.path)||publicThumbnailUrl(x.item,'thumb640')||publicThumbnailUrl(x.item,'thumb256');if(url)result.set(String(x.item.id),url)}
+        signed=await signPaths(entries.map(x=>x.path),{
+          expiresIn:86400,
+          bucket,
+          transform:{width:640,height:640,resize:'cover',quality:72}
+        });
       }catch(error){
-        console.warn('[LuviaMediaCore] Thumbnail-Batchsignierung fehlgeschlagen, öffentliche URLs werden versucht.',error);
-        for(const x of thumbEntries){const url=publicThumbnailUrl(x.item,'thumb640')||publicThumbnailUrl(x.item,'thumb256');if(url)result.set(String(x.item.id),url)}
+        console.warn('[LuviaMediaCore] Galerie-Transformation nicht verfügbar; signierte Quelldateien werden verwendet.',error);
       }
-    }
-    for(const [bucket,entries] of legacyGroups){
-      try{const signed=await signPaths(entries.map(x=>x.path),{expiresIn:86400,bucket});for(const x of entries){const url=signed.get(x.path);if(url)result.set(String(x.item.id),url)}}
-      catch(error){console.warn('[LuviaMediaCore] Legacy-Vorschaubilder konnten nicht gebündelt signiert werden.',error)}
+      const missing=entries.filter(x=>!signed.get(x.path));
+      let fallback=new Map();
+      if(missing.length){
+        try{fallback=await signPaths(missing.map(x=>x.path),{expiresIn:86400,bucket})}
+        catch(error){console.error('[LuviaMediaCore] Galerie-Bildquellen konnten nicht signiert werden.',error)}
+      }
+      for(const x of entries){
+        const url=signed.get(x.path)||fallback.get(x.path)||'';
+        if(url)result.set(String(x.item.id),url);
+      }
     }
     return result;
   }

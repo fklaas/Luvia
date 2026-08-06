@@ -1,0 +1,1 @@
+fix(gallery): restore signed card sources and remove duplicate bootstrap
