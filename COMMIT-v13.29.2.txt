@@ -1,0 +1,1 @@
+fix(gallery): stop cluster realtime request storm and simplify polaroid action

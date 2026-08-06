@@ -1,14 +1,14 @@
 (() => {
   'use strict';
 
-  const VERSION = '4.29.1';
-  const BUILD = '13.29.1';
+  const VERSION = '4.29.2';
+  const BUILD = '13.29.2';
   const DIAGNOSTICS_LABEL = '[LuviaGalleryDiagnostics]';
   const diagnosticsState = {
     mountedAt: null, mountCount: 0, loadCount: 0, readDataCount: 0, renderAllCount: 0,
     renderFavoritesCount: 0, renderClustersCount: 0, renderDaysCount: 0,
     hydrateBatchCount: 0, imageUrlRequestCount: 0, mediaRealtimeCount: 0,
-    clusterRealtimeCount: 0, scheduledRefreshCount: 0, coalescedRefreshCount: 0,
+    clusterRealtimeCount: 0, ignoredClusterRealtimeCount: 0, clusterSyncCount: 0, scheduledRefreshCount: 0, coalescedRefreshCount: 0,
     reasons: {}, lastLoadMs: 0, lastReadMs: 0, lastRenderMs: 0
   };
   const diag = (event, detail={}) => {
@@ -35,6 +35,8 @@
   let pending = null;
   let loadTimer = null;
   let suppressRealtimeUntil = 0;
+  let clusterSyncInProgress = false;
+  let muteClusterRealtimeUntil = 0;
   let lastFingerprint = '';
   let dayLimit = 10;
   let modalScrollY = 0;
@@ -140,8 +142,16 @@
     if(loadTimer||busy)diagnosticsState.coalescedRefreshCount++;
     diag('schedule-refresh',{reason,realtime:Boolean(options.realtime),busy,alreadyQueued:Boolean(loadTimer)});
     clearTimeout(loadTimer);
-    pending = {reason, ...options};
-    loadTimer = setTimeout(() => {const queued=pending||{};pending=null;load(queued)}, options.immediate ? 0 : REALTIME_DEBOUNCE_MS);
+    const previous = pending || {};
+    pending = {
+      ...previous,
+      ...options,
+      reason,
+      analyze: Boolean(previous.analyze || options.analyze),
+      force: Boolean(previous.force || options.force),
+      silent: previous.silent === false || options.silent === false ? false : true
+    };
+    loadTimer = setTimeout(() => {const queued=pending||{};pending=null;loadTimer=null;load(queued)}, options.immediate ? 0 : REALTIME_DEBOUNCE_MS);
   }
 
   async function tripDays() {
@@ -169,7 +179,7 @@
     return `<article class="lv-gallery-photo ${compact?'is-compact':''}" data-photo="${esc(item.id)}">
       <button type="button" class="lv-photo-open" data-photo-open="${esc(item.id)}">${photoVisual(item,`data-photo-image="${esc(item.id)}"`)}</button>
       <div class="lv-photo-meta"><strong>${esc(displayName(item))}</strong><small>${esc(fmtTime(item.capturedAt))}</small></div>
-      <div class="lv-photo-actions"><button type="button" data-photo-favorite="${esc(item.id)}" class="${item.favorite?'is-on':''}" title="Favorit">${item.favorite?'★':'☆'}</button><button type="button" class="lv-photo-timeline-action" data-photo-timeline="${esc(item.id)}" title="Zur Timeline">↝ <span>Timeline</span></button><button type="button" data-photo-edit="${esc(item.id)}" title="Bearbeiten">✎</button><button type="button" data-photo-remove="${esc(item.id)}" title="Löschen">×</button></div>
+      <div class="lv-photo-actions"><button type="button" data-photo-favorite="${esc(item.id)}" class="${item.favorite?'is-on':''}" title="Favorit">${item.favorite?'★':'☆'}</button><button type="button" class="lv-photo-timeline-action" data-photo-timeline="${esc(item.id)}" title="Als Polaroid des Tages zur Timeline hinzufügen" aria-label="Als Polaroid des Tages zur Timeline hinzufügen">▣</button><button type="button" data-photo-edit="${esc(item.id)}" title="Bearbeiten">✎</button><button type="button" data-photo-remove="${esc(item.id)}" title="Löschen">×</button></div>
     </article>`;
   }
   async function hydrateImages(root, list) {
@@ -191,7 +201,7 @@
       await window.LuviaMediaCore.toggleFavorite(button.dataset.photoFavorite);
       await load({reason:'Favorit',silent:true,analyze:false,force:true});
     });
-    root.querySelectorAll('[data-photo-timeline]').forEach(button => button.onclick = async event => {event.stopPropagation();const item=items.find(x=>x.id===button.dataset.photoTimeline);if(!item?.dayKey)return showError(new Error('Dieses Foto ist keinem Reisetag zugeordnet.'));suppressRealtimeUntil=Date.now()+1400;button.disabled=true;try{await window.LuviaMediaCore.setPolaroid(item.id,item.dayKey);await load({reason:'Timeline',silent:true,analyze:false,force:true});status('Foto wurde als Polaroid des Tages zur Timeline hinzugefügt.','ready')}finally{button.disabled=false}});
+    root.querySelectorAll('[data-photo-timeline]').forEach(button => button.onclick = async event => {event.stopPropagation();const item=items.find(x=>x.id===button.dataset.photoTimeline);if(!item?.dayKey)return showError(new Error('Dieses Foto ist keinem Reisetag zugeordnet.'));suppressRealtimeUntil=Date.now()+1400;button.disabled=true;try{await window.LuviaMediaCore.setPolaroid(item.id,item.dayKey);await load({reason:'Polaroid',silent:true,analyze:false,force:true});status('Foto wurde als Polaroid des Tages zur Timeline hinzugefügt.','ready')}finally{button.disabled=false}});
     root.querySelectorAll('[data-photo-edit]').forEach(button => button.onclick = event => { event.stopPropagation(); openEditor(button.dataset.photoEdit); });
     root.querySelectorAll('[data-photo-remove]').forEach(button => button.onclick = async event => {
       event.stopPropagation();
@@ -385,7 +395,17 @@
     polaroids=await window.LuviaMediaCore.listPolaroids();
     if (analyze) {
       const generated=window.LuviaMediaClustering.generate(items);
-      clusters=await window.LuviaMediaClustering.syncGenerated(generated);
+      clusterSyncInProgress = true;
+      muteClusterRealtimeUntil = Date.now() + 3000;
+      diagnosticsState.clusterSyncCount++;
+      diag('cluster-sync-start',{generated:generated.length});
+      try {
+        clusters=await window.LuviaMediaClustering.syncGenerated(generated);
+      } finally {
+        clusterSyncInProgress = false;
+        muteClusterRealtimeUntil = Math.max(muteClusterRealtimeUntil, Date.now() + 1200);
+        diag('cluster-sync-finish',{clusters:clusters.length});
+      }
     } else clusters=await window.LuviaMediaClustering.listPersisted();
     diagnosticsState.lastReadMs=Math.round(performance.now()-started);diag('read-data',{analyze,items:items.length,clusters:clusters.length,durationMs:diagnosticsState.lastReadMs});
   }
@@ -435,11 +455,26 @@
     const analyze=event==='INSERT'||event==='DELETE'||(event==='UPDATE'&&['captured_at','day_key','status'].some(key=>payload?.old?.[key]!==payload?.new?.[key]));
     scheduleLoad('Media Realtime',{realtime:true,silent:true,analyze,force:false});
   }
-  function clusterRealtime(payload) { diagnosticsState.clusterRealtimeCount++;diag('cluster-realtime',{table:payload?.table,event:payload?.eventType||payload?.event}); scheduleLoad('Cluster Realtime',{realtime:true,silent:true,analyze:false,force:false}); }
+  function clusterRealtime(payload) {
+    diagnosticsState.clusterRealtimeCount++;
+    const muted = clusterSyncInProgress || Date.now() < muteClusterRealtimeUntil;
+    diag('cluster-realtime',{table:payload?.table,event:payload?.eventType||payload?.event,muted});
+    if (muted) {
+      diagnosticsState.ignoredClusterRealtimeCount++;
+      diag('cluster-realtime-ignored',{reason:clusterSyncInProgress?'own-sync':'grace-window'});
+      return;
+    }
+    scheduleLoad('Cluster Realtime',{realtime:true,silent:true,analyze:false,force:false});
+  }
 
   async function mount(target) {
+    if (host === target && target?.dataset?.luviaGalleryMounted === '1') {
+      diag('mount-skipped',{reason:'already-mounted'});
+      return ()=>unmount();
+    }
+    if (host) await unmount();
     diagnosticsState.mountCount++;diagnosticsState.mountedAt=new Date().toISOString();diag('mount',{mountCount:diagnosticsState.mountCount});
-    host=target; host.innerHTML=shell();
+    host=target; host.dataset.luviaGalleryMounted='1'; host.innerHTML=shell();
     const input=host.querySelector('[data-gallery-input]');
     host.querySelector('[data-gallery-download]').onclick=async()=>{try{const trip=window.LuviaTripStore?.snapshot?.()?.activeTrip||{};await downloadCollection(items.map(x=>x.id),`${trip.title||trip.name||'Luvia'} Galerie`)}catch(error){showError(error)}};
     host.querySelector('[data-gallery-add]').onclick=()=>{try{input.showPicker?input.showPicker():input.click()}catch{input.click()}};
@@ -449,7 +484,7 @@
     const refresh=()=>scheduleLoad('Media-Ansicht aktualisiert',{immediate:true,force:true,analyze:false});window.addEventListener('luvia:media-composite-updated',refresh);window.addEventListener('luvia:media-view-refresh',refresh);window.addEventListener('luvia:media-deleted',refresh);host.__luviaMediaRefresh=refresh;await load({silent:false,analyze:true,force:true});
     return ()=>unmount();
   }
-  async function unmount(){if(host?.__luviaMediaRefresh){window.removeEventListener('luvia:media-composite-updated',host.__luviaMediaRefresh);window.removeEventListener('luvia:media-view-refresh',host.__luviaMediaRefresh);window.removeEventListener('luvia:media-deleted',host.__luviaMediaRefresh)}clearTimeout(loadTimer);await unsubMedia?.();await unsubClusters?.();unsubMedia=unsubClusters=null;urlCache.clear();urlFailureCache.clear();if(host)host.innerHTML='';host=null;activeDay=null;lastFingerprint=''}
+  async function unmount(){if(host?.__luviaMediaRefresh){window.removeEventListener('luvia:media-composite-updated',host.__luviaMediaRefresh);window.removeEventListener('luvia:media-view-refresh',host.__luviaMediaRefresh);window.removeEventListener('luvia:media-deleted',host.__luviaMediaRefresh)}clearTimeout(loadTimer);await unsubMedia?.();await unsubClusters?.();unsubMedia=unsubClusters=null;urlCache.clear();urlFailureCache.clear();if(host){delete host.dataset.luviaGalleryMounted;host.innerHTML=''}host=null;activeDay=null;lastFingerprint=''}
 
   window.LuviaGalleryDiagnostics=Object.freeze({version:VERSION,build:BUILD,snapshot:()=>JSON.parse(JSON.stringify(diagnosticsState)),reset:()=>{for(const key of Object.keys(diagnosticsState)){if(typeof diagnosticsState[key]==='number')diagnosticsState[key]=0;else if(key==='reasons')diagnosticsState[key]={}}diag('reset')}});
   window.LuviaGalleryView=Object.freeze({version:VERSION,build:BUILD,mount,unmount,refresh:options=>load({silent:false,force:true,...options}),openPhoto:openLightbox,openEditor,renderVisual:(item,attrs='')=>photoVisual(item,attrs),hydrateVisuals:(root,list)=>hydrateImages(root,list),locationName,downloadPhoto:downloadPhotoAsset,downloadCollection,shareCollection,diagnostics:()=>window.LuviaGalleryDiagnostics.snapshot()});
