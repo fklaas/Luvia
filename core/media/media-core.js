@@ -1,6 +1,6 @@
 (() => {
   'use strict';
-  const VERSION='4.28.6.7',BUILD='13.28.6.7',BUCKET='luvia-media',channels=new Map();
+  const VERSION='4.29.3',BUILD='13.29.3',BUCKET='luvia-media',channels=new Map();
   const id=()=>crypto?.randomUUID?.()||`${Date.now()}-${Math.random().toString(16).slice(2)}`;
   const ext=f=>(f?.name?.split('.').pop()||f?.type?.split('/').pop()||'jpg').replace(/[^a-z0-9]/gi,'').toLowerCase()||'jpg';
   const day=iso=>{const d=new Date(iso);return Number.isNaN(d.getTime())?null:`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`};
@@ -78,8 +78,40 @@
   async function setPolaroid(mediaId,dayKey){const{client,tripId,userId}=await context(),item=await get(mediaId);if(!item)throw new Error('Foto wurde nicht gefunden.');const key=dayKey||item.dayKey;if(!key)throw new Error('Das Foto ist keinem Reisetag zugeordnet.');const r=await client.from('media_day_polaroids').upsert({trip_id:tripId,day_key:key,media_id:mediaId,selected_by:userId,selected_at:new Date().toISOString()},{onConflict:'trip_id,day_key'}).select('*').single();if(r.error)throw r.error;const existing=await client.from('timeline_events').select('id,metadata').eq('trip_id',tripId).eq('event_type','photo_memory');if(!existing.error){const ids=(existing.data||[]).filter(x=>x.metadata?.polaroidDayKey===key).map(x=>x.id);if(ids.length)await client.from('timeline_events').delete().eq('trip_id',tripId).in('id',ids)}const occurredAt=item.capturedAt||`${key}T12:00:00`;const title=item.displayName||`Polaroid des Tages`;const created=await client.from('timeline_events').insert({trip_id:tripId,event_type:'photo_memory',title,description:'Polaroid des Tages',occurred_at:occurredAt,source:'media_polaroid',is_automatic:false,metadata:{mediaId,mediaIds:[mediaId],polaroid:true,polaroidDayKey:key}});if(created.error)throw created.error;window.dispatchEvent(new CustomEvent('luvia:media-polaroid-changed',{detail:{mediaId,tripId,dayKey:key}}));window.dispatchEvent(new CustomEvent('luvia:memory-bridge-applied',{detail:{tripId}}));return r.data}
   async function linkPlace(mediaId,placeId,options={}){const{client,tripId,userId}=await context(),r=await client.from('media_place_links').upsert({trip_id:tripId,media_id:mediaId,place_id:placeId,source:options.source||'manual',confidence:options.confidence??1,evidence:options.evidence||{},created_by:userId},{onConflict:'media_id,place_id'}).select('*').single();if(r.error)throw r.error;await update(mediaId,{placeId});return r.data}
   async function remove(mediaId){const{client,tripId}=await context(),item=await get(mediaId);if(!item)return false;const paths=[item.storagePath,item.previewPath,item.thumbnailPath,item.renderedPreviewPath,item.metadata?.renderedPreviewPath].filter(Boolean);if(paths.length){const s=await client.storage.from(item.storageBucket||BUCKET).remove(paths);if(s.error)throw s.error}const r=await client.from('media').update({status:'deleted'}).eq('trip_id',tripId).eq('id',mediaId);if(r.error)throw r.error;await client.from('media_cluster_items').delete().eq('media_id',mediaId);window.dispatchEvent(new CustomEvent('luvia:media-deleted',{detail:{mediaId,tripId}}));return true}
+  async function clearTripGallery(options={}){
+    const{client,tripId}=await context(),progress=typeof options.onProgress==='function'?options.onProgress:()=>{};
+    const all=await client.from('media').select('*').eq('trip_id',tripId);if(all.error)throw all.error;
+    const rows=all.data||[],mediaIds=rows.map(row=>row.id);
+    const safe=async promise=>{const r=await promise;if(r?.error&&!['42P01','PGRST205','42703'].includes(r.error.code))throw r.error;return r};
+    progress('Verknüpfte Memory Albums werden entfernt …');
+    const albumRows=await safe(client.from('memory_albums').select('id').eq('trip_id',tripId));
+    const albumIds=(albumRows?.data||[]).map(x=>x.id);
+    if(albumIds.length){await safe(client.from('memory_album_favorites').delete().in('album_id',albumIds));await safe(client.from('memory_album_items').delete().in('album_id',albumIds))}
+    await safe(client.from('memory_albums').delete().eq('trip_id',tripId));
+    progress('Fotomomente und Polaroids werden entfernt …');
+    await safe(client.from('media_day_polaroids').delete().eq('trip_id',tripId));
+    const clusterRows=await safe(client.from('media_clusters').select('id').eq('trip_id',tripId));
+    const clusterIds=(clusterRows?.data||[]).map(x=>x.id);
+    if(clusterIds.length)await safe(client.from('media_cluster_items').delete().in('cluster_id',clusterIds));
+    await safe(client.from('media_clusters').delete().eq('trip_id',tripId));
+    progress('Fotoeinträge werden aus der Timeline entfernt …');
+    await safe(client.from('timeline_events').delete().eq('trip_id',tripId).eq('event_type','photo_memory'));
+    if(mediaIds.length){
+      await safe(client.from('media_place_links').delete().in('media_id',mediaIds));
+      await safe(client.from('live_moment_media').delete().in('media_id',mediaIds));
+    }
+    progress('Originale und Vorschaubilder werden aus dem Storage gelöscht …');
+    const byBucket=new Map();
+    for(const row of rows){const bucket=row.storage_bucket||BUCKET;const paths=[row.storage_path,row.preview_path,row.metadata?.renderedPreviewPath].filter(Boolean);if(paths.length)byBucket.set(bucket,[...(byBucket.get(bucket)||[]),...paths]);if(row.thumbnail_path)byBucket.set('luvia-media-thumbnails',[...(byBucket.get('luvia-media-thumbnails')||[]),row.thumbnail_path])}
+    for(const[bucket,rawPaths]of byBucket){const paths=[...new Set(rawPaths)];for(let i=0;i<paths.length;i+=100){const r=await client.storage.from(bucket).remove(paths.slice(i,i+100));if(r.error&&!/not found|does not exist/i.test(r.error.message||''))console.warn('[LuviaMediaCore] Storage-Bereinigung teilweise fehlgeschlagen',bucket,r.error)}}
+    progress('Mediendatensätze werden endgültig gelöscht …');
+    const deleted=await client.from('media').delete().eq('trip_id',tripId);if(deleted.error)throw deleted.error;
+    window.dispatchEvent(new CustomEvent('luvia:gallery-cleared',{detail:{tripId,count:rows.length}}));
+    return{tripId,count:rows.length,albumCount:albumIds.length,clusterCount:clusterIds.length};
+  }
+
   async function subscribe(callback){const{client,tripId}=await context();if(channels.has(tripId))await channels.get(tripId)();const c=client.channel(`luvia-media-${tripId}-${Math.random().toString(36).slice(2)}`).on('postgres_changes',{event:'*',schema:'public',table:'media',filter:`trip_id=eq.${tripId}`},callback).on('postgres_changes',{event:'*',schema:'public',table:'media_day_polaroids',filter:`trip_id=eq.${tripId}`},callback).subscribe();const stop=async()=>{await client.removeChannel(c);channels.delete(tripId)};channels.set(tripId,stop);return stop}
   async function reanalyze(mediaId){const item=await get(mediaId);if(!item)throw new Error('Foto wurde nicht gefunden.');const url=await signedUrl({...item,previewPath:null,thumbnailPath:null},900);if(!url)throw new Error('Originaldatei ist nicht verfügbar.');const response=await fetch(url);if(!response.ok)throw new Error('Originaldatei konnte nicht geladen werden.');const blob=await response.blob();const file=new File([blob],item.originalName||`photo.${ext({name:item.storagePath,type:item.mimeType})}`,{type:item.mimeType||blob.type,lastModified:item.metadata?.originalLastModified||Date.now()});const meta=await window.LuviaMediaMetadata.extract(file,{source:item.source});const resolvedLocation=await resolveCaptureLocation(meta);return update(mediaId,{capturedAt:meta.capturedAt,latitude:meta.latitude,longitude:meta.longitude,width:meta.width,height:meta.height,metadata:{...(item.metadata||{}),captureEvidence:meta.evidence,exif:meta.exif||{},resolvedLocation,reanalyzedAt:new Date().toISOString(),isHeic:Boolean(meta.isHeic)}})}
   const diagnostics=()=>({service:'media-core',version:VERSION,build:BUILD,status:'active',ok:true,checkedAt:new Date().toISOString(),durationMs:0,dependencies:{metadata:Boolean(window.LuviaMediaMetadata),preview:Boolean(window.LuviaMediaPreview)},checks:{canonicalMediaEntity:true,realtime:true,favorites:true,nonDestructiveEditing:true,dayPolaroids:true},failedChecks:[],warnings:[]});
-  window.LuviaMediaCore=Object.freeze({version:VERSION,build:BUILD,bucket:BUCKET,getContext:context,list,get,upload,update,reanalyze,toggleFavorite,listPolaroids,setPolaroid,linkPlace,remove,signedUrl,signedOriginalUrl,saveRenderedPreview,subscribe,diagnostics,rowToEntity:entity});
+  window.LuviaMediaCore=Object.freeze({version:VERSION,build:BUILD,bucket:BUCKET,getContext:context,list,get,upload,update,reanalyze,toggleFavorite,listPolaroids,setPolaroid,linkPlace,remove,clearTripGallery,signedUrl,signedOriginalUrl,saveRenderedPreview,subscribe,diagnostics,rowToEntity:entity});
 })();

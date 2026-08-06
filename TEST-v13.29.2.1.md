@@ -1,4 +1,4 @@
-# Test 13.29.2.1
+# Test 13.29.2.2
 
 1. Galerie öffnen und `LuviaGalleryDiagnostics.reset()` ausführen.
 2. Mehrere Fotos am Handy hintereinander hochladen.

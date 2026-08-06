@@ -1,6 +1,6 @@
 (() => {
   'use strict';
-  const VERSION='4.29.2.1', BUILD='13.29.2.1';
+  const VERSION='4.29.3', BUILD='13.29.3';
   const MAX_GAP_MS=20*60*1000, MAX_DISTANCE_M=300, channels=new Map();
   const radians=v=>v*Math.PI/180;
   const distance=(a,b)=>{if([a.latitude,a.longitude,b.latitude,b.longitude].some(v=>v===null||v===undefined))return null;const R=6371000,dLat=radians(b.latitude-a.latitude),dLon=radians(b.longitude-a.longitude),x=Math.sin(dLat/2)**2+Math.cos(radians(a.latitude))*Math.cos(radians(b.latitude))*Math.sin(dLon/2)**2;return 2*R*Math.asin(Math.sqrt(x))};
@@ -29,42 +29,29 @@
     const manualMedia=new Set(persisted.filter(x=>!x.is_automatic&&x.state!=='dismissed').flatMap(x=>x.mediaIds));
     const activeSignatures=new Set();
     for(const cluster of generated){
-      const ids=[...new Set(cluster.mediaIds.filter(id=>!manualMedia.has(id)).map(String))];
+      const ids=[...new Set((cluster.mediaIds||[]).filter(id=>!manualMedia.has(id)).map(String))];
       if(ids.length<2&&cluster.kind==='moment')continue;
       const stable=`${tripId}:media:${signature(ids)}`;
       activeSignatures.add(stable);
-      let existing=persisted.find(x=>x.source_key===stable);
-      if(existing?.state==='dismissed')continue;
+      const dismissed=persisted.find(x=>x.source_key===stable&&x.state==='dismissed');
+      if(dismissed)continue;
       const payload={trip_id:tripId,title:cluster.title,kind:cluster.kind,start_at:cluster.startAt,end_at:cluster.endAt,is_automatic:true,confidence:cluster.confidence,source_key:stable,state:'active',updated_by:userId};
-      let row=existing;
-      if(existing){
-        if(clusterPayloadChanged(existing,payload)){
-          const r=await client.from('media_clusters').update(payload).eq('id',existing.id).select('*').single();
-          if(r.error)throw r.error;
-          row={...r.data,mediaIds:existing.mediaIds||[]};
-        }
-      }else{
-        const r=await client.from('media_clusters').insert({...payload,created_by:userId}).select('*').single();
-        if(r.error){if(r.error.code==='23505')continue;throw r.error}
-        row={...r.data,mediaIds:[]};
-      }
+      const upserted=await client.from('media_clusters').upsert({...payload,created_by:userId},{onConflict:'trip_id,source_key',ignoreDuplicates:false}).select('*').single();
+      if(upserted.error)throw upserted.error;
+      const row=upserted.data;
       if(!row)continue;
-      const oldAutomatic=persisted.filter(x=>x.is_automatic&&x.id!==row.id&&x.mediaIds.some(id=>ids.includes(id))).map(x=>x.id);
-      if(oldAutomatic.length){
-        const del=await client.from('media_cluster_items').delete().in('cluster_id',oldAutomatic).in('media_id',ids);
-        if(del.error)throw del.error;
+      if(ids.length){
+        const memberships=ids.map((media_id,position)=>({cluster_id:row.id,media_id,position,created_by:userId}));
+        const linked=await client.from('media_cluster_items').upsert(memberships,{onConflict:'media_id',ignoreDuplicates:false});
+        if(linked.error)throw linked.error;
       }
-      if(!sameMembership(row.mediaIds,ids)){
-        const clearMembership=await client.from('media_cluster_items').delete().in('media_id',ids);
-        if(clearMembership.error)throw clearMembership.error;
-        const ownDelete=await client.from('media_cluster_items').delete().eq('cluster_id',row.id);
-        if(ownDelete.error)throw ownDelete.error;
-        const ins=ids.map((media_id,position)=>({cluster_id:row.id,media_id,position,created_by:userId}));
-        if(ins.length){const r=await client.from('media_cluster_items').insert(ins);if(r.error)throw r.error}
-      }
+      const currentLinks=await client.from('media_cluster_items').select('media_id').eq('cluster_id',row.id);
+      if(currentLinks.error)throw currentLinks.error;
+      const obsolete=(currentLinks.data||[]).map(x=>String(x.media_id)).filter(id=>!ids.includes(id));
+      if(obsolete.length){const removed=await client.from('media_cluster_items').delete().eq('cluster_id',row.id).in('media_id',obsolete);if(removed.error)throw removed.error}
     }
     const stale=persisted.filter(x=>x.is_automatic&&x.state!=='dismissed'&&x.source_key?.includes(':media:')&&!activeSignatures.has(x.source_key)).map(x=>x.id);
-    if(stale.length){const r=await client.from('media_clusters').update({state:'dismissed',updated_by:userId}).in('id',stale).eq('trip_id',tripId);if(r.error)throw r.error}
+    if(stale.length){const r=await client.from('media_clusters').update({state:'dismissed',updated_by:userId}).eq('trip_id',tripId).in('id',stale);if(r.error)throw r.error}
     let current=await listPersisted();
     const empty=current.filter(x=>x.state!=='dismissed'&&(!x.mediaIds||x.mediaIds.length===0)).map(x=>x.id);
     if(empty.length){const r=await client.from('media_clusters').update({state:'dismissed',updated_by:userId}).eq('trip_id',tripId).in('id',empty);if(r.error)throw r.error;current=current.filter(x=>!empty.includes(x.id))}

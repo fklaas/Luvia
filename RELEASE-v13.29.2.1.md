@@ -1,4 +1,4 @@
-# Luvia 13.29.2.1 / Core 4.29.2.1
+# Luvia 13.29.2.2 / Core 4.29.2.2
 
 ## Realtime Upload Batch Integrity
 

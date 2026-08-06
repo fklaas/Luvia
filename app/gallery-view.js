@@ -1,8 +1,8 @@
 (() => {
   'use strict';
 
-  const VERSION = '4.29.2.1';
-  const BUILD = '13.29.2.1';
+  const VERSION = '4.29.3';
+  const BUILD = '13.29.3';
   const DIAGNOSTICS_LABEL = '[LuviaGalleryDiagnostics]';
   const diagnosticsState = {
     mountedAt: null, mountCount: 0, loadCount: 0, readDataCount: 0, renderAllCount: 0,
@@ -15,8 +15,8 @@
     diagnosticsState.reasons[event]=(diagnosticsState.reasons[event]||0)+1;
     console.info(DIAGNOSTICS_LABEL,event,{...detail,snapshot:{...diagnosticsState}});
   };
-  const REALTIME_DEBOUNCE_MS = 2200;
-  const REALTIME_MAX_WAIT_MS = 6000;
+  const REALTIME_DEBOUNCE_MS = 3500;
+  const REALTIME_MAX_WAIT_MS = 0;
   const FILTERS = {
     none: ['Original', ''], warm: ['Golden Hour', 'sepia(.18) saturate(1.15) contrast(1.04)'], cool: ['Blue Sky', 'hue-rotate(10deg) saturate(1.08)'], vivid: ['Pop', 'saturate(1.45) contrast(1.1)'], soft: ['Soft', 'contrast(.92) saturate(.88) brightness(1.04)'], mono: ['Mono', 'grayscale(1) contrast(1.08)'],
     paris: ['Paris', 'sepia(.12) saturate(1.16) contrast(1.06) hue-rotate(-6deg)'], sunset: ['Sunset', 'sepia(.24) saturate(1.35) hue-rotate(-12deg)'], rose: ['Rosé', 'sepia(.12) saturate(1.2) hue-rotate(325deg)'], cinema: ['Cinema', 'contrast(1.2) saturate(.78) sepia(.1)'], noir: ['Noir', 'grayscale(1) contrast(1.35) brightness(.92)'], retro: ['Retro', 'sepia(.38) saturate(.82) contrast(.92)'], film: ['Film', 'contrast(1.12) saturate(.9) brightness(.98)'], dreamy: ['Dreamy', 'brightness(1.08) contrast(.88) saturate(.86)'], tropical: ['Tropical', 'saturate(1.45) hue-rotate(-8deg) contrast(1.04)'], aqua: ['Aqua', 'saturate(1.2) hue-rotate(18deg)'], candy: ['Candy', 'saturate(1.4) hue-rotate(335deg) brightness(1.04)'], matte: ['Matte', 'contrast(.86) saturate(.78) brightness(1.06)'],
@@ -90,7 +90,7 @@
     return `<section class="lv-gallery-view">
       <header class="lv-gallery-hero">
         <div><span>📸 Realtime Galerie</span><h1>Eure gemeinsamen Reisefotos</h1><p>Momente, Reisetage, Favoriten und kreative Bearbeitung – ohne sichtbares Neuladen.</p></div>
-        <div class="lv-gallery-upload-actions"><button type="button" data-gallery-download>Galerie herunterladen</button><button type="button" class="lv-gallery-upload" data-gallery-add>Fotos hinzufügen</button></div>
+        <div class="lv-gallery-upload-actions"><button type="button" data-gallery-download>Galerie herunterladen</button><button type="button" class="lv-gallery-danger" data-gallery-clear>Galerie leeren</button><button type="button" class="lv-gallery-upload" data-gallery-add>Fotos hinzufügen</button></div>
         <input class="lv-gallery-file-input" type="file" accept="image/*,.jpg,.jpeg,.png,.webp,.heic,.heif,.avif" multiple data-gallery-input>
       </header>
       <div class="lv-gallery-status" data-gallery-status>Galerie wird geladen …</div>
@@ -156,8 +156,7 @@
     };
     if (busy) return;
     clearTimeout(loadTimer);
-    const maxWaitReached=Boolean(options.realtime && realtimeBatchStartedAt && now-realtimeBatchStartedAt>=REALTIME_MAX_WAIT_MS);
-    const delay=options.immediate||maxWaitReached?0:(options.realtime?REALTIME_DEBOUNCE_MS:250);
+    const delay=options.immediate?0:(options.realtime?REALTIME_DEBOUNCE_MS:250);
     loadTimer = setTimeout(() => {
       const queued=pending||{};
       pending=null;
@@ -439,9 +438,41 @@
     const started=performance.now();diagnosticsState.loadCount++;diag('load-start',{reason:options.reason||'direct',analyze:Boolean(options.analyze),force:Boolean(options.force)});
     const silent=options.silent!==false;
     if(!silent)status('Galerie wird aktualisiert …');
-    try { await readData({analyze:Boolean(options.analyze)}); await renderAll({force:Boolean(options.force)}); if(!silent)status(`${items.length} Fotos · ${clusters.filter(c=>c.state!=='dismissed'&&c.mediaIds?.length).length} Fotomomente · Realtime aktiv`,'ready'); else if(host.querySelector('[data-gallery-status]')?.dataset.state!=='ready') status(`${items.length} Fotos · Realtime aktiv`,'ready'); }
+    try {
+      await readData({analyze:Boolean(options.analyze)});
+      await renderAll({force:Boolean(options.force)});
+      const activeClusterCount=clusters.filter(c=>c.state!=='dismissed'&&c.mediaIds?.length).length;
+      status(`${items.length} Fotos · ${activeClusterCount} Fotomomente · Realtime aktiv`,'ready');
+    }
     catch(error){showError(error)}
-    finally {diagnosticsState.lastLoadMs=Math.round(performance.now()-started);diag('load-finish',{reason:options.reason||'direct',durationMs:diagnosticsState.lastLoadMs});busy=false; if(pending){const next=pending;pending=null;realtimeBatchStartedAt=0;scheduleLoad(next.reason||'Nachlauf',{...next,immediate:true})}}
+    finally {diagnosticsState.lastLoadMs=Math.round(performance.now()-started);diag('load-finish',{reason:options.reason||'direct',durationMs:diagnosticsState.lastLoadMs});busy=false; if(pending){const next=pending;pending=null;realtimeBatchStartedAt=0;scheduleLoad(next.reason||'Nachlauf',{...next,immediate:!next.realtime})}}
+  }
+
+  function clearGalleryDialog() {
+    return new Promise(resolve=>{
+      const overlay=document.createElement('div');overlay.className='lv-photo-overlay';
+      overlay.innerHTML=`<section class="lv-editor-dialog lv-gallery-clear-dialog"><button data-close aria-label="Schließen">×</button><span>⚠️ Endgültig löschen</span><h2>Galerie vollständig leeren?</h2><p>Alle Fotos dieser Reise werden aus Galerie und Storage gelöscht. Fotomomente, Memory Albums sowie Foto- und Polaroid-Einträge der Timeline verschwinden ebenfalls.</p><div class="lv-gallery-clear-warning"><b>Dieser Vorgang kann nicht rückgängig gemacht werden.</b><small>Tippe <strong>GALERIE LEEREN</strong> ein, um fortzufahren.</small></div><label>Bestätigung<input data-clear-confirm autocomplete="off" placeholder="GALERIE LEEREN"></label><div class="lv-editor-actions"><button data-cancel>Abbrechen</button><button class="danger" data-confirm disabled>Alles endgültig löschen</button></div></section>`;
+      const remove=mountOverlay(overlay),input=overlay.querySelector('[data-clear-confirm]'),confirmButton=overlay.querySelector('[data-confirm]');
+      const finish=value=>{remove();resolve(value)};
+      overlay.querySelector('[data-close]').onclick=()=>finish(false);overlay.querySelector('[data-cancel]').onclick=()=>finish(false);overlay.onclick=e=>{if(e.target===overlay)finish(false)};
+      input.oninput=()=>{confirmButton.disabled=input.value.trim().toUpperCase()!=='GALERIE LEEREN'};
+      confirmButton.onclick=()=>finish(true);requestAnimationFrame(()=>input.focus());
+    });
+  }
+  async function clearGallery() {
+    if(!items.length){status('Die Galerie ist bereits leer.','ready');return}
+    if(!(await clearGalleryDialog()))return;
+    const button=host?.querySelector('[data-gallery-clear]');if(button)button.disabled=true;
+    suppressRealtimeUntil=Date.now()+120000;clearTimeout(loadTimer);loadTimer=null;pending=null;
+    status('Galerie wird vollständig geleert …');
+    try{
+      const result=await window.LuviaMediaCore.clearTripGallery({onProgress:progress=>status(progress)});
+      urlCache.clear();urlFailureCache.clear();items=[];clusters=[];polaroids={};lastFingerprint='';
+      await renderAll({force:true});status('Galerie wurde vollständig geleert.','ready');
+      window.dispatchEvent(new CustomEvent('luvia:gallery-cleared',{detail:result}));
+      window.dispatchEvent(new CustomEvent('luvia:timeline-cloud-changed',{detail:{tripId:result.tripId}}));
+      window.dispatchEvent(new CustomEvent('luvia:memory-album-updated',{detail:{tripId:result.tripId,cleared:true,local:true}}));
+    }catch(error){showError(error)}finally{if(button)button.disabled=false;suppressRealtimeUntil=Date.now()+3000}
   }
 
   async function currentLocation() {
@@ -470,12 +501,13 @@
     diag('media-realtime',{table,event});
     if(!['media','media_day_polaroids'].includes(table))return;
     if(table==='media' && event==='UPDATE'){
-      const oldRow=payload?.old||{},newRow=payload?.new||{};
-      const visibleKeys=['display_name','favorite','edit_settings','status','captured_at','day_key'];
-      const meaningful=visibleKeys.some(key=>JSON.stringify(oldRow[key])!==JSON.stringify(newRow[key]));
+      const newRow=payload?.new||{},current=items.find(item=>String(item.id)===String(newRow.id));
+      const visibleNow=current?{display_name:current.displayName||null,favorite:Boolean(current.favorite),edit_settings:current.editSettings||{},status:current.status,captured_at:current.capturedAt,day_key:current.dayKey}:null;
+      const meaningful=!visibleNow||['display_name','favorite','edit_settings','status','captured_at','day_key'].some(key=>JSON.stringify(visibleNow[key]??null)!==JSON.stringify(newRow[key]??null));
       if(!meaningful){diag('media-realtime-ignored',{reason:'delivery-metadata-update'});return}
     }
-    const analyze=table==='media'&&(event==='INSERT'||event==='DELETE'||(event==='UPDATE'&&['captured_at','day_key','status'].some(key=>payload?.old?.[key]!==payload?.new?.[key])));
+    const newRow=payload?.new||{},current=items.find(item=>String(item.id)===String(newRow.id));
+    const analyze=table==='media'&&(event==='INSERT'||event==='DELETE'||(event==='UPDATE'&&(!current||String(current.capturedAt||'')!==String(newRow.captured_at||'')||String(current.dayKey||'')!==String(newRow.day_key||'')||String(current.status||'')!==String(newRow.status||''))));
     scheduleLoad('Media Realtime',{realtime:true,silent:true,analyze,force:false});
   }
   function clusterRealtime(payload) {
@@ -500,6 +532,7 @@
     host=target; host.dataset.luviaGalleryMounted='1'; host.innerHTML=shell();
     const input=host.querySelector('[data-gallery-input]');
     host.querySelector('[data-gallery-download]').onclick=async()=>{try{const trip=window.LuviaTripStore?.snapshot?.()?.activeTrip||{};await downloadCollection(items.map(x=>x.id),`${trip.title||trip.name||'Luvia'} Galerie`)}catch(error){showError(error)}};
+    host.querySelector('[data-gallery-clear]').onclick=()=>clearGallery();
     host.querySelector('[data-gallery-add]').onclick=()=>{try{input.showPicker?input.showPicker():input.click()}catch{input.click()}};
     input.onchange=async()=>{const files=[...input.files];input.value='';try{await upload(files)}catch(error){showError(error)}};
         unsubMedia=await window.LuviaMediaCore.subscribe(mediaRealtime);
