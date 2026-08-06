@@ -1,0 +1,24 @@
+Luvia 13.3.1 – neue und geänderte Dateien
+
+app/app-shell.js
+core/modules/module-registry.js
+core/places/place-adapters.js
+core/places/place-core.js
+core/places/place-domain.js
+core/places/place-registry.js
+core/trips/trip-creator.js
+index.html
+intelligence/kernel/version.js
+intelligence/place-entity-service.js
+intelligence/runtime-config.json
+modules/accommodations/accommodation-module.css
+modules/accommodations/accommodation-module.js
+supabase/functions/luvia-gateway/index.ts
+supabase/functions/luvia-gateway/_shared/place-entities.ts
+supabase/migrations/20260729_028_core_v4_3_1_stay_foundation.sql
+sw.js
+RELEASE-v13.3.1.md
+DEPLOYMENT-v13.3.1.md
+TEST-v13.3.1.md
+COMMIT-v13.3.1.txt
+CHANGED-FILES-v13.3.1.txt

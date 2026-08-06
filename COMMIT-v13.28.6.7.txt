@@ -1,0 +1,1 @@
+fix(media): contain mobile gallery and clean PWA install prompt

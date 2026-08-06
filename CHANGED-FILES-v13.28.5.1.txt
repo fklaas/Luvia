@@ -1,0 +1,15 @@
+app/gallery-view.js
+app/gallery-view.css
+app/albums-view.js
+app/albums-view.css
+core/services/theme-service.js
+core/legacy/paris-migrator.js
+core/media/media-core.js
+app/app-shell.js
+index.html
+sw.js
+force-update.html
+RELEASE-v13.28.5.1.md
+DEPLOYMENT-v13.28.5.1.md
+TEST-v13.28.5.1.md
+CHANGED-FILES-v13.28.5.1.txt

@@ -1,0 +1,1 @@
+fix(media): recover album intelligence and unify edited photo rendering

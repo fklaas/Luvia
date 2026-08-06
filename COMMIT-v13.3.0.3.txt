@@ -1,0 +1,1 @@
+fix(guided-journey): enforce readable travel canvas and stepwise registration

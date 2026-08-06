@@ -1,0 +1,8 @@
+core/places/place-collection-service.js
+modules/restaurants-v2/restaurant-module.js
+00_UNBEDINGT_IMMER_LESEN_PLACES_ARCHITEKTUR.md
+RELEASE-v13.6.9.md
+DEPLOYMENT-v13.6.9.md
+TEST-v13.6.9.md
+CHANGED-FILES-v13.6.9.txt
+plus runtime version/cache references

@@ -1,0 +1,13 @@
+core/places/place-detail-service.js
+modules/restaurants-v2/restaurant-module.js
+modules/restaurants-v2/restaurant-module.css
+modules/accommodations/accommodation-module.js
+app/app-shell.js
+index.html
+sw.js
+intelligence/runtime-config.json
+supabase/migrations/20260729_030_core_v4_4_0_place_experience_consolidation.sql
+supabase/migrations/20260729_031_core_v4_4_1_universal_place_schedule_timeline.sql
+RELEASE-v13.4.1.md
+DEPLOYMENT-v13.4.1.md
+COMMIT-v13.4.1.txt

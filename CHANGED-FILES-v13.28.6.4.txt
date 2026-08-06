@@ -1,0 +1,16 @@
+app/gallery-view.js
+app/gallery-view.css
+app/albums-view.js
+app/albums-view.css
+core/media/media-core.js
+core/media/ai-memory-bridge.js
+core/ai/providers/openai-provider.js
+index.html
+force-update.html
+sw.js
+supabase/functions/luvia-intelligence/capabilities/registry.ts
+supabase/functions/luvia-intelligence/schemas/index.ts
+RELEASE-v13.28.6.7.md
+DEPLOYMENT-v13.28.6.7.md
+TEST-v13.28.6.7.md
+COMMIT-v13.28.6.7.txt

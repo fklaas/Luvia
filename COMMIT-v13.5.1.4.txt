@@ -1,0 +1,1 @@
+fix(places): finalize provider labels and global detail contacts

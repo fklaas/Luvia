@@ -1,0 +1,1 @@
+refactor(guided-journey): turn public entry into a responsive sliding canvas

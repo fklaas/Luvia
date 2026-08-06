@@ -1,0 +1,5 @@
+Commit Name:
+release: Luvia 11.6.0 Core 3.4.0 priority-1 completion
+
+Commit Beschreibung:
+Schließt die vollständige Priorität-1-Stabilisierungsphase ab. Enthält responsive Dashboard-Absicherung, hochwertigen Reise- und Modul-Editor, vereinheitlichte Einladungen, Hidden Join-Onboarding, QR-/Link-/Code-Beitritt über eine zentrale Logik, atomaren Supabase-Join, Realtime-Teilnehmer und Restaurant-Recovery nach Tab-Wechsel.

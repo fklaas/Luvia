@@ -1,0 +1,14 @@
+Luvia 13.3.0.3 – geänderte Dateien
+
+app/public-entry.js
+app/public-entry.css
+app/app-shell.js
+index.html
+sw.js
+intelligence/kernel/version.js
+intelligence/runtime-config.json
+RELEASE-v13.3.0.3.md
+DEPLOYMENT-v13.3.0.3.md
+TEST-v13.3.0.3.md
+COMMIT-v13.3.0.3.txt
+CHANGED-FILES-v13.3.0.3.txt

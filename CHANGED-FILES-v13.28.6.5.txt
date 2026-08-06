@@ -1,0 +1,16 @@
+core/media/media-core.js
+core/media/media-clustering.js
+core/media/ai-memory-bridge.js
+core/ai/providers/openai-provider.js
+app/gallery-view.js
+app/albums-view.js
+supabase/functions/luvia-intelligence/capabilities/registry.ts
+supabase/functions/luvia-intelligence/schemas/index.ts
+index.html
+service-worker.js
+force-update.html
+RELEASE-v13.28.6.7.md
+DEPLOYMENT-v13.28.6.7.md
+TEST-v13.28.6.7.md
+COMMIT-v13.28.6.7.txt
+CHANGED-FILES-v13.28.6.7.txt

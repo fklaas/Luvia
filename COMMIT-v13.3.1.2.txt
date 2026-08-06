@@ -1,0 +1,1 @@
+feat(stay): align accommodation experience with universal places

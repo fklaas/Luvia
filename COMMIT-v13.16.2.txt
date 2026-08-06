@@ -1,0 +1,1 @@
+feat(discovery): turn Places and Move into guided travel canvases

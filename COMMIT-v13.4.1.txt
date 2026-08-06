@@ -1,0 +1,1 @@
+refactor(places): enforce universal detail schedule and timeline contract

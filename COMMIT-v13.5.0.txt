@@ -1,0 +1,1 @@
+refactor(places): enforce place type contracts and conformance guards

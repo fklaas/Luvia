@@ -1,0 +1,1 @@
+feat(stay): add cloud-backed accommodation foundation

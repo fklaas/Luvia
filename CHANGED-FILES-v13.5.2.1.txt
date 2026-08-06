@@ -1,0 +1,11 @@
+app/app-shell.js
+core/places/place-detail-service.js
+intelligence/backend-service.js
+intelligence/runtime-config.json
+modules/restaurants-v2/restaurant-module.js
+modules/accommodations/accommodation-module.js
+index.html
+sw.js
+RELEASE-v13.5.2.1.md
+DEPLOYMENT-v13.5.2.1.md
+COMMIT-v13.5.2.1.txt

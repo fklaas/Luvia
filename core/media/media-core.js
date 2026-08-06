@@ -1,6 +1,6 @@
 (() => {
   'use strict';
-  const VERSION='4.29.4',BUILD='13.29.4',BUCKET='luvia-media',channels=new Map();
+  const VERSION='4.30.1',BUILD='13.30.1',BUCKET='luvia-media',channels=new Map();
   const id=()=>crypto?.randomUUID?.()||`${Date.now()}-${Math.random().toString(16).slice(2)}`;
   const ext=f=>(f?.name?.split('.').pop()||f?.type?.split('/').pop()||'jpg').replace(/[^a-z0-9]/gi,'').toLowerCase()||'jpg';
   const day=iso=>{const d=new Date(iso);return Number.isNaN(d.getTime())?null:`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`};
@@ -83,7 +83,8 @@
     const all=await client.from('media').select('*').eq('trip_id',tripId);if(all.error)throw all.error;
     const rows=all.data||[],mediaIds=rows.map(row=>row.id);
     const safe=async promise=>{const r=await promise;if(r?.error&&!['42P01','PGRST205','42703'].includes(r.error.code))throw r.error;return r};
-    progress('Verknüpfte Memory Albums werden entfernt …');
+    progress('Verknüpfte Memory Journeys und Memory Moments werden entfernt …');
+    await safe(client.from('memory_journeys').delete().eq('trip_id',tripId));
     const albumRows=await safe(client.from('memory_albums').select('id').eq('trip_id',tripId));
     const albumIds=(albumRows?.data||[]).map(x=>x.id);
     if(albumIds.length){await safe(client.from('memory_album_favorites').delete().in('album_id',albumIds));await safe(client.from('memory_album_items').delete().in('album_id',albumIds))}

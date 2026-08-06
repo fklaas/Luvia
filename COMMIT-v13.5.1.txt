@@ -1,0 +1,1 @@
+refactor(places): enforce global place UI contract and visual conformance
