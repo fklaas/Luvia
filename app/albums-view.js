@@ -1,6 +1,6 @@
 (() => {
 'use strict';
-const VERSION='4.29.0.2',BUILD='13.29.0.2';
+const VERSION='4.29.1',BUILD='13.29.1';
 let host=null,albums=[],unsub=null,refreshTimer=0,urlCache=new Map();
 const esc=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const fmt=v=>{if(!v)return'';const d=new Date(v);return Number.isNaN(d.getTime())?'':new Intl.DateTimeFormat('de-DE',{day:'2-digit',month:'short',year:'numeric'}).format(d)};

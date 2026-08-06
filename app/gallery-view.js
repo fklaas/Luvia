@@ -1,8 +1,20 @@
 (() => {
   'use strict';
 
-  const VERSION = '4.28.6.7';
-  const BUILD = '13.28.6.7';
+  const VERSION = '4.29.1';
+  const BUILD = '13.29.1';
+  const DIAGNOSTICS_LABEL = '[LuviaGalleryDiagnostics]';
+  const diagnosticsState = {
+    mountedAt: null, mountCount: 0, loadCount: 0, readDataCount: 0, renderAllCount: 0,
+    renderFavoritesCount: 0, renderClustersCount: 0, renderDaysCount: 0,
+    hydrateBatchCount: 0, imageUrlRequestCount: 0, mediaRealtimeCount: 0,
+    clusterRealtimeCount: 0, scheduledRefreshCount: 0, coalescedRefreshCount: 0,
+    reasons: {}, lastLoadMs: 0, lastReadMs: 0, lastRenderMs: 0
+  };
+  const diag = (event, detail={}) => {
+    diagnosticsState.reasons[event]=(diagnosticsState.reasons[event]||0)+1;
+    console.info(DIAGNOSTICS_LABEL,event,{...detail,snapshot:{...diagnosticsState}});
+  };
   const REALTIME_DEBOUNCE_MS = 650;
   const FILTERS = {
     none: ['Original', ''], warm: ['Golden Hour', 'sepia(.18) saturate(1.15) contrast(1.04)'], cool: ['Blue Sky', 'hue-rotate(10deg) saturate(1.08)'], vivid: ['Pop', 'saturate(1.45) contrast(1.1)'], soft: ['Soft', 'contrast(.92) saturate(.88) brightness(1.04)'], mono: ['Mono', 'grayscale(1) contrast(1.08)'],
@@ -124,6 +136,9 @@
   }
   function scheduleLoad(reason='Realtime', options={}) {
     if (Date.now() < suppressRealtimeUntil && options.realtime) return;
+    diagnosticsState.scheduledRefreshCount++;
+    if(loadTimer||busy)diagnosticsState.coalescedRefreshCount++;
+    diag('schedule-refresh',{reason,realtime:Boolean(options.realtime),busy,alreadyQueued:Boolean(loadTimer)});
     clearTimeout(loadTimer);
     pending = {reason, ...options};
     loadTimer = setTimeout(() => {const queued=pending||{};pending=null;load(queued)}, options.immediate ? 0 : REALTIME_DEBOUNCE_MS);
@@ -154,10 +169,12 @@
     return `<article class="lv-gallery-photo ${compact?'is-compact':''}" data-photo="${esc(item.id)}">
       <button type="button" class="lv-photo-open" data-photo-open="${esc(item.id)}">${photoVisual(item,`data-photo-image="${esc(item.id)}"`)}</button>
       <div class="lv-photo-meta"><strong>${esc(displayName(item))}</strong><small>${esc(fmtTime(item.capturedAt))}</small></div>
-      <div class="lv-photo-actions"><button type="button" data-photo-favorite="${esc(item.id)}" class="${item.favorite?'is-on':''}" title="Favorit">${item.favorite?'★':'☆'}</button><button type="button" data-photo-polaroid="${esc(item.id)}" title="Polaroid des Tages">▣</button><button type="button" data-photo-edit="${esc(item.id)}" title="Bearbeiten">✎</button><button type="button" data-photo-remove="${esc(item.id)}" title="Löschen">×</button></div>
+      <div class="lv-photo-actions"><button type="button" data-photo-favorite="${esc(item.id)}" class="${item.favorite?'is-on':''}" title="Favorit">${item.favorite?'★':'☆'}</button><button type="button" class="lv-photo-timeline-action" data-photo-timeline="${esc(item.id)}" title="Zur Timeline">↝ <span>Timeline</span></button><button type="button" data-photo-edit="${esc(item.id)}" title="Bearbeiten">✎</button><button type="button" data-photo-remove="${esc(item.id)}" title="Löschen">×</button></div>
     </article>`;
   }
   async function hydrateImages(root, list) {
+    diagnosticsState.hydrateBatchCount++;
+    diag('hydrate-batch',{count:list.length});
     await Promise.all(list.map(async item => {
       const url = await urlFor(item);
       root.querySelectorAll(`[data-photo-image="${cssEsc(item.id)}"]`).forEach(node => {
@@ -174,7 +191,7 @@
       await window.LuviaMediaCore.toggleFavorite(button.dataset.photoFavorite);
       await load({reason:'Favorit',silent:true,analyze:false,force:true});
     });
-    root.querySelectorAll('[data-photo-polaroid]').forEach(button => button.onclick = async event => {event.stopPropagation();const item=items.find(x=>x.id===button.dataset.photoPolaroid);if(!item?.dayKey)return showError(new Error('Dieses Foto ist keinem Reisetag zugeordnet.'));suppressRealtimeUntil=Date.now()+1400;await window.LuviaMediaCore.setPolaroid(item.id,item.dayKey);await load({reason:'Polaroid',silent:true,analyze:false,force:true});status('Polaroid des Tages wurde in die Timeline übernommen.','ready')});
+    root.querySelectorAll('[data-photo-timeline]').forEach(button => button.onclick = async event => {event.stopPropagation();const item=items.find(x=>x.id===button.dataset.photoTimeline);if(!item?.dayKey)return showError(new Error('Dieses Foto ist keinem Reisetag zugeordnet.'));suppressRealtimeUntil=Date.now()+1400;button.disabled=true;try{await window.LuviaMediaCore.setPolaroid(item.id,item.dayKey);await load({reason:'Timeline',silent:true,analyze:false,force:true});status('Foto wurde als Polaroid des Tages zur Timeline hinzugefügt.','ready')}finally{button.disabled=false}});
     root.querySelectorAll('[data-photo-edit]').forEach(button => button.onclick = event => { event.stopPropagation(); openEditor(button.dataset.photoEdit); });
     root.querySelectorAll('[data-photo-remove]').forEach(button => button.onclick = async event => {
       event.stopPropagation();
@@ -186,6 +203,7 @@
   }
 
   async function renderFavorites() {
+    diagnosticsState.renderFavoritesCount++;
     const root = host.querySelector('[data-gallery-favorites]');
     const favorites = items.filter(item => item.favorite);
     host.querySelector('[data-favorite-count]').textContent = String(favorites.length);
@@ -195,6 +213,7 @@
   }
 
   async function renderDays() {
+    diagnosticsState.renderDaysCount++;
     const root = host?.querySelector('[data-gallery-days]');
     if (!root) return;
     const groups = await dayGroups();
@@ -228,22 +247,47 @@
     return `${related.length} Fotos innerhalb weniger Minuten; keine Standortdaten vorhanden.`;
   }
   async function renderClusters() {
+    diagnosticsState.renderClustersCount++;
     const root = host?.querySelector('[data-gallery-clusters]');
     if (!root) return;
     const visible = clusters.filter(cluster => cluster.state !== 'dismissed' && cluster.mediaIds?.length);
     const countNode=host?.querySelector('[data-cluster-count]'); if(countNode) countNode.textContent=String(visible.length);
     if (!visible.length) { root.innerHTML = '<div class="lv-gallery-empty compact"><b>✨</b><h3>Noch keine Fotomomente</h3><p>Mehrere Fotos innerhalb von 20 Minuten werden automatisch gruppiert.</p></div>'; return; }
-    root.innerHTML = `<div class="lv-cluster-grid">${visible.map(cluster => `<article class="lv-cluster-card"><button class="lv-cluster-collage" data-cluster-open="${esc(cluster.id)}">${cluster.mediaIds.slice(0,4).map(id=>`<span data-cluster-image="${esc(id)}"></span>`).join('')}<b>${cluster.mediaIds.length} Fotos</b></button><div class="lv-cluster-copy"><small>${esc(fmtDate(cluster.start_at))} · ${esc(fmtTime(cluster.start_at))}</small><h3>${esc(cluster.title||'Gemeinsamer Fotomoment')}</h3><p>${esc(clusterReason(cluster))}</p><div><button type="button" data-memory-bridge="${esc(cluster.id)}">Erinnerung prüfen</button><button type="button" data-cluster-dismiss="${esc(cluster.id)}">Auflösen</button></div></div></article>`).join('')}</div>`;
+    root.innerHTML = `<div class="lv-cluster-grid">${visible.map(cluster => `<article class="lv-cluster-card"><button class="lv-cluster-collage" data-cluster-open="${esc(cluster.id)}">${cluster.mediaIds.slice(0,4).map(id=>`<span data-cluster-image="${esc(id)}"></span>`).join('')}<b>${cluster.mediaIds.length} Fotos</b></button><div class="lv-cluster-copy"><small>${esc(fmtDate(cluster.start_at))} · ${esc(fmtTime(cluster.start_at))}</small><h3>${esc(cluster.title||'Gemeinsamer Fotomoment')}</h3><p>${esc(clusterReason(cluster))}</p><div><button type="button" class="lv-cluster-ai-title" data-cluster-ai-title="${esc(cluster.id)}">✨ KI-Titel wählen</button><button type="button" data-memory-bridge="${esc(cluster.id)}">Erinnerung prüfen</button><button type="button" data-cluster-dismiss="${esc(cluster.id)}">Auflösen</button></div></div></article>`).join('')}</div>`;
     await Promise.all(visible.flatMap(cluster => cluster.mediaIds.slice(0,4).map(async id => {
       const item = items.find(entry=>entry.id===id), node = root.querySelector(`[data-cluster-image="${cssEsc(id)}"]`);
       if (!item || !node) return; node.innerHTML=photoVisual(item,`data-photo-image="${esc(item.id)}"`); await hydrateImages(node,[item]);
     })));
     root.querySelectorAll('[data-cluster-open]').forEach(button => button.onclick = () => openCluster(button.dataset.clusterOpen));
+    root.querySelectorAll('[data-cluster-ai-title]').forEach(button => button.onclick = () => openClusterTitlePicker(button.dataset.clusterAiTitle));
     root.querySelectorAll('[data-memory-bridge]').forEach(button => button.onclick = () => openMemoryBridge(button.dataset.memoryBridge));
     root.querySelectorAll('[data-cluster-dismiss]').forEach(button => button.onclick = async () => {
       if (!confirm('Automatische Gruppierung auflösen?')) return;
       suppressRealtimeUntil=Date.now()+1600; await window.LuviaMediaClustering.dissolve(button.dataset.clusterDismiss); await window.LuviaTimelineCore?.removePhotoMemoryByCluster?.(button.dataset.clusterDismiss); await load({silent:true,analyze:false,force:true});
     });
+  }
+
+  async function openClusterTitlePicker(clusterId) {
+    const cluster=clusters.find(entry=>String(entry.id)===String(clusterId)); if(!cluster)return;
+    const overlay=document.createElement('div'); overlay.className='lv-photo-overlay';
+    overlay.innerHTML=`<section class="lv-cluster-dialog lv-title-picker"><button data-close>×</button><span>✨ Luvia Titelfunk</span><h2>Wie soll dieser Fotomoment heißen?</h2><p>Die Auswahl wird bei jedem Öffnen neu gemischt. „Neue Vorschläge“ erzeugt eine frische Runde.</p><div class="lv-title-suggestion-status">Verspielte Titel werden vorbereitet …</div><div class="lv-title-suggestions" data-title-suggestions></div><div class="lv-editor-actions"><button type="button" data-title-refresh>✨ Neue Vorschläge</button><button type="button" data-cancel>Abbrechen</button></div></section>`;
+    const removeOverlay=mountOverlay(overlay),close=()=>removeOverlay();
+    overlay.querySelector('[data-close]').onclick=close;overlay.querySelector('[data-cancel]').onclick=close;overlay.onclick=e=>{if(e.target===overlay)close()};
+    const render=async()=>{
+      const statusNode=overlay.querySelector('.lv-title-suggestion-status'),grid=overlay.querySelector('[data-title-suggestions]'),refresh=overlay.querySelector('[data-title-refresh]');
+      refresh.disabled=true;statusNode.textContent='KI und Luvia sammeln neue Ideen …';grid.innerHTML='';
+      try{
+        const proposal=await window.LuviaAIMemoryBridge.analyze(clusterId);
+        const pool=[...(proposal.titleSuggestions||[]),proposal.title].filter(Boolean);
+        const shuffled=[...new Set(pool)].sort(()=>Math.random()-.5).slice(0,12);
+        grid.innerHTML=shuffled.map(title=>`<button type="button" data-title-choice="${esc(title)}">${esc(title)}</button>`).join('');
+        statusNode.textContent=`${shuffled.length} Vorschläge · locker, frech, verspielt und passend zum Moment`;
+        grid.querySelectorAll('[data-title-choice]').forEach(button=>button.onclick=async()=>{button.disabled=true;try{await window.LuviaMediaClustering.rename(clusterId,button.dataset.titleChoice);close();await load({reason:'Cluster-Titel',silent:true,analyze:false,force:true});status('Fotomoment-Titel wurde gespeichert.','ready')}catch(error){showError(error);button.disabled=false}});
+      }catch(error){statusNode.textContent='Vorschläge konnten gerade nicht geladen werden.';showError(error)}
+      finally{refresh.disabled=false}
+    };
+    overlay.querySelector('[data-title-refresh]').onclick=render;
+    await render();
   }
 
   async function openCluster(id) {
@@ -280,7 +324,7 @@
       <div class="lv-studio-pane is-active" data-studio-pane="look"><div class="lv-filter-browser"><div>${filterButtons}</div></div></div>
       <div class="lv-studio-pane" data-studio-pane="adjust"><div class="lv-editor-sliders"><label>Helligkeit <input type="range" min="50" max="150" value="${Number(edit.brightness)}" data-ed="brightness"><output>${Number(edit.brightness)}%</output></label><label>Kontrast <input type="range" min="50" max="160" value="${Number(edit.contrast)}" data-ed="contrast"><output>${Number(edit.contrast)}%</output></label><label>Sättigung <input type="range" min="0" max="200" value="${Number(edit.saturation)}" data-ed="saturation"><output>${Number(edit.saturation)}%</output></label><label>Wärme <input type="range" min="-50" max="50" value="${Number(edit.temperature)}" data-ed="temperature"><output>${Number(edit.temperature)}</output></label><label>Belichtung <input type="range" min="-40" max="40" value="${Number(edit.exposure||0)}" data-ed="exposure"><output>${Number(edit.exposure||0)}</output></label><label>Lichter <input type="range" min="-50" max="50" value="${Number(edit.highlights||0)}" data-ed="highlights"><output>${Number(edit.highlights||0)}</output></label><label>Schatten <input type="range" min="-50" max="50" value="${Number(edit.shadows||0)}" data-ed="shadows"><output>${Number(edit.shadows||0)}</output></label><label>Klarheit <input type="range" min="-40" max="40" value="${Number(edit.clarity||0)}" data-ed="clarity"><output>${Number(edit.clarity||0)}</output></label><label>Weichzeichnen <input type="range" min="0" max="8" step=".5" value="${Number(edit.blur)}" data-ed="blur"><output>${Number(edit.blur)}</output></label><label>Vignette <input type="range" min="0" max="100" value="${Number(edit.vignette)}" data-ed="vignette"><output>${Number(edit.vignette)}%</output></label><label>Farbton <input type="range" min="-180" max="180" value="${Number(edit.hue||0)}" data-ed="hue"><output>${Number(edit.hue||0)}</output></label></div></div>
       <div class="lv-studio-pane" data-studio-pane="decorate"><div class="lv-editor-fun"><label>Rahmen <select data-ed="frame">${FRAMES.map(frame=>`<option value="${frame}">${frame?frame[0].toUpperCase()+frame.slice(1):'Kein Rahmen'}</option>`).join('')}</select></label><div class="lv-sticker-browser">${stickerButtons}</div><label>Text im Bild <input type="text" maxlength="60" value="${esc(edit.caption||'')}" data-ed="caption" placeholder="Euer Moment …"></label><div class="lv-tool-row"><button type="button" data-add-text>Text hinzufügen</button><button type="button" data-rotate>↻ 90° drehen</button></div></div></div>
-      <div class="lv-studio-pane" data-studio-pane="title"><div class="lv-editor-name"><input value="" placeholder="Eigener Fototitel" data-edit-name><button type="button" data-ai-title>✨ KI-Titel aus Bild, Zeit und Ort erkennen</button><small data-metadata-summary></small></div></div>
+      <div class="lv-studio-pane" data-studio-pane="title"><div class="lv-editor-name"><input value="" placeholder="Eigener Fototitel" data-edit-name><button type="button" data-ai-title>✨ Wechselnde KI-Titel vorschlagen</button><div class="lv-photo-title-suggestions" data-photo-title-suggestions></div><small data-metadata-summary></small></div></div>
     </div>`;
   }
 
@@ -289,8 +333,10 @@
     const url = await urlFor(item);
     if (!url) throw new Error('Für dieses Foto ist keine sichere Vorschau verfügbar.');
     if (!window.LuviaOpenAIProvider?.run) throw new Error('Luvia Bildanalyse ist noch nicht geladen.');
-    const result = await window.LuviaOpenAIProvider.run({capability:'media.describe',tier:'fast',input:{imageUrl:url,language:'de',instruction:'Erzeuge einen kurzen, warmen und konkreten deutschen Fototitel. Nutze nachweisbare Aufnahmezeit, EXIF-GPS, Reiseziel und erkannten Ort. Wenn Koordinaten oder ein Ortsname vorliegen, darf der Titel z. B. Unser Nachmittag in Paris oder Bei der Galerie Lafayette lauten. Keine unbelegten Details erfinden.'},context:{capturedAt:item.capturedAt,latitude:item.latitude,longitude:item.longitude,dayKey:item.dayKey,...placeContextFor(item)}} ,{timeoutMs:45000});
-    return result?.data?.result?.title || result?.result?.title || '';
+    const result = await window.LuviaOpenAIProvider.run({capability:'media.describe',tier:'fast',input:{imageUrl:url,language:'de',instruction:'Erzeuge 10 deutlich unterschiedliche kurze deutsche Fototitel als titles-Array. Mische verspielt, frech, lustig, warm und ruhig. Maximal 2 bis 7 Wörter je Titel. Nutze nur belegbare Bild-, Zeit-, Orts- und Reisekontexte; keine erfundenen Details, keine kitschigen Standardsätze und keine Wiederholungen.'},context:{capturedAt:item.capturedAt,latitude:item.latitude,longitude:item.longitude,dayKey:item.dayKey,...placeContextFor(item)}} ,{timeoutMs:45000});
+    const data=result?.data?.result||result?.result||result?.data||{};
+    const titles=[...(data.titles||data.titleSuggestions||[]),data.title].map(String).map(x=>x.trim()).filter(Boolean);
+    return [...new Set(titles)].slice(0,12);
   }
 
   async function openEditor(id) {
@@ -313,7 +359,7 @@
     overlay.querySelector('[data-rotate]').onclick=()=>{state.rotation=(Number(state.rotation||0)+90)%360;apply()};
     const drawer=overlay.querySelector('[data-studio-drawer]');
     overlay.querySelectorAll('[data-studio-tab]').forEach(button=>button.onclick=()=>{const key=button.dataset.studioTab;overlay.querySelectorAll('[data-studio-tab]').forEach(x=>x.classList.toggle('is-active',x===button));overlay.querySelectorAll('[data-studio-pane]').forEach(x=>x.classList.toggle('is-active',x.dataset.studioPane===key));drawer?.classList.add('is-open')});
-    overlay.querySelector('[data-ai-title]').onclick=async()=>{const button=overlay.querySelector('[data-ai-title]');button.disabled=true;button.textContent='✨ Bild wird erkannt …';try{const title=await aiTitleFor(item);overlay.querySelector('[data-edit-name]').value=title||''}catch(error){showError(error)}finally{button.disabled=false;button.textContent='✨ KI-Titel erkennen'}};
+    overlay.querySelector('[data-ai-title]').onclick=async()=>{const button=overlay.querySelector('[data-ai-title]'),box=overlay.querySelector('[data-photo-title-suggestions]');button.disabled=true;button.textContent='✨ Neue Titel werden gemischt …';try{let titles=await aiTitleFor(item);if(!titles.length)titles=['Kamera an, Alltag aus','Nicht geplant. Trotzdem perfekt.','Guter Tag. Punkt.','Mehr davon, bitte','Ganz schön viel Leben','Kurz raus, viel gesehen'];titles=[...titles].sort(()=>Math.random()-.5).slice(0,8);box.innerHTML=titles.map(title=>`<button type="button" data-photo-title-choice="${esc(title)}">${esc(title)}</button>`).join('');box.querySelectorAll('[data-photo-title-choice]').forEach(choice=>choice.onclick=()=>{overlay.querySelector('[data-edit-name]').value=choice.dataset.photoTitleChoice})}catch(error){showError(error)}finally{button.disabled=false;button.textContent='✨ Andere KI-Titel vorschlagen'}};
     overlay.querySelectorAll('[data-quick-sticker]').forEach(button=>button.addEventListener('click',()=>{const value=button.dataset.quickSticker;if(!value)return;state.overlays=[...(state.overlays||[]),{type:'sticker',value,x:.5,y:.5,size:.13,rotation:0,schema:'image-v2'}];apply()}));
     overlay.querySelector('[data-add-text]')?.addEventListener('click',()=>{const value=overlay.querySelector('[data-ed="caption"]')?.value?.trim()||'Euer Moment';state.overlays=[...(state.overlays||[]),{type:'text',value,x:.5,y:.78,size:.07,rotation:0,schema:'image-v2'}];apply()});
     overlay.querySelector('[data-reset]').onclick=()=>{Object.assign(state,{brightness:100,contrast:100,saturation:100,temperature:0,blur:0,vignette:0,exposure:0,highlights:0,shadows:0,clarity:0,hue:0,grain:0,filter:'none',rotation:0,frame:'',sticker:'',caption:'',overlays:[]});const textInput=overlay.querySelector('[data-ed="caption"]'); if(textInput) textInput.value=''; apply();overlay.querySelectorAll('[data-filter]').forEach(x=>x.classList.toggle('is-active',x.dataset.filter==='none'))};
@@ -332,6 +378,7 @@
   }
 
   async function readData({analyze=false}={}) {
+    const started=performance.now(); diagnosticsState.readDataCount++;
     items=await window.LuviaMediaCore.list({type:'image'});
     const pendingMetadata=items.filter(item=>!item.metadata?.captureEvidence&&!item.metadata?.metadataAutoCheckedAt).slice(0,4);
     for(const candidate of pendingMetadata){try{const refreshed=await window.LuviaMediaCore.reanalyze(candidate.id);items=items.map(x=>x.id===refreshed.id?refreshed:x)}catch{}}
@@ -340,21 +387,25 @@
       const generated=window.LuviaMediaClustering.generate(items);
       clusters=await window.LuviaMediaClustering.syncGenerated(generated);
     } else clusters=await window.LuviaMediaClustering.listPersisted();
+    diagnosticsState.lastReadMs=Math.round(performance.now()-started);diag('read-data',{analyze,items:items.length,clusters:clusters.length,durationMs:diagnosticsState.lastReadMs});
   }
   async function renderAll({force=false}={}) {
+    const started=performance.now(); diagnosticsState.renderAllCount++;
     const next=fingerprint(); if(!force && next===lastFingerprint)return; lastFingerprint=next;
     const countNode=host?.querySelector('[data-gallery-count]'); if(!countNode)return; countNode.textContent=`${items.length} Foto${items.length===1?'':'s'}`;
     await renderFavorites(); await renderClusters(); await renderDays();
+    diagnosticsState.lastRenderMs=Math.round(performance.now()-started);diag('render-all',{force,durationMs:diagnosticsState.lastRenderMs});
   }
   async function load(options={}) {
     if(!host)return;
     if(busy){pending={...pending,...options};return}
     busy=true;
+    const started=performance.now();diagnosticsState.loadCount++;diag('load-start',{reason:options.reason||'direct',analyze:Boolean(options.analyze),force:Boolean(options.force)});
     const silent=options.silent!==false;
     if(!silent)status('Galerie wird aktualisiert …');
     try { await readData({analyze:Boolean(options.analyze)}); await renderAll({force:Boolean(options.force)}); if(!silent)status(`${items.length} Fotos · ${clusters.filter(c=>c.state!=='dismissed'&&c.mediaIds?.length).length} Fotomomente · Realtime aktiv`,'ready'); else if(host.querySelector('[data-gallery-status]')?.dataset.state!=='ready') status(`${items.length} Fotos · Realtime aktiv`,'ready'); }
     catch(error){showError(error)}
-    finally {busy=false; if(pending){const next=pending;pending=null;scheduleLoad(next.reason||'Nachlauf',next)}}
+    finally {diagnosticsState.lastLoadMs=Math.round(performance.now()-started);diag('load-finish',{reason:options.reason||'direct',durationMs:diagnosticsState.lastLoadMs});busy=false; if(pending){const next=pending;pending=null;scheduleLoad(next.reason||'Nachlauf',next)}}
   }
 
   async function currentLocation() {
@@ -376,15 +427,18 @@
   }
 
   function mediaRealtime(payload) {
+    diagnosticsState.mediaRealtimeCount++;
+    diag('media-realtime',{table:payload?.table,event:payload?.eventType||payload?.event});
     const relevant=['media','media_day_polaroids'].includes(payload?.table||'');
     if(!relevant)return;
     const event=payload?.eventType || payload?.event;
     const analyze=event==='INSERT'||event==='DELETE'||(event==='UPDATE'&&['captured_at','day_key','status'].some(key=>payload?.old?.[key]!==payload?.new?.[key]));
     scheduleLoad('Media Realtime',{realtime:true,silent:true,analyze,force:false});
   }
-  function clusterRealtime() { scheduleLoad('Cluster Realtime',{realtime:true,silent:true,analyze:false,force:false}); }
+  function clusterRealtime(payload) { diagnosticsState.clusterRealtimeCount++;diag('cluster-realtime',{table:payload?.table,event:payload?.eventType||payload?.event}); scheduleLoad('Cluster Realtime',{realtime:true,silent:true,analyze:false,force:false}); }
 
   async function mount(target) {
+    diagnosticsState.mountCount++;diagnosticsState.mountedAt=new Date().toISOString();diag('mount',{mountCount:diagnosticsState.mountCount});
     host=target; host.innerHTML=shell();
     const input=host.querySelector('[data-gallery-input]');
     host.querySelector('[data-gallery-download]').onclick=async()=>{try{const trip=window.LuviaTripStore?.snapshot?.()?.activeTrip||{};await downloadCollection(items.map(x=>x.id),`${trip.title||trip.name||'Luvia'} Galerie`)}catch(error){showError(error)}};
@@ -397,5 +451,6 @@
   }
   async function unmount(){if(host?.__luviaMediaRefresh){window.removeEventListener('luvia:media-composite-updated',host.__luviaMediaRefresh);window.removeEventListener('luvia:media-view-refresh',host.__luviaMediaRefresh);window.removeEventListener('luvia:media-deleted',host.__luviaMediaRefresh)}clearTimeout(loadTimer);await unsubMedia?.();await unsubClusters?.();unsubMedia=unsubClusters=null;urlCache.clear();urlFailureCache.clear();if(host)host.innerHTML='';host=null;activeDay=null;lastFingerprint=''}
 
-  window.LuviaGalleryView=Object.freeze({version:VERSION,build:BUILD,mount,unmount,refresh:options=>load({silent:false,force:true,...options}),openPhoto:openLightbox,openEditor,renderVisual:(item,attrs='')=>photoVisual(item,attrs),hydrateVisuals:(root,list)=>hydrateImages(root,list),locationName,downloadPhoto:downloadPhotoAsset,downloadCollection,shareCollection});
+  window.LuviaGalleryDiagnostics=Object.freeze({version:VERSION,build:BUILD,snapshot:()=>JSON.parse(JSON.stringify(diagnosticsState)),reset:()=>{for(const key of Object.keys(diagnosticsState)){if(typeof diagnosticsState[key]==='number')diagnosticsState[key]=0;else if(key==='reasons')diagnosticsState[key]={}}diag('reset')}});
+  window.LuviaGalleryView=Object.freeze({version:VERSION,build:BUILD,mount,unmount,refresh:options=>load({silent:false,force:true,...options}),openPhoto:openLightbox,openEditor,renderVisual:(item,attrs='')=>photoVisual(item,attrs),hydrateVisuals:(root,list)=>hydrateImages(root,list),locationName,downloadPhoto:downloadPhotoAsset,downloadCollection,shareCollection,diagnostics:()=>window.LuviaGalleryDiagnostics.snapshot()});
 })();
