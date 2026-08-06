@@ -1,1 +1,1 @@
-(()=>{'use strict';window.LuviaKernelVersion=Object.freeze({core:'4.29.2',build:'13.29.2',name:'Gallery Request Storm Fix',channel:'production',builtAt:'2026-08-06T13:00:00+02:00'});window.LuviaCoreVersion=window.LuviaKernelVersion;window.LUVIA_RELEASE=window.LuviaKernelVersion;})();
+(()=>{'use strict';window.LuviaKernelVersion=Object.freeze({core:'4.29.2.1',build:'13.29.2.1',name:'Realtime Upload Batch Integrity',channel:'production',builtAt:'2026-08-06T13:55:00+02:00'});window.LuviaCoreVersion=window.LuviaKernelVersion;window.LUVIA_RELEASE=window.LuviaKernelVersion;})();

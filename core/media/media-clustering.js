@@ -1,6 +1,6 @@
 (() => {
   'use strict';
-  const VERSION='4.29.2', BUILD='13.29.2';
+  const VERSION='4.29.2.1', BUILD='13.29.2.1';
   const MAX_GAP_MS=20*60*1000, MAX_DISTANCE_M=300, channels=new Map();
   const radians=v=>v*Math.PI/180;
   const distance=(a,b)=>{if([a.latitude,a.longitude,b.latitude,b.longitude].some(v=>v===null||v===undefined))return null;const R=6371000,dLat=radians(b.latitude-a.latitude),dLon=radians(b.longitude-a.longitude),x=Math.sin(dLat/2)**2+Math.cos(radians(a.latitude))*Math.cos(radians(b.latitude))*Math.sin(dLon/2)**2;return 2*R*Math.asin(Math.sqrt(x))};
@@ -22,13 +22,14 @@
     Number(existing?.confidence||0)!==Number(payload.confidence||0) ||
     String(existing?.source_key||'')!==String(payload.source_key||'') ||
     String(existing?.state||'')!==String(payload.state||'');
-  async function syncGenerated(generated){
+  let syncPromise=null;
+  async function performSyncGenerated(generated){
     const{client,tripId,userId}=await ctx();
     const persisted=await listPersisted();
     const manualMedia=new Set(persisted.filter(x=>!x.is_automatic&&x.state!=='dismissed').flatMap(x=>x.mediaIds));
     const activeSignatures=new Set();
     for(const cluster of generated){
-      const ids=cluster.mediaIds.filter(id=>!manualMedia.has(id));
+      const ids=[...new Set(cluster.mediaIds.filter(id=>!manualMedia.has(id)).map(String))];
       if(ids.length<2&&cluster.kind==='moment')continue;
       const stable=`${tripId}:media:${signature(ids)}`;
       activeSignatures.add(stable);
@@ -54,6 +55,8 @@
         if(del.error)throw del.error;
       }
       if(!sameMembership(row.mediaIds,ids)){
+        const clearMembership=await client.from('media_cluster_items').delete().in('media_id',ids);
+        if(clearMembership.error)throw clearMembership.error;
         const ownDelete=await client.from('media_cluster_items').delete().eq('cluster_id',row.id);
         if(ownDelete.error)throw ownDelete.error;
         const ins=ids.map((media_id,position)=>({cluster_id:row.id,media_id,position,created_by:userId}));
@@ -66,6 +69,11 @@
     const empty=current.filter(x=>x.state!=='dismissed'&&(!x.mediaIds||x.mediaIds.length===0)).map(x=>x.id);
     if(empty.length){const r=await client.from('media_clusters').update({state:'dismissed',updated_by:userId}).eq('trip_id',tripId).in('id',empty);if(r.error)throw r.error;current=current.filter(x=>!empty.includes(x.id))}
     return current
+  }
+  async function syncGenerated(generated){
+    if(syncPromise)return syncPromise;
+    syncPromise=performSyncGenerated(generated).finally(()=>{syncPromise=null});
+    return syncPromise;
   }
   async function rename(id,title){const{client,tripId,userId}=await ctx();const r=await client.from('media_clusters').update({title:String(title||'').trim()||'Fotomoment',is_automatic:false,updated_by:userId}).eq('trip_id',tripId).eq('id',id).select('*').single();if(r.error)throw r.error;return r.data}
   async function setKind(id,value){const allowed=new Set(['moment','screenshots','documents']);if(!allowed.has(value))throw new Error('Unbekannter Cluster-Typ.');const{client,tripId,userId}=await ctx();const r=await client.from('media_clusters').update({kind:value,is_automatic:false,updated_by:userId}).eq('trip_id',tripId).eq('id',id).select('*').single();if(r.error)throw r.error;return r.data}

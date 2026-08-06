@@ -154,7 +154,7 @@ body.lv-photo-modal-open{position:fixed!important;width:100%!important;overflow:
   .lv-photo-actions{grid-template-columns:repeat(2,minmax(0,1fr))!important}
 }
 
-/* v13.29.2 — Gallery Request Storm Diagnostics + UX corrections */
+/* v13.29.2.1 — Gallery Request Storm Diagnostics + UX corrections */
 .lv-photo-actions{align-items:center;flex-wrap:wrap}
 .lv-photo-actions .lv-photo-timeline-action{width:38px!important;min-width:38px!important;padding:0!important;display:inline-flex;align-items:center;justify-content:center;font-weight:850;font-size:17px;color:#25445a}
 .lv-cluster-ai-title{background:linear-gradient(135deg,#fff6d9,#ffe8f0)!important;border-color:#efd5a0!important}

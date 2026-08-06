@@ -1,8 +1,8 @@
 (() => {
   'use strict';
 
-  const VERSION = '4.29.2';
-  const BUILD = '13.29.2';
+  const VERSION = '4.29.2.1';
+  const BUILD = '13.29.2.1';
   const DIAGNOSTICS_LABEL = '[LuviaGalleryDiagnostics]';
   const diagnosticsState = {
     mountedAt: null, mountCount: 0, loadCount: 0, readDataCount: 0, renderAllCount: 0,
@@ -15,7 +15,8 @@
     diagnosticsState.reasons[event]=(diagnosticsState.reasons[event]||0)+1;
     console.info(DIAGNOSTICS_LABEL,event,{...detail,snapshot:{...diagnosticsState}});
   };
-  const REALTIME_DEBOUNCE_MS = 650;
+  const REALTIME_DEBOUNCE_MS = 2200;
+  const REALTIME_MAX_WAIT_MS = 6000;
   const FILTERS = {
     none: ['Original', ''], warm: ['Golden Hour', 'sepia(.18) saturate(1.15) contrast(1.04)'], cool: ['Blue Sky', 'hue-rotate(10deg) saturate(1.08)'], vivid: ['Pop', 'saturate(1.45) contrast(1.1)'], soft: ['Soft', 'contrast(.92) saturate(.88) brightness(1.04)'], mono: ['Mono', 'grayscale(1) contrast(1.08)'],
     paris: ['Paris', 'sepia(.12) saturate(1.16) contrast(1.06) hue-rotate(-6deg)'], sunset: ['Sunset', 'sepia(.24) saturate(1.35) hue-rotate(-12deg)'], rose: ['Rosé', 'sepia(.12) saturate(1.2) hue-rotate(325deg)'], cinema: ['Cinema', 'contrast(1.2) saturate(.78) sepia(.1)'], noir: ['Noir', 'grayscale(1) contrast(1.35) brightness(.92)'], retro: ['Retro', 'sepia(.38) saturate(.82) contrast(.92)'], film: ['Film', 'contrast(1.12) saturate(.9) brightness(.98)'], dreamy: ['Dreamy', 'brightness(1.08) contrast(.88) saturate(.86)'], tropical: ['Tropical', 'saturate(1.45) hue-rotate(-8deg) contrast(1.04)'], aqua: ['Aqua', 'saturate(1.2) hue-rotate(18deg)'], candy: ['Candy', 'saturate(1.4) hue-rotate(335deg) brightness(1.04)'], matte: ['Matte', 'contrast(.86) saturate(.78) brightness(1.06)'],
@@ -34,6 +35,7 @@
   let busy = false;
   let pending = null;
   let loadTimer = null;
+  let realtimeBatchStartedAt = 0;
   let suppressRealtimeUntil = 0;
   let clusterSyncInProgress = false;
   let muteClusterRealtimeUntil = 0;
@@ -139,9 +141,10 @@
   function scheduleLoad(reason='Realtime', options={}) {
     if (Date.now() < suppressRealtimeUntil && options.realtime) return;
     diagnosticsState.scheduledRefreshCount++;
-    if(loadTimer||busy)diagnosticsState.coalescedRefreshCount++;
+    if(loadTimer||busy||pending)diagnosticsState.coalescedRefreshCount++;
+    const now=Date.now();
+    if(options.realtime && !realtimeBatchStartedAt) realtimeBatchStartedAt=now;
     diag('schedule-refresh',{reason,realtime:Boolean(options.realtime),busy,alreadyQueued:Boolean(loadTimer)});
-    clearTimeout(loadTimer);
     const previous = pending || {};
     pending = {
       ...previous,
@@ -151,7 +154,17 @@
       force: Boolean(previous.force || options.force),
       silent: previous.silent === false || options.silent === false ? false : true
     };
-    loadTimer = setTimeout(() => {const queued=pending||{};pending=null;loadTimer=null;load(queued)}, options.immediate ? 0 : REALTIME_DEBOUNCE_MS);
+    if (busy) return;
+    clearTimeout(loadTimer);
+    const maxWaitReached=Boolean(options.realtime && realtimeBatchStartedAt && now-realtimeBatchStartedAt>=REALTIME_MAX_WAIT_MS);
+    const delay=options.immediate||maxWaitReached?0:(options.realtime?REALTIME_DEBOUNCE_MS:250);
+    loadTimer = setTimeout(() => {
+      const queued=pending||{};
+      pending=null;
+      loadTimer=null;
+      realtimeBatchStartedAt=0;
+      load(queued);
+    }, delay);
   }
 
   async function tripDays() {
@@ -396,14 +409,17 @@
     if (analyze) {
       const generated=window.LuviaMediaClustering.generate(items);
       clusterSyncInProgress = true;
-      muteClusterRealtimeUntil = Date.now() + 3000;
+      muteClusterRealtimeUntil = Date.now() + 5000;
       diagnosticsState.clusterSyncCount++;
       diag('cluster-sync-start',{generated:generated.length});
       try {
         clusters=await window.LuviaMediaClustering.syncGenerated(generated);
+      } catch (error) {
+        console.warn('[LuviaGalleryView] Cluster-Synchronisierung übersprungen; Galerie bleibt aktuell.', error);
+        clusters=await window.LuviaMediaClustering.listPersisted().catch(()=>[]);
       } finally {
         clusterSyncInProgress = false;
-        muteClusterRealtimeUntil = Math.max(muteClusterRealtimeUntil, Date.now() + 1200);
+        muteClusterRealtimeUntil = Math.max(muteClusterRealtimeUntil, Date.now() + 2500);
         diag('cluster-sync-finish',{clusters:clusters.length});
       }
     } else clusters=await window.LuviaMediaClustering.listPersisted();
@@ -425,7 +441,7 @@
     if(!silent)status('Galerie wird aktualisiert …');
     try { await readData({analyze:Boolean(options.analyze)}); await renderAll({force:Boolean(options.force)}); if(!silent)status(`${items.length} Fotos · ${clusters.filter(c=>c.state!=='dismissed'&&c.mediaIds?.length).length} Fotomomente · Realtime aktiv`,'ready'); else if(host.querySelector('[data-gallery-status]')?.dataset.state!=='ready') status(`${items.length} Fotos · Realtime aktiv`,'ready'); }
     catch(error){showError(error)}
-    finally {diagnosticsState.lastLoadMs=Math.round(performance.now()-started);diag('load-finish',{reason:options.reason||'direct',durationMs:diagnosticsState.lastLoadMs});busy=false; if(pending){const next=pending;pending=null;scheduleLoad(next.reason||'Nachlauf',next)}}
+    finally {diagnosticsState.lastLoadMs=Math.round(performance.now()-started);diag('load-finish',{reason:options.reason||'direct',durationMs:diagnosticsState.lastLoadMs});busy=false; if(pending){const next=pending;pending=null;realtimeBatchStartedAt=0;scheduleLoad(next.reason||'Nachlauf',{...next,immediate:true})}}
   }
 
   async function currentLocation() {
@@ -435,7 +451,7 @@
   }
   async function upload(files,{camera=false}={}) {
     const list=[...files]; if(!list.length)return;
-    suppressRealtimeUntil=Date.now()+10000;
+    suppressRealtimeUntil=Date.now()+Math.max(15000,list.length*5000);
     let location=window.LuviaPresenceVisitCore?.diagnostics?.()?.lastPosition||null;
     if(camera&&!location) location=await currentLocation();
     status(`${list.length} Foto${list.length===1?'':'s'} werden hochgeladen …`);
@@ -444,15 +460,22 @@
       await window.LuviaMediaCore.upload(list[i],{source:camera?'app_camera':'user_upload',captureSource:camera?'app_camera':'file_picker',capturedAt:camera?new Date().toISOString():undefined,captureLocation:location,deviceMetadata:camera?{userAgent:navigator.userAgent,platform:navigator.platform,language:navigator.language}:null});
     }
     await load({silent:false,analyze:true,force:true});
+    suppressRealtimeUntil=Date.now()+5000;
   }
 
   function mediaRealtime(payload) {
     diagnosticsState.mediaRealtimeCount++;
-    diag('media-realtime',{table:payload?.table,event:payload?.eventType||payload?.event});
-    const relevant=['media','media_day_polaroids'].includes(payload?.table||'');
-    if(!relevant)return;
+    const table=payload?.table||'';
     const event=payload?.eventType || payload?.event;
-    const analyze=event==='INSERT'||event==='DELETE'||(event==='UPDATE'&&['captured_at','day_key','status'].some(key=>payload?.old?.[key]!==payload?.new?.[key]));
+    diag('media-realtime',{table,event});
+    if(!['media','media_day_polaroids'].includes(table))return;
+    if(table==='media' && event==='UPDATE'){
+      const oldRow=payload?.old||{},newRow=payload?.new||{};
+      const visibleKeys=['display_name','favorite','edit_settings','status','captured_at','day_key'];
+      const meaningful=visibleKeys.some(key=>JSON.stringify(oldRow[key])!==JSON.stringify(newRow[key]));
+      if(!meaningful){diag('media-realtime-ignored',{reason:'delivery-metadata-update'});return}
+    }
+    const analyze=table==='media'&&(event==='INSERT'||event==='DELETE'||(event==='UPDATE'&&['captured_at','day_key','status'].some(key=>payload?.old?.[key]!==payload?.new?.[key])));
     scheduleLoad('Media Realtime',{realtime:true,silent:true,analyze,force:false});
   }
   function clusterRealtime(payload) {
