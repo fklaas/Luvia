@@ -1,0 +1,10 @@
+const fs=require('fs'),path=require('path');
+const root=path.resolve(__dirname,'..');
+const js=fs.readFileSync(path.join(root,'app/memory-worlds-v3.js'),'utf8');
+const css=fs.readFileSync(path.join(root,'app/memory-worlds-v3.css'),'utf8');
+const mustJs=["BUILD='13.37.0'","VERSION='4.37.0'",'memoryPalette','multiMemberColor','mc-canvas-decor','mc-stage-voices','is-touch-focus','cols=n<=4?2:n<=8?3:4',"experience:'memory-visual-system-v1'"];
+const mustCss=['Memory Visual System V1','--trip-color','--voice-a','--voice-b','.mc-canvas-decor','.mc-deck-stage-head','.mc-stage-voices','z-index:999!important','.mc-loose-card.is-touch-focus','inset:174px 0 68px','.mc-card-focus-note .mc-focus-mark'];
+for(const n of mustJs)if(!js.includes(n))throw new Error('JS missing '+n);
+for(const n of mustCss)if(!css.includes(n))throw new Error('CSS missing '+n);
+if(/const memberColor=.*#d88198/.test(js))throw new Error('phantom fallback profile color remains in JS');
+console.log('Memory Visual System V1 static contract: OK');
