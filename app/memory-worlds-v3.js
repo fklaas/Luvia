@@ -1,6 +1,6 @@
 (() => {
     'use strict';
-    const BUILD = '13.34.0', VERSION = '4.34.0';
+    const BUILD = '13.34.1', VERSION = '4.34.1';
     let host = null, stopAlbums = null, stopJourneys = null;
     const esc = (v) => String(v ?? '').replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
     const plain = (html = '') => { const d = document.createElement('div'); d.innerHTML = html; return (d.textContent || '').replace(/\s+/g, ' ').trim(); };
@@ -81,7 +81,7 @@
     function voices(members, contrib = []) { const map = new Map(contrib.map(c => [String(c.user_id), c])); return `<div class="mw-voices">${members.map(m => { const c = map.get(String(m.id)); return `<div class="mw-voice ${c ? 'has' : ''}"><b>${esc((m.displayName || '?').slice(0, 1))}</b><span>${esc(m.displayName || 'Reisender')}</span><small>${c ? esc(c.reaction || '✓') : 'wartet noch'}</small></div>`; }).join('')}</div>`; }
     function shell(kind) { const root = document.createElement('div'); root.className = `mw-shell ${kind}`; root.innerHTML = `<div class="mw-stage"><div class="mw-render"></div><div class="mw-ui"></div><button class="mw-close" aria-label="Schließen">×</button><div class="mw-progress"></div></div>`; document.body.append(root); document.body.classList.add('mw-open'); const render = root.querySelector('.mw-render'), ui = root.querySelector('.mw-ui'); const engine = window.LuviaMemoryRenderEngine.create(render); const close = () => { root.classList.add('closing'); setTimeout(() => { engine.destroy(); root.remove(); document.body.classList.remove('mw-open'); }, 420); }; root.querySelector('.mw-close').onclick = close; return { root, ui, engine, close }; }
     function setProgress(root, i, n) { root.querySelector('.mw-progress').innerHTML = Array.from({ length: n }, (_, x) => `<i class="${x === i ? 'on' : x < i ? 'done' : ''}"></i>`).join(''); }
-    function renderUI(ui, html, cls = '') { ui.classList.add('switching'); setTimeout(() => { ui.className = `mw-ui ${cls} switching`; ui.innerHTML = html; requestAnimationFrame(() => requestAnimationFrame(() => ui.classList.remove('switching'))); }, 150); }
+    function renderUI(ui, html, cls = '') { ui.className = `mw-ui ${cls} switching`; ui.innerHTML = html; void ui.offsetWidth; requestAnimationFrame(() => requestAnimationFrame(() => ui.classList.remove('switching'))); }
     async function aiFill(btn, ctx, onResult, force = false) { btn.disabled = true; btn.classList.add('loading'); const old = btn.innerHTML; btn.innerHTML = '<span>✦</span> Luvia denkt …'; try {
         const r = await ai.compose(ctx, force);
         onResult(r);
@@ -204,11 +204,11 @@
         async function show() {
             setProgress(root, state.i, N);
             if (state.i === 0) {
-                engine.setScene('flight', { routeCount: Math.max(7, state.days.length + 3) });
-                renderUI(ui, `<div class="mw-departure mw-readable"><small>MEMORY JOURNEY</small><h1>Zurück nach<br><em>${esc(dest)}</em></h1><p>${state.days.length} Reisetage · ${src.media.length} Bilder · ${members.length} Reisende</p><p class="mw-caption">Die Route läuft jetzt nur vorwärts: von A über die Zwischenpunkte bis zum Ziel.</p>${next('Reise starten')}</div>`, 'departure');
+                engine.setScene('flight');
+                renderUI(ui, `<div class="mw-departure mw-readable"><small>MEMORY JOURNEY</small><h1>Zurück nach<br><em>${esc(dest)}</em></h1><p>${state.days.length} Reisetage · ${src.media.length} Bilder · ${members.length} Reisende</p><p class="mw-caption">Die Reise beginnt – und der Himmel bleibt in Bewegung.</p>${next('Reise starten')}</div>`, 'departure');
             }
             else if (state.i === 1) {
-                engine.setScene('day', { routeCount: Math.max(7, state.days.length + 3) });
+                engine.setScene('day');
                 const d = state.days[state.dayIndex], ctx = { scope: 'journey-day', destination: dest, place: placeOf(d.media), date: d.key, photoCount: d.media.length, facts: factsOf(d.media), voices: [], sensory: state.sensory, existing: d.story, media: d.media };
                 renderUI(ui, `<div class="mw-day-stage"><div class="mw-day-photo" data-dayphoto></div><div class="mw-day-ticket mw-readable"><small>REISETAG ${String(state.dayIndex + 1).padStart(2, '0')} · ${esc(fmt(d.key))}</small><input data-daytitle value="${esc(d.title)}"><div class="mw-ai-row">${aiBtn('KI: Titel + Text', 'day')}</div>${editor('daystory', d.story, 'Was ist von diesem Tag wirklich geblieben?')}<div class="mw-day-nav"><button data-prev ${state.dayIndex === 0 ? 'disabled' : ''}>← vorheriger Tag</button><span>${state.dayIndex + 1} / ${state.days.length}</span><button data-nextday ${state.dayIndex === state.days.length - 1 ? 'disabled' : ''}>nächster Tag →</button></div></div></div>${next('Durch eure Moments reisen')}`, 'day');
                 img(ui.querySelector('[data-dayphoto]'), d.media[0]);
