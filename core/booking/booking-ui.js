@@ -2,10 +2,16 @@
   'use strict';
   const VERSION='1.0.2';
   const esc=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
-  const capable=type=>Boolean(window.LuviaPlaceTypeContracts?.capability?.(type,'reservation')||window.LuviaPlaceTypeContracts?.capability?.(type,'booking'));
+  const canonicalType=raw=>{
+    const type=String(raw||'').toLowerCase();
+    if(type==='restaurant'||type.includes('restaurant')||['cafe','café','bar','bakery','meal_takeaway','meal_delivery','food'].includes(type))return 'restaurant';
+    if(['accommodation','hotel','lodging','motel','hostel','resort_hotel','bed_and_breakfast','guest_house'].includes(type)||type.includes('hotel'))return 'accommodation';
+    return type;
+  };
+  const capable=type=>Boolean(window.LuviaPlaceTypeContracts?.capability?.(canonicalType(type),'reservation')||window.LuviaPlaceTypeContracts?.capability?.(canonicalType(type),'booking'));
 
   function actionButton({placeType,place}={}){
-    const type=String(placeType||place?.primaryType||place?.primary_type||'').toLowerCase();
+    const type=canonicalType(placeType||place?.primaryType||place?.primary_type||'');
     if(!capable(type))return '';
     const label=type==='accommodation'?'Buchen':'Reservieren';
     const pid=place?.providerPlaceId||place?.provider_place_id||place?.id||'';
