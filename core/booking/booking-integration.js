@@ -1,6 +1,6 @@
 (() => {
   'use strict';
-  const VERSION='1.0.2';
+  const VERSION='1.0.3';
   let client=null, repository=null, initialized=false, initPromise=null;
 
   const mapType=type=>({
@@ -77,8 +77,11 @@
         destination:activeTrip()?.destination||null
       }
     });
-    const ready=await window.LuviaBookingCore.transition(row.id,'ready',{metadata:{createdFrom:'places'}});
+    let ready=await window.LuviaBookingCore.transition(row.id,'ready',{metadata:{createdFrom:'places'}});
     window.dispatchEvent(new CustomEvent('luvia:booking-changed',{detail:{booking:ready,action:'created'}}));
+    if(!ready?.contact?.email && ready?.contact?.website){
+      try{await resolveContact(ready.id);ready=await get(ready.id)||ready}catch(error){console.warn('[Luvia Booking] automatische Kontaktermittlung nicht verfügbar',error)}
+    }
     return ready;
   }
 
@@ -114,6 +117,28 @@
     return data;
   }
 
+
+  async function updateContact(id,email){
+    await init();
+    const booking=await get(id);
+    if(!booking)throw new Error('Buchung wurde nicht gefunden.');
+    const value=clean(email).toLowerCase();
+    if(!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value))throw new Error('Bitte eine gültige E-Mail-Adresse eingeben.');
+    const contact={...(booking.contact||{}),email:value};
+    const {data,error}=await client.from('bookings').update({contact,channel:'email',metadata:{...(booking.metadata||{}),manualContact:{addedAt:new Date().toISOString(),source:'luvia_ui'}}}).eq('id',id).select('*').single();
+    if(error)throw error;
+    window.dispatchEvent(new CustomEvent('luvia:booking-changed',{detail:{booking:data,action:'contact-updated'}}));
+    return data;
+  }
+
+  async function resolveContact(id){
+    await init();
+    const {data,error}=await client.functions.invoke('booking-contact-resolve',{body:{bookingId:id}});
+    if(error)throw error;
+    window.dispatchEvent(new CustomEvent('luvia:booking-changed',{detail:{bookingId:id,action:'contact-resolved',result:data}}));
+    return data;
+  }
+
   async function sendEmail(id,{requesterName,note}={}){
     await init();
     const booking=await get(id);
@@ -132,7 +157,7 @@
   }
 
   const api=Object.freeze({
-    version:VERSION,init,createForPlace,listForTrip,get,transition,planRoute,sendEmail,cancel,mapType,
+    version:VERSION,init,createForPlace,listForTrip,get,transition,planRoute,resolveContact,updateContact,sendEmail,cancel,mapType,
     diagnostics:()=>({version:VERSION,initialized,activeTripId:activeTripId(),coreVersion:window.LuviaBookingCore?.version||null})
   });
   window.LuviaBooking=api;

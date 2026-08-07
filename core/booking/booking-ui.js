@@ -1,6 +1,6 @@
 (() => {
   'use strict';
-  const VERSION='1.0.3';
+  const VERSION='1.0.4';
   const esc=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
   const canonicalType=raw=>{
     const type=String(raw||'').toLowerCase();
@@ -21,7 +21,8 @@
     const pid=place?.providerPlaceId||place?.provider_place_id||place?.id||'';
     const name=place?.name||'';
     const email=place?.email||place?.contactEmail||'';
-    return `<button type="button" class="luv-place-primary-action" data-luvia-booking-place data-booking-place-type="${esc(type)}" data-booking-place-id="${esc(pid)}" data-booking-place-name="${esc(name)}" data-booking-place-email="${esc(email)}">◇ ${label}</button>`;
+    const website=place?.website||place?.websiteUri||place?.website_uri||'';
+    return `<button type="button" class="luv-place-primary-action" data-luvia-booking-place data-booking-place-type="${esc(type)}" data-booking-place-id="${esc(pid)}" data-booking-place-name="${esc(name)}" data-booking-place-email="${esc(email)}" data-booking-place-website="${esc(website)}">◇ ${label}</button>`;
   }
 
   function dialogHtml(place={}){
@@ -39,12 +40,12 @@
           <label><span>${isHotel?'Check-in':'Datum'}</span><input type="date" data-booking-date value="${esc(defaultDate)}"></label>
           ${isHotel?`<label><span>Check-out</span><input type="date" data-booking-end-date value="${esc(defaultDate)}"></label>`:`<label><span>Uhrzeit</span><input type="time" data-booking-time value="19:00"></label>`}
           <label><span>${isHotel?'Gäste':'Personen'}</span><input type="number" min="1" max="50" value="2" data-booking-party></label>
-          <label><span>Kontakt-E-Mail des Anbieters <small>(falls bekannt)</small></span><input type="email" data-booking-email value="${esc(place.email||'')}" placeholder="reservierung@…"></label>
+          <label><span>Kontakt</span><div class="lv-booking-auto-contact">Luvia ermittelt den offiziellen Buchungskontakt automatisch.</div><input type="email" data-booking-email value="${esc(place.email||'')}" placeholder="Optionaler manueller Fallback"></label>
           <label class="is-wide"><span>Wunsch / Hinweis</span><textarea data-booking-note rows="3" placeholder="z. B. Kinderwagen, ruhiger Tisch, spätes Check-in …"></textarea></label>
         </div>
         <div class="lv-booking-safety">
           <strong>So funktioniert es</strong>
-          <p>Luvia legt eine Buchungsanfrage an. Bei einer verifizierten E-Mail kann sie nach deiner ausdrücklichen Freigabe versendet werden. Ohne sicheren Kontakt bleibt die Anfrage als Aufgabe offen – Luvia rät keine Adressen.</p>
+          <p>Luvia sucht zuerst selbst nach einem belegbaren öffentlichen Buchungskanal auf der offiziellen Website. Nur wenn kein sicherer Kontakt gefunden wird, bleibt die Anfrage offen oder kann manuell ergänzt werden. Luvia rät keine Adressen.</p>
         </div>
         <div class="lv-booking-actions">
           <button type="button" data-booking-close>Abbrechen</button>
@@ -113,7 +114,8 @@
       id:button.dataset.bookingPlaceId,
       providerPlaceId:button.dataset.bookingPlaceId,
       name:button.dataset.bookingPlaceName,
-      email:button.dataset.bookingPlaceEmail
+      email:button.dataset.bookingPlaceEmail,
+      website:button.dataset.bookingPlaceWebsite
     }).catch(console.error);
   },true);
 

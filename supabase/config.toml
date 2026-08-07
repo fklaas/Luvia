@@ -12,3 +12,6 @@ verify_jwt = false
 
 [functions.booking-health]
 verify_jwt = false
+
+[functions.booking-contact-resolve]
+verify_jwt = true

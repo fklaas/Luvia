@@ -1,6 +1,6 @@
 (() => {
   'use strict';
-  const VERSION='1.0.2';
+  const VERSION='1.0.3';
   let root=null,trip=null;
   const esc=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
   const STATUS={
@@ -18,7 +18,7 @@
       <div class="lv-booking-meta">${b.start_at?`<span>🗓️ ${esc(fmt(b.start_at))}</span>`:''}<span>👥 ${Number(b.party_size||1)}</span>${b.provider?`<span>↗ ${esc(b.provider)}</span>`:''}${b.confirmation_number?`<span>✓ ${esc(b.confirmation_number)}</span>`:''}${b.open_dead_letters?`<span>⚠️ ${b.open_dead_letters} Fehler</span>`:''}</div>
       <div class="lv-booking-card-actions">
         ${canSend?`<button type="button" class="is-primary" data-booking-send="${esc(b.id)}">Verbindlich senden</button>`:''}
-        ${!email&&['ready','needs_action'].includes(b.status)?`<button type="button" data-booking-contact="${esc(b.id)}">Kontakt ergänzen</button>`:''}
+        ${!email&&['ready','needs_action'].includes(b.status)?`<button type="button" data-booking-resolve="${esc(b.id)}">Kontakt automatisch suchen</button><button type="button" data-booking-contact="${esc(b.id)}">Kontakt manuell ergänzen</button>`:''}
         ${b.status==='confirmed'?'<span>✓ Reservierung bestätigt</span>':''}
         ${canCancel?`<button type="button" data-booking-cancel="${esc(b.id)}">Stornieren</button>`:''}
       </div>
@@ -34,17 +34,23 @@
       root.innerHTML=`<section class="lv-bookings-view"><div class="lv-booking-empty"><strong>Buchungen konnten nicht geladen werden.</strong><p>${esc(error?.message||'Unbekannter Fehler')}</p></div></section>`;
     }
   }
-  async function mount(node,activeTrip){root=node;trip=activeTrip;await window.LuviaBooking.init();await load();}
-  function unmount(){root=null;trip=null;}
-  document.addEventListener('click',async e=>{
-    if(!root?.isConnected)return;
+  async function handleClick(e){
     const send=e.target.closest('[data-booking-send]');
-    if(send){send.disabled=true;try{await window.LuviaBooking.sendEmail(send.dataset.bookingSend,{});window.LuviaUIKit?.toast?.('Buchungsanfrage wurde versendet.',{type:'success'});await load()}catch(error){window.LuviaUIKit?.toast?.(error?.message||'Versand fehlgeschlagen.',{type:'error'});send.disabled=false}return;}
+    if(send){e.preventDefault();e.stopPropagation();send.disabled=true;try{await window.LuviaBooking.sendEmail(send.dataset.bookingSend,{});window.LuviaUIKit?.toast?.('Buchungsanfrage wurde versendet.',{type:'success'});await load()}catch(error){console.error('[Luvia Booking] send',error);window.LuviaUIKit?.toast?.(error?.message||'Versand fehlgeschlagen.',{type:'error'});send.disabled=false}return;}
     const cancel=e.target.closest('[data-booking-cancel]');
-    if(cancel){if(!confirm('Diese Buchungsanfrage wirklich stornieren?'))return;try{await window.LuviaBooking.cancel(cancel.dataset.bookingCancel);await load()}catch(error){window.LuviaUIKit?.toast?.(error?.message||'Stornierung fehlgeschlagen.',{type:'error'})}return;}
+    if(cancel){e.preventDefault();e.stopPropagation();if(!window.confirm('Diese Buchungsanfrage wirklich stornieren?'))return;cancel.disabled=true;try{await window.LuviaBooking.cancel(cancel.dataset.bookingCancel);window.LuviaUIKit?.toast?.('Buchungsanfrage storniert.',{type:'success'});await load()}catch(error){console.error('[Luvia Booking] cancel',error);window.LuviaUIKit?.toast?.(error?.message||'Stornierung fehlgeschlagen.',{type:'error'});cancel.disabled=false}return;}
+    const resolve=e.target.closest('[data-booking-resolve]');
+    if(resolve){e.preventDefault();e.stopPropagation();resolve.disabled=true;try{const result=await window.LuviaBooking.resolveContact(resolve.dataset.bookingResolve);if(result?.resolved){window.LuviaUIKit?.toast?.('Offizieller Buchungskontakt gefunden.',{type:'success'})}else{window.LuviaUIKit?.toast?.('Kein sicherer öffentlicher E-Mail-Kontakt gefunden.',{type:'info'})}await load()}catch(error){console.error('[Luvia Booking] resolve contact',error);window.LuviaUIKit?.toast?.(error?.message||'Kontaktsuche fehlgeschlagen.',{type:'error'});resolve.disabled=false}return;}
     const contact=e.target.closest('[data-booking-contact]');
-    if(contact){const email=prompt('Verifizierte Kontakt-E-Mail des Anbieters:','');if(!email)return;window.LuviaUIKit?.toast?.('Kontaktbearbeitung wird im nächsten Booking-UI-Schritt ergänzt.',{type:'info'});}
-  });
+    if(contact){e.preventDefault();e.stopPropagation();const email=window.prompt('Öffentliche bzw. verifizierte Kontakt-E-Mail des Anbieters:','');if(!email)return;contact.disabled=true;try{await window.LuviaBooking.updateContact(contact.dataset.bookingContact,email);window.LuviaUIKit?.toast?.('Kontakt gespeichert.',{type:'success'});await load()}catch(error){console.error('[Luvia Booking] update contact',error);window.LuviaUIKit?.toast?.(error?.message||'Kontakt konnte nicht gespeichert werden.',{type:'error'});contact.disabled=false}}
+  }
+  async function mount(node,activeTrip){
+    if(root&&root!==node)root.removeEventListener('click',handleClick,true);
+    root=node;trip=activeTrip;
+    root.addEventListener('click',handleClick,true);
+    await window.LuviaBooking.init();await load();
+  }
+  function unmount(){if(root)root.removeEventListener('click',handleClick,true);root=null;trip=null;}
   window.addEventListener('luvia:booking-changed',()=>{if(root?.isConnected)load().catch(console.warn)});
   window.LuviaBookingsView=Object.freeze({version:VERSION,mount,unmount,load});
 })();
