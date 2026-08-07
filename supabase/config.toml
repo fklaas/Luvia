@@ -3,3 +3,12 @@ verify_jwt = false
 
 [functions.luvia-intelligence]
 verify_jwt = false
+
+[functions.booking-email-send]
+verify_jwt = true
+
+[functions.booking-email-inbound]
+verify_jwt = false
+
+[functions.booking-health]
+verify_jwt = false

@@ -1,6 +1,6 @@
 (() => {
   'use strict';
-  const VERSION='4.28.5';
+  const VERSION='4.38.0';
   const esc=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot',"'":'&#39;'}[c]));
   const tile=(x)=>`<button type="button" class="lv-hub-tile ${x.primary?'is-primary':''} ${x.preview?'is-preview':''}" data-hub-action="${esc(x.action||'')}" ${x.disabled?'disabled':''}><span class="lv-hub-icon">${x.icon}</span><span class="lv-hub-copy"><strong>${esc(x.title)}</strong><small>${esc(x.description)}</small>${x.meta?`<em>${esc(x.meta)}</em>`:''}</span><span class="lv-hub-arrow">${x.preview?'Demnächst':'→'}</span></button>`;
   function tripStats(trip){const id=trip?.id||trip?.tripId;const places=window.LuviaPlaceCore?.getPlaces?.({tripId:id})||[];const planned=places.filter(p=>p?.metadata?.plannedAt||p?.metadata?.tripPlace?.planned_at).length;return {places:places.length,planned};}
@@ -9,6 +9,7 @@
     {icon:'📍',title:'Places',description:'Orte entdecken und zur Timeline hinzufügen.',meta:`${stats.places} Orte im Reisekontext`,action:'places',primary:true},
     {icon:'🧭',title:'Meine Orte',description:'Entdeckt, geplant, besucht und erinnert an einem Ort.',action:'places-lifecycle'},
     {icon:'📅',title:'Timeline',description:'Reisetage und geplante Momente ordnen.',action:'timeline'},
+    {icon:'◇',title:'Buchungen & Reservierungen',description:'Anfragen, Antworten und Bestätigungen zentral verwalten.',action:'bookings'},
     {icon:'✅',title:'Checklisten',description:'Vor und während der Reise nichts vergessen.',action:'checklists'},
     {icon:'💶',title:'Budget',description:'Ausgaben und gemeinsames Reisebudget im Blick behalten.',action:'budget'},
     {icon:'🗺️',title:'Routen',description:'Geplante Orte als Etappen in Google Maps öffnen.',action:'routes'},

@@ -1,0 +1,14 @@
+const fs=require('fs');const assert=require('assert');
+const root=process.argv[2]||'.';
+const read=p=>fs.readFileSync(`${root}/${p}`,'utf8');
+assert(read('intelligence/kernel/version.js').includes("core:'4.38.0'"));
+assert(read('intelligence/kernel/version.js').includes("build:'13.38.0'"));
+assert(read('index.html').includes('core/booking/booking-integration.js?v=13.38.0'));
+assert(read('index.html').includes('app/bookings-view.js?v=13.38.0'));
+assert(read('app/module-hubs.js').includes("action:'bookings'"));
+assert(read('app/app-shell.js').includes("view==='bookings'"));
+assert(read('core/places/place-detail-service.js').includes('bookingAction(c,p)'));
+assert(read('supabase/config.toml').includes('[functions.booking-email-inbound]'));
+assert(read('supabase/config.toml').includes('verify_jwt = false'));
+assert(fs.existsSync(`${root}/supabase/migrations/20260807223900_core_v4_38_0_booking_v1_release.sql`));
+console.log('LUVIA_V13_38_0_BOOKING_INTEGRATION_OK');

@@ -1,0 +1,16 @@
+Luvia v13.38.0 / Core 4.38.0
+- core/booking/* (neu)
+- app/bookings-view.js (neu)
+- app/bookings-view.css (neu)
+- core/places/place-detail-service.js
+- app/module-hubs.js
+- app/app-shell.js
+- index.html
+- intelligence/kernel/version.js
+- supabase/config.toml
+- supabase/functions/booking-email-send/index.ts (neu)
+- supabase/functions/booking-email-inbound/index.ts (neu)
+- supabase/functions/booking-health/index.ts (neu)
+- supabase/migrations/20260807223000...20260807223900 (neu)
+- RELEASE-v13.38.0.md (neu)
+- BOOKING-CORE-PRODUCTION-DEPLOY.md (neu)

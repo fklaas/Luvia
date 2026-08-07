@@ -1,0 +1,11 @@
+(function(){
+'use strict';
+const VERSION='0.3.0';const providers=new Map();const clean=v=>String(v??'').trim();
+function normalize(def){if(!def||typeof def!=='object')throw new Error('Booking-Provider fehlt.');const id=clean(def.id).toLowerCase();if(!id)throw new Error('Booking-Provider-ID fehlt.');if(typeof def.supports!=='function')throw new Error(`${id}.supports muss eine Funktion sein.`);if(typeof def.dispatch!=='function')throw new Error(`${id}.dispatch muss eine Funktion sein.`);return Object.freeze({...def,id,priority:Number.isFinite(Number(def.priority))?Number(def.priority):0,version:def.version||'1.0.0'});}
+function register(def,{replace=false}={}){const provider=normalize(def);if(providers.has(provider.id)&&!replace)throw new Error(`Booking-Provider bereits registriert: ${provider.id}`);providers.set(provider.id,provider);return provider;}
+function get(id){return providers.get(clean(id).toLowerCase())||null;}function list(){return [...providers.values()].map(p=>({id:p.id,version:p.version,priority:p.priority,channel:p.channel||null,network:Boolean(p.network)}));}
+async function candidates(booking,context={}){const result=[];for(const p of providers.values()){try{const support=await p.supports(booking,context);if(support===true||support?.supported)result.push({provider:p,score:Number(support?.score??p.priority??0),reason:support?.reason||null});}catch(error){console.warn('[LuviaBookingProviders] supports fehlgeschlagen',p.id,error);}}return result.sort((a,b)=>b.score-a.score||b.provider.priority-a.provider.priority);}
+async function resolve(booking,context={}){return (await candidates(booking,context))[0]?.provider||null;}
+async function dispatch(booking,context={}){const provider=context.providerId?get(context.providerId):await resolve(booking,context);if(!provider)throw new Error('Kein geeigneter Booking-Provider verfügbar.');await window.LuviaBookingEvents?.emit('booking.provider.selected',{bookingId:booking.id,provider:provider.id,channel:provider.channel||booking.channel});return provider.dispatch(booking,context);}
+window.LuviaBookingProviderRegistry=Object.freeze({version:VERSION,register,get,list,candidates,resolve,dispatch});
+})();
