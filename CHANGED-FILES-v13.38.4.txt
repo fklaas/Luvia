@@ -1,0 +1,7 @@
+core/booking/booking-ui.js
+core/places/places-final-foundation.js
+core/places/place-detail-service.js
+intelligence/kernel/version.js
+RELEASE-v13.38.4.md
+COMMIT-v13.38.4.txt
+CHANGED-FILES-v13.38.4.txt

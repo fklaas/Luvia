@@ -1,6 +1,6 @@
 (() => {
   'use strict';
-  const VERSION='1.0.2';
+  const VERSION='1.0.3';
   const esc=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
   const canonicalType=raw=>{
     const type=String(raw||'').toLowerCase();
@@ -8,7 +8,11 @@
     if(['accommodation','hotel','lodging','motel','hostel','resort_hotel','bed_and_breakfast','guest_house'].includes(type)||type.includes('hotel'))return 'accommodation';
     return type;
   };
-  const capable=type=>Boolean(window.LuviaPlaceTypeContracts?.capability?.(canonicalType(type),'reservation')||window.LuviaPlaceTypeContracts?.capability?.(canonicalType(type),'booking'));
+  const capable=type=>{
+    const canonical=canonicalType(type);
+    if(['restaurant','accommodation'].includes(canonical))return true;
+    return Boolean(window.LuviaPlaceTypeContracts?.capability?.(canonical,'reservation')||window.LuviaPlaceTypeContracts?.capability?.(canonical,'booking'));
+  };
 
   function actionButton({placeType,place}={}){
     const type=canonicalType(placeType||place?.primaryType||place?.primary_type||'');
@@ -84,7 +88,12 @@
           ? `<strong>Anfrage vorbereitet.</strong><p>Die Buchungsanfrage wurde in Luvia angelegt. Du kannst sie im Bereich „Buchungen“ verbindlich versenden.</p>`
           : `<strong>Anfrage angelegt.</strong><p>Für diesen Ort liegt noch keine sichere E-Mail-Adresse vor. Luvia hält die Anfrage offen und verwendet keine geratenen Kontaktdaten.</p>`;
         create.remove();
-        setTimeout(()=>window.dispatchEvent(new CustomEvent('luvia:navigate-request',{detail:{view:'bookings'}})),500);
+        // Nach erfolgreichem Anlegen die gesamte Overlay-Kette schließen: Booking-Dialog
+        // und ggf. darunter geöffnete Place-Detailkarte.
+        close(node);
+        try{window.LuviaPlaceDetail?.close?.()}catch{}
+        try{window.LuviaPlaceDetails?.close?.()}catch{}
+        setTimeout(()=>window.dispatchEvent(new CustomEvent('luvia:navigate-request',{detail:{view:'bookings'}})),120);
       }catch(error){
         result.hidden=false;
         result.textContent=error?.message||'Die Buchungsanfrage konnte nicht angelegt werden.';
