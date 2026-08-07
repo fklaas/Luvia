@@ -1,6 +1,6 @@
 (function(){
 'use strict';
-const VERSION='4.38.0';
+const VERSION='4.38.1';
 const adapters=new Map();const capabilityRenderers=new Map();const detailCache=new Map();const detailInflight=new Map();const photoCache=new Map();const photoInflight=new Map();let current=null;
 const esc=v=>window.LuviaPlaceExperience?.esc?.(v)||String(v??'');
 const LABELS={discovered:'Entdeckt',planned:'Geplant',visited:'Besucht',remembered:'Erinnert'};

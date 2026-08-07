@@ -1,1 +1,1 @@
-(()=>{'use strict';window.LuviaKernelVersion=Object.freeze({core:'4.38.0',build:'13.38.0',name:'Booking Core V1 Integration',channel:'production',builtAt:'2026-08-07T22:25:00+02:00'});window.LuviaCoreVersion=window.LuviaKernelVersion;window.LUVIA_RELEASE=window.LuviaKernelVersion;})();
+(()=>{'use strict';window.LuviaKernelVersion=Object.freeze({core:'4.38.1',build:'13.38.1',name:'Booking Core V1 Place UX Fix',channel:'production',builtAt:'2026-08-07T23:55:00+02:00'});window.LuviaCoreVersion=window.LuviaKernelVersion;window.LUVIA_RELEASE=window.LuviaKernelVersion;})();

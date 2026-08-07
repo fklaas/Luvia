@@ -19,7 +19,7 @@
     const isHotel=type==='accommodation'||type==='hotel';
     const trip=window.LuviaTripStore?.snapshot?.()?.activeTrip||{};
     const defaultDate=(trip.startDate||trip.start_date||new Date().toISOString().slice(0,10));
-    return `<div class="lv-booking-backdrop" data-booking-close>
+    return `<div class="lv-booking-backdrop">
       <section class="lv-booking-dialog" role="dialog" aria-modal="true" aria-labelledby="bookingDialogTitle">
         <button type="button" class="lv-booking-close" data-booking-close aria-label="Schließen">×</button>
         <span class="lv-booking-kicker">Luvia Booking</span>
