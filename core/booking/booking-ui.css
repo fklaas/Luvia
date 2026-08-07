@@ -1,5 +1,5 @@
 
-.lv-booking-backdrop{position:fixed;inset:0;z-index:10040;background:rgba(17,20,29,.48);display:grid;place-items:center;padding:20px;backdrop-filter:blur(12px)}
+.lv-booking-backdrop{position:fixed;inset:0;z-index:2147483647;background:rgba(17,20,29,.48);display:grid;place-items:center;padding:20px;backdrop-filter:blur(12px)}
 .lv-booking-dialog{width:min(680px,100%);max-height:min(90vh,860px);overflow:auto;background:var(--lv-surface-elevated,#fff);color:var(--lv-text,#20222a);border:1px solid var(--lv-line,rgba(0,0,0,.08));border-radius:28px;box-shadow:var(--lv-shadow-overlay,0 24px 70px rgba(0,0,0,.2));padding:28px;position:relative}
 .lv-booking-close{position:absolute;right:18px;top:16px;border:0;background:transparent;font-size:28px;color:var(--lv-muted,#777);cursor:pointer}
 .lv-booking-kicker{font-size:12px;font-weight:800;text-transform:uppercase;letter-spacing:.12em;color:var(--module-accent,var(--place-accent,#b46678))}

@@ -1,0 +1,10 @@
+Luvia v13.38.2 / Core 4.38.2
+
+Changed:
+- core/booking/booking-ui.css
+- core/places/places-final-foundation.js
+- intelligence/kernel/version.js
+- index.html
+- RELEASE-v13.38.2.md
+- CHANGED-FILES-v13.38.2.txt
+- COMMIT-v13.38.2.txt

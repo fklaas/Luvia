@@ -1,0 +1,1 @@
+fix(booking): surface AI reservation action above place overlays
