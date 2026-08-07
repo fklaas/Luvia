@@ -1,12 +1,24 @@
 (() => {
 'use strict';
-const VERSION='4.36.7',BUILD='13.36.7';
-let host=null,stopCards=null,stopIdentities=null,urlCache=new Map(),homeState=null;
+const VERSION='4.36.8',BUILD='13.36.8';
+let host=null,stopCards=null,stopIdentities=null,stopTrip=null,urlCache=new Map(),homeState=null;
 const deckSessionSeed=Math.random().toString(36).slice(2);
 const validColor=v=>/^#[0-9a-f]{6}$/i.test(String(v||'').trim())?String(v).trim().toLowerCase():null;
-const tripRecord=()=>({...(window.LuviaTripStore?.snapshot?.()?.activeTrip||{}),...(window.LuviaTripContext?.getSnapshot?.()?.activeTrip||{}),...(window.LuviaTripContext?.getActiveTrip?.()||{})});
+const tripRecord=()=>{
+  const store=window.LuviaTripStore?.snapshot?.()||{},canonical=store.activeTrip||null;
+  if(canonical)return canonical;
+  return window.LuviaTripContext?.getActiveTrip?.()||window.LuviaTripContext?.getSnapshot?.()?.activeTrip||{};
+};
 const inheritedAccent=()=>{const nodes=[document.documentElement,document.body,document.querySelector('.lv-dashboard'),document.querySelector('.lv-shell'),document.querySelector('#app'),host].filter(Boolean),props=['--trip-accent','--lv-accent','--module-accent'];for(const node of nodes){const css=getComputedStyle(node);for(const prop of props){const hit=validColor(css.getPropertyValue(prop));if(hit)return hit}}return null};
-const tripAccent=()=>{const t=tripRecord(),root=document.documentElement,body=document.body,rootTrip=validColor(root.style.getPropertyValue('--trip-accent')),bodyTrip=validColor(body?.style?.getPropertyValue?.('--trip-accent')),candidates=[rootTrip,bodyTrip,t.accent,t.accent_color,t.themeColor,t.theme_color,t.color,t.settings?.accent,t.settings?.accent_color,t.settings?.themeColor,t.settings?.theme_color,t.moduleSettings?.theme?.accent,t.module_settings?.theme?.accent,t.visualTheme?.accent,t.visual_theme?.accent,inheritedAccent()];return candidates.map(validColor).find(Boolean)||'#ee6f83'};
+const tripAccent=()=>{
+  const coreAccent=validColor(window.LuviaMemoryCards?.tripAccent?.());if(coreAccent)return coreAccent;
+  const storeTrip=window.LuviaTripStore?.snapshot?.()?.activeTrip||{},contextTrip=window.LuviaTripContext?.getActiveTrip?.()||window.LuviaTripContext?.getSnapshot?.()?.activeTrip||{},t=tripRecord();
+  const canonical=[storeTrip.accent,contextTrip.accent,t.accent,storeTrip.accent_color,contextTrip.accent_color,t.accent_color,storeTrip.themeColor,contextTrip.themeColor,t.themeColor,storeTrip.theme_color,contextTrip.theme_color,t.theme_color,storeTrip.color,contextTrip.color,t.color].map(validColor).find(Boolean);
+  if(canonical)return canonical;
+  const nested=[t.settings?.accent,t.settings?.accent_color,t.settings?.themeColor,t.settings?.theme_color,t.moduleSettings?.theme?.accent,t.module_settings?.theme?.accent,t.visualTheme?.accent,t.visual_theme?.accent].map(validColor).find(Boolean);
+  if(nested)return nested;
+  return inheritedAccent()||'#ee6f83';
+};
 const esc=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const me=()=>window.ParisAuth?.getState?.()?.user||{};
 const REACTIONS=['❤️','🥹','😂','🥰','🤩','🫶','✨','☀️','🌊','🍝','☕','🎢','🏙️','🌿','🎶','📸','😌','🤭','😋','🥳','🤯','🙈','💫','🔥'];
@@ -129,12 +141,12 @@ async function openDeck(key,sourceEl){
   const showSpread=async()=>{
     const arranged=shuffled(items,`${key}:${Math.random()}`);
     const mobile=matchMedia('(max-width:800px)').matches;
-    const cardsMarkup=mobile?`<div class="mc-mobile-swipe" data-swipe-deck><div class="mc-swipe-track">${arranged.map((c,i)=>`<section class="mc-swipe-slide" data-swipe-slide="${i}">${renderLooseCard(c,homeState.members,i,'deck')}</section>`).join('')}</div><div class="mc-swipe-meta"><span><b data-swipe-index>1</b> von ${arranged.length}</span><em>Nach links oder rechts wischen</em></div></div>`:`<div class="mc-spread" data-count="${items.length}">${arranged.map((c,i)=>renderLooseCard(c,homeState.members,i,'deck')).join('')}</div>`;
+    const cardsMarkup=mobile?`<div class="mc-mobile-throw" data-throw-deck><div class="mc-throw-stack">${arranged.map((c,i)=>`<section class="mc-throw-card" data-throw-card="${i}" style="--throw-order:${i}">${renderLooseCard(c,homeState.members,i,'deck')}</section>`).join('')}</div><div class="mc-throw-meta"><span><b data-throw-index>1</b> von ${arranged.length}</span><em>Karte nach links oder rechts wegwischen</em></div><button type="button" class="mc-throw-reset" data-throw-reset hidden>Stapel neu mischen</button></div>`:`<div class="mc-spread" data-count="${items.length}">${arranged.map((c,i)=>renderLooseCard(c,homeState.members,i,'deck')).join('')}</div>`;
     const p=await swap(ctx,`<div class="mc-deck-stage-head"><div class="mc-stage-head-surface"><small>MEMORY MOMENT</small><h2>${cluster?fmt(cluster.started_at||cluster.created_at)||'Eure Karten':'Eure Karten'}</h2><span>${items.length} ${items.length===1?'Erinnerung':'Erinnerungen'} · ${people.length} ${people.length===1?'Stimme':'Stimmen'}</span></div></div><div class="mc-stage-atmosphere" aria-hidden="true"><span class="mc-route mc-route-a"></span><span class="mc-route mc-route-b"></span><span class="mc-route mc-route-c"></span><span class="mc-postmark">LUVIA · MOMENT</span><span class="mc-travel-sketch mc-sketch-ticket">BON VOYAGE</span><span class="mc-travel-sketch mc-sketch-photo">MEMORY</span><span class="mc-travel-sketch mc-sketch-pin">⌖</span><span class="mc-travel-sketch mc-sketch-heart">♡</span><span class="mc-travel-sketch mc-sketch-plane">✈︎</span></div><div class="mc-stage-decor" aria-hidden="true"><i>✦</i><i>✈</i><i>⌖</i><i>♡</i><i>↝</i><i>⌾</i><i>⌁</i><i>✦</i><i>△</i><i>· · ·</i></div>${cardsMarkup}${cluster?'<button class="mc-continue" data-continue>Moment weiter ergänzen</button>':''}`,{motion:'scatter',showBack:true});
     await paintLoosePhotos(p,arranged,media);
     if(!mobile)positionSpread(p.querySelector('.mc-spread'),arranged,true);
-    else {const track=p.querySelector('.mc-swipe-track'),indexEl=p.querySelector('[data-swipe-index]');if(track&&indexEl){let raf=0;const update=()=>{raf=0;const slides=[...track.querySelectorAll('.mc-swipe-slide')],center=track.scrollLeft+track.clientWidth/2;let best=0,dist=Infinity;slides.forEach((slide,i)=>{const d=Math.abs((slide.offsetLeft+slide.offsetWidth/2)-center);if(d<dist){dist=d;best=i}});indexEl.textContent=String(best+1)};track.addEventListener('scroll',()=>{if(!raf)raf=requestAnimationFrame(update)},{passive:true});requestAnimationFrame(update)}}
-    for(const card of p.querySelectorAll('[data-loose-card]'))card.onclick=e=>{if(e.target.closest('button'))return;openCardDetail(ctx,items.find(x=>String(x.id)===String(card.dataset.looseCard)),homeState.members,media,showSpread)};
+    else bindThrowDeck(p.querySelector('[data-throw-deck]'),arranged.length);
+    for(const card of p.querySelectorAll('[data-loose-card]'))card.onclick=e=>{if(e.target.closest('button')||card.closest('.mc-throw-card')?.dataset.dragged==='1')return;openCardDetail(ctx,items.find(x=>String(x.id)===String(card.dataset.looseCard)),homeState.members,media,showSpread)};
     p.querySelectorAll('[data-weight][data-own="1"]').forEach(b=>b.onclick=async e=>{e.stopPropagation();const c=items.find(x=>String(x.id)===String(b.dataset.weight));const next=Number(c.weight)>=3?1:Number(c.weight)+1;await window.LuviaMemoryCards.setWeight(c.id,next);c.weight=next;b.textContent=weightLabel(next);b.closest('.mc-loose-card')?.classList.remove('w1','w2','w3');b.closest('.mc-loose-card')?.classList.add(`w${next}`)});
     if(cluster)p.querySelector('[data-continue]').onclick=()=>{ctx.close();setTimeout(()=>openDiscovery(cluster,media,homeState.members,0),460)};
     ctx.back.onclick=()=>closeSpread();
@@ -145,32 +157,44 @@ async function openDeck(key,sourceEl){
   };
   await showSpread();
 }
+function bindThrowDeck(root,total){
+  if(!root)return;
+  const stack=root.querySelector('.mc-throw-stack'),indexEl=root.querySelector('[data-throw-index]'),reset=root.querySelector('[data-throw-reset]');
+  if(!stack)return;
+  const cards=[...stack.querySelectorAll('.mc-throw-card')];let cursor=0,active=null,startX=0,startY=0,lastX=0,lastT=0,velocity=0;
+  const refresh=()=>{cards.forEach((card,i)=>{const rel=i-cursor;card.hidden=rel<0;card.style.setProperty('--throw-depth',String(Math.max(0,rel)));card.classList.toggle('is-front',rel===0)});if(indexEl)indexEl.textContent=String(Math.min(cursor+1,total));if(reset)reset.hidden=cursor<total};
+  const front=()=>cards[cursor]||null;
+  const settle=(card,x=0,y=0)=>{card.classList.add('is-settling');card.style.setProperty('--drag-x',`${x}px`);card.style.setProperty('--drag-y',`${y}px`);card.style.setProperty('--drag-r',`${x*.035}deg`);setTimeout(()=>{card.classList.remove('is-settling');card.style.removeProperty('--drag-x');card.style.removeProperty('--drag-y');card.style.removeProperty('--drag-r')},280)};
+  const throwAway=(card,dir,y)=>{const distance=Math.max(innerWidth*1.25,620)*dir;card.dataset.dragged='1';card.classList.add('is-thrown');card.style.setProperty('--drag-x',`${distance}px`);card.style.setProperty('--drag-y',`${Math.max(-120,Math.min(120,y*.45))}px`);card.style.setProperty('--drag-r',`${dir*18}deg`);setTimeout(()=>{cursor++;refresh();card.hidden=true;card.classList.remove('is-thrown');card.style.removeProperty('--drag-x');card.style.removeProperty('--drag-y');card.style.removeProperty('--drag-r');setTimeout(()=>{card.dataset.dragged='0'},80)},330)};
+  stack.addEventListener('pointerdown',e=>{const card=e.target.closest('.mc-throw-card.is-front');if(!card||e.target.closest('button'))return;active=card;startX=lastX=e.clientX;startY=e.clientY;lastT=performance.now();velocity=0;card.dataset.dragged='0';card.classList.add('is-dragging');card.setPointerCapture?.(e.pointerId)});
+  stack.addEventListener('pointermove',e=>{if(!active)return;const x=e.clientX-startX,y=e.clientY-startY,now=performance.now(),dt=Math.max(8,now-lastT);velocity=(e.clientX-lastX)/dt;lastX=e.clientX;lastT=now;if(Math.abs(x)>6)active.dataset.dragged='1';active.style.setProperty('--drag-x',`${x}px`);active.style.setProperty('--drag-y',`${y*.20}px`);active.style.setProperty('--drag-r',`${Math.max(-12,Math.min(12,x*.035))}deg`);active.style.setProperty('--drag-progress',String(Math.min(1,Math.abs(x)/(stack.clientWidth*.42))));e.preventDefault()});
+  const release=e=>{if(!active)return;const card=active,x=e.clientX-startX,y=e.clientY-startY,threshold=Math.min(130,stack.clientWidth*.28),shouldThrow=Math.abs(x)>=threshold||Math.abs(velocity)>.72;card.classList.remove('is-dragging');active=null;if(shouldThrow)throwAway(card,(x||velocity)>=0?1:-1,y);else{settle(card);setTimeout(()=>{card.dataset.dragged='0'},300)}};
+  stack.addEventListener('pointerup',release);stack.addEventListener('pointercancel',release);
+  reset?.addEventListener('click',()=>{cursor=0;cards.forEach(c=>{c.hidden=false;c.dataset.dragged='0'});refresh()});
+  refresh();
+}
 function positionSpread(root,items,reroll=false){
-  if(!root)return;const cards=[...root.querySelectorAll('.mc-loose-card')],rnd=()=>Math.random();
-  if(matchMedia('(max-width:800px)').matches)return;
-  const count=Math.max(1,cards.length),box=root.getBoundingClientRect(),cardBox=cards[0]?.getBoundingClientRect?.()||{width:240,height:350};
-  const cw=Math.max(190,cardBox.width||240),ch=Math.max(290,cardBox.height||350),padX=Math.min(cw*.56,box.width*.105),padY=Math.min(ch*.50,box.height*.18);
-  const minX=padX,maxX=Math.max(minX+1,box.width-padX),minY=padY,maxY=Math.max(minY+1,box.height-padY),pts=[];
-  const minMetric=count<=4?1.02:count<=6?.90:.82,targetNearest=count<=4?1.72:count<=6?1.52:1.34,maxNearest=count<=4?3.15:2.75;
-  const metric=(a,b)=>Math.hypot((a.x-b.x)/(cw*.94),(a.y-b.y)/(ch*.76));
-  const sectorOf=c=>{const angle=Math.atan2((c.y-box.height*.54)/(box.height*.5),(c.x-box.width*.5)/(box.width*.5));return Math.floor(((angle+Math.PI)/(Math.PI*2))*8)%8};
+  if(!root||matchMedia('(max-width:800px)').matches)return;
+  const cards=[...root.querySelectorAll('.mc-loose-card')],rnd=()=>Math.random();if(!cards.length)return;
+  const count=cards.length,box=root.getBoundingClientRect(),sample=cards[0].getBoundingClientRect(),cw=Math.max(190,sample.width||240),ch=Math.max(285,sample.height||350);
+  const marginX=Math.max(cw*.34,28),marginY=Math.max(ch*.30,24),minX=marginX,maxX=Math.max(minX+1,box.width-marginX),minY=marginY,maxY=Math.max(minY+1,box.height-marginY),pts=[];
+  const overlapLimit=count<=5?.14:count<=8?.20:.24,idealNear=count<=5?1.35:1.15,maxNear=count<=5?2.45:2.15;
+  const overlapRatio=(a,b)=>{const dx=Math.abs(a.x-b.x),dy=Math.abs(a.y-b.y),ox=Math.max(0,cw-dx),oy=Math.max(0,ch-dy);return(ox*oy)/(cw*ch)};
+  const distance=(a,b)=>Math.hypot((a.x-b.x)/cw,(a.y-b.y)/ch);
   for(let i=0;i<count;i++){
     let best=null,bestScore=-1e9;
-    for(let n=0;n<320;n++){
+    for(let n=0;n<520;n++){
       const c={x:minX+rnd()*(maxX-minX),y:minY+rnd()*(maxY-minY)};
-      const nx=(c.x-box.width/2)/(box.width*.5),ny=(c.y-box.height*.54)/(box.height*.5),radius=Math.hypot(nx,ny);
-      const edgePenalty=Math.max(0,radius-.96)*7,centerPenalty=Math.abs(radius-(count<=4?.42:.52))*.48;
-      if(!pts.length){const score=-centerPenalty-edgePenalty+rnd()*.22;if(score>bestScore){best=c;bestScore=score}continue}
-      const distances=pts.map(p=>metric(c,p)),near=Math.min(...distances),tooClose=Math.max(0,minMetric-near),tooFar=Math.max(0,near-maxNearest),idealPenalty=Math.abs(near-targetNearest)*.58;
-      const sector=sectorOf(c),sectorCount=pts.filter(p=>sectorOf(p)===sector).length,sectorPenalty=Math.max(0,sectorCount-1)*.75;
-      const leftCount=pts.filter(p=>p.x<box.width/2).length,rightCount=pts.length-leftCount,balancePenalty=(c.x<box.width/2&&leftCount>rightCount+1)||(c.x>=box.width/2&&rightCount>leftCount+1)?.45:0;
-      const score=3.3-tooClose*8.5-tooFar*1.8-idealPenalty-edgePenalty-centerPenalty-sectorPenalty-balancePenalty+rnd()*.28;
+      if(!pts.length){best=c;break}
+      const overlaps=pts.map(p=>overlapRatio(c,p)),worst=Math.max(...overlaps),sumOverlap=overlaps.reduce((a,b)=>a+b,0),distances=pts.map(p=>distance(c,p)),near=Math.min(...distances);
+      const hardOverlap=Math.max(0,worst-overlapLimit),crowdPenalty=sumOverlap*.95,tooNear=Math.max(0,.72-near),tooFar=Math.max(0,near-maxNear),idealPenalty=Math.abs(near-idealNear)*.33;
+      const cx=(c.x-box.width*.5)/(box.width*.5),cy=(c.y-box.height*.56)/(box.height*.5),edge=Math.max(0,Math.hypot(cx,cy)-.94);
+      const score=4.2-hardOverlap*26-crowdPenalty*3.2-tooNear*8-tooFar*2.2-idealPenalty-edge*5+rnd()*.38;
       if(score>bestScore){best=c;bestScore=score}
     }
-    pts.push(best||{x:box.width*(.24+rnd()*.52),y:box.height*(.24+rnd()*.58)});
+    pts.push(best||{x:box.width*(.25+rnd()*.5),y:box.height*(.28+rnd()*.48)});
   }
-  const arranged=shuffled(pts,`${Date.now()}:${Math.random()}`);
-  cards.forEach((el,i)=>{const p=arranged[i];el.style.setProperty('--spread-left',`${(p.x/box.width*100).toFixed(2)}%`);el.style.setProperty('--spread-top',`${(p.y/box.height*100).toFixed(2)}%`);el.style.setProperty('--spread-r',`${((rnd()-.5)*4.4).toFixed(2)}deg`);el.style.zIndex=String(20+i)});
+  cards.forEach((el,i)=>{const p=pts[i];el.style.setProperty('--spread-left',`${(p.x/box.width*100).toFixed(2)}%`);el.style.setProperty('--spread-top',`${(p.y/box.height*100).toFixed(2)}%`);el.style.setProperty('--spread-r',`${((rnd()-.5)*4.0).toFixed(2)}deg`);el.style.zIndex=String(20+i)});
 }
 
 async function openCardDetail(ctx,card,members,media,onBack){
@@ -183,6 +207,6 @@ async function openCardDetail(ctx,card,members,media,onBack){
   p.onclick=e=>{if(e.target.closest('.mc-loose-card,.mc-card-focus-note,button'))return;back()};
 }
 
-async function mount(node){host=node;await renderHome();stopCards=await window.LuviaMemoryCards.subscribe(()=>setTimeout(renderHome,350));stopIdentities=await window.LuviaMemoryCards.subscribeIdentities?.(()=>{window.LuviaMemoryCards.members().then(m=>{if(!homeState)return;homeState.members=m;renderHome()})});return()=>{stopCards?.();stopIdentities?.();stopCards=null;stopIdentities=null;host=null}}
-window.LuviaAlbumsView=Object.freeze({version:VERSION,build:BUILD,mount,render:renderHome,experience:'memory-deck-mobile-swipe-travel-accent-spatial-rebalance',model:'cards -> decks -> moments -> journeys -> studio'});
+async function mount(node){host=node;await renderHome();stopCards=await window.LuviaMemoryCards.subscribe(()=>setTimeout(renderHome,350));stopIdentities=await window.LuviaMemoryCards.subscribeIdentities?.(()=>{window.LuviaMemoryCards.members().then(m=>{if(!homeState)return;homeState.members=m;renderHome()})});stopTrip=window.LuviaTripStore?.subscribe?.(()=>{if(host)setTimeout(renderHome,80)});return()=>{stopCards?.();stopIdentities?.();stopTrip?.();stopCards=null;stopIdentities=null;stopTrip=null;host=null}}
+window.LuviaAlbumsView=Object.freeze({version:VERSION,build:BUILD,mount,render:renderHome,experience:'memory-deck-swipe-physics-accent-source-overlap-control',model:'cards -> decks -> moments -> journeys -> studio'});
 })();

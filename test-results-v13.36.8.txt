@@ -1,0 +1,24 @@
+Luvia 13.36.8 / Core 4.36.8 — build workspace test results
+
+PASS  JavaScript syntax: app/memory-worlds-v3.js
+PASS  JavaScript syntax: core/media/memory-cards.js
+PASS  JavaScript syntax: intelligence/kernel/version.js
+PASS  JavaScript syntax: intelligence/services/base-services.js
+PASS  JavaScript syntax: core/diagnostics/media-readiness.js
+PASS  runtime version 13.36.8 / Core 4.36.8
+PASS  service worker cache 13.36.8
+PASS  force update target 13.36.8
+PASS  Memory Core canonical tripAccent API
+PASS  Memory UI consumes Core tripAccent first
+PASS  single-author stack layers use only trip accent
+PASS  trip-store subscription refreshes Memory UI
+PASS  mobile throw deck runtime markup
+PASS  old scroll-snap runtime markup removed
+PASS  pointer drag physics
+PASS  spring-back and throw threshold
+PASS  desktop overlap budget
+PASS  desktop hover lift retained
+PASS  new mobile throw CSS has no scroll-snap
+PASS  CSS braces balanced
+PASS  local index assets present (152 checked)
+PASS  no stale 13.36.7 / 4.36.7 in active runtime files

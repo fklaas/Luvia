@@ -406,3 +406,43 @@ body.mc-open{overflow:hidden}.mc-overlay{position:fixed;inset:0;z-index:10000;ba
   .mc-swipe-meta em{max-width:190px;text-align:center}
 }
 @media(prefers-reduced-motion:reduce){.mc-travel-sketch{animation:none!important}.mc-swipe-track{scroll-behavior:auto}}
+
+/* 13.36.8 – Memory Deck Swipe Physics, Accent Source & Overlap Control */
+/* Desktop: keep the thrown-card feeling, but soften visual collisions. */
+@media(min-width:801px){
+  .mc-spread{inset:150px 3.5vw 78px!important}
+  .mc-spread .mc-loose-card{transition:transform 290ms cubic-bezier(.16,.84,.24,1),box-shadow 290ms ease,filter 220ms ease,opacity 220ms ease!important}
+  .mc-spread .mc-loose-card:hover{z-index:1400!important;transform:translate(-50%,calc(-50% - 18px)) rotate(calc(var(--spread-r,0deg)*.08)) scale(1.043)!important}
+}
+
+/* Mobile: real throw-away card physics. No carousel, no scroll-snap. */
+@media(max-width:800px){
+  .mc-mobile-throw{position:relative;z-index:9;display:flex;flex:1 1 auto;min-height:0;width:100%;flex-direction:column;align-items:center;justify-content:center;overflow:hidden;padding:2px 0 42px;touch-action:none}
+  .mc-throw-stack{position:relative;width:min(430px,94vw);height:min(610px,calc(100dvh - 220px));min-height:390px;display:grid;place-items:center;touch-action:none;user-select:none;-webkit-user-select:none}
+  .mc-throw-card{--drag-x:0px;--drag-y:0px;--drag-r:0deg;--throw-depth:0;position:absolute;inset:0;display:grid;place-items:center;transform:translate3d(calc(var(--throw-depth)*2px),calc(var(--throw-depth)*7px),0) scale(calc(1 - min(var(--throw-depth),2)*.025));opacity:calc(1 - min(var(--throw-depth),3)*.10);z-index:calc(40 - var(--throw-depth));transition:transform 260ms cubic-bezier(.2,.82,.2,1),opacity 220ms ease,filter 220ms ease;pointer-events:none}
+  .mc-throw-card:nth-child(n+4){visibility:hidden}
+  .mc-throw-card.is-front{pointer-events:auto;transform:translate3d(var(--drag-x),var(--drag-y),0) rotate(var(--drag-r)) scale(1);opacity:1;visibility:visible;cursor:grab;will-change:transform;z-index:60}
+  .mc-throw-card.is-front.is-dragging{transition:none!important;cursor:grabbing}
+  .mc-throw-card.is-front.is-thrown{transition:transform 330ms cubic-bezier(.18,.72,.2,1),opacity 300ms ease!important;opacity:.2}
+  .mc-throw-card.is-front.is-settling{transition:transform 280ms cubic-bezier(.18,.9,.25,1)!important}
+  .mc-throw-card .mc-loose-card{position:relative!important;left:auto!important;top:auto!important;width:min(390px,86vw)!important;max-width:86vw!important;height:auto!important;max-height:calc(100dvh - 245px)!important;min-height:0!important;margin:0!important;transform:none!important;overflow:hidden;box-shadow:0 30px 72px rgba(54,44,46,.19)!important}
+  .mc-throw-card .mc-loose-media{height:auto!important;min-height:145px;aspect-ratio:16/10}
+  .mc-throw-card .tone-photo .mc-loose-media{aspect-ratio:4/3;min-height:0}
+  .mc-throw-card .mc-loose-copy{min-height:0!important;padding:16px 18px 18px}
+  .mc-throw-card .mc-loose-copy p{font-size:clamp(17px,4.8vw,21px)!important;line-height:1.38}
+  .mc-throw-card .text-long .mc-loose-copy p{font-size:clamp(15px,4.25vw,18px)!important;line-height:1.42}
+  .mc-throw-meta{position:absolute;left:50%;bottom:4px;transform:translateX(-50%);display:flex;align-items:center;justify-content:center;gap:9px;width:max-content;max-width:94vw;color:#71696b;font:700 11px/1.2 var(--lv-font-body,Inter,sans-serif);z-index:70}
+  .mc-throw-meta span{padding:7px 11px;border-radius:999px;background:rgba(255,255,255,.82);border:1px solid color-mix(in srgb,var(--mc-stage-trip) 18%,#e6dfdc);box-shadow:0 8px 22px rgba(56,44,46,.07)}
+  .mc-throw-meta em{font-style:normal;font-weight:600;color:#91878a}
+  .mc-throw-reset{position:absolute;z-index:80;left:50%;top:50%;transform:translate(-50%,-50%);border:1px solid color-mix(in srgb,var(--mc-stage-trip) 22%,#e6dfdc);background:rgba(255,255,255,.9);border-radius:999px;padding:12px 16px;font:750 13px/1 var(--lv-font-body,Inter,sans-serif);box-shadow:0 18px 44px rgba(54,44,46,.12)}
+  .mc-throw-reset[hidden]{display:none!important}
+  .mc-mobile-swipe,.mc-swipe-track,.mc-swipe-slide,.mc-swipe-meta{display:none!important}
+}
+@media(max-width:480px){
+  .mc-throw-stack{width:96vw;height:min(590px,calc(100dvh - 205px));min-height:365px}
+  .mc-throw-card .mc-loose-card{width:90vw!important;max-width:90vw!important;max-height:calc(100dvh - 225px)!important}
+  .mc-throw-meta em{max-width:205px;text-align:center}
+}
+@media(prefers-reduced-motion:reduce){
+  .mc-throw-card,.mc-throw-card.is-front.is-thrown,.mc-throw-card.is-front.is-settling{transition-duration:1ms!important}
+}
