@@ -1,0 +1,24 @@
+Luvia 13.36.9 / Core 4.36.9 — automated local checks
+
+PASS JavaScript syntax: app/memory-worlds-v3.js
+PASS JavaScript syntax: core/media/memory-cards.js
+PASS JavaScript syntax: intelligence/kernel/version.js
+PASS JavaScript syntax: intelligence/services/base-services.js
+PASS JavaScript syntax: core/diagnostics/media-readiness.js
+PASS Kernel app/core version = 13.36.9 / 4.36.9
+PASS Service worker cache version = 13.36.9
+PASS force-update target = 13.36.9
+PASS Memory UI/Core versions = 13.36.9 / 4.36.9
+PASS Canonical root --trip-accent is first Memory accent source
+PASS Single-author stackLayers are trip-only
+PASS Theme change triggers Memory rerender
+PASS Desktop distributed anchor patterns present
+PASS Desktop overlap hard limit = 10% <=6 cards / 13% larger decks
+PASS Mobile depth presets expose up to four card layers
+PASS Tinder-style pointer drag / spring-back / throw threshold retained
+PASS Desktop hover lift retained
+PASS Stronger visible closed-deck trip accent styling present
+PASS index.html local assets: 152 references / 0 missing
+PASS CSS brace balance: 658 / 658
+
+Not automatically validated: deployed Supabase trip accent value, real browser visual composition, real iPhone/Android gesture behavior, Realtime/profile colors, signed photo rendering.

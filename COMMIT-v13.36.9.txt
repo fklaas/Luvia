@@ -1,0 +1,1 @@
+fix(memories): recover deck layout and canonical trip accent

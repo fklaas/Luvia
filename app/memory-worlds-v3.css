@@ -446,3 +446,24 @@ body.mc-open{overflow:hidden}.mc-overlay{position:fixed;inset:0;z-index:10000;ba
 @media(prefers-reduced-motion:reduce){
   .mc-throw-card,.mc-throw-card.is-front.is-thrown,.mc-throw-card.is-front.is-settling{transition-duration:1ms!important}
 }
+
+
+/* v13.36.9 — Layout Recovery & Canonical Trip Accent */
+.mc-deck[data-stack]{--deck-trip:var(--deck-accent)}
+.mc-deck-layer{background:color-mix(in srgb,var(--layer-color) 28%,#fff)!important;border-color:color-mix(in srgb,var(--layer-color) 58%,#fff)!important;box-shadow:0 18px 40px color-mix(in srgb,var(--layer-color) 18%,transparent)!important}
+.mc-deck-front{border-color:color-mix(in srgb,var(--deck-accent) 56%,#fff)!important;box-shadow:0 26px 62px rgba(71,52,48,.14),0 0 0 2px color-mix(in srgb,var(--deck-accent) 18%,transparent)!important}
+.mc-deck-front:after{box-shadow:inset 0 0 0 3px color-mix(in srgb,var(--deck-accent) 15%,transparent)!important}
+@media(min-width:801px){
+  .mc-spread{inset:150px 3.8vw 82px!important}
+  .mc-spread .mc-loose-card{transition:transform 290ms cubic-bezier(.16,.84,.24,1),box-shadow 290ms ease,filter 220ms ease,opacity 220ms ease!important}
+  .mc-spread .mc-loose-card:hover{z-index:1600!important;transform:translate(-50%,calc(-50% - 18px)) rotate(calc(var(--spread-r,0deg)*.08)) scale(1.043)!important;box-shadow:0 48px 96px rgba(55,41,44,.22),0 22px 46px color-mix(in srgb,var(--person-color) 22%,transparent)!important}
+}
+@media(max-width:800px){
+  .mc-mobile-throw{padding:8px 0 58px!important;overflow:visible!important}
+  .mc-throw-stack{width:min(430px,94vw)!important;height:min(640px,calc(100dvh - 205px))!important;min-height:430px!important;overflow:visible!important}
+  .mc-throw-card{transform:translate3d(var(--stack-x,0px),var(--stack-y,0px),0) rotate(var(--stack-r,0deg)) scale(var(--stack-scale,1))!important;opacity:var(--stack-opacity,1)!important;transform-origin:50% 88%;visibility:visible}
+  .mc-throw-card:nth-child(n+5){visibility:hidden!important}
+  .mc-throw-card.is-front{transform:translate3d(var(--drag-x),var(--drag-y),0) rotate(var(--drag-r)) scale(1)!important;opacity:1!important}
+  .mc-throw-card .mc-loose-card{box-shadow:0 30px 72px rgba(54,44,46,.20),0 8px 24px color-mix(in srgb,var(--person-color) 12%,transparent)!important}
+  .mc-throw-card:not(.is-front) .mc-loose-card{pointer-events:none;filter:saturate(.92) brightness(.995)}
+}

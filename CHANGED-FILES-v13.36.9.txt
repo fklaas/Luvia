@@ -1,0 +1,15 @@
+app/memory-worlds-v3.js
+app/memory-worlds-v3.css
+core/media/memory-cards.js
+intelligence/kernel/version.js
+intelligence/services/base-services.js
+core/diagnostics/media-readiness.js
+index.html
+sw.js
+force-update.html
+RELEASE-v13.36.9.md
+TEST-v13.36.9.md
+DEPLOYMENT-v13.36.9.md
+COMMIT-v13.36.9.txt
+CHANGED-FILES-v13.36.9.txt
+test-results-v13.36.9.txt
