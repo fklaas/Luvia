@@ -1,0 +1,32 @@
+Luvia 13.36.7 / Core 4.36.7 — build workspace test results
+
+AUTOMATED / STATIC CHECKS ACTUALLY EXECUTED
+PASS  JavaScript syntax: app/memory-worlds-v3.js
+PASS  JavaScript syntax: core/media/memory-cards.js
+PASS  JavaScript syntax: intelligence/kernel/version.js
+PASS  JavaScript syntax: intelligence/services/base-services.js
+PASS  JavaScript syntax: core/diagnostics/media-readiness.js
+PASS  runtime version 13.36.7 / Core 4.36.7
+PASS  root-level --trip-accent prioritized before trip record fields
+PASS  single-author stack palette uses trip accent only
+PASS  mobile swipe deck markup present
+PASS  mobile uses swipe index indicator
+PASS  mobile path skips desktop scatter positioning
+PASS  desktop sector-balanced scatter present
+PASS  desktop visible hover lift is 18px
+PASS  desktop hover transition is animated
+PASS  illustrated travel sketches present
+PASS  mobile native scroll-snap present
+PASS  CSS brace balance
+PASS  no stale 13.36.6 / Core 4.36.6 in active runtime version files
+PASS  index.html local asset references: 152 checked, 0 missing
+
+NOT CLAIMED AS AUTOMATIC PASS
+- Exact deployed trip accent value for the user’s current active trip
+- Physical-device mobile swipe/gesture quality and browser chrome behavior
+- Real Supabase realtime propagation of another participant’s profile color
+- Signed photo rendering under production auth/RLS
+- Subjective quality of randomized desktop scatter compositions
+
+ZIP integrity is checked after packaging and appended separately.
+PASS  ZIP integrity: 1727 members, no corrupt member detected.

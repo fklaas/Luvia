@@ -356,3 +356,53 @@ body.mc-open{overflow:hidden}.mc-overlay{position:fixed;inset:0;z-index:10000;ba
   .mc-deck-stage-head{width:calc(100% - 14px)!important;margin-left:7px!important;margin-right:7px!important}
 }
 @media(prefers-reduced-motion:reduce){.mc-route{animation:none!important}}
+
+/* 13.36.7 – Memory Deck Mobile Swipe, Travel Accent & Spatial Rebalance */
+/* Desktop: airy guided scatter; hover visibly lifts the selected card without moving its neighbours. */
+@media(min-width:801px){
+  .mc-spread{inset:150px 3vw 76px!important}
+  .mc-spread .mc-loose-card{width:clamp(205px,15vw,268px)!important;transition:transform 285ms cubic-bezier(.16,.84,.24,1),box-shadow 285ms ease,filter 240ms ease,opacity 240ms ease!important;transform:translate(-50%,-50%) rotate(var(--spread-r,0deg))}
+  .mc-spread .mc-loose-card:hover{z-index:1200!important;transform:translate(-50%,calc(-50% - 18px)) rotate(calc(var(--spread-r,0deg)*.10)) scale(1.045)!important;box-shadow:0 48px 96px rgba(55,41,44,.22),0 22px 46px color-mix(in srgb,var(--person-color) 22%,transparent)!important}
+  .mc-spread:has(.mc-loose-card:hover) .mc-loose-card:not(:hover){opacity:.97!important;filter:saturate(.98)!important}
+}
+
+/* More visible, still quiet travel illustrations in the open-memory stage. */
+.mc-travel-sketch{position:absolute;display:grid;place-items:center;pointer-events:none;color:color-mix(in srgb,var(--mc-stage-trip) 66%,#78938b);border:1.5px solid color-mix(in srgb,var(--mc-stage-trip) 34%,transparent);background:color-mix(in srgb,var(--mc-stage-trip) 5%,rgba(255,255,255,.44));box-shadow:0 10px 30px color-mix(in srgb,var(--mc-stage-trip) 8%,transparent);opacity:.22;animation:mcSketchFloat 18s ease-in-out infinite alternate}
+.mc-sketch-ticket{left:4.5%;top:46%;width:128px;height:48px;border-radius:9px;transform:rotate(-8deg);font:800 9px/1 var(--lv-font-body,Inter,sans-serif);letter-spacing:.18em;animation-duration:23s}
+.mc-sketch-photo{right:5%;top:43%;width:108px;height:88px;border-radius:7px;transform:rotate(7deg);font:800 9px/1 var(--lv-font-body,Inter,sans-serif);letter-spacing:.15em;animation-duration:27s;animation-delay:-8s}
+.mc-sketch-photo:before{content:"";width:72px;height:43px;border:1px solid currentColor;border-radius:3px;position:absolute;top:12px;opacity:.72}
+.mc-sketch-pin{left:16%;bottom:9%;width:54px;height:54px;border-radius:50%;font-size:25px;animation-duration:21s;animation-delay:-5s}
+.mc-sketch-heart{right:13%;bottom:9%;width:62px;height:62px;border-radius:50%;font-size:30px;animation-duration:25s;animation-delay:-11s}
+.mc-sketch-plane{right:18%;top:27%;border:0;background:transparent;box-shadow:none;font-size:32px;transform:rotate(12deg);opacity:.18;animation-duration:19s}
+@keyframes mcSketchFloat{from{translate:0 0;filter:blur(0)}to{translate:7px -10px;filter:blur(.1px)}}
+
+/* Mobile: the open stack is a native horizontal swipe deck, not a squeezed desktop spread. */
+@media(max-width:800px){
+  .mc-canvas-overlay .mc-screen{min-height:100dvh!important;height:100dvh!important;overflow:hidden!important;padding:calc(64px + env(safe-area-inset-top)) 0 calc(82px + env(safe-area-inset-bottom))!important}
+  .mc-deck-stage-head{width:calc(100% - 24px)!important;margin:0 12px 10px!important;flex:0 0 auto}
+  .mc-stage-head-surface{padding:9px 14px 10px!important;border-radius:19px!important}
+  .mc-deck-stage-head h2{font-size:clamp(25px,7vw,31px)!important}
+  .mc-deck-stage-head span{font-size:11px}
+  .mc-mobile-swipe{position:relative;z-index:8;width:100%;min-height:0;flex:1 1 auto;display:flex;flex-direction:column;justify-content:center;overflow:hidden}
+  .mc-swipe-track{display:flex;align-items:center;gap:0;width:100%;overflow-x:auto;overflow-y:hidden;scroll-snap-type:x mandatory;scroll-behavior:smooth;overscroll-behavior-x:contain;-webkit-overflow-scrolling:touch;scrollbar-width:none;padding:8px 0 12px;touch-action:pan-x}
+  .mc-swipe-track::-webkit-scrollbar{display:none}
+  .mc-swipe-slide{flex:0 0 100%;width:100%;min-width:100%;display:grid;place-items:center;scroll-snap-align:center;scroll-snap-stop:always;padding:8px 7vw 16px}
+  .mc-swipe-slide .mc-loose-card{position:relative!important;left:auto!important;top:auto!important;width:min(390px,84vw)!important;max-width:84vw!important;height:auto!important;min-height:0!important;margin:0!important;transform:rotate(var(--card-rot,0deg))!important;box-shadow:0 28px 70px rgba(54,44,46,.18)!important}
+  .mc-swipe-slide .mc-loose-media{height:auto!important;min-height:150px;aspect-ratio:16/10}
+  .mc-swipe-slide .tone-photo .mc-loose-media{aspect-ratio:4/3;min-height:0}
+  .mc-swipe-slide .mc-loose-copy{min-height:0!important;padding:16px 18px 18px}
+  .mc-swipe-slide .mc-loose-copy p{font-size:clamp(17px,4.8vw,21px)!important;line-height:1.38}
+  .mc-swipe-meta{display:flex;align-items:center;justify-content:center;gap:12px;min-height:34px;color:#71696b;font:700 12px/1.2 var(--lv-font-body,Inter,sans-serif)}
+  .mc-swipe-meta span{padding:7px 11px;border-radius:999px;background:rgba(255,255,255,.76);border:1px solid color-mix(in srgb,var(--mc-stage-trip) 14%,#e6dfdc);box-shadow:0 8px 22px rgba(56,44,46,.06)}
+  .mc-swipe-meta em{font-style:normal;font-weight:600;color:#91878a}
+  .mc-continue{position:fixed!important;bottom:max(10px,env(safe-area-inset-bottom))!important;left:50%!important;transform:translateX(-50%)!important;margin:0!important;z-index:70}
+  .mc-stage-atmosphere,.mc-stage-decor{position:fixed!important}
+  .mc-travel-sketch{opacity:.12!important}
+}
+@media(max-width:480px){
+  .mc-swipe-slide{padding-left:5vw;padding-right:5vw}
+  .mc-swipe-slide .mc-loose-card{width:88vw!important;max-width:88vw!important}
+  .mc-swipe-meta{gap:8px;font-size:11px}
+  .mc-swipe-meta em{max-width:190px;text-align:center}
+}
+@media(prefers-reduced-motion:reduce){.mc-travel-sketch{animation:none!important}.mc-swipe-track{scroll-behavior:auto}}

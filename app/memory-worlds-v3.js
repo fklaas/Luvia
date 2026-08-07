@@ -1,12 +1,12 @@
 (() => {
 'use strict';
-const VERSION='4.36.6',BUILD='13.36.6';
+const VERSION='4.36.7',BUILD='13.36.7';
 let host=null,stopCards=null,stopIdentities=null,urlCache=new Map(),homeState=null;
 const deckSessionSeed=Math.random().toString(36).slice(2);
 const validColor=v=>/^#[0-9a-f]{6}$/i.test(String(v||'').trim())?String(v).trim().toLowerCase():null;
 const tripRecord=()=>({...(window.LuviaTripStore?.snapshot?.()?.activeTrip||{}),...(window.LuviaTripContext?.getSnapshot?.()?.activeTrip||{}),...(window.LuviaTripContext?.getActiveTrip?.()||{})});
-const inheritedAccent=()=>{const nodes=[host,host?.closest?.('[style]'),document.querySelector('.lv-shell'),document.querySelector('#app'),document.documentElement].filter(Boolean),props=['--trip-accent','--module-accent','--lv-accent'];for(const node of nodes){const css=getComputedStyle(node);for(const prop of props){const hit=validColor(css.getPropertyValue(prop));if(hit)return hit}}return null};
-const tripAccent=()=>{const t=tripRecord(),candidates=[inheritedAccent(),t.accent,t.accent_color,t.themeColor,t.theme_color,t.color,t.settings?.accent,t.settings?.accent_color,t.settings?.themeColor,t.settings?.theme_color,t.moduleSettings?.theme?.accent,t.module_settings?.theme?.accent,t.visualTheme?.accent,t.visual_theme?.accent];return candidates.map(validColor).find(Boolean)||'#ee6f83'};
+const inheritedAccent=()=>{const nodes=[document.documentElement,document.body,document.querySelector('.lv-dashboard'),document.querySelector('.lv-shell'),document.querySelector('#app'),host].filter(Boolean),props=['--trip-accent','--lv-accent','--module-accent'];for(const node of nodes){const css=getComputedStyle(node);for(const prop of props){const hit=validColor(css.getPropertyValue(prop));if(hit)return hit}}return null};
+const tripAccent=()=>{const t=tripRecord(),root=document.documentElement,body=document.body,rootTrip=validColor(root.style.getPropertyValue('--trip-accent')),bodyTrip=validColor(body?.style?.getPropertyValue?.('--trip-accent')),candidates=[rootTrip,bodyTrip,t.accent,t.accent_color,t.themeColor,t.theme_color,t.color,t.settings?.accent,t.settings?.accent_color,t.settings?.themeColor,t.settings?.theme_color,t.moduleSettings?.theme?.accent,t.module_settings?.theme?.accent,t.visualTheme?.accent,t.visual_theme?.accent,inheritedAccent()];return candidates.map(validColor).find(Boolean)||'#ee6f83'};
 const esc=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const me=()=>window.ParisAuth?.getState?.()?.user||{};
 const REACTIONS=['❤️','🥹','😂','🥰','🤩','🫶','✨','☀️','🌊','🍝','☕','🎢','🏙️','🌿','🎶','📸','😌','🤭','😋','🥳','🤯','🙈','💫','🔥'];
@@ -128,8 +128,12 @@ async function openDeck(key,sourceEl){
   await new Promise(r=>setTimeout(r,2350));
   const showSpread=async()=>{
     const arranged=shuffled(items,`${key}:${Math.random()}`);
-    const p=await swap(ctx,`<div class="mc-deck-stage-head"><div class="mc-stage-head-surface"><small>MEMORY MOMENT</small><h2>${cluster?fmt(cluster.started_at||cluster.created_at)||'Eure Karten':'Eure Karten'}</h2><span>${items.length} ${items.length===1?'Erinnerung':'Erinnerungen'} · ${people.length} ${people.length===1?'Stimme':'Stimmen'}</span></div></div><div class="mc-stage-atmosphere" aria-hidden="true"><span class="mc-route mc-route-a"></span><span class="mc-route mc-route-b"></span><span class="mc-route mc-route-c"></span><span class="mc-postmark">LUVIA · MOMENT</span></div><div class="mc-stage-decor" aria-hidden="true"><i>✦</i><i>✈</i><i>⌖</i><i>♡</i><i>↝</i><i>⌾</i><i>⌁</i><i>✦</i><i>△</i><i>· · ·</i></div><div class="mc-spread" data-count="${items.length}">${arranged.map((c,i)=>renderLooseCard(c,homeState.members,i,'deck')).join('')}</div>${cluster?'<button class="mc-continue" data-continue>Moment weiter ergänzen</button>':''}`,{motion:'scatter',showBack:true});
-    await paintLoosePhotos(p,arranged,media);positionSpread(p.querySelector('.mc-spread'),arranged,true);
+    const mobile=matchMedia('(max-width:800px)').matches;
+    const cardsMarkup=mobile?`<div class="mc-mobile-swipe" data-swipe-deck><div class="mc-swipe-track">${arranged.map((c,i)=>`<section class="mc-swipe-slide" data-swipe-slide="${i}">${renderLooseCard(c,homeState.members,i,'deck')}</section>`).join('')}</div><div class="mc-swipe-meta"><span><b data-swipe-index>1</b> von ${arranged.length}</span><em>Nach links oder rechts wischen</em></div></div>`:`<div class="mc-spread" data-count="${items.length}">${arranged.map((c,i)=>renderLooseCard(c,homeState.members,i,'deck')).join('')}</div>`;
+    const p=await swap(ctx,`<div class="mc-deck-stage-head"><div class="mc-stage-head-surface"><small>MEMORY MOMENT</small><h2>${cluster?fmt(cluster.started_at||cluster.created_at)||'Eure Karten':'Eure Karten'}</h2><span>${items.length} ${items.length===1?'Erinnerung':'Erinnerungen'} · ${people.length} ${people.length===1?'Stimme':'Stimmen'}</span></div></div><div class="mc-stage-atmosphere" aria-hidden="true"><span class="mc-route mc-route-a"></span><span class="mc-route mc-route-b"></span><span class="mc-route mc-route-c"></span><span class="mc-postmark">LUVIA · MOMENT</span><span class="mc-travel-sketch mc-sketch-ticket">BON VOYAGE</span><span class="mc-travel-sketch mc-sketch-photo">MEMORY</span><span class="mc-travel-sketch mc-sketch-pin">⌖</span><span class="mc-travel-sketch mc-sketch-heart">♡</span><span class="mc-travel-sketch mc-sketch-plane">✈︎</span></div><div class="mc-stage-decor" aria-hidden="true"><i>✦</i><i>✈</i><i>⌖</i><i>♡</i><i>↝</i><i>⌾</i><i>⌁</i><i>✦</i><i>△</i><i>· · ·</i></div>${cardsMarkup}${cluster?'<button class="mc-continue" data-continue>Moment weiter ergänzen</button>':''}`,{motion:'scatter',showBack:true});
+    await paintLoosePhotos(p,arranged,media);
+    if(!mobile)positionSpread(p.querySelector('.mc-spread'),arranged,true);
+    else {const track=p.querySelector('.mc-swipe-track'),indexEl=p.querySelector('[data-swipe-index]');if(track&&indexEl){let raf=0;const update=()=>{raf=0;const slides=[...track.querySelectorAll('.mc-swipe-slide')],center=track.scrollLeft+track.clientWidth/2;let best=0,dist=Infinity;slides.forEach((slide,i)=>{const d=Math.abs((slide.offsetLeft+slide.offsetWidth/2)-center);if(d<dist){dist=d;best=i}});indexEl.textContent=String(best+1)};track.addEventListener('scroll',()=>{if(!raf)raf=requestAnimationFrame(update)},{passive:true});requestAnimationFrame(update)}}
     for(const card of p.querySelectorAll('[data-loose-card]'))card.onclick=e=>{if(e.target.closest('button'))return;openCardDetail(ctx,items.find(x=>String(x.id)===String(card.dataset.looseCard)),homeState.members,media,showSpread)};
     p.querySelectorAll('[data-weight][data-own="1"]').forEach(b=>b.onclick=async e=>{e.stopPropagation();const c=items.find(x=>String(x.id)===String(b.dataset.weight));const next=Number(c.weight)>=3?1:Number(c.weight)+1;await window.LuviaMemoryCards.setWeight(c.id,next);c.weight=next;b.textContent=weightLabel(next);b.closest('.mc-loose-card')?.classList.remove('w1','w2','w3');b.closest('.mc-loose-card')?.classList.add(`w${next}`)});
     if(cluster)p.querySelector('[data-continue]').onclick=()=>{ctx.close();setTimeout(()=>openDiscovery(cluster,media,homeState.members,0),460)};
@@ -142,31 +146,31 @@ async function openDeck(key,sourceEl){
   await showSpread();
 }
 function positionSpread(root,items,reroll=false){
-  if(!root)return;const cards=[...root.querySelectorAll('.mc-loose-card')],mobile=matchMedia('(max-width:800px)').matches,rnd=()=>Math.random();
-  if(mobile){cards.forEach((el,i)=>{const side=i%2===0?-1:1;const x=side*(7+rnd()*11),y=rnd()*3;el.style.setProperty('--spread-x',`${x.toFixed(1)}px`);el.style.setProperty('--spread-y',`${y.toFixed(1)}px`);el.style.setProperty('--spread-r',`${(side*(.35+rnd()*.8)).toFixed(2)}deg`);el.style.zIndex=String(20+i)});return}
-  const count=Math.max(1,cards.length),box=root.getBoundingClientRect(),cardBox=cards[0]?.getBoundingClientRect?.()||{width:240,height:360};
-  const cw=Math.max(190,cardBox.width||240),ch=Math.max(300,cardBox.height||360),padX=Math.min(cw*.52,box.width*.12),padY=Math.min(ch*.46,box.height*.22);
-  const minX=padX,maxX=Math.max(minX+1,box.width-padX),minY=padY,maxY=Math.max(minY+1,box.height-padY);
-  const targetNearest=count<=4?1.42:count<=6?1.22:1.04,minMetric=count<=4?.92:.78,maxMetric=count<=4?2.45:2.05;
-  const pts=[];
-  const metric=(a,b)=>Math.hypot((a.x-b.x)/(cw*.92),(a.y-b.y)/(ch*.72));
+  if(!root)return;const cards=[...root.querySelectorAll('.mc-loose-card')],rnd=()=>Math.random();
+  if(matchMedia('(max-width:800px)').matches)return;
+  const count=Math.max(1,cards.length),box=root.getBoundingClientRect(),cardBox=cards[0]?.getBoundingClientRect?.()||{width:240,height:350};
+  const cw=Math.max(190,cardBox.width||240),ch=Math.max(290,cardBox.height||350),padX=Math.min(cw*.56,box.width*.105),padY=Math.min(ch*.50,box.height*.18);
+  const minX=padX,maxX=Math.max(minX+1,box.width-padX),minY=padY,maxY=Math.max(minY+1,box.height-padY),pts=[];
+  const minMetric=count<=4?1.02:count<=6?.90:.82,targetNearest=count<=4?1.72:count<=6?1.52:1.34,maxNearest=count<=4?3.15:2.75;
+  const metric=(a,b)=>Math.hypot((a.x-b.x)/(cw*.94),(a.y-b.y)/(ch*.76));
+  const sectorOf=c=>{const angle=Math.atan2((c.y-box.height*.54)/(box.height*.5),(c.x-box.width*.5)/(box.width*.5));return Math.floor(((angle+Math.PI)/(Math.PI*2))*8)%8};
   for(let i=0;i<count;i++){
     let best=null,bestScore=-1e9;
-    for(let n=0;n<220;n++){
+    for(let n=0;n<320;n++){
       const c={x:minX+rnd()*(maxX-minX),y:minY+rnd()*(maxY-minY)};
-      const nx=(c.x-box.width/2)/(box.width*.5),ny=(c.y-box.height*.53)/(box.height*.5),center=Math.hypot(nx,ny);
-      if(!pts.length){const score=-Math.abs(center-.34)+rnd()*.08;if(score>bestScore){best=c;bestScore=score}continue}
-      const distances=pts.map(p=>metric(c,p)),near=Math.min(...distances),tooClose=Math.max(0,minMetric-near),tooFar=Math.max(0,near-maxMetric);
-      const balancePenalty=Math.max(0,center-.78)*4.5,idealPenalty=Math.abs(near-targetNearest)*.72;
-      const centroid=pts.reduce((a,p)=>({x:a.x+p.x/pts.length,y:a.y+p.y/pts.length}),{x:0,y:0}),clusterDist=Math.hypot((c.x-centroid.x)/(cw*1.7),(c.y-centroid.y)/(ch*1.25));
-      const cohesionPenalty=Math.max(0,clusterDist-2.45)*1.6;
-      const score=2.8-tooClose*7-tooFar*2.2-idealPenalty-balancePenalty-cohesionPenalty+rnd()*.16;
+      const nx=(c.x-box.width/2)/(box.width*.5),ny=(c.y-box.height*.54)/(box.height*.5),radius=Math.hypot(nx,ny);
+      const edgePenalty=Math.max(0,radius-.96)*7,centerPenalty=Math.abs(radius-(count<=4?.42:.52))*.48;
+      if(!pts.length){const score=-centerPenalty-edgePenalty+rnd()*.22;if(score>bestScore){best=c;bestScore=score}continue}
+      const distances=pts.map(p=>metric(c,p)),near=Math.min(...distances),tooClose=Math.max(0,minMetric-near),tooFar=Math.max(0,near-maxNearest),idealPenalty=Math.abs(near-targetNearest)*.58;
+      const sector=sectorOf(c),sectorCount=pts.filter(p=>sectorOf(p)===sector).length,sectorPenalty=Math.max(0,sectorCount-1)*.75;
+      const leftCount=pts.filter(p=>p.x<box.width/2).length,rightCount=pts.length-leftCount,balancePenalty=(c.x<box.width/2&&leftCount>rightCount+1)||(c.x>=box.width/2&&rightCount>leftCount+1)?.45:0;
+      const score=3.3-tooClose*8.5-tooFar*1.8-idealPenalty-edgePenalty-centerPenalty-sectorPenalty-balancePenalty+rnd()*.28;
       if(score>bestScore){best=c;bestScore=score}
     }
-    pts.push(best||{x:box.width/2,y:box.height/2});
+    pts.push(best||{x:box.width*(.24+rnd()*.52),y:box.height*(.24+rnd()*.58)});
   }
   const arranged=shuffled(pts,`${Date.now()}:${Math.random()}`);
-  cards.forEach((el,i)=>{const p=arranged[i];el.style.setProperty('--spread-left',`${(p.x/box.width*100).toFixed(2)}%`);el.style.setProperty('--spread-top',`${(p.y/box.height*100).toFixed(2)}%`);el.style.setProperty('--spread-r',`${((rnd()-.5)*3.2).toFixed(2)}deg`);el.style.zIndex=String(20+i)});
+  cards.forEach((el,i)=>{const p=arranged[i];el.style.setProperty('--spread-left',`${(p.x/box.width*100).toFixed(2)}%`);el.style.setProperty('--spread-top',`${(p.y/box.height*100).toFixed(2)}%`);el.style.setProperty('--spread-r',`${((rnd()-.5)*4.4).toFixed(2)}deg`);el.style.zIndex=String(20+i)});
 }
 
 async function openCardDetail(ctx,card,members,media,onBack){
@@ -180,5 +184,5 @@ async function openCardDetail(ctx,card,members,media,onBack){
 }
 
 async function mount(node){host=node;await renderHome();stopCards=await window.LuviaMemoryCards.subscribe(()=>setTimeout(renderHome,350));stopIdentities=await window.LuviaMemoryCards.subscribeIdentities?.(()=>{window.LuviaMemoryCards.members().then(m=>{if(!homeState)return;homeState.members=m;renderHome()})});return()=>{stopCards?.();stopIdentities?.();stopCards=null;stopIdentities=null;host=null}}
-window.LuviaAlbumsView=Object.freeze({version:VERSION,build:BUILD,mount,render:renderHome,experience:'memory-deck-composition-focus-atmosphere-typography-mobile-recovery',model:'cards -> decks -> moments -> journeys -> studio'});
+window.LuviaAlbumsView=Object.freeze({version:VERSION,build:BUILD,mount,render:renderHome,experience:'memory-deck-mobile-swipe-travel-accent-spatial-rebalance',model:'cards -> decks -> moments -> journeys -> studio'});
 })();
