@@ -505,3 +505,24 @@ body.mc-open{overflow:hidden}.mc-overlay{position:fixed;inset:0;z-index:10000;ba
   .mc-review-complete[hidden]{display:none!important}.mc-review-complete>small{font:850 9px/1 var(--lv-font-body,Inter,sans-serif);letter-spacing:.17em;color:color-mix(in srgb,var(--mc-stage-trip) 72%,#6d6164)}.mc-review-complete h3{margin:9px 0 9px;font:650 29px/1.05 var(--lv-font-display,Georgia,serif);color:#294255}.mc-review-complete p{margin:0;color:#7e7375;font:650 12px/1.45 var(--lv-font-body,Inter,sans-serif)}
   .mc-review-complete>div{display:grid;gap:8px;margin-top:20px}.mc-review-complete button{min-height:44px;border-radius:999px;border:1px solid color-mix(in srgb,var(--mc-stage-trip) 22%,#e3dbd8);background:#fff;color:#47555e;font:800 12px/1 var(--lv-font-body,Inter,sans-serif)}.mc-review-complete button.is-primary{background:var(--mc-stage-trip);border-color:var(--mc-stage-trip);color:#fff}
 }
+
+/* v13.37.0 — Memory Curation Foundation */
+.mc-deck-wrap{display:grid;gap:10px;align-content:start;min-width:0}
+.mc-deck-curation{display:flex;justify-content:center;gap:8px;flex-wrap:wrap;margin-top:-18px;position:relative;z-index:4}
+.mc-deck-curation button{border:1px solid color-mix(in srgb,var(--mc-accent,#67ad96) 18%,#ddd);background:rgba(255,255,255,.9);border-radius:999px;padding:8px 11px;font:750 10px/1 var(--lv-font-body,Inter,sans-serif);color:#5f6668;cursor:pointer;box-shadow:0 8px 20px rgba(43,38,39,.06)}
+.mc-deck-curation button:hover{transform:translateY(-1px)}
+.mc-deck-curation button.danger{color:#a85f67;background:#fff8f8}
+.mc-photo-choice-multi button{position:relative}.mc-photo-choice-multi button.picked:after{content:"HERO";position:absolute;top:15px;right:15px;padding:5px 7px;border-radius:999px;background:rgba(255,255,255,.92);font:900 9px/1 var(--lv-font-body,Inter,sans-serif);letter-spacing:.1em;color:#52796d}
+.mc-photo-choice-multi button.limit-hit{animation:mc-limit-hit .34s ease}
+.mc-photo-selection-meta{width:max-content;margin:14px auto 0;padding:8px 12px;border-radius:999px;background:rgba(255,255,255,.82);border:1px solid #e8dfdc;color:#726a6b;font:750 11px/1 var(--lv-font-body,Inter,sans-serif)}
+@keyframes mc-limit-hit{50%{transform:translateY(-2px) scale(.98);box-shadow:0 0 0 3px rgba(194,105,126,.18)}}
+.mc-loose-card.curation-hero .mc-card-foot:before{content:"HERO";font-size:8px;letter-spacing:.14em;font-weight:900;color:var(--person-color)}
+.mc-loose-card.curation-story .mc-card-foot:before{content:"STORY";font-size:8px;letter-spacing:.14em;font-weight:900;color:var(--person-color)}
+.mc-loose-card.curation-signal .mc-card-foot:before{content:"SIGNAL";font-size:8px;letter-spacing:.14em;font-weight:900;color:var(--person-color)}
+.mc-loose-card.curation-signal .mc-loose-copy>strong{font-size:34px;line-height:1;margin-top:2px}.mc-loose-card.curation-signal .mc-loose-copy>p{font-size:16px!important;font-weight:650;color:#43515a}
+@media(min-width:801px){
+  /* Render cards in their real CSS size and lift without scaling: sharper text on desktop/laptop. */
+  .mc-spread .mc-loose-card{transform:translate3d(-50%,-50%,0) rotate(var(--spread-r,0deg))!important;image-rendering:auto;text-rendering:geometricPrecision}
+  .mc-spread .mc-loose-card:hover{transform:translate3d(-50%,calc(-50% - 18px),0) rotate(calc(var(--spread-r,0deg)*.08))!important}
+}
+@media(max-width:800px){.mc-deck-curation{margin-top:-8px}.mc-deck-curation button{min-height:38px}}

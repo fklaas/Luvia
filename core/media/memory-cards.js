@@ -1,6 +1,6 @@
 (() => {
 'use strict';
-const VERSION='4.36.11',BUILD='13.36.11';
+const VERSION='4.37.0',BUILD='13.37.0';
 let channel=null,identityChannel=null,writeDepth=0;
 const missing=e=>['42P01','PGRST205'].includes(e?.code);
 const validColor=v=>/^#[0-9a-f]{6}$/i.test(String(v||'').trim())?String(v).trim().toLowerCase():null;
@@ -42,7 +42,24 @@ async function albumReviews(cardIds=[]){
   if(r.error){if(missing(r.error))return{};throw r.error}return Object.fromEntries((r.data||[]).map(x=>[String(x.card_id),x.decision]));
 }
 
+const curationClass=card=>{const t=String(card?.card_type||'');if(t==='photo')return'hero';if(['quote','place','food','inside_joke','note'].includes(t))return'story';return'signal'};
+async function syncPhotoCandidates(clusterId,mediaIds=[]){
+  const ids=[...new Set(mediaIds.map(String).filter(Boolean))].slice(0,3),context=await ctx();
+  const existing=await list({clusterId}),mine=existing.filter(c=>String(c.author_id)===String(context.userId)&&c.card_type==='photo');
+  for(const card of mine){if(card.media_id&&!ids.includes(String(card.media_id)))await dismiss(card.id)}
+  const saved=[];for(const mediaId of ids){const same=mine.find(c=>String(c.media_id)===String(mediaId));saved.push(await save({id:same?.id||null,cardType:'photo',sourceType:'cluster-discovery',clusterId,mediaId,weight:2,dedupeKey:`cluster:${clusterId}:author:${context.userId}:photo:${mediaId}`,metadata:{...(same?.metadata||{}),choice:'personal-favorite',curation_class:'hero',selected_for_stack:true}}))}return saved;
+}
+async function stackCuration(clusterIds=[]){
+  const ids=[...new Set(clusterIds.map(String).filter(Boolean))];if(!ids.length)return{states:{},proposals:{}};const{client,tripId}=await ctx();
+  const [states,proposals]=await Promise.all([client.from('memory_stack_curation').select('*').eq('trip_id',tripId).in('cluster_id',ids),client.from('memory_stack_title_proposals').select('*').eq('trip_id',tripId).in('cluster_id',ids).order('created_at',{ascending:true})]);
+  if(states.error&&!missing(states.error))throw states.error;if(proposals.error&&!missing(proposals.error))throw proposals.error;
+  const proposalMap={};for(const row of proposals.data||[])(proposalMap[String(row.cluster_id)]??=[]).push(row);return{states:Object.fromEntries((states.data||[]).map(x=>[String(x.cluster_id),x])),proposals:proposalMap};
+}
+async function saveTitleProposal(clusterId,title){const clean=String(title||'').trim().slice(0,90);if(!clean)throw new Error('Titel darf nicht leer sein.');const{client,tripId,userId}=await ctx();const r=await client.from('memory_stack_title_proposals').upsert({trip_id:tripId,cluster_id:clusterId,user_id:userId,title:clean,updated_at:new Date().toISOString()},{onConflict:'trip_id,cluster_id,user_id'}).select('*').single();if(r.error){if(missing(r.error))throw new Error('Bitte zuerst die 13.37.0 Migration ausführen.');throw r.error}window.dispatchEvent(new CustomEvent('luvia:memory-curation-updated',{detail:{clusterId,local:true}}));return r.data}
+async function dissolveStack(clusterId){const{client,tripId}=await ctx();const r=await client.rpc('luvia_memory_dissolve_stack',{p_trip_id:tripId,p_cluster_id:clusterId});if(r.error)throw r.error;window.dispatchEvent(new CustomEvent('luvia:memory-curation-updated',{detail:{clusterId,dissolved:true,local:true}}));return true}
+async function albumReviewSummary(cardIds=[]){const ids=[...new Set(cardIds.map(String).filter(Boolean))];if(!ids.length)return{byCard:{},reviewers:0};const{client,tripId}=await ctx();const r=await client.from('memory_card_album_reviews').select('card_id,user_id,decision').eq('trip_id',tripId).in('card_id',ids);if(r.error){if(missing(r.error))return{byCard:{},reviewers:0};throw r.error}const byCard={},users=new Set();for(const row of r.data||[]){users.add(String(row.user_id));const k=String(row.card_id);const b=byCard[k]??={included:0,excluded:0,undecided:0,total:0};b[row.decision]=(b[row.decision]||0)+1;b.total++}return{byCard,reviewers:users.size}}
+
 async function subscribe(cb){const{client,tripId}=await ctx();if(channel)await client.removeChannel(channel);channel=client.channel(`luvia-memory-cards-${tripId}-${Math.random().toString(36).slice(2)}`).on('postgres_changes',{event:'*',schema:'public',table:'memory_cards',filter:`trip_id=eq.${tripId}`},p=>{if(!writeDepth)cb?.(p)}).subscribe();return async()=>{if(channel){await client.removeChannel(channel);channel=null}}}
 async function subscribeIdentities(cb){const{client}=await ctx();if(identityChannel)await client.removeChannel(identityChannel);identityChannel=client.channel(`luvia-memory-identities-${Math.random().toString(36).slice(2)}`).on('postgres_changes',{event:'*',schema:'public',table:'memory_member_identity'},p=>cb?.(p)).subscribe();return async()=>{if(identityChannel){await client.removeChannel(identityChannel);identityChannel=null}}}
-window.LuviaMemoryCards=Object.freeze({version:VERSION,build:BUILD,list,save,setWeight,dismiss,members,setAlbumReview,albumReviews,subscribe,subscribeIdentities,tripAccent,activeTrip,isWriting:()=>writeDepth>0});
+window.LuviaMemoryCards=Object.freeze({version:VERSION,build:BUILD,list,save,setWeight,dismiss,members,setAlbumReview,albumReviews,albumReviewSummary,syncPhotoCandidates,curationClass,stackCuration,saveTitleProposal,dissolveStack,subscribe,subscribeIdentities,tripAccent,activeTrip,isWriting:()=>writeDepth>0});
 })();

@@ -98,7 +98,7 @@
       </header>
       <div class="lv-gallery-status" data-gallery-status>Galerie wird geladen …</div>
       <section class="lv-gallery-section"><div class="lv-gallery-section-head"><div><span>⭐ Auswahl</span><h2>Favoriten</h2></div><strong data-favorite-count>0</strong></div><div class="lv-favorites" data-gallery-favorites></div></section>
-      <section class="lv-gallery-section"><div class="lv-gallery-section-head"><div><span>✨ Als Moment erkannt</span><h2>Memory Moments</h2></div><strong data-cluster-count>0</strong></div><div data-gallery-clusters></div></section>
+
       <section class="lv-gallery-section"><div class="lv-gallery-section-head"><div><span>🗓️ Reisetage</span><h2>Fototage</h2></div><strong data-gallery-count>0 Fotos</strong></div><div data-gallery-days></div></section>
     </section>`;
   }

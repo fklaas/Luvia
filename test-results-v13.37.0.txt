@@ -1,0 +1,29 @@
+Luvia 13.37.0 / Core 4.37.0 — automated local checks
+
+PASS  JavaScript syntax: app/memory-worlds-v3.js
+PASS  JavaScript syntax: core/media/memory-cards.js
+PASS  JavaScript syntax: app/gallery-view.js
+PASS  JavaScript syntax: intelligence/kernel/version.js
+PASS  JavaScript syntax: intelligence/services/base-services.js
+PASS  JavaScript syntax: core/diagnostics/media-readiness.js
+PASS  152 local index.html asset references, 0 missing
+PASS  CSS braces balanced
+PASS  Hero / Story / Signal classifier wired
+PASS  Up to 3 Hero photo candidates per participant/moment
+PASS  Existing selected photo-card reuse prevents duplicate candidate rows
+PASS  Stack day derived from Media dayKey/day_key source
+PASS  Cloud-backed participant title proposals
+PASS  Owner-only stack dissolve RPC checks trip ownership
+PASS  Shared album-review aggregation for trip members
+PASS  Legacy pure reaction duplicate suppressed when vibe card exists
+PASS  Gallery Memory Moments section removed from visible Gallery UI
+PASS  Desktop hover override removes scale-based text softening
+PASS  App 13.37.0 / Core 4.37.0 / SW cache / Force Update consistent
+PASS  No old 13.36.11 / 4.36.11 refs in active release runtime files
+
+Not executed automatically:
+- live Supabase migration execution
+- two-account realtime/review aggregation
+- real owner/non-owner RLS/RPC behavior
+- visual browser/device sharpness and layout review
+- signed production photo rendering

@@ -1,1 +1,1 @@
-feat(memories): introduce Memory Visual System V1 across desktop and mobile
+feat(memories): establish collaborative memory curation foundation
