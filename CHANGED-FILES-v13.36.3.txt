@@ -1,0 +1,14 @@
+app/memory-worlds-v3.js
+app/memory-worlds-v3.css
+core/media/memory-cards.js
+supabase/migrations/20260807123500_memory_member_identity_realtime.sql
+intelligence/kernel/version.js
+index.html
+sw.js
+force-update.html
+core/diagnostics/media-readiness.js
+intelligence/services/base-services.js
+RELEASE-v13.36.3.md
+DEPLOYMENT-v13.36.3.md
+COMMIT-v13.36.3.txt
+CHANGED-FILES-v13.36.3.txt
