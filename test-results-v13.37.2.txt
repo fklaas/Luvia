@@ -1,0 +1,32 @@
+Luvia 13.37.2 / Core 4.37.2 — automated local checks
+Date: 2026-08-07
+
+PASS JavaScript syntax: app/memory-worlds-v3.js
+PASS JavaScript syntax: core/media/memory-cards.js
+PASS JavaScript syntax: intelligence/kernel/version.js
+PASS JavaScript syntax: intelligence/services/base-services.js
+PASS JavaScript syntax: core/diagnostics/media-readiness.js
+PASS App/Core version: 13.37.2 / 4.37.2
+PASS Service worker cache: luvia-shell-v13.37.2
+PASS Force-update target: appv=13.37.2
+PASS 152 local index.html asset references checked; 0 missing
+PASS CSS brace structure: 811 opening / 811 closing
+PASS voting results UI present
+PASS real photo/content preview in voting UI present
+PASS explicit remaining/total points budget copy present
+PASS every candidate is initialized with explicit 0 points before vote save
+PASS aggregate vote-summary Core API present
+PASS vote Realtime subscription present
+PASS weak Story Card album-candidate guard present
+PASS Story Card enrichment/edit Core path present
+PASS opened stack header separates date context from title
+PASS content-driven card sizing overrides fixed 5:7 clipping
+PASS visible HERO/STORY/SIGNAL pseudo-labels suppressed
+PASS active runtime files contain no unexpected stale 13.37.1 / 4.37.1 version references
+
+NOT AUTOMATICALLY VERIFIED
+- real multi-account Supabase voting roundtrip in production
+- actual cross-device Realtime transition to final results
+- visual card-fit quality with every real production text/photo combination
+- subjective laptop/desktop radial composition after variable-height cards
+- actual user understanding/usability of the result screen

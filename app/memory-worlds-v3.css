@@ -544,3 +544,63 @@ body.mc-open{overflow:hidden}.mc-overlay{position:fixed;inset:0;z-index:10000;ba
 .mc-signal-caption{font-size:12px!important;line-height:1.35!important;color:#69747a!important;font-weight:650!important;margin-top:2px!important}
 @keyframes mcModalIn{from{opacity:0}to{opacity:1}}
 @media(max-width:800px){.mc-curation-modal{padding:12px;align-items:end}.mc-curation-dialog{width:100%;max-height:88dvh;border-radius:26px 26px 18px 18px;padding:24px 18px}.mc-modal-actions{display:grid;grid-template-columns:1fr 1fr}.mc-vote-list article{grid-template-columns:36px 1fr}.mc-vote-points{grid-column:1/-1;justify-content:flex-end}.mc-deck-info strong{font-size:19px!important}.mc-deck-chips{max-height:42px}}
+
+/* v13.37.2 — Memory Voting Results & Card Content Fit */
+/* Cards are content-driven. Nothing important may be clipped by a fixed 5:7 box. */
+.mc-loose-card{aspect-ratio:auto!important;min-height:340px;height:auto!important;overflow:hidden}
+.mc-loose-card.curation-hero{min-height:350px}
+.mc-loose-card.curation-story{min-height:390px}
+.mc-loose-card.curation-story.text-long{min-height:430px}
+.mc-loose-card.curation-signal{min-height:330px}
+.mc-loose-copy{height:auto!important;min-height:210px!important;box-sizing:border-box;overflow:visible!important}
+.mc-loose-card.curation-hero .mc-loose-copy{min-height:145px!important}
+.mc-loose-card.curation-signal .mc-loose-copy{min-height:195px!important}
+.mc-loose-copy p{margin-bottom:16px!important;overflow-wrap:anywhere}
+.mc-card-foot{flex:0 0 auto}
+.mc-loose-card.curation-hero .mc-card-foot:before,.mc-loose-card.curation-story .mc-card-foot:before,.mc-loose-card.curation-signal .mc-card-foot:before{content:none!important}
+.mc-story-enrich{margin:2px 0 13px;border:1px solid color-mix(in srgb,var(--person-color) 24%,#e6dfdc);background:color-mix(in srgb,var(--person-color) 7%,#fff);color:#52636b;border-radius:999px;padding:8px 11px;font:800 10px/1 var(--lv-font-body,Inter,sans-serif);cursor:pointer}
+.mc-story-enrich:hover{transform:translateY(-1px)}
+
+/* Open-stack header: date is context, title is the headline. */
+.mc-deck-stage-head h2{font-size:clamp(27px,2.45vw,40px)!important;line-height:1.08!important;max-width:680px;margin-left:auto!important;margin-right:auto!important}
+.mc-stage-head-surface>small{display:block;font-size:9px;letter-spacing:.16em}
+
+/* Voting: show the actual memory, not merely its type. */
+.mc-budget-copy b{color:#355d51}
+.mc-vote-list{gap:12px}
+.mc-vote-list article.mc-vote-card{grid-template-columns:88px minmax(0,1fr) auto;align-items:stretch;padding:10px;min-height:92px}
+.mc-vote-preview{width:88px;min-height:78px;border-radius:14px;overflow:hidden;display:grid;place-items:center;background:color-mix(in srgb,var(--trip-accent,#67ad96) 8%,#fff);font-size:28px}
+.mc-vote-preview.has-photo{background:#eef2f0}
+.mc-vote-preview img,.mc-result-preview img{width:100%;height:100%;object-fit:cover;display:block}
+.mc-vote-copy{display:flex;min-width:0;flex-direction:column;justify-content:center;padding:3px 0}
+.mc-vote-copy>small{margin:0 0 5px!important;text-transform:uppercase;letter-spacing:.08em;font-weight:850;color:#72807e}
+.mc-vote-copy>strong{font-size:14px!important;line-height:1.32!important;-webkit-line-clamp:3!important}
+.mc-vote-copy>p{margin:5px 0 0;color:#879092;font-size:10px;line-height:1.35}
+.mc-vote-points{align-self:center}
+
+/* Voting results are an understandable outcome, not a technical table. */
+.mc-result-list{display:grid;gap:11px;margin-top:18px}
+.mc-result-card{display:grid;grid-template-columns:42px 72px minmax(0,1fr);align-items:center;gap:11px;padding:10px 12px;border-radius:19px;background:rgba(255,255,255,.86);border:1px solid #e6ebe8}
+.mc-result-rank{width:38px;height:38px;border-radius:50%;display:grid;place-items:center;background:color-mix(in srgb,var(--trip-accent,#67ad96) 14%,#fff);color:#416458;font:900 12px/1 var(--lv-font-body,Inter,sans-serif)}
+.mc-result-preview{width:72px;height:62px;border-radius:13px;overflow:hidden;display:grid;place-items:center;background:color-mix(in srgb,var(--trip-accent,#67ad96) 8%,#fff);font-size:24px}
+.mc-result-card small{display:block;margin-bottom:4px;color:#7f898b;font-size:9px;text-transform:uppercase;letter-spacing:.08em;font-weight:850}.mc-result-card strong{display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;color:#334b59;font:780 13px/1.3 var(--lv-font-body,Inter,sans-serif)}.mc-result-card p{margin:4px 0 0;color:#678078;font:750 10px/1.3 var(--lv-font-body,Inter,sans-serif)}
+.mc-result-note{margin-top:14px;padding:12px 14px;border-radius:15px;background:color-mix(in srgb,var(--trip-accent,#67ad96) 7%,#fff);color:#5f706b;font:700 11px/1.4 var(--lv-font-body,Inter,sans-serif)}
+
+.mc-curation-dialog textarea{width:100%;box-sizing:border-box;resize:vertical;min-height:150px;padding:15px 16px;border-radius:16px;border:1px solid #dce4e1;background:#fff;font:650 15px/1.45 var(--lv-font-body,Inter,sans-serif);outline:none;color:#334b59}.mc-curation-dialog textarea:focus{border-color:var(--trip-accent,#67ad96);box-shadow:0 0 0 4px color-mix(in srgb,var(--trip-accent,#67ad96) 12%,transparent)}.mc-story-hint{margin-top:8px;color:#8a9394;font:650 10px/1.4 var(--lv-font-body,Inter,sans-serif)}
+
+@media(min-width:801px){
+  .mc-spread .mc-loose-card{min-height:340px!important}
+  .mc-spread .mc-loose-card.curation-story{min-height:390px!important}
+  .mc-spread .mc-loose-card.curation-story.text-long{min-height:430px!important}
+  .mc-spread .mc-loose-card.curation-hero{min-height:350px!important}
+  .mc-spread .mc-loose-card.curation-signal{min-height:330px!important}
+}
+@media(max-width:800px){
+  .mc-loose-card,.mc-loose-card.curation-story,.mc-loose-card.curation-story.text-long,.mc-loose-card.curation-hero,.mc-loose-card.curation-signal{min-height:0!important;height:auto!important}
+  .mc-loose-copy,.mc-loose-card.curation-hero .mc-loose-copy,.mc-loose-card.curation-signal .mc-loose-copy{min-height:0!important}
+  .mc-vote-list article.mc-vote-card{grid-template-columns:76px minmax(0,1fr);min-height:88px}
+  .mc-vote-preview{width:76px;min-height:72px}
+  .mc-vote-points{grid-column:1/-1;justify-content:flex-end}
+  .mc-result-card{grid-template-columns:38px 62px minmax(0,1fr)}
+  .mc-result-preview{width:62px;height:56px}
+}
