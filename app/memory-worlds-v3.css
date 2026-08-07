@@ -674,7 +674,7 @@ body.mc-open{overflow:hidden}.mc-overlay{position:fixed;inset:0;z-index:10000;ba
 @media(max-width:1200px) and (min-width:801px){.mc-deck-info strong{font-size:17px!important}.mc-deck-info{gap:5px!important}}
 
 
-/* v13.37.4 — Memory Stack Navigation & Summary Recovery */
+/* v13.37.5 — Memory Spread Runtime Recovery */
 .mc-deck-wrap{display:flex;flex-direction:column;align-items:center;min-width:0}
 .mc-deck-summary{width:min(320px,94%);margin:-7px auto 12px;display:grid;justify-items:center;gap:7px;position:relative;z-index:5;text-align:center;color:#667076}
 .mc-deck-summary-chips{display:flex;justify-content:center;gap:6px;flex-wrap:wrap}
@@ -684,4 +684,4 @@ body.mc-open{overflow:hidden}.mc-overlay{position:fixed;inset:0;z-index:10000;ba
 .mc-deck-curation{margin-top:0!important}
 @media(max-width:800px){.mc-deck-summary{width:min(330px,90vw);margin-top:-3px}.mc-deck-summary-status{font-size:11px}.mc-deck-summary-chips b{font-size:9.5px}}
 
-/* Release marker: Luvia 13.37.4 · Core 4.37.4 */
+/* Release marker: Luvia 13.37.5 · Core 4.37.5 */

@@ -1,6 +1,6 @@
 (() => {
 'use strict';
-const VERSION='4.37.4',BUILD='13.37.4';
+const VERSION='4.37.5',BUILD='13.37.5';
 let host=null,stopCards=null,stopIdentities=null,stopVotes=null,stopTrip=null,stopTheme=null,urlCache=new Map(),homeState=null;
 const deckSessionSeed=Math.random().toString(36).slice(2);
 const validColor=v=>/^#[0-9a-f]{6}$/i.test(String(v||'').trim())?String(v).trim().toLowerCase():null;
@@ -161,7 +161,7 @@ async function openDiscovery(cluster,media,members,startStep=0){
 
 function renderLooseCard(c,members,i,mode='deck'){
   const uid=String(me().id||''),rot=((seeded(c.id,i)-.5)*(mode==='deck'?3.0:1.6)).toFixed(2),x=Math.round((seeded(c.id,i+10)-.5)*22),y=Math.round((seeded(c.id,i+20)-.5)*18);
-  const group=homeState?.grouped?[...homeState.grouped.values()].find(list=>list.some(x=>String(x.id)===String(c.id)))||[]:[];const visual=resolveMemoryVisualPalette(group.length?group:[c],members);const accent=memberColor(c.author_id,members)||(visual.mode==='multi'?visual.primary:visual.trip),name=whoName(c,members),label=typeName(c.card_type);
+  const group=homeState?.grouped?[...homeState.grouped.values()].find(list=>list.some(x=>String(x.id)===String(c.id)))||[]:[];const cls=curationClass(c);const visual=resolveMemoryVisualPalette(group.length?group:[c],members);const accent=memberColor(c.author_id,members)||(visual.mode==='multi'?visual.primary:visual.trip),name=whoName(c,members),label=typeName(c.card_type);
   const siblingVibe=group.find(v=>v.card_type==='vibe'&&String(v.author_id)===String(c.author_id));
   const reactionContext=c.card_type==='reaction'&&siblingVibe?`<p class="mc-signal-caption">${esc(whoName(c,members))}: ${esc(siblingVibe.content||'Ein Gefühl, das geblieben ist')}</p>`:'';
   const content=c.content?`${cls==='story'?'<span class="mc-story-kicker">Kleine Geschichte</span>':''}<p>${esc(c.content)}</p>`:'';

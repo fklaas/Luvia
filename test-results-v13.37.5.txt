@@ -1,0 +1,15 @@
+Luvia 13.37.5 · Core 4.37.5 — automated local checks
+
+PASS JavaScript syntax: app/memory-worlds-v3.js
+PASS JavaScript syntax: core/media/memory-cards.js
+PASS JavaScript syntax: intelligence/kernel/version.js
+PASS JavaScript syntax: intelligence/services/base-services.js
+PASS JavaScript syntax: core/diagnostics/media-readiness.js
+PASS Runtime regression guard: renderLooseCard defines cls=curationClass(c) before cls is used
+PASS Stack navigation guard: openDeck reaches showSpread directly
+PASS App/Core/Cache/Force-Update version consistency: 13.37.5 / 4.37.5
+PASS No active 13.37.4 references in critical runtime/version files
+PASS Local index.html assets: 151 checked, 0 missing
+PASS memory-worlds-v3.css brace balance: 862 / 862
+
+Manual deployment check still required for real authenticated stack data and browser rendering.
