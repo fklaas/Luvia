@@ -1,0 +1,12 @@
+# Test 13.32.0
+- Memory Moment opens as full-screen cinematic flow.
+- Memory Journey is visually and structurally distinct from a Moment.
+- all seven scenes can be traversed forward/back.
+- rich text and reactions work on desktop and mobile.
+- image/voice weighting changes highlight emphasis.
+- AI title/day/story controls fail gracefully to local suggestions.
+- other traveller contributions render as voice bubbles.
+- Story/Post buttons create PNG files.
+- Reel/TikTok/Wrapped buttons create WebM video in supported browsers.
+- Share uses native share sheet where file sharing is supported.
+- gallery/upload/realtime behavior remains unchanged.
