@@ -26,6 +26,7 @@
     {id:'dashboard.brief',tier:'default',mode:'READ',schema:'dashboard_brief',tools:['trip.current','preferences.current','travel.context','journey.context','journey.events','journey.reservations','journey.evidence','schedule.current','today.current','recommendations.current','memory.signals'],cacheTtlMs:300000,description:'Erstellt ein ehrliches Reisebriefing für das Dashboard.'},
     {id:'timeline.propose',tier:'deep',mode:'DRAFT',schema:'timeline_proposal',tools:['trip.current','preferences.current','travel.context','journey.context','journey.events','journey.reservations','journey.evidence','schedule.current','today.current','places.saved','memory.signals'],cacheTtlMs:0,description:'Bereitet bestätigungspflichtige Timeline-Änderungen vor.'},
     {id:'memory.extract',tier:'fast',mode:'DRAFT',schema:'memory_signals',tools:['preferences.current'],cacheTtlMs:0,description:'Leitet belegte Lernsignale aus Nutzerentscheidungen ab.'},
+    {id:'memory.compose',tier:'default',mode:'DRAFT',schema:'memory_composition',tools:[],cacheTtlMs:0,description:'Erzeugt aus Reisebildern und belegtem Kontext gemeinsam Titel, Erinnerungstext, Caption und Highlights.'},
     {id:'text.summarize',tier:'fast',mode:'READ',schema:'summary',tools:[],cacheTtlMs:600000,description:'Kurze, kontrollierte Zusammenfassungen.'}
   ].forEach(register);
   function get(id){return entries.get(String(id||''))||null}

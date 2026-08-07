@@ -16,7 +16,7 @@ export async function runOpenAI(args:{capability:Capability;tier:Tier;input:unkn
       model,
       store:false,
       safety_identifier:args.safetyId,
-      input:[{role:'system',content:[{type:'input_text',text:systemPrompt(args.capability)}]},{role:'user',content:[{type:'input_text',text:userInput(args.input,args.context)},...(args.capability.id==='media.describe'&&typeof (args.input as any)?.imageUrl==='string'?[{type:'input_image',image_url:(args.input as any).imageUrl,detail:'low'}]:[])]}],
+      input:[{role:'system',content:[{type:'input_text',text:systemPrompt(args.capability)}]},{role:'user',content:[{type:'input_text',text:userInput(args.input,args.context)},...((args.capability.id==='media.describe'&&typeof (args.input as any)?.imageUrl==='string')?[{type:'input_image',image_url:(args.input as any).imageUrl,detail:'low'}]:[]),...(args.capability.id==='memory.compose'&&Array.isArray((args.input as any)?.imageUrls)?(args.input as any).imageUrls.slice(0,3).filter((u:any)=>typeof u==='string'&&u.startsWith('http')).map((u:string)=>({type:'input_image',image_url:u,detail:'low'})):[])]}],
       text:{format:{type:'json_schema',name:`luvia_${args.capability.schema}`,schema:outputSchema(args.capability.schema),strict:true}},
       max_output_tokens:args.capability.maxOutputTokens
     };
