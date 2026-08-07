@@ -1,4 +1,4 @@
-/* Release 13.35.0 · Core 4.35.0 */
+/* Release 13.36.1 · Core 4.36.1 */
 (() => {
   'use strict';
   const VERSION='4.28.6.7';
