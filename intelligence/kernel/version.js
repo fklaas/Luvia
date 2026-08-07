@@ -1,1 +1,1 @@
-(()=>{'use strict';window.LuviaKernelVersion=Object.freeze({core:'4.35.0',build:'13.35.0',name:'Memory Studio Motion Rebuild',channel:'production',builtAt:'2026-08-07T10:16:00+02:00'});window.LuviaCoreVersion=window.LuviaKernelVersion;window.LUVIA_RELEASE=window.LuviaKernelVersion;})();
+(()=>{'use strict';window.LuviaKernelVersion=Object.freeze({core:'4.36.0',build:'13.36.0',name:'Memory Cards Foundation',channel:'production',builtAt:'2026-08-07T10:50:00+02:00'});window.LuviaCoreVersion=window.LuviaKernelVersion;window.LUVIA_RELEASE=window.LuviaKernelVersion;})();

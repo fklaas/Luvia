@@ -1,0 +1,12 @@
+index.html
+sw.js
+force-update.html
+intelligence/kernel/version.js
+core/media/memory-cards.js
+app/memory-worlds-v3.js
+app/memory-worlds-v3.css
+supabase/migrations/20260807105000_memory_cards_foundation.sql
+RELEASE-v13.36.0.md
+DEPLOYMENT-v13.36.0.md
+COMMIT-v13.36.0.txt
+CHANGED-FILES-v13.36.0.txt

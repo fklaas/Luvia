@@ -1,0 +1,1 @@
+feat(memories): introduce collaborative memory cards foundation
