@@ -1,6 +1,6 @@
 (() => {
   'use strict';
-  const VERSION='1.0.3';
+  const VERSION='1.0.4';
   let root=null,trip=null;
   const esc=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
   const STATUS={
@@ -44,13 +44,21 @@
     const contact=e.target.closest('[data-booking-contact]');
     if(contact){e.preventDefault();e.stopPropagation();const email=window.prompt('Öffentliche bzw. verifizierte Kontakt-E-Mail des Anbieters:','');if(!email)return;contact.disabled=true;try{await window.LuviaBooking.updateContact(contact.dataset.bookingContact,email);window.LuviaUIKit?.toast?.('Kontakt gespeichert.',{type:'success'});await load()}catch(error){console.error('[Luvia Booking] update contact',error);window.LuviaUIKit?.toast?.(error?.message||'Kontakt konnte nicht gespeichert werden.',{type:'error'});contact.disabled=false}}
   }
+  function globalClick(e){
+    // Delegate booking actions on document level. The booking list is replaced
+    // via innerHTML on refresh and the App Shell swaps whole view containers.
+    if(!root?.isConnected)return;
+    const bookingView=e.target.closest?.('.lv-bookings-view');
+    if(!bookingView||!root.contains(bookingView))return;
+    handleClick(e).catch(error=>console.error('[Luvia Booking] action handler',error));
+  }
+  document.addEventListener('click',globalClick,true);
+
   async function mount(node,activeTrip){
-    if(root&&root!==node)root.removeEventListener('click',handleClick,true);
     root=node;trip=activeTrip;
-    root.addEventListener('click',handleClick,true);
     await window.LuviaBooking.init();await load();
   }
-  function unmount(){if(root)root.removeEventListener('click',handleClick,true);root=null;trip=null;}
+  function unmount(){root=null;trip=null;}
   window.addEventListener('luvia:booking-changed',()=>{if(root?.isConnected)load().catch(console.warn)});
   window.LuviaBookingsView=Object.freeze({version:VERSION,mount,unmount,load});
 })();
