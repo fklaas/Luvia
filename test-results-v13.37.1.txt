@@ -1,0 +1,19 @@
+Luvia 13.37.1 / Core 4.37.1 — local regression results
+PASS JS syntax: app/memory-worlds-v3.js
+PASS JS syntax: core/media/memory-cards.js
+PASS JS syntax: intelligence/kernel/version.js
+PASS JS syntax: intelligence/services/base-services.js
+PASS JS syntax: core/diagnostics/media-readiness.js
+PASS App/Core version consistency
+PASS Service Worker cache version
+PASS Force Update target
+PASS 152 local index assets, 0 missing
+PASS CSS braces 760/760
+PASS custom title modal present
+PASS browser title prompt removed
+PASS technical 'bereit zur Priorisierung' wording removed
+PASS voting entry UI present
+PASS voting Core API present
+PASS voting migration present
+PASS reaction-card rebalance enabled
+NOTE Real Supabase multi-user voting, persistence and visual browser behavior require deployed manual testing.
