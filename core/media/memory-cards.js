@@ -1,7 +1,7 @@
 (() => {
 'use strict';
-const VERSION='4.37.6',BUILD='13.37.6';
-let channel=null,identityChannel=null,voteChannel=null,writeDepth=0;
+const VERSION='4.37.7',BUILD='13.37.7';
+let channel=null,identityChannel=null,voteChannel=null,reviewChannel=null,writeDepth=0;
 const missing=e=>['42P01','PGRST205'].includes(e?.code);
 const validColor=v=>/^#[0-9a-f]{6}$/i.test(String(v||'').trim())?String(v).trim().toLowerCase():null;
 function activeTrip(){return window.LuviaTripStore?.snapshot?.()?.activeTrip||window.LuviaTripContext?.getActiveTrip?.()||window.LuviaTripContext?.getSnapshot?.()?.activeTrip||{}}
@@ -67,6 +67,8 @@ async function updateStory(id,content){const text=String(content||'').replace(/\
 
 async function subscribe(cb){const{client,tripId}=await ctx();if(channel)await client.removeChannel(channel);channel=client.channel(`luvia-memory-cards-${tripId}-${Math.random().toString(36).slice(2)}`).on('postgres_changes',{event:'*',schema:'public',table:'memory_cards',filter:`trip_id=eq.${tripId}`},p=>{if(!writeDepth)cb?.(p)}).subscribe();return async()=>{if(channel){await client.removeChannel(channel);channel=null}}}
 async function subscribeIdentities(cb){const{client}=await ctx();if(identityChannel)await client.removeChannel(identityChannel);identityChannel=client.channel(`luvia-memory-identities-${Math.random().toString(36).slice(2)}`).on('postgres_changes',{event:'*',schema:'public',table:'memory_member_identity'},p=>cb?.(p)).subscribe();return async()=>{if(identityChannel){await client.removeChannel(identityChannel);identityChannel=null}}}
+
+async function subscribeReviews(cb){const{client,tripId}=await ctx();if(reviewChannel)await client.removeChannel(reviewChannel);reviewChannel=client.channel(`luvia-memory-reviews-${tripId}-${Math.random().toString(36).slice(2)}`).on('postgres_changes',{event:'*',schema:'public',table:'memory_card_album_reviews',filter:`trip_id=eq.${tripId}`},p=>cb?.(p)).subscribe();return async()=>{if(reviewChannel){await client.removeChannel(reviewChannel);reviewChannel=null}}}
 async function subscribeVotes(cb){const{client,tripId}=await ctx();if(voteChannel)await client.removeChannel(voteChannel);voteChannel=client.channel(`luvia-memory-votes-${tripId}-${Math.random().toString(36).slice(2)}`).on('postgres_changes',{event:'*',schema:'public',table:'memory_card_album_votes',filter:`trip_id=eq.${tripId}`},p=>cb?.(p)).subscribe();return async()=>{if(voteChannel){await client.removeChannel(voteChannel);voteChannel=null}}}
-window.LuviaMemoryCards=Object.freeze({version:VERSION,build:BUILD,list,save,setWeight,dismiss,members,setAlbumReview,albumReviews,albumReviewSummary,albumVotes,saveAlbumVotes,albumVoteSummary,updateStory,syncPhotoCandidates,curationClass,stackCuration,saveTitleProposal,dissolveStack,subscribe,subscribeIdentities,subscribeVotes,tripAccent,activeTrip,isWriting:()=>writeDepth>0});
+window.LuviaMemoryCards=Object.freeze({version:VERSION,build:BUILD,list,save,setWeight,dismiss,members,setAlbumReview,albumReviews,albumReviewSummary,albumVotes,saveAlbumVotes,albumVoteSummary,updateStory,syncPhotoCandidates,curationClass,stackCuration,saveTitleProposal,dissolveStack,subscribe,subscribeIdentities,subscribeReviews,subscribeVotes,tripAccent,activeTrip,isWriting:()=>writeDepth>0});
 })();

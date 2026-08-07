@@ -1,0 +1,27 @@
+Luvia 13.37.7 / Core 4.37.7 automated static regression results
+
+PASS JavaScript syntax: app/memory-worlds-v3.js
+PASS JavaScript syntax: core/media/memory-cards.js
+PASS JavaScript syntax: core/diagnostics/media-readiness.js
+PASS JavaScript syntax: intelligence/kernel/version.js
+PASS JavaScript syntax: intelligence/services/base-services.js
+PASS CSS brace balance: 914 / 914
+PASS App version consistency: 13.37.7 in active version/cache entry points
+PASS Core version consistency: 4.37.7 in active core/version entry points
+PASS memory_card_album_reviews Realtime subscription exists in Core
+PASS review Realtime subscription mounted/unmounted by Memory view
+PASS existing vote Realtime subscription preserved
+PASS non-photo experience composition present (Story + Moment projection)
+PASS raw reaction/vibe rows are not deleted by composition projection
+PASS symmetric spread motion reverse-order token present
+PASS desktop spread + reveal share fixed physical card rule
+PASS voting photo gallery/lightbox integration preserved
+PASS mobile Tinder/pointer swipe integration preserved
+PASS index.html local asset references: 0 missing
+
+Manual after deployment:
+- Two-user Supabase Realtime review-complete -> voting-ready
+- Two-user vote-complete -> result-ready
+- Visual card equality on target laptop/browser scaling
+- Opening/closing choreography with real 4/7/10+ card stacks
+- Story/Moment content quality with real trip memories

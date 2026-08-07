@@ -779,3 +779,49 @@ body.mc-open{overflow:hidden}.mc-overlay{position:fixed;inset:0;z-index:10000;ba
   .mc-deck:hover .layer-6{transform:translate(6px,-39px) rotate(.6deg)!important}
   .mc-deck:hover .mc-deck-front{transform:none!important}
 }
+
+/* v13.37.7 — Memory Deck Consistency, Realtime Voting & Story Card Rework */
+@media(min-width:801px){
+  /* One physical card box everywhere the shared deck is presented. */
+  .mc-spread .mc-loose-card,
+  .mc-reveal .mc-loose-card{
+    width:var(--mc-card-width,226px)!important;
+    height:calc(var(--mc-card-width,226px) * 1.68)!important;
+    min-height:0!important;
+    max-height:none!important;
+    aspect-ratio:auto!important;
+    overflow:hidden!important;
+  }
+  .mc-reveal{align-items:flex-start!important;gap:22px!important}
+  .mc-reveal .mc-loose-card{--mc-card-width:238px;margin:8px!important;transform:rotate(var(--card-rot,0deg))!important}
+  .mc-spread .mc-loose-media,.mc-reveal .mc-loose-media{height:39%!important;min-height:0!important;flex:0 0 39%!important}
+  .mc-spread .tone-photo .mc-loose-media,.mc-reveal .tone-photo .mc-loose-media{height:56%!important;flex-basis:56%!important}
+  .mc-spread .mc-loose-copy,.mc-reveal .mc-loose-copy{height:61%!important;min-height:0!important;overflow:hidden!important}
+  .mc-spread .tone-photo .mc-loose-copy,.mc-reveal .tone-photo .mc-loose-copy{height:44%!important}
+  .mc-spread .mc-loose-copy>p,.mc-reveal .mc-loose-copy>p{display:-webkit-box;-webkit-box-orient:vertical;-webkit-line-clamp:5;overflow:hidden}
+  .mc-spread .text-long .mc-loose-copy>p,.mc-reveal .text-long .mc-loose-copy>p{-webkit-line-clamp:6}
+
+  /* Opening and closing are the same choreography in opposite directions. */
+  .mc-spread .mc-loose-card{
+    transition-duration:720ms,440ms,360ms,320ms!important;
+    transition-timing-function:var(--mc-motion-soft),ease,var(--mc-motion-ease),ease!important;
+    transition-delay:calc(var(--motion-order,0) * 30ms),calc(var(--motion-order,0) * 24ms),0ms,0ms!important;
+  }
+  .mc-spread.is-gathering .mc-loose-card{
+    transition-duration:720ms,440ms,360ms,320ms!important;
+    transition-timing-function:var(--mc-motion-soft),ease,var(--mc-motion-ease),ease!important;
+    transition-delay:calc(var(--motion-reverse,0) * 30ms),calc(var(--motion-reverse,0) * 24ms),0ms,0ms!important;
+  }
+}
+
+/* Non-photo cards are contextual memory surfaces, not isolated metadata badges. */
+.mc-story-context,.mc-moment-context{width:100%;display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin:9px 0 2px;padding:8px 10px;border-radius:14px;background:color-mix(in srgb,var(--person-color) 7%,#fff);border:1px solid color-mix(in srgb,var(--person-color) 14%,transparent);font:750 11px/1.25 var(--lv-font-body,Inter,sans-serif);color:#566068}
+.mc-story-context b,.mc-moment-context b{font-size:19px;line-height:1}.mc-story-context span,.mc-moment-context span{min-width:0;flex:1}
+.mc-story-kicker{display:inline-flex!important;align-items:center;min-height:22px;margin-top:10px;padding:4px 8px;border-radius:999px;background:color-mix(in srgb,var(--person-color) 9%,#fff);color:color-mix(in srgb,var(--person-color) 78%,#52606a);font:850 9px/1 var(--lv-font-body,Inter,sans-serif);letter-spacing:.07em;text-transform:uppercase}
+.mc-loose-card.curation-story .mc-loose-media em{font-size:0}.mc-loose-card.curation-story .mc-loose-media em:after{content:'GESCHICHTE';font-size:10px}
+.mc-loose-card.curation-signal .mc-loose-media em{font-size:0}.mc-loose-card.curation-signal .mc-loose-media em:after{content:'MOMENT';font-size:10px}
+
+/* Remove technical card-class stamps from the user-facing footer. */
+.mc-loose-card.curation-hero .mc-card-foot:before,.mc-loose-card.curation-story .mc-card-foot:before,.mc-loose-card.curation-signal .mc-card-foot:before{content:none!important}
+
+/* Release marker: Luvia 13.37.7 · Core 4.37.7 */
