@@ -1,0 +1,24 @@
+Luvia 13.36.11 · Core 4.36.11 — automated local checks
+Generated: 2026-08-07
+
+PASS JS syntax: app/memory-worlds-v3.js
+PASS JS syntax: core/media/memory-cards.js
+PASS JS syntax: intelligence/kernel/version.js
+PASS JS syntax: intelligence/services/base-services.js
+PASS JS syntax: core/diagnostics/media-readiness.js
+PASS Kernel version 13.36.11 / 4.36.11
+PASS Service worker cache 13.36.11
+PASS Force update target 13.36.11
+PASS Memory runtime version
+PASS Mobile directional swipe feedback
+PASS Mobile completion state
+PASS Desktop review actions visible inside card
+PASS Radial stage midpoint
+PASS Responsive ellipse radii
+PASS Small card rotation
+PASS Laptop card scaling
+PASS Persistent album review decisions
+PASS Dead throw reset removed from runtime markup
+PASS CSS brace balance
+PASS index local assets: 152 checked, 0 missing
+PASS no stale 13.36.10 references in active UI/version/cache runtime

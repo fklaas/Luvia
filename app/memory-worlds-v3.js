@@ -1,6 +1,6 @@
 (() => {
 'use strict';
-const VERSION='4.36.10',BUILD='13.36.10';
+const VERSION='4.36.11',BUILD='13.36.11';
 let host=null,stopCards=null,stopIdentities=null,stopTrip=null,stopTheme=null,urlCache=new Map(),homeState=null;
 const deckSessionSeed=Math.random().toString(36).slice(2);
 const validColor=v=>/^#[0-9a-f]{6}$/i.test(String(v||'').trim())?String(v).trim().toLowerCase():null;
@@ -120,7 +120,7 @@ function renderLooseCard(c,members,i,mode='deck'){
   const content=c.content?`<p>${esc(c.content)}</p>`:'';
   const reaction=c.reaction?`<strong>${esc(c.reaction)}</strong>`:'';
   const textLength=String(c.content||c.reaction||'').trim().length,textClass=textLength>100?'text-long':textLength>48?'text-medium':'text-short';
-  return `<article class="mc-loose-card tone-${cardTone(c.card_type)} w${c.weight} ${textClass}" data-loose-card="${esc(c.id)}" style="--card-rot:${rot}deg;--card-x:${x}px;--card-y:${y}px;--card-i:${i};--person-color:${esc(accent)}"><div class="mc-card-ribbon"></div><div class="mc-loose-media" data-mid="${esc(c.media_id||'')}">${c.media_id?'':`<span class="mc-card-symbol">${typeIcon(c.card_type)}</span><em>${esc(label)}</em>`}</div><div class="mc-loose-copy"><div class="mc-card-author"><span style="--avatar:${esc(accent)}">${esc(memberInitial(c.author_id,members))}</span><small>${esc(name)}</small></div>${content}${reaction}<div class="mc-card-foot"><i>${esc(label)}</i><button class="mc-weight" data-weight="${esc(c.id)}" data-own="${String(c.author_id)===uid?'1':'0'}">${weightLabel(c.weight)}</button></div>${mode==='deck'?`<div class="mc-album-review" aria-label="Auswahl fürs zukünftige Memory Album"><button type="button" data-album-review="excluded" data-card-id="${esc(c.id)}" title="Nicht ins Album">←</button><span>Album</span><button type="button" data-album-review="included" data-card-id="${esc(c.id)}" title="Für Album vormerken">→</button></div>`:''}</div></article>`
+  return `<article class="mc-loose-card tone-${cardTone(c.card_type)} w${c.weight} ${textClass}" data-loose-card="${esc(c.id)}" style="--card-rot:${rot}deg;--card-x:${x}px;--card-y:${y}px;--card-i:${i};--person-color:${esc(accent)}"><div class="mc-card-ribbon"></div><div class="mc-loose-media" data-mid="${esc(c.media_id||'')}">${c.media_id?'':`<span class="mc-card-symbol">${typeIcon(c.card_type)}</span><em>${esc(label)}</em>`}</div><div class="mc-loose-copy"><div class="mc-card-author"><span style="--avatar:${esc(accent)}">${esc(memberInitial(c.author_id,members))}</span><small>${esc(name)}</small></div>${content}${reaction}<div class="mc-card-foot"><i>${esc(label)}</i><button class="mc-weight" data-weight="${esc(c.id)}" data-own="${String(c.author_id)===uid?'1':'0'}">${weightLabel(c.weight)}</button></div>${mode==='deck'?`<div class="mc-album-review" aria-label="Auswahl fürs zukünftige Memory Album"><button type="button" data-album-review="excluded" data-card-id="${esc(c.id)}" title="Nicht ins Album"><b>←</b><span>Nicht ins Album</span></button><button type="button" data-album-review="included" data-card-id="${esc(c.id)}" title="Für Album behalten"><span>Für Album</span><b>→</b></button></div>`:''}</div></article>`
 }
 async function paintLoosePhotos(root,cards,media){const map=new Map(media.map(m=>[String(m.id),m]));for(const el of root.querySelectorAll('[data-mid]')){const m=map.get(String(el.dataset.mid));if(m)await putImg(el,m)}}
 
@@ -141,15 +141,15 @@ async function openDeck(key,sourceEl){
   const showSpread=async()=>{
     const arranged=shuffled(items,`${key}:${Math.random()}`);
     const mobile=matchMedia('(max-width:800px)').matches;
-    const cardsMarkup=mobile?`<div class="mc-mobile-throw" data-throw-deck><div class="mc-throw-stack">${arranged.map((c,i)=>`<section class="mc-throw-card" data-throw-card="${i}" style="--throw-order:${i}">${renderLooseCard(c,homeState.members,i,'deck')}</section>`).join('')}</div><div class="mc-throw-meta"><span><b data-throw-index>1</b> von ${arranged.length}</span><em>← nicht ins Album · fürs Album →</em></div><button type="button" class="mc-throw-reset" data-throw-reset hidden>Stapel neu mischen</button></div>`:`<div class="mc-spread" data-count="${items.length}">${arranged.map((c,i)=>renderLooseCard(c,homeState.members,i,'deck')).join('')}</div>`;
+    const cardsMarkup=mobile?`<div class="mc-mobile-throw" data-throw-deck><div class="mc-throw-stack">${arranged.map((c,i)=>`<section class="mc-throw-card" data-throw-card="${i}" style="--throw-order:${i}">${renderLooseCard(c,homeState.members,i,'deck')}</section>`).join('')}<div class="mc-swipe-feedback mc-swipe-feedback-left" data-swipe-feedback="excluded"><b>←</b><strong>Nicht ins Album</strong><small>Die Erinnerung bleibt erhalten.</small></div><div class="mc-swipe-feedback mc-swipe-feedback-right" data-swipe-feedback="included"><strong>Für Album behalten</strong><b>→</b><small>Für euer späteres Memory Album vorgemerkt.</small></div></div><div class="mc-throw-meta"><span><b data-throw-index>1</b> von ${arranged.length}</span><em>Wische links oder rechts und entscheide fürs Album.</em></div><div class="mc-review-complete" data-review-complete hidden><small>REVIEW ABGESCHLOSSEN</small><h3>Alle Karten geprüft.</h3><p><b data-review-included-count>0</b> fürs Album behalten · <b data-review-excluded-count>0</b> nicht ausgewählt</p><div><button type="button" data-review-again>Auswahl erneut prüfen</button><button type="button" class="is-primary" data-review-close>Zurück zu Erinnerungen</button></div></div></div>`:`<div class="mc-spread" data-count="${items.length}">${arranged.map((c,i)=>renderLooseCard(c,homeState.members,i,'deck')).join('')}</div>`;
     const p=await swap(ctx,`<div class="mc-deck-stage-head"><div class="mc-stage-head-surface"><small>MEMORY MOMENT</small><h2>${cluster?fmt(cluster.started_at||cluster.created_at)||'Eure Karten':'Eure Karten'}</h2><span>${items.length} ${items.length===1?'Erinnerung':'Erinnerungen'} · ${people.length} ${people.length===1?'Stimme':'Stimmen'}</span></div></div><div class="mc-stage-atmosphere" aria-hidden="true"><span class="mc-route mc-route-a"></span><span class="mc-route mc-route-b"></span><span class="mc-route mc-route-c"></span><span class="mc-postmark">LUVIA · MOMENT</span><span class="mc-travel-sketch mc-sketch-ticket">BON VOYAGE</span><span class="mc-travel-sketch mc-sketch-photo">MEMORY</span><span class="mc-travel-sketch mc-sketch-pin">⌖</span><span class="mc-travel-sketch mc-sketch-heart">♡</span><span class="mc-travel-sketch mc-sketch-plane">✈︎</span></div><div class="mc-stage-decor" aria-hidden="true"><i>✦</i><i>✈</i><i>⌖</i><i>♡</i><i>↝</i><i>⌾</i><i>⌁</i><i>✦</i><i>△</i><i>· · ·</i></div>${cardsMarkup}${cluster?'<button class="mc-continue" data-continue>Moment weiter ergänzen</button>':''}`,{motion:'scatter',showBack:true});
     await paintLoosePhotos(p,arranged,media);
-    try{const reviews=await window.LuviaMemoryCards.albumReviews?.(arranged.map(c=>c.id))||{};p.querySelectorAll('[data-album-review]').forEach(b=>b.classList.toggle('is-selected',reviews[String(b.dataset.cardId)]===b.dataset.albumReview));}catch(error){console.warn('[MemoryReview] Bestehende Auswahl konnte nicht geladen werden.',error)}
+    let reviews={};try{reviews=await window.LuviaMemoryCards.albumReviews?.(arranged.map(c=>c.id))||{};p.querySelectorAll('[data-album-review]').forEach(b=>b.classList.toggle('is-selected',reviews[String(b.dataset.cardId)]===b.dataset.albumReview));}catch(error){console.warn('[MemoryReview] Bestehende Auswahl konnte nicht geladen werden.',error)}
     if(!mobile)positionSpread(p.querySelector('.mc-spread'),arranged,true);
-    else bindThrowDeck(p.querySelector('[data-throw-deck]'),arranged);
+    else bindThrowDeck(p.querySelector('[data-throw-deck]'),arranged,reviews,()=>closeSpread());
     for(const card of p.querySelectorAll('[data-loose-card]'))card.onclick=e=>{if(e.target.closest('button')||card.closest('.mc-throw-card')?.dataset.dragged==='1')return;openCardDetail(ctx,items.find(x=>String(x.id)===String(card.dataset.looseCard)),homeState.members,media,showSpread)};
     p.querySelectorAll('[data-weight][data-own="1"]').forEach(b=>b.onclick=async e=>{e.stopPropagation();const c=items.find(x=>String(x.id)===String(b.dataset.weight));const next=Number(c.weight)>=3?1:Number(c.weight)+1;await window.LuviaMemoryCards.setWeight(c.id,next);c.weight=next;b.textContent=weightLabel(next);b.closest('.mc-loose-card')?.classList.remove('w1','w2','w3');b.closest('.mc-loose-card')?.classList.add(`w${next}`)});
-    p.querySelectorAll('[data-album-review]').forEach(b=>b.onclick=async e=>{e.stopPropagation();b.disabled=true;try{await window.LuviaMemoryCards.setAlbumReview(b.dataset.cardId,b.dataset.albumReview);const row=b.closest('.mc-album-review');row?.querySelectorAll('button').forEach(x=>x.classList.toggle('is-selected',x===b));}catch(error){console.warn('[MemoryReview]',error)}finally{b.disabled=false}});
+    p.querySelectorAll('[data-album-review]').forEach(b=>b.onclick=async e=>{e.stopPropagation();b.disabled=true;try{await window.LuviaMemoryCards.setAlbumReview(b.dataset.cardId,b.dataset.albumReview);reviews[String(b.dataset.cardId)]=b.dataset.albumReview;const row=b.closest('.mc-album-review'),card=b.closest('.mc-loose-card');row?.querySelectorAll('button').forEach(x=>x.classList.toggle('is-selected',x===b));card?.classList.toggle('is-album-included',b.dataset.albumReview==='included');card?.classList.toggle('is-album-excluded',b.dataset.albumReview==='excluded');}catch(error){console.warn('[MemoryReview]',error)}finally{b.disabled=false}});
     if(cluster)p.querySelector('[data-continue]').onclick=()=>{ctx.close();setTimeout(()=>openDiscovery(cluster,media,homeState.members,0),460)};
     ctx.back.onclick=()=>closeSpread();
   };
@@ -159,53 +159,59 @@ async function openDeck(key,sourceEl){
   };
   await showSpread();
 }
-function bindThrowDeck(root,items){
+function bindThrowDeck(root,items,initialReviews={},onClose){
   const total=items.length;
   if(!root)return;
-  const stack=root.querySelector('.mc-throw-stack'),indexEl=root.querySelector('[data-throw-index]'),reset=root.querySelector('[data-throw-reset]');
+  const stack=root.querySelector('.mc-throw-stack'),indexEl=root.querySelector('[data-throw-index]'),complete=root.querySelector('[data-review-complete]'),includedEl=root.querySelector('[data-review-included-count]'),excludedEl=root.querySelector('[data-review-excluded-count]');
   if(!stack)return;
-  const cards=[...stack.querySelectorAll('.mc-throw-card')];let cursor=0,active=null,startX=0,startY=0,lastX=0,lastT=0,velocity=0;
+  const cards=[...stack.querySelectorAll('.mc-throw-card')],feedbackLeft=stack.querySelector('[data-swipe-feedback="excluded"]'),feedbackRight=stack.querySelector('[data-swipe-feedback="included"]');let cursor=0,active=null,startX=0,startY=0,lastX=0,lastT=0,velocity=0,reviews={...initialReviews};
   const depthPreset=[
     {x:0,y:0,r:0,scale:1,opacity:1},
-    {x:-11,y:18,r:-2.4,scale:.982,opacity:.92},
-    {x:12,y:35,r:2.7,scale:.963,opacity:.82},
-    {x:-7,y:51,r:-3.2,scale:.944,opacity:.70}
+    {x:-13,y:21,r:-2.6,scale:.981,opacity:.93},
+    {x:15,y:40,r:2.9,scale:.961,opacity:.84},
+    {x:-9,y:58,r:-3.3,scale:.941,opacity:.74}
   ];
-  const refresh=()=>{cards.forEach((card,i)=>{const rel=i-cursor,depth=Math.max(0,rel),preset=depthPreset[Math.min(depth,depthPreset.length-1)];card.hidden=rel<0||rel>3;card.style.setProperty('--throw-depth',String(depth));card.style.setProperty('--stack-x',`${preset.x}px`);card.style.setProperty('--stack-y',`${preset.y}px`);card.style.setProperty('--stack-r',`${preset.r}deg`);card.style.setProperty('--stack-scale',String(preset.scale));card.style.setProperty('--stack-opacity',String(preset.opacity));card.classList.toggle('is-front',rel===0)});if(indexEl)indexEl.textContent=String(Math.min(cursor+1,total));if(reset)reset.hidden=cursor<total};
-  const settle=card=>{card.classList.add('is-settling');card.style.setProperty('--drag-x','0px');card.style.setProperty('--drag-y','0px');card.style.setProperty('--drag-r','0deg');setTimeout(()=>{card.classList.remove('is-settling');card.style.removeProperty('--drag-x');card.style.removeProperty('--drag-y');card.style.removeProperty('--drag-r')},300)};
-  const throwAway=(card,dir,y)=>{const cardId=items[cursor]?.id||card.querySelector('[data-loose-card]')?.dataset.looseCard;const decision=dir>0?'included':'excluded';if(cardId)window.LuviaMemoryCards?.setAlbumReview?.(cardId,decision).catch(error=>console.warn('[MemoryReview]',error));const distance=Math.max(innerWidth*1.32,680)*dir;card.dataset.dragged='1';card.classList.add('is-thrown');card.style.setProperty('--drag-x',`${distance}px`);card.style.setProperty('--drag-y',`${Math.max(-150,Math.min(150,y*.50))}px`);card.style.setProperty('--drag-r',`${dir*22}deg`);setTimeout(()=>{cursor++;refresh();card.hidden=true;card.classList.remove('is-thrown');card.style.removeProperty('--drag-x');card.style.removeProperty('--drag-y');card.style.removeProperty('--drag-r');setTimeout(()=>{card.dataset.dragged='0'},90)},360)};
+  const feedback=(x=0,threshold=120)=>{const amount=Math.min(1,Math.abs(x)/Math.max(1,threshold));if(feedbackLeft){feedbackLeft.style.setProperty('--swipe-feedback',x<0?String(amount):'0');feedbackLeft.classList.toggle('is-armed',x<0&&amount>.72)}if(feedbackRight){feedbackRight.style.setProperty('--swipe-feedback',x>0?String(amount):'0');feedbackRight.classList.toggle('is-armed',x>0&&amount>.72)}};
+  const updateComplete=()=>{const values=items.map(x=>reviews[String(x.id)]),inc=values.filter(x=>x==='included').length,exc=values.filter(x=>x==='excluded').length;if(includedEl)includedEl.textContent=String(inc);if(excludedEl)excludedEl.textContent=String(exc)};
+  const refresh=()=>{cards.forEach((card,i)=>{const rel=i-cursor,depth=Math.max(0,rel),preset=depthPreset[Math.min(depth,depthPreset.length-1)];card.hidden=rel<0||rel>3;card.style.setProperty('--throw-depth',String(depth));card.style.setProperty('--stack-x',`${preset.x}px`);card.style.setProperty('--stack-y',`${preset.y}px`);card.style.setProperty('--stack-r',`${preset.r}deg`);card.style.setProperty('--stack-scale',String(preset.scale));card.style.setProperty('--stack-opacity',String(preset.opacity));card.classList.toggle('is-front',rel===0)});if(indexEl)indexEl.textContent=String(Math.min(cursor+1,total));const done=cursor>=total;root.classList.toggle('is-complete',done);if(complete)complete.hidden=!done;updateComplete();feedback(0)};
+  const settle=card=>{card.classList.add('is-settling');card.style.setProperty('--drag-x','0px');card.style.setProperty('--drag-y','0px');card.style.setProperty('--drag-r','0deg');feedback(0);setTimeout(()=>{card.classList.remove('is-settling');card.style.removeProperty('--drag-x');card.style.removeProperty('--drag-y');card.style.removeProperty('--drag-r')},300)};
+  const throwAway=(card,dir,y)=>{const cardId=items[cursor]?.id||card.querySelector('[data-loose-card]')?.dataset.looseCard,decision=dir>0?'included':'excluded';if(cardId){reviews[String(cardId)]=decision;window.LuviaMemoryCards?.setAlbumReview?.(cardId,decision).catch(error=>console.warn('[MemoryReview]',error))}const target=dir>0?feedbackRight:feedbackLeft;target?.classList.add('is-committed');const distance=Math.max(innerWidth*1.32,680)*dir;card.dataset.dragged='1';card.classList.add('is-thrown');card.style.setProperty('--drag-x',`${distance}px`);card.style.setProperty('--drag-y',`${Math.max(-150,Math.min(150,y*.50))}px`);card.style.setProperty('--drag-r',`${dir*22}deg`);setTimeout(()=>{cursor++;refresh();card.hidden=true;card.classList.remove('is-thrown');card.style.removeProperty('--drag-x');card.style.removeProperty('--drag-y');card.style.removeProperty('--drag-r');target?.classList.remove('is-committed');setTimeout(()=>{card.dataset.dragged='0'},90)},360)};
   stack.addEventListener('pointerdown',e=>{const card=e.target.closest('.mc-throw-card.is-front');if(!card||e.target.closest('button'))return;active=card;startX=lastX=e.clientX;startY=e.clientY;lastT=performance.now();velocity=0;card.dataset.dragged='0';card.classList.add('is-dragging');card.setPointerCapture?.(e.pointerId)});
-  stack.addEventListener('pointermove',e=>{if(!active)return;const x=e.clientX-startX,y=e.clientY-startY,now=performance.now(),dt=Math.max(8,now-lastT);velocity=(e.clientX-lastX)/dt;lastX=e.clientX;lastT=now;if(Math.abs(x)>7)active.dataset.dragged='1';active.style.setProperty('--drag-x',`${x}px`);active.style.setProperty('--drag-y',`${y*.22}px`);active.style.setProperty('--drag-r',`${Math.max(-14,Math.min(14,x*.04))}deg`);e.preventDefault()});
+  stack.addEventListener('pointermove',e=>{if(!active)return;const x=e.clientX-startX,y=e.clientY-startY,now=performance.now(),dt=Math.max(8,now-lastT),threshold=Math.min(125,stack.clientWidth*.27);velocity=(e.clientX-lastX)/dt;lastX=e.clientX;lastT=now;if(Math.abs(x)>7)active.dataset.dragged='1';active.style.setProperty('--drag-x',`${x}px`);active.style.setProperty('--drag-y',`${y*.22}px`);active.style.setProperty('--drag-r',`${Math.max(-14,Math.min(14,x*.04))}deg`);feedback(x,threshold);e.preventDefault()});
   const release=e=>{if(!active)return;const card=active,x=e.clientX-startX,y=e.clientY-startY,threshold=Math.min(125,stack.clientWidth*.27),shouldThrow=Math.abs(x)>=threshold||Math.abs(velocity)>.68;card.classList.remove('is-dragging');active=null;if(shouldThrow)throwAway(card,(x||velocity)>=0?1:-1,y);else{settle(card);setTimeout(()=>{card.dataset.dragged='0'},320)}};
   stack.addEventListener('pointerup',release);stack.addEventListener('pointercancel',release);
-  reset?.addEventListener('click',()=>{cursor=0;cards.forEach(c=>{c.hidden=false;c.dataset.dragged='0'});refresh()});
+  root.querySelector('[data-review-again]')?.addEventListener('click',()=>{cursor=0;cards.forEach(c=>{c.hidden=false;c.dataset.dragged='0'});refresh()});
+  root.querySelector('[data-review-close]')?.addEventListener('click',()=>onClose?.());
   refresh();
 }
 function positionSpread(root,items,reroll=false){
   if(!root||matchMedia('(max-width:800px)').matches)return;
   const cards=[...root.querySelectorAll('.mc-loose-card')];if(!cards.length)return;
-  const rnd=Math.random,count=cards.length,box=root.getBoundingClientRect();const dynamicWidth=Math.round(Math.max(178,Math.min(258,Math.sqrt(Math.max(1,box.width*box.height/count))*.52)));root.style.setProperty('--mc-card-width',`${dynamicWidth}px`);const sample=cards[0].getBoundingClientRect(),cw=Math.max(178,dynamicWidth),ch=Math.max(249,dynamicWidth*1.4);
-  const padX=Math.max(cw*.46,40),padTop=Math.max(ch*.44,36),padBottom=Math.max(ch*.38,34),usableW=Math.max(1,box.width-padX*2),usableH=Math.max(1,box.height-padTop-padBottom);
-  const patterns=[
-    [[.08,.18],[.31,.12],[.56,.19],[.82,.14],[.18,.58],[.42,.67],[.68,.59],[.91,.66],[.53,.42],[.29,.38],[.78,.39],[.08,.78]],
-    [[.15,.13],[.43,.18],[.73,.11],[.90,.31],[.64,.44],[.36,.42],[.08,.39],[.18,.73],[.49,.72],[.79,.69],[.94,.81],[.56,.30]],
-    [[.08,.27],[.29,.11],[.57,.14],[.84,.24],[.72,.49],[.42,.50],[.16,.51],[.09,.78],[.36,.72],[.64,.76],[.90,.66],[.53,.31]]
-  ];
-  const source=patterns[Math.floor(rnd()*patterns.length)],offset=Math.floor(rnd()*source.length),anchors=[];
-  for(let i=0;i<count;i++){const a=source[(i+offset)%source.length]||[.5,.5];anchors.push({x:padX+a[0]*usableW,y:padTop+a[1]*usableH})}
-  const placed=[],maxOverlap=count<=6?.10:.13;
-  const overlap=(a,b)=>{const dx=Math.abs(a.x-b.x),dy=Math.abs(a.y-b.y),ox=Math.max(0,cw-dx),oy=Math.max(0,ch-dy);return(ox*oy)/(cw*ch)};
-  anchors.forEach((a,i)=>{
-    let best={x:a.x,y:a.y},bestScore=-1e9;
-    for(let n=0;n<90;n++){
-      const jitterX=(rnd()-.5)*Math.min(cw*.62,usableW*.12),jitterY=(rnd()-.5)*Math.min(ch*.44,usableH*.11),c={x:Math.max(padX,Math.min(box.width-padX,a.x+jitterX)),y:Math.max(padTop,Math.min(box.height-padBottom,a.y+jitterY))};
-      const overlaps=placed.map(p=>overlap(c,p)),worst=overlaps.length?Math.max(...overlaps):0,sum=overlaps.reduce((x,y)=>x+y,0),anchorDrift=Math.hypot((c.x-a.x)/cw,(c.y-a.y)/ch);
-      const score=3.2-Math.max(0,worst-maxOverlap)*40-sum*5-anchorDrift*.55+rnd()*.18;
+  const rnd=Math.random,count=cards.length,box=root.getBoundingClientRect();
+  const compact=box.width<1450||box.height<650,maxWidth=compact?220:252;
+  const dynamicWidth=Math.round(Math.max(170,Math.min(maxWidth,Math.sqrt(Math.max(1,box.width*box.height/count))*.46)));
+  root.style.setProperty('--mc-card-width',`${dynamicWidth}px`);
+  const cw=dynamicWidth,ch=dynamicWidth*1.4,cx=box.width/2,cy=box.height/2;
+  const edgeX=Math.max(cw*.58,32),edgeY=Math.max(ch*.52,28);
+  const rx=Math.max(cw*.95,Math.min(box.width*.39,box.width/2-edgeX));
+  const ry=Math.max(ch*.62,Math.min(box.height*.34,box.height/2-edgeY));
+  root.style.setProperty('--mc-radius-x',`${Math.round(rx)}px`);root.style.setProperty('--mc-radius-y',`${Math.round(ry)}px`);
+  const startAngle=rnd()*Math.PI*2,placed=[];
+  const overlapRatio=(a,b)=>{const dx=Math.abs(a.x-b.x),dy=Math.abs(a.y-b.y),ox=Math.max(0,cw-dx),oy=Math.max(0,ch-dy);return(ox*oy)/(cw*ch)};
+  for(let i=0;i<count;i++){
+    const base=startAngle+(Math.PI*2*i/count),ring=i%3===0?.48:.72+rnd()*.20;let best=null,bestScore=-1e9;
+    for(let n=0;n<80;n++){
+      const angle=base+(rnd()-.5)*Math.min(.46,Math.PI/count*.72),radius=Math.max(.34,Math.min(.96,ring+(rnd()-.5)*.22));
+      const c={x:cx+Math.cos(angle)*rx*radius,y:cy+Math.sin(angle)*ry*radius};
+      const overlaps=placed.map(p=>overlapRatio(c,p)),worst=overlaps.length?Math.max(...overlaps):0;
+      const minDist=placed.length?Math.min(...placed.map(p=>Math.hypot(c.x-p.x,c.y-p.y))):cw*2;
+      const targetMin=cw*.72,tooClose=Math.max(0,targetMin-minDist)/targetMin;
+      const score=4-worst*34-tooClose*8-Math.abs(radius-.72)*.35+rnd()*.22;
       if(score>bestScore){best=c;bestScore=score}
     }
-    placed.push(best);
-  });
-  cards.forEach((el,i)=>{const p=placed[i];el.style.setProperty('--spread-left',`${(p.x/box.width*100).toFixed(2)}%`);el.style.setProperty('--spread-top',`${(p.y/box.height*100).toFixed(2)}%`);el.style.setProperty('--spread-r',`${((rnd()-.5)*4.6).toFixed(2)}deg`);el.style.zIndex=String(20+i)});
+    placed.push(best||{x:cx,y:cy});
+  }
+  cards.forEach((el,i)=>{const p=placed[i];el.style.setProperty('--spread-left',`${(p.x/box.width*100).toFixed(2)}%`);el.style.setProperty('--spread-top',`${(p.y/box.height*100).toFixed(2)}%`);el.style.setProperty('--spread-r',`${((rnd()-.5)*7).toFixed(2)}deg`);el.style.zIndex=String(20+i)});
 }
 
 async function openCardDetail(ctx,card,members,media,onBack){
@@ -219,5 +225,5 @@ async function openCardDetail(ctx,card,members,media,onBack){
 }
 
 async function mount(node){host=node;await renderHome();stopCards=await window.LuviaMemoryCards.subscribe(()=>setTimeout(renderHome,350));stopIdentities=await window.LuviaMemoryCards.subscribeIdentities?.(()=>{window.LuviaMemoryCards.members().then(m=>{if(!homeState)return;homeState.members=m;renderHome()})});stopTrip=window.LuviaTripStore?.subscribe?.(()=>{if(host)setTimeout(renderHome,80)});const onTheme=()=>{if(host)setTimeout(renderHome,60)};window.addEventListener('luvia:theme-changed',onTheme);stopTheme=()=>window.removeEventListener('luvia:theme-changed',onTheme);return()=>{stopCards?.();stopIdentities?.();stopTrip?.();stopTheme?.();stopCards=null;stopIdentities=null;stopTrip=null;stopTheme=null;host=null}}
-window.LuviaAlbumsView=Object.freeze({version:VERSION,build:BUILD,mount,render:renderHome,experience:'memory-deck-layout-recovery-canonical-trip-accent',model:'cards -> decks -> moments -> journeys -> studio'});
+window.LuviaAlbumsView=Object.freeze({version:VERSION,build:BUILD,mount,render:renderHome,experience:'memory-review-feedback-radial-deck-composition',model:'cards -> decks -> moments -> journeys -> studio'});
 })();
