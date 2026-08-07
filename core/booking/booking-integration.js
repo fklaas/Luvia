@@ -1,6 +1,6 @@
 (() => {
   'use strict';
-  const VERSION='1.0.3';
+  const VERSION='1.0.4';
   let client=null, repository=null, initialized=false, initPromise=null;
 
   const mapType=type=>({
@@ -102,9 +102,19 @@
 
   async function transition(id,status,patch={}){
     await init();
-    const result=await window.LuviaBookingCore.transition(id,status,patch);
-    window.dispatchEvent(new CustomEvent('luvia:booking-changed',{detail:{booking:result,action:'transition',status}}));
-    return result;
+    const {data,error}=await client.rpc('luvia_transition_booking',{p_booking_id:id,p_status:status,p_patch:patch||{}});
+    if(error)throw new Error(error.message||'Booking-Status konnte nicht geändert werden.');
+    window.dispatchEvent(new CustomEvent('luvia:booking-changed',{detail:{booking:data,action:'transition',status}}));
+    return data;
+  }
+
+  async function functionError(error,fallback){
+    if(!error)return new Error(fallback);
+    try{
+      const ctx=error.context;
+      if(ctx&&typeof ctx.json==='function'){const body=await ctx.json();const detail=body?.details||body?.error||body?.message;if(detail)return new Error(String(detail));}
+    }catch{}
+    return new Error(error.message||fallback);
   }
 
   async function planRoute(id,excludedChannels=[]){
@@ -134,7 +144,8 @@
   async function resolveContact(id){
     await init();
     const {data,error}=await client.functions.invoke('booking-contact-resolve',{body:{bookingId:id}});
-    if(error)throw error;
+    if(error)throw await functionError(error,'Automatische Kontaktsuche ist derzeit nicht verfügbar.');
+    if(data?.error)throw new Error(data.details||data.error);
     window.dispatchEvent(new CustomEvent('luvia:booking-changed',{detail:{bookingId:id,action:'contact-resolved',result:data}}));
     return data;
   }
@@ -147,7 +158,8 @@
     const {data,error}=await client.functions.invoke('booking-email-send',{
       body:{bookingId:id,requesterName:requesterName||undefined,note:note||undefined}
     });
-    if(error)throw error;
+    if(error)throw await functionError(error,'Versand der Buchungsanfrage ist fehlgeschlagen.');
+    if(data?.error)throw new Error(data.details||data.error);
     window.dispatchEvent(new CustomEvent('luvia:booking-changed',{detail:{bookingId:id,action:'email-sent',result:data}}));
     return data;
   }
