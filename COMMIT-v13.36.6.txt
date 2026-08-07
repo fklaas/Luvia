@@ -1,0 +1,1 @@
+fix(memories): recover mobile layout and refine deck composition

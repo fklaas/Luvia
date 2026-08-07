@@ -277,3 +277,82 @@ body.mc-open{overflow:hidden}.mc-overlay{position:fixed;inset:0;z-index:10000;ba
   .mc-spread .mc-loose-card{width:91vw}
 }
 @media(prefers-reduced-motion:reduce){.mc-stage-decor i{animation:none!important}}
+
+/* 13.36.6 – Memory Deck Composition, Focus Meaning, Atmosphere, Typography & Mobile Recovery */
+.mc-canvas-overlay{
+  background:
+    radial-gradient(ellipse at 10% 18%,color-mix(in srgb,var(--mc-stage-trip) 16%,transparent) 0,transparent 34%),
+    radial-gradient(ellipse at 88% 70%,color-mix(in srgb,var(--mc-stage-a) 14%,transparent) 0,transparent 36%),
+    radial-gradient(ellipse at 50% 112%,color-mix(in srgb,var(--mc-stage-b) 10%,transparent) 0,transparent 42%),
+    repeating-linear-gradient(0deg,rgba(79,59,52,.018) 0 1px,transparent 1px 5px),
+    linear-gradient(145deg,#fffdf9 0%,color-mix(in srgb,var(--mc-stage-trip) 5%,#fff9f3) 50%,#fffdf9 100%);
+}
+.mc-canvas-overlay:before{content:"";position:absolute;inset:0;pointer-events:none;z-index:0;opacity:.42;background:radial-gradient(circle at 22% 32%,rgba(255,255,255,.82),transparent 23%),radial-gradient(circle at 72% 18%,rgba(255,255,255,.7),transparent 19%),radial-gradient(circle at 46% 78%,rgba(255,255,255,.74),transparent 25%)}
+.mc-stage-atmosphere{position:absolute;inset:0;z-index:1;pointer-events:none;overflow:hidden;color:color-mix(in srgb,var(--mc-stage-trip) 50%,#8ea7a0)}
+.mc-route{position:absolute;width:clamp(220px,27vw,520px);height:clamp(80px,12vw,190px);border-top:2px dashed color-mix(in srgb,var(--mc-stage-trip) 30%,transparent);border-radius:50%;opacity:.34;filter:blur(.05px);animation:mcRouteDrift 24s ease-in-out infinite alternate}
+.mc-route:after{content:"✦";position:absolute;right:-8px;top:-13px;font-size:18px;color:color-mix(in srgb,var(--mc-stage-trip) 48%,#8eaaa3)}
+.mc-route-a{left:9%;top:33%;transform:rotate(-12deg);animation-duration:26s}.mc-route-b{right:7%;bottom:22%;transform:rotate(164deg);animation-duration:31s;animation-delay:-9s}.mc-route-c{left:36%;bottom:8%;width:clamp(180px,20vw,360px);transform:rotate(8deg);opacity:.22;animation-duration:29s;animation-delay:-14s}
+.mc-postmark{position:absolute;right:12%;top:17%;padding:8px 13px;border:1px solid color-mix(in srgb,var(--mc-stage-trip) 25%,transparent);border-radius:999px;font:800 9px/1 var(--lv-font-body,Inter,sans-serif);letter-spacing:.2em;opacity:.22;transform:rotate(7deg)}
+@keyframes mcRouteDrift{0%{translate:-8px 5px;opacity:.22}50%{translate:8px -5px;opacity:.38}100%{translate:-2px -11px;opacity:.28}}
+.mc-stage-decor{z-index:2;opacity:.48}.mc-stage-decor i{opacity:.55;color:color-mix(in srgb,var(--mc-stage-trip) 50%,#9bada5)}
+.mc-stage-decor i:nth-child(1){left:4%;top:20%;font-size:28px}.mc-stage-decor i:nth-child(2){right:5%;top:21%;font-size:24px}.mc-stage-decor i:nth-child(3){left:10%;bottom:18%;font-size:24px}.mc-stage-decor i:nth-child(4){right:8%;bottom:14%;font-size:30px}.mc-stage-decor i:nth-child(5){left:47%;bottom:6%;font-size:25px}.mc-stage-decor i:nth-child(6){left:25%;top:46%;font-size:22px;opacity:.33}.mc-stage-decor i:nth-child(7){right:29%;bottom:25%;font-size:38px;opacity:.24}.mc-stage-decor i:nth-child(8){left:68%;top:41%;font-size:20px;opacity:.34}.mc-stage-decor i:nth-child(9){left:17%;top:63%;font-size:18px;opacity:.27}.mc-stage-decor i:nth-child(10){right:18%;top:56%;font:700 11px/1 monospace;letter-spacing:.38em;opacity:.25}
+
+/* Guided scatter: cards still feel thrown, but stay visually related. */
+.mc-spread{inset:142px 2.4vw 72px;overflow:visible}
+.mc-spread .mc-loose-card{width:clamp(205px,15vw,266px);transition:transform 240ms cubic-bezier(.18,.78,.2,1),box-shadow 240ms ease,filter 220ms ease,opacity 220ms ease}
+.mc-spread .mc-loose-card:hover{transform:translate(-50%,calc(-50% - 12px)) rotate(calc(var(--spread-r,0deg)*.14)) scale(1.035)}
+
+/* Content-aware typography keeps long memories readable. */
+.mc-loose-card.text-medium .mc-loose-copy p{font-size:clamp(18px,1.35vw,22px);line-height:1.38}
+.mc-loose-card.text-long .mc-loose-copy p{font-size:clamp(16px,1.12vw,19px);line-height:1.45;letter-spacing:-.008em}
+.mc-card-focus-wrap .mc-loose-card.text-long .mc-loose-copy p{font-size:clamp(17px,1.25vw,20px)}
+
+/* Focus explains the card instead of repeating its complete text as a giant headline. */
+.mc-card-focus-wrap{grid-template-columns:minmax(280px,430px) minmax(300px,470px);gap:clamp(34px,6vw,82px)}
+.mc-card-focus-note{position:relative;max-width:470px;padding:34px 36px 32px;border:1px solid color-mix(in srgb,var(--focus-accent) 18%,#e6e0dc);border-radius:30px;background:linear-gradient(145deg,rgba(255,255,255,.94),color-mix(in srgb,var(--focus-accent) 7%,#fff));box-shadow:0 24px 64px rgba(47,57,60,.10);backdrop-filter:blur(14px)}
+.mc-card-focus-note:before{content:"";position:absolute;left:36px;top:23px;width:42px;height:3px;border-radius:99px;background:var(--focus-accent)}
+.mc-card-focus-note small{display:block;margin-top:9px;color:color-mix(in srgb,var(--focus-accent) 72%,#37515d)}
+.mc-card-focus-note h2{font-size:clamp(27px,2.5vw,40px);line-height:1.08;letter-spacing:-.035em;margin:.5em 0 .55em;color:#263f51}
+.mc-card-focus-note .mc-focus-context{margin:0;padding:0 0 16px;border-bottom:1px solid color-mix(in srgb,var(--focus-accent) 13%,#e8e1de);font:650 13px/1.55 var(--lv-font-body,Inter,sans-serif);color:#74696c}
+.mc-card-focus-note .mc-focus-meaning{margin:16px 0 0;font:500 15px/1.62 var(--lv-font-body,Inter,sans-serif);color:#5f6f78}
+.mc-card-focus-note span{margin-top:18px;padding-top:16px;border-top:1px solid color-mix(in srgb,var(--focus-accent) 11%,#ece4e1);font-size:12px}
+
+/* Mobile recovery: one scroll owner, no absolute desktop stage, no clipped content. */
+@media(max-width:800px){
+  body.mc-open{overflow:hidden!important}
+  .mc-canvas-overlay{overflow-y:auto!important;overflow-x:hidden!important;overscroll-behavior:contain;-webkit-overflow-scrolling:touch}
+  .mc-canvas-overlay .mc-flow{position:relative!important;inset:auto!important;min-height:100%;overflow:visible!important}
+  .mc-canvas-overlay .mc-screen{position:relative!important;inset:auto!important;min-height:100dvh!important;height:auto!important;overflow:visible!important;padding:calc(70px + env(safe-area-inset-top)) 0 calc(110px + env(safe-area-inset-bottom))!important}
+  .mc-canvas-overlay .mc-overlay-nav{position:fixed!important;top:max(10px,env(safe-area-inset-top));left:10px;right:10px;z-index:90}
+  .mc-deck-stage-head{position:relative!important;top:auto!important;width:calc(100% - 20px)!important;margin:0 10px 20px!important;transform:none!important}
+  .mc-stage-head-surface{padding:12px 16px 14px;border-radius:21px}
+  .mc-deck-stage-head h2{font-size:clamp(27px,8vw,34px)}
+  .mc-stage-decor,.mc-stage-atmosphere{position:fixed!important}
+  .mc-route{opacity:.16}.mc-postmark{display:none}
+  .mc-spread{position:relative!important;inset:auto!important;width:100%!important;display:flex!important;flex-direction:column!important;align-items:center!important;gap:22px!important;min-height:0!important;padding:4px 0 40px!important;overflow:visible!important}
+  .mc-spread .mc-loose-card{position:relative!important;left:auto!important;top:auto!important;width:min(430px,88vw)!important;max-width:88vw!important;min-height:0!important;height:auto!important;margin:0!important;flex:0 0 auto!important;transform:translateX(var(--spread-x,0)) translateY(var(--spread-y,0)) rotate(var(--spread-r,0deg))!important}
+  .mc-spread .mc-loose-card:hover{transform:translateX(var(--spread-x,0)) translateY(calc(var(--spread-y,0) - 6px)) rotate(calc(var(--spread-r,0deg)*.15)) scale(1.012)!important}
+  .mc-spread .mc-loose-media{height:auto;min-height:150px;aspect-ratio:16/10}
+  .mc-spread .tone-photo .mc-loose-media{aspect-ratio:4/3;min-height:0}
+  .mc-spread .mc-loose-copy{min-height:0!important;padding:17px 18px 19px}
+  .mc-spread .mc-loose-copy p{font-size:clamp(18px,5vw,22px)!important;line-height:1.38}
+  .mc-spread .mc-loose-card.text-long .mc-loose-copy p{font-size:clamp(16px,4.5vw,19px)!important;line-height:1.44}
+  .mc-continue{position:sticky!important;bottom:max(12px,env(safe-area-inset-bottom));left:auto!important;right:auto!important;transform:none!important;margin:22px auto 0!important;z-index:70}
+  .mc-card-focus-wrap{display:flex!important;flex-direction:column!important;align-items:center!important;justify-content:flex-start!important;min-height:0!important;width:100%!important;gap:22px!important;padding:0 12px 28px!important;overflow:visible!important}
+  .mc-card-focus-scene{width:100%!important;min-height:0!important}
+  .mc-card-focus-wrap .mc-loose-card{width:min(430px,90vw)!important;max-width:90vw!important;height:auto!important;min-height:0!important;aspect-ratio:auto!important;transform:none!important}
+  .mc-card-focus-wrap .mc-loose-media{height:auto!important;min-height:180px;aspect-ratio:16/10}
+  .mc-card-focus-wrap .tone-photo .mc-loose-media{aspect-ratio:4/3;min-height:0}
+  .mc-card-focus-note{width:min(430px,90vw)!important;max-width:90vw!important;padding:30px 24px 26px!important;text-align:left!important;border-radius:26px}
+  .mc-card-focus-note:before{left:24px;top:20px}
+  .mc-card-focus-note h2{font-size:clamp(25px,7vw,34px)!important;line-height:1.1}
+  .mc-card-focus-note .mc-focus-meaning{font-size:14px}
+  .mc-focus-aura{display:none}
+}
+@media(max-width:480px){
+  .mc-canvas-overlay .mc-screen{padding-top:calc(64px + env(safe-area-inset-top))!important}
+  .mc-spread{gap:18px!important}
+  .mc-spread .mc-loose-card,.mc-card-focus-wrap .mc-loose-card,.mc-card-focus-note{width:92vw!important;max-width:92vw!important}
+  .mc-deck-stage-head{width:calc(100% - 14px)!important;margin-left:7px!important;margin-right:7px!important}
+}
+@media(prefers-reduced-motion:reduce){.mc-route{animation:none!important}}

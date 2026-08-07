@@ -1,0 +1,39 @@
+Luvia 13.36.6 / Core 4.36.6 — build workspace test results
+
+AUTOMATED / STATIC CHECKS ACTUALLY EXECUTED
+PASS  JavaScript syntax: app/memory-worlds-v3.js
+PASS  JavaScript syntax: core/media/memory-cards.js
+PASS  JavaScript syntax: intelligence/kernel/version.js
+PASS  JavaScript syntax: intelligence/services/base-services.js
+PASS  JavaScript syntax: core/diagnostics/media-readiness.js
+PASS  runtime version 13.36.6 / Core 4.36.6
+PASS  service worker cache 13.36.6
+PASS  force-update target 13.36.6
+PASS  inherited active theme accent is first palette candidate
+PASS  single-author stack layers use trip accent
+PASS  open card author color separated from single stack color
+PASS  guided scatter scoring present
+PASS  focus meaning/context present
+PASS  content-aware text classes present
+PASS  stage atmosphere routes present
+PASS  mobile overlay is scroll owner
+PASS  mobile screen uses normal flow/min-height
+PASS  mobile spread uses normal flow
+PASS  mobile card width bounded to viewport
+PASS  mobile focus vertically scrollable through overlay
+PASS  safe-area padding present
+PASS  new mobile block has no negative card margins
+PASS  new desktop composition has no grid/slot templates
+PASS  CSS brace balance — 567 opening / 567 closing
+PASS  no stale 13.36.5 / Core 4.36.5 in active runtime version files
+PASS  index.html local asset references: 152 checked, 0 missing
+
+NOT CLAIMED AS AUTOMATIC PASS
+- Exact deployed trip accent value for the user's current trip/theme
+- Real Supabase realtime propagation of another participant's profile color
+- Signed photo rendering under production auth/RLS
+- Visual/gesture quality on a physical mobile device
+- Subjective quality of random guided-scatter compositions
+- Actual browser/PWA viewport behavior after deployment
+
+PASS  ZIP integrity: final archive pre-check succeeded, 1721 members, no corrupt member detected.
