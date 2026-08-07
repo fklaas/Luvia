@@ -1,6 +1,6 @@
 (() => {
 'use strict';
-const VERSION='4.36.1',BUILD='13.36.1';
+const VERSION='4.36.2',BUILD='13.36.2';
 let host=null,stopCards=null,urlCache=new Map(),homeState=null;
 const esc=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const me=()=>window.ParisAuth?.getState?.()?.user||{};
@@ -11,8 +11,11 @@ const fmt=v=>{if(!v)return'';const d=new Date(v);return Number.isNaN(d.getTime()
 async function signed(m){if(!m)return'';const k=String(m.id);if(urlCache.has(k))return urlCache.get(k);const u=await window.LuviaMediaCore?.signedUrl?.(m,3600).catch(()=>null)||'';urlCache.set(k,u);return u}
 async function putImg(el,m){if(!el||!m)return;const u=await signed(m);if(u&&el.isConnected)el.innerHTML=`<img src="${esc(u)}" alt="Reisefoto" loading="lazy" decoding="async">`}
 const whoName=(card,members)=>members.find(x=>String(x.id)===String(card.author_id))?.displayName||'Reisender';
-const weightLabel=n=>Number(n)>=3?'Herzstück':Number(n)===2?'Wichtig':'Erinnerung';
+const weightLabel=n=>Number(n)>=3?'Herzstück':Number(n)===2?'Im Fokus':'Im Stapel';
 const typeIcon=t=>({photo:'📸',quote:'💬',vibe:'✨',reaction:'💛',place:'📍',food:'🍝',weather:'☀️',inside_joke:'🤭'}[t]||'◌');
+const typeName=t=>({photo:'Lieblingsblick',quote:'Gedanke',vibe:'Momentgefühl',reaction:'Reaktion',place:'Ort',food:'Genuss',weather:'Atmosphäre',inside_joke:'Insider'}[t]||'Erinnerung');
+const memberColor=(id,members)=>members.find(x=>String(x.id)===String(id))?.avatarColor||'#d88198';
+const memberInitial=(id,members)=>{const n=members.find(x=>String(x.id)===String(id))?.displayName||'?';return n.trim().charAt(0).toUpperCase()||'?'};
 const cardTone=t=>({photo:'photo',quote:'quote',vibe:'vibe',reaction:'reaction',place:'place',food:'food',weather:'weather',inside_joke:'joke'}[t]||'note');
 function clusterForKey(key,clusters){if(!key?.startsWith('cluster:'))return null;const id=key.slice(8);return clusters.find(c=>String(c.id)===String(id))||null}
 function seeded(key,index){let h=2166136261;for(const ch of `${key}:${index}`){h^=ch.charCodeAt(0);h=Math.imul(h,16777619)}return((h>>>0)%10000)/10000}
@@ -36,17 +39,23 @@ async function renderHome(){
   </section>`;
   for(const b of host.querySelectorAll('[data-cluster]')){const c=pending[Number(b.dataset.i)];const media=await window.LuviaMemoryAlbums.mediaByIds(c.mediaIds);putImg(b.querySelector('.mc-discover-photo'),media[0]);b.onclick=()=>openDiscovery(c,media,members)}
   await paintCardPhotos(host,cards,src.media||[]);
-  for(const el of host.querySelectorAll('[data-stack]'))el.onclick=()=>openDeck(el.dataset.stack);
+  for(const el of host.querySelectorAll('[data-stack]'))el.onclick=()=>openDeck(el.dataset.stack,el);
 }
 
 function renderStack(key,items,members,index){
   const hero=items.find(x=>x.card_type==='photo')||items[0];
-  const rot=((seeded(key,index)-.5)*3.2).toFixed(2),lift=Math.round((seeded(key,index+9)-.5)*12);
-  const topQuote=items.find(x=>x.content&&x.card_type!=='photo');
+  const rot=((seeded(key,index)-.5)*2.2).toFixed(2),lift=Math.round((seeded(key,index+9)-.5)*8);
   const people=[...new Set(items.map(x=>String(x.author_id)))];
-  return `<button class="mc-deck" data-stack="${esc(key)}" style="--deck-rot:${rot}deg;--deck-lift:${lift}px">
-    <span class="mc-deck-layer layer-3"></span><span class="mc-deck-layer layer-2"></span><span class="mc-deck-layer layer-1"></span>
-    <span class="mc-deck-front tone-${cardTone(hero.card_type)}"><span class="mc-deck-photo" data-card-media="${esc(hero.media_id||'')}">${hero.media_id?'':`<b>${typeIcon(hero.card_type)}</b>`}</span><span class="mc-deck-info"><small>${items.length} ${items.length===1?'Card':'Cards'} · ${people.length} ${people.length===1?'Stimme':'Stimmen'}</small><strong>${topQuote?esc(topQuote.content):'Diesen Moment wieder öffnen'}</strong><i>${items.some(x=>Number(x.weight)>=3)?'♥ Herzstück dabei':'Memory Moment'}</i></span></span>
+  const mixed=[...items].sort((a,b)=>seeded(`${key}:${a.id}`,index)-seeded(`${key}:${b.id}`,index));
+  const layers=Array.from({length:Math.min(5,Math.max(3,items.length))},(_,i)=>{
+    const c=mixed[(i+1)%mixed.length]||hero; const color=memberColor(c.author_id,members);
+    return `<span class="mc-deck-layer layer-${i+1}" style="--layer-color:${esc(color)};--layer-i:${i}"></span>`;
+  }).join('');
+  const voices=people.map(id=>`<span class="mc-voice-dot" style="--voice:${esc(memberColor(id,members))}" title="${esc(members.find(x=>String(x.id)===id)?.displayName||'Reisender')}">${esc(memberInitial(id,members))}</span>`).join('');
+  const accent=memberColor(hero.author_id,members);
+  return `<button class="mc-deck" data-stack="${esc(key)}" style="--deck-rot:${rot}deg;--deck-lift:${lift}px;--deck-accent:${esc(accent)}">
+    ${layers}
+    <span class="mc-deck-front tone-${cardTone(hero.card_type)}" style="--person-color:${esc(accent)}"><span class="mc-deck-photo" data-card-media="${esc(hero.media_id||'')}">${hero.media_id?'':`<b>${typeIcon(hero.card_type)}</b>`}</span><span class="mc-deck-info"><span class="mc-deck-meta"><small>${items.length} ${items.length===1?'Card':'Cards'} · ${people.length} ${people.length===1?'Stimme':'Stimmen'}</small><span class="mc-voices">${voices}</span></span><strong>${clusterForKey(key,homeState?.clusters||[])?'Gemeinsamer Memory Moment':'Eure Erinnerungen'}</strong><i>${items.some(x=>Number(x.weight)>=3)?'♥ Ein Herzstück ist dabei':'Perspektiven gemischt im selben Deck'}</i></span></span>
   </button>`
 }
 async function paintCardPhotos(root,cards,media){const map=new Map(media.map(m=>[String(m.id),m]));for(const el of root.querySelectorAll('[data-card-media]')){const m=map.get(String(el.dataset.cardMedia));if(m)await putImg(el,m)}}
@@ -72,25 +81,45 @@ async function openDiscovery(cluster,media,members,startStep=0){
 }
 
 function renderLooseCard(c,members,i,mode='deck'){
-  const uid=String(me().id||''),rot=((seeded(c.id,i)-.5)*(mode==='deck'?4.2:2.4)).toFixed(2),x=Math.round((seeded(c.id,i+10)-.5)*24),y=Math.round((seeded(c.id,i+20)-.5)*20);
+  const uid=String(me().id||''),rot=((seeded(c.id,i)-.5)*(mode==='deck'?3.0:1.6)).toFixed(2),x=Math.round((seeded(c.id,i+10)-.5)*22),y=Math.round((seeded(c.id,i+20)-.5)*18);
+  const accent=memberColor(c.author_id,members),name=whoName(c,members),label=typeName(c.card_type);
   const content=c.content?`<p>${esc(c.content)}</p>`:'';
   const reaction=c.reaction?`<strong>${esc(c.reaction)}</strong>`:'';
-  return `<article class="mc-loose-card tone-${cardTone(c.card_type)} w${c.weight}" data-loose-card="${esc(c.id)}" style="--card-rot:${rot}deg;--card-x:${x}px;--card-y:${y}px;--card-i:${i}"><div class="mc-loose-media" data-mid="${esc(c.media_id||'')}">${c.media_id?'':`<span>${typeIcon(c.card_type)}</span>`}</div><div class="mc-loose-copy"><small>${esc(whoName(c,members))}</small>${content}${reaction}<button class="mc-weight" data-weight="${esc(c.id)}" data-own="${String(c.author_id)===uid?'1':'0'}">${weightLabel(c.weight)}</button></div></article>`
+  return `<article class="mc-loose-card tone-${cardTone(c.card_type)} w${c.weight}" data-loose-card="${esc(c.id)}" style="--card-rot:${rot}deg;--card-x:${x}px;--card-y:${y}px;--card-i:${i};--person-color:${esc(accent)}"><div class="mc-card-ribbon"></div><div class="mc-loose-media" data-mid="${esc(c.media_id||'')}">${c.media_id?'':`<span class="mc-card-symbol">${typeIcon(c.card_type)}</span><em>${esc(label)}</em>`}</div><div class="mc-loose-copy"><div class="mc-card-author"><span style="--avatar:${esc(accent)}">${esc(memberInitial(c.author_id,members))}</span><small>${esc(name)}</small></div>${content}${reaction}<div class="mc-card-foot"><i>${esc(label)}</i><button class="mc-weight" data-weight="${esc(c.id)}" data-own="${String(c.author_id)===uid?'1':'0'}">${weightLabel(c.weight)}</button></div></div></article>`
 }
 async function paintLoosePhotos(root,cards,media){const map=new Map(media.map(m=>[String(m.id),m]));for(const el of root.querySelectorAll('[data-mid]')){const m=map.get(String(el.dataset.mid));if(m)await putImg(el,m)}}
 
-async function openDeck(key){
+async function openDeck(key,sourceEl){
   if(!homeState)return;
   const items=homeState.grouped.get(key)||[];if(!items.length)return;
   const cluster=clusterForKey(key,homeState.clusters);const media=cluster?await window.LuviaMemoryAlbums.mediaByIds(cluster.mediaIds):homeState.src.media||[];
-  const ctx=overlay({deck:true});ctx.back.hidden=true;
-  const showSpread=async()=>{const p=await swap(ctx,`<div class="mc-deck-stage-head"><small>MEMORY MOMENT</small><h2>${cluster?fmt(cluster.started_at||cluster.created_at)||'Eure Karten':'Eure Karten'}</h2><span>${items.length} ${items.length===1?'Erinnerung':'Erinnerungen'}</span></div><div class="mc-spread">${items.map((c,i)=>renderLooseCard(c,homeState.members,i,'deck')).join('')}</div>${cluster?'<button class="mc-continue" data-continue>Moment weiter ergänzen</button>':''}`,{motion:'deck',showBack:false});await paintLoosePhotos(p,items,media);for(const card of p.querySelectorAll('[data-loose-card]'))card.onclick=e=>{if(e.target.closest('button'))return;openCardDetail(ctx,items.find(x=>String(x.id)===String(card.dataset.looseCard)),homeState.members,media,showSpread)};p.querySelectorAll('[data-weight][data-own="1"]').forEach(b=>b.onclick=async e=>{e.stopPropagation();const c=items.find(x=>String(x.id)===String(b.dataset.weight));const next=Number(c.weight)>=3?1:Number(c.weight)+1;await window.LuviaMemoryCards.setWeight(c.id,next);c.weight=next;b.textContent=weightLabel(next);b.closest('.mc-loose-card')?.classList.remove('w1','w2','w3');b.closest('.mc-loose-card')?.classList.add(`w${next}`)});if(cluster)p.querySelector('[data-continue]').onclick=()=>{ctx.close();setTimeout(()=>openDiscovery(cluster,media,homeState.members,0),270)}};
-  showSpread();
+  const decks=[...host.querySelectorAll('.mc-deck')];decks.forEach(d=>d.classList.toggle('is-source',d===sourceEl));host.querySelector('.mc-home')?.classList.add('is-deck-opening');
+  await new Promise(r=>setTimeout(r,260));
+  const ctx=overlay({deck:true});ctx.root.classList.add('mc-canvas-overlay');ctx.back.hidden=false;ctx.back.onclick=()=>ctx.close();
+  const previewItems=[...items].sort((a,b)=>seeded(`${key}:${a.id}`,1)-seeded(`${key}:${b.id}`,1)).slice(0,5);
+  const launch=await swap(ctx,`<div class="mc-deck-launch"><div class="mc-launch-stack">${previewItems.map((c,i)=>`<span style="--launch-i:${i};--launch-color:${esc(memberColor(c.author_id,homeState.members))}"></span>`).join('')}</div><small>${items.length} ${items.length===1?'Card':'Cards'} · ${new Set(items.map(x=>String(x.author_id))).size} Stimmen</small></div>`,{motion:'focus',showBack:true});
+  requestAnimationFrame(()=>launch.querySelector('.mc-launch-stack')?.classList.add('alive'));
+  await new Promise(r=>setTimeout(r,620));
+  const showSpread=async()=>{
+    const p=await swap(ctx,`<div class="mc-deck-stage-head"><small>MEMORY MOMENT</small><h2>${cluster?fmt(cluster.started_at||cluster.created_at)||'Eure Karten':'Eure Karten'}</h2><span>${items.length} ${items.length===1?'Erinnerung':'Erinnerungen'} · gemeinsam gemischt</span></div><div class="mc-spread" data-count="${items.length}">${items.map((c,i)=>renderLooseCard(c,homeState.members,i,'deck')).join('')}</div>${cluster?'<button class="mc-continue" data-continue>Moment weiter ergänzen</button>':''}`,{motion:'scatter',showBack:true});
+    await paintLoosePhotos(p,items,media);positionSpread(p.querySelector('.mc-spread'),items);
+    for(const card of p.querySelectorAll('[data-loose-card]'))card.onclick=e=>{if(e.target.closest('button'))return;openCardDetail(ctx,items.find(x=>String(x.id)===String(card.dataset.looseCard)),homeState.members,media,showSpread)};
+    p.querySelectorAll('[data-weight][data-own="1"]').forEach(b=>b.onclick=async e=>{e.stopPropagation();const c=items.find(x=>String(x.id)===String(b.dataset.weight));const next=Number(c.weight)>=3?1:Number(c.weight)+1;await window.LuviaMemoryCards.setWeight(c.id,next);c.weight=next;b.textContent=weightLabel(next);b.closest('.mc-loose-card')?.classList.remove('w1','w2','w3');b.closest('.mc-loose-card')?.classList.add(`w${next}`)});
+    if(cluster)p.querySelector('[data-continue]').onclick=()=>{ctx.close();setTimeout(()=>openDiscovery(cluster,media,homeState.members,0),270)};
+    ctx.back.onclick=()=>ctx.close();
+  };
+  await showSpread();
+}
+function positionSpread(root,items){
+  if(!root)return;const cards=[...root.querySelectorAll('.mc-loose-card')];const mobile=matchMedia('(max-width:800px)').matches;
+  if(mobile){cards.forEach((el,i)=>{el.style.setProperty('--spread-x',`${i%2?18:-12}px`);el.style.setProperty('--spread-y',`${i*18}px`);el.style.setProperty('--spread-r',`${((seeded(items[i]?.id||i,i)-.5)*2.4).toFixed(2)}deg`)});return}
+  const presets=[[18,28],[42,18],[66,30],[30,57],[56,55],[78,60],[17,78],[44,80],[70,82],[86,35]];
+  cards.forEach((el,i)=>{const p=presets[i%presets.length],j=(seeded(items[i]?.id||i,i)-.5)*5,k=(seeded(items[i]?.id||i,i+6)-.5)*5;el.style.setProperty('--spread-left',`${p[0]+j}%`);el.style.setProperty('--spread-top',`${p[1]+k}%`);el.style.setProperty('--spread-r',`${((seeded(items[i]?.id||i,i+11)-.5)*3).toFixed(2)}deg`)})
 }
 async function openCardDetail(ctx,card,members,media,onBack){
   const p=await swap(ctx,`<div class="mc-card-focus-wrap">${renderLooseCard(card,members,0,'focus')}<div class="mc-card-focus-note"><small>MEMORY CARD</small><h2>${card.card_type==='photo'?'Dein gewählter Blick':card.content?esc(card.content):card.reaction?esc(card.reaction):'Kleine Erinnerung'}</h2><p>${esc(whoName(card,members))} · ${weightLabel(card.weight)}</p><span>Tippe auf Zurück, um die Karten wieder auszubreiten.</span></div></div>`,{motion:'focus',showBack:true});await paintLoosePhotos(p,[card],media);const detail=p.querySelector('.mc-loose-card');detail.classList.add('is-focus');ctx.back.onclick=async()=>{ctx.back.onclick=null;await onBack()}
 }
 
 async function mount(node){host=node;await renderHome();stopCards=await window.LuviaMemoryCards.subscribe(()=>setTimeout(renderHome,350));return()=>{stopCards?.();stopCards=null;host=null}}
-window.LuviaAlbumsView=Object.freeze({version:VERSION,build:BUILD,mount,render:renderHome,experience:'memory-card-deck-experience',model:'cards -> decks -> moments -> journeys -> studio'});
+window.LuviaAlbumsView=Object.freeze({version:VERSION,build:BUILD,mount,render:renderHome,experience:'memory-deck-identity-spread-motion',model:'cards -> decks -> moments -> journeys -> studio'});
 })();

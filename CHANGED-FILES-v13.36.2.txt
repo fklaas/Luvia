@@ -1,0 +1,13 @@
+app/memory-worlds-v3.js
+app/memory-worlds-v3.css
+core/media/memory-cards.js
+supabase/migrations/20260807120000_memory_deck_member_colors.sql
+intelligence/kernel/version.js
+index.html
+sw.js
+force-update.html
+RELEASE-v13.36.2.md
+DEPLOYMENT-v13.36.2.md
+COMMIT-v13.36.2.txt
+core/diagnostics/media-readiness.js
+intelligence/services/base-services.js
