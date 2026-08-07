@@ -1,0 +1,30 @@
+Luvia 13.36.5 / Core 4.36.5 — build workspace test results
+
+AUTOMATED / STATIC CHECKS ACTUALLY EXECUTED
+PASS  JavaScript syntax: app/memory-worlds-v3.js
+PASS  JavaScript syntax: core/media/memory-cards.js
+PASS  JavaScript syntax: intelligence/kernel/version.js
+PASS  JavaScript syntax: intelligence/services/base-services.js
+PASS  JavaScript syntax: core/diagnostics/media-readiness.js
+PASS  index.html local asset references: 152 checked, 0 missing
+PASS  runtime version: Memory UI 13.36.5 / Core 4.36.5
+PASS  central resolveMemoryVisualPalette path present
+PASS  single-author stackLayers forced to trip color source
+PASS  old desktop slot/template array removed
+PASS  full-stage spread override present
+PASS  230 ms hover transform transition + 12 px lift present
+PASS  animated mcDecorFloat background elements present
+PASS  mobile non-overlap layout guard present
+PASS  old #d88198 --person-color fallback removed
+PASS  trip color resolver reads active trip/store/theme candidate fields
+PASS  CSS brace balance: 490 opening / 490 closing
+PASS  no stale 13.36.4 / Core 4.36.4 references in active runtime version files
+
+NOT CLAIMED AS AUTOMATIC PASS
+- Real deployed trip accent value for the user's current trip
+- Real Supabase realtime propagation of another participant's profile color
+- Signed photo rendering under production auth/RLS
+- Visual/gesture quality on a physical mobile device
+- Subjective composition quality of random spreads
+
+PASS  ZIP integrity: final archive verified with ZipFile.testzip(), no corrupt member detected.

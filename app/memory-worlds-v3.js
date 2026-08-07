@@ -1,10 +1,11 @@
 (() => {
 'use strict';
-const VERSION='4.36.4',BUILD='13.36.4';
+const VERSION='4.36.5',BUILD='13.36.5';
 let host=null,stopCards=null,stopIdentities=null,urlCache=new Map(),homeState=null;
 const deckSessionSeed=Math.random().toString(36).slice(2);
-const validColor=v=>/^#[0-9a-f]{6}$/i.test(String(v||'').trim())?String(v).trim():null;
-const tripAccent=()=>validColor(window.LuviaTripContext?.getAccent?.())||validColor(getComputedStyle(document.documentElement).getPropertyValue('--trip-accent'))||'#ee6f83';
+const validColor=v=>/^#[0-9a-f]{6}$/i.test(String(v||'').trim())?String(v).trim().toLowerCase():null;
+const tripRecord=()=>({...(window.LuviaTripStore?.snapshot?.()?.activeTrip||{}),...(window.LuviaTripContext?.getSnapshot?.()?.activeTrip||{}),...(window.LuviaTripContext?.getActiveTrip?.()||{})});
+const tripAccent=()=>{const t=tripRecord(),candidates=[t.accent,t.accent_color,t.themeColor,t.theme_color,t.color,t.settings?.accent,t.settings?.accent_color,t.settings?.themeColor,t.settings?.theme_color,t.moduleSettings?.theme?.accent,t.module_settings?.theme?.accent,t.visualTheme?.accent,t.visual_theme?.accent,getComputedStyle(document.documentElement).getPropertyValue('--trip-accent'),getComputedStyle(document.documentElement).getPropertyValue('--lv-accent')];return candidates.map(validColor).find(Boolean)||'#ee6f83'};
 const esc=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const me=()=>window.ParisAuth?.getState?.()?.user||{};
 const REACTIONS=['❤️','🥹','😂','🥰','🤩','🫶','✨','☀️','🌊','🍝','☕','🎢','🏙️','🌿','🎶','📸','😌','🤭','😋','🥳','🤯','🙈','💫','🔥'];
@@ -17,10 +18,17 @@ const whoName=(card,members)=>members.find(x=>String(x.id)===String(card.author_
 const weightLabel=n=>Number(n)>=3?'Herzstück':Number(n)===2?'Im Fokus':'Im Stapel';
 const typeIcon=t=>({photo:'📸',quote:'💬',vibe:'✨',reaction:'💛',place:'📍',food:'🍝',weather:'☀️',inside_joke:'🤭'}[t]||'◌');
 const typeName=t=>({photo:'Lieblingsblick',quote:'Gedanke',vibe:'Momentgefühl',reaction:'Reaktion',place:'Ort',food:'Genuss',weather:'Atmosphäre',inside_joke:'Insider'}[t]||'Erinnerung');
-const memberColor=(id,members)=>validColor(members.find(x=>String(x.id)===String(id))?.avatarColor);
+const memberColor=(id,members)=>{const m=members.find(x=>String(x.id)===String(id))||{};return [m.avatarColor,m.avatar_color,m.profileColor,m.profile_color,m.accent,m.color].map(validColor).find(Boolean)||null};
 const contributorPalette=(people,members)=>[...new Set(people.map(id=>memberColor(id,members)).filter(Boolean))];
-const deckColor=(card,members,people)=>{if(people.length<=1)return tripAccent();const palette=contributorPalette(people,members);return memberColor(card.author_id,members)||palette[0]||tripAccent()};
-const stagePalette=(people,members)=>{if(people.length<=1){const trip=tripAccent();return[trip,trip]}const palette=contributorPalette(people,members);const first=palette[0]||tripAccent();return[first,palette[1]||first]};
+function resolveMemoryVisualPalette(items,members){
+  const people=deckPeople(items),trip=tripAccent();
+  if(people.length<=1)return Object.freeze({mode:'single',people,trip,contributors:[],primary:trip,secondary:trip,stackLayers:[trip,trip,trip,trip,trip,trip]});
+  const contributors=contributorPalette(people,members);
+  const usable=contributors.length?contributors:[trip];
+  return Object.freeze({mode:'multi',people,trip,contributors,primary:usable[0],secondary:usable[1]||usable[0],stackLayers:Array.from({length:6},(_,i)=>usable[i%usable.length])});
+}
+const deckColor=(card,members,people,items)=>{const visual=resolveMemoryVisualPalette(items?.length?items:(homeState?.grouped?[...homeState.grouped.values()].find(list=>list.some(x=>String(x.id)===String(card?.id)))||[]:[]),members);if(visual.mode==='single')return visual.trip;return memberColor(card?.author_id,members)||visual.stackLayers[0]};
+const stagePalette=(items,members)=>{const visual=resolveMemoryVisualPalette(items,members);return[visual.primary,visual.secondary]};
 const deckPeople=items=>[...new Set(items.map(x=>String(x.author_id)).filter(Boolean))];
 const shuffled=(items,salt='')=>{const a=[...items];for(let i=a.length-1;i>0;i--){const r=Math.abs(Math.sin(Date.now()*0.00037+i*17+salt.length*13+Math.random()*97));const j=Math.floor(r*(i+1));[a[i],a[j]]=[a[j],a[i]]}return a};
 const memberInitial=(id,members)=>{const n=members.find(x=>String(x.id)===String(id))?.displayName||'?';return n.trim().charAt(0).toUpperCase()||'?'};
@@ -51,18 +59,17 @@ async function renderHome(){
 }
 
 function renderStack(key,items,members,index){
-  const people=deckPeople(items),photos=items.filter(x=>x.card_type==='photo'&&x.media_id);
+  const visual=resolveMemoryVisualPalette(items,members),people=visual.people,photos=items.filter(x=>x.card_type==='photo'&&x.media_id);
   const hero=(photos.length?photos[Math.floor(Math.random()*photos.length)]:items[Math.floor(Math.random()*items.length)])||items[0];
   const rot=((Math.random()-.5)*2.0).toFixed(2),lift=Math.round((Math.random()-.5)*8);
   const rest=shuffled(items.filter(x=>String(x.id)!==String(hero.id)),`${deckSessionSeed}:${key}:${index}`);
   const visible=Math.min(6,Math.max(3,items.length));
   const layers=Array.from({length:visible},(_,i)=>{
-    const c=rest[i%Math.max(1,rest.length)]||hero; const color=deckColor(c,members,people);
+    const c=rest[i%Math.max(1,rest.length)]||hero; const color=visual.stackLayers[i%visual.stackLayers.length];
     return `<span class="mc-deck-layer layer-${i+1}" style="--layer-color:${esc(color)};--layer-i:${i}"></span>`;
   }).join('');
-  const palette=contributorPalette(people,members);
-  const voices=people.map(id=>`<span class="mc-voice-dot" style="--voice:${esc(people.length<=1?tripAccent():(memberColor(id,members)||palette[0]||tripAccent()))}" title="${esc(members.find(x=>String(x.id)===id)?.displayName||'Reisender')}">${esc(memberInitial(id,members))}</span>`).join('');
-  const accent=deckColor(hero,members,people);
+  const voices=people.map(id=>`<span class="mc-voice-dot" style="--voice:${esc(visual.mode==='single'?visual.trip:(memberColor(id,members)||visual.primary))}" title="${esc(members.find(x=>String(x.id)===id)?.displayName||'Reisender')}">${esc(memberInitial(id,members))}</span>`).join('');
+  const accent=visual.mode==='single'?visual.trip:(memberColor(hero.author_id,members)||visual.primary);
   const cluster=clusterForKey(key,homeState?.clusters||[]);
   const momentLabel=cluster?(fmt(cluster.started_at||cluster.created_at)||'Memory Moment'):'Eure Erinnerungen';
   return `<button class="mc-deck" data-stack="${esc(key)}" style="--deck-rot:${rot}deg;--deck-lift:${lift}px;--deck-accent:${esc(accent)}">
@@ -94,8 +101,7 @@ async function openDiscovery(cluster,media,members,startStep=0){
 
 function renderLooseCard(c,members,i,mode='deck'){
   const uid=String(me().id||''),rot=((seeded(c.id,i)-.5)*(mode==='deck'?3.0:1.6)).toFixed(2),x=Math.round((seeded(c.id,i+10)-.5)*22),y=Math.round((seeded(c.id,i+20)-.5)*18);
-  const people=homeState?.grouped?[...homeState.grouped.values()].find(list=>list.some(x=>String(x.id)===String(c.id)))?deckPeople([...homeState.grouped.values()].find(list=>list.some(x=>String(x.id)===String(c.id)))):[]:[];
-  const accent=deckColor(c,members,people),name=whoName(c,members),label=typeName(c.card_type);
+  const group=homeState?.grouped?[...homeState.grouped.values()].find(list=>list.some(x=>String(x.id)===String(c.id)))||[]:[];const visual=resolveMemoryVisualPalette(group.length?group:[c],members);const accent=visual.mode==='single'?visual.trip:(memberColor(c.author_id,members)||visual.primary),name=whoName(c,members),label=typeName(c.card_type);
   const content=c.content?`<p>${esc(c.content)}</p>`:'';
   const reaction=c.reaction?`<strong>${esc(c.reaction)}</strong>`:'';
   return `<article class="mc-loose-card tone-${cardTone(c.card_type)} w${c.weight}" data-loose-card="${esc(c.id)}" style="--card-rot:${rot}deg;--card-x:${x}px;--card-y:${y}px;--card-i:${i};--person-color:${esc(accent)}"><div class="mc-card-ribbon"></div><div class="mc-loose-media" data-mid="${esc(c.media_id||'')}">${c.media_id?'':`<span class="mc-card-symbol">${typeIcon(c.card_type)}</span><em>${esc(label)}</em>`}</div><div class="mc-loose-copy"><div class="mc-card-author"><span style="--avatar:${esc(accent)}">${esc(memberInitial(c.author_id,members))}</span><small>${esc(name)}</small></div>${content}${reaction}<div class="mc-card-foot"><i>${esc(label)}</i><button class="mc-weight" data-weight="${esc(c.id)}" data-own="${String(c.author_id)===uid?'1':'0'}">${weightLabel(c.weight)}</button></div></div></article>`
@@ -110,15 +116,15 @@ async function openDeck(key,sourceEl){
   await new Promise(r=>setTimeout(r,520));
   const ctx=overlay({deck:true});ctx.root.classList.add('mc-canvas-overlay');
   const baseClose=ctx.close;ctx.close=()=>{ctx.root.classList.add('closing');setTimeout(()=>{ctx.root.remove();document.body.classList.remove('mc-open');home?.classList.remove('is-deck-opening');decks.forEach(d=>d.classList.remove('is-source'));},420)};ctx.root.querySelector('.mc-x').onclick=ctx.close;
-  const people=deckPeople(items),previewItems=shuffled(items,`${key}:launch`).slice(0,Math.min(6,items.length));
-  const [stageA,stageB]=stagePalette(people,homeState.members);ctx.root.style.setProperty('--mc-stage-a',stageA);ctx.root.style.setProperty('--mc-stage-b',stageB);ctx.root.style.setProperty('--mc-stage-trip',tripAccent());
-  const launch=await swap(ctx,`<div class="mc-deck-launch"><div class="mc-launch-stack">${previewItems.map((c,i)=>`<span style="--launch-i:${i};--launch-color:${esc(deckColor(c,homeState.members,people))}"></span>`).join('')}</div><small>${items.length} ${items.length===1?'Card':'Cards'} · ${people.length} ${people.length===1?'Stimme':'Stimmen'}</small></div>`,{motion:'focus',showBack:true});
+  const visual=resolveMemoryVisualPalette(items,homeState.members),people=visual.people,previewItems=shuffled(items,`${key}:launch`).slice(0,Math.min(6,items.length));
+  const [stageA,stageB]=stagePalette(items,homeState.members);ctx.root.style.setProperty('--mc-stage-a',stageA);ctx.root.style.setProperty('--mc-stage-b',stageB);ctx.root.style.setProperty('--mc-stage-trip',tripAccent());
+  const launch=await swap(ctx,`<div class="mc-deck-launch"><div class="mc-launch-stack">${previewItems.map((c,i)=>`<span style="--launch-i:${i};--launch-color:${esc(visual.stackLayers[i%visual.stackLayers.length])}"></span>`).join('')}</div><small>${items.length} ${items.length===1?'Card':'Cards'} · ${people.length} ${people.length===1?'Stimme':'Stimmen'}</small></div>`,{motion:'focus',showBack:true});
   const launchStack=launch.querySelector('.mc-launch-stack');requestAnimationFrame(()=>launchStack?.classList.add('alive','breathing'));
   ctx.back.onclick=()=>ctx.close();
   await new Promise(r=>setTimeout(r,2350));
   const showSpread=async()=>{
     const arranged=shuffled(items,`${key}:${Math.random()}`);
-    const p=await swap(ctx,`<div class="mc-deck-stage-head"><div class="mc-stage-head-surface"><small>MEMORY MOMENT</small><h2>${cluster?fmt(cluster.started_at||cluster.created_at)||'Eure Karten':'Eure Karten'}</h2><span>${items.length} ${items.length===1?'Erinnerung':'Erinnerungen'} · ${people.length} ${people.length===1?'Stimme':'Stimmen'}</span></div></div><div class="mc-stage-decor" aria-hidden="true"><i>✦</i><i>✈</i><i>⌖</i><i>♡</i><i>↝</i></div><div class="mc-spread" data-count="${items.length}">${arranged.map((c,i)=>renderLooseCard(c,homeState.members,i,'deck')).join('')}</div>${cluster?'<button class="mc-continue" data-continue>Moment weiter ergänzen</button>':''}`,{motion:'scatter',showBack:true});
+    const p=await swap(ctx,`<div class="mc-deck-stage-head"><div class="mc-stage-head-surface"><small>MEMORY MOMENT</small><h2>${cluster?fmt(cluster.started_at||cluster.created_at)||'Eure Karten':'Eure Karten'}</h2><span>${items.length} ${items.length===1?'Erinnerung':'Erinnerungen'} · ${people.length} ${people.length===1?'Stimme':'Stimmen'}</span></div></div><div class="mc-stage-decor" aria-hidden="true"><i>✦</i><i>✈</i><i>⌖</i><i>♡</i><i>↝</i><i>📷</i><i>⌁</i><i>✦</i></div><div class="mc-spread" data-count="${items.length}">${arranged.map((c,i)=>renderLooseCard(c,homeState.members,i,'deck')).join('')}</div>${cluster?'<button class="mc-continue" data-continue>Moment weiter ergänzen</button>':''}`,{motion:'scatter',showBack:true});
     await paintLoosePhotos(p,arranged,media);positionSpread(p.querySelector('.mc-spread'),arranged,true);
     for(const card of p.querySelectorAll('[data-loose-card]'))card.onclick=e=>{if(e.target.closest('button'))return;openCardDetail(ctx,items.find(x=>String(x.id)===String(card.dataset.looseCard)),homeState.members,media,showSpread)};
     p.querySelectorAll('[data-weight][data-own="1"]').forEach(b=>b.onclick=async e=>{e.stopPropagation();const c=items.find(x=>String(x.id)===String(b.dataset.weight));const next=Number(c.weight)>=3?1:Number(c.weight)+1;await window.LuviaMemoryCards.setWeight(c.id,next);c.weight=next;b.textContent=weightLabel(next);b.closest('.mc-loose-card')?.classList.remove('w1','w2','w3');b.closest('.mc-loose-card')?.classList.add(`w${next}`)});
@@ -133,21 +139,28 @@ async function openDeck(key,sourceEl){
 }
 function positionSpread(root,items,reroll=false){
   if(!root)return;const cards=[...root.querySelectorAll('.mc-loose-card')],mobile=matchMedia('(max-width:800px)').matches,rnd=()=>Math.random();
-  if(mobile){cards.forEach((el,i)=>{const side=i%3===0?-1:i%3===1?1:0;const x=side*(5+rnd()*12),y=(rnd()-.5)*8;el.style.setProperty('--spread-x',`${x.toFixed(1)}px`);el.style.setProperty('--spread-y',`${y.toFixed(1)}px`);el.style.setProperty('--spread-r',`${((rnd()-.5)*1.8).toFixed(2)}deg`);el.style.zIndex=String(20+i)});return}
-  const count=cards.length;
-  const templates=count<=4?[[32,30],[68,30],[35,70],[65,70]]:count<=6?[[22,28],[50,25],[78,28],[28,70],[58,69],[82,70]]:count<=9?[[20,22],[50,20],[80,23],[23,51],[51,50],[78,51],[20,79],[50,78],[80,78]]:[[15,23],[38,20],[62,21],[85,24],[18,52],[40,50],[63,51],[84,52],[17,80],[39,79],[62,79],[84,78]];
-  const order=shuffled(templates,`${Date.now()}:${Math.random()}`);
-  cards.forEach((el,i)=>{const p=order[i%order.length],jx=(rnd()-.5)*4.5,jy=(rnd()-.5)*4.5;el.style.setProperty('--spread-left',`${Math.max(12,Math.min(88,p[0]+jx))}%`);el.style.setProperty('--spread-top',`${Math.max(17,Math.min(83,p[1]+jy))}%`);el.style.setProperty('--spread-r',`${((rnd()-.5)*3.2).toFixed(2)}deg`);el.style.zIndex=String(20+i)})
+  if(mobile){cards.forEach((el,i)=>{const side=i%2===0?-1:1;const x=side*(10+rnd()*18),y=rnd()*7;el.style.setProperty('--spread-x',`${x.toFixed(1)}px`);el.style.setProperty('--spread-y',`${y.toFixed(1)}px`);el.style.setProperty('--spread-r',`${(side*(.55+rnd()*1.25)).toFixed(2)}deg`);el.style.zIndex=String(20+i)});return}
+  const count=Math.max(1,cards.length),golden=.61803398875,phase=rnd();
+  const points=[];
+  for(let i=0;i<count;i++){
+    const u=(phase+i*golden)%1,v=(phase*.73+i*.41421356237)%1;
+    let left=8+u*84,top=19+v*74;
+    if(count<=4){left=14+u*72;top=25+v*62}
+    points.push([left,top]);
+  }
+  const spreadOut=shuffled(points,`${Date.now()}:${Math.random()}`);
+  cards.forEach((el,i)=>{const p=spreadOut[i],jx=(rnd()-.5)*3.2,jy=(rnd()-.5)*3.2;el.style.setProperty('--spread-left',`${Math.max(7,Math.min(93,p[0]+jx))}%`);el.style.setProperty('--spread-top',`${Math.max(18,Math.min(92,p[1]+jy))}%`);el.style.setProperty('--spread-r',`${((rnd()-.5)*4.0).toFixed(2)}deg`);el.style.zIndex=String(20+i)});
 }
+
 async function openCardDetail(ctx,card,members,media,onBack){
   const group=homeState?.grouped?[...homeState.grouped.values()].find(list=>list.some(x=>String(x.id)===String(card.id))):null;
-  const cardPeople=group?deckPeople(group):[];
-  const focusAccent=deckColor(card,members,cardPeople);
+  const visual=resolveMemoryVisualPalette(group?.length?group:[card],members);
+  const focusAccent=visual.mode==='single'?visual.trip:(memberColor(card.author_id,members)||visual.primary);
   const p=await swap(ctx,`<div class="mc-card-focus-wrap" style="--focus-accent:${esc(focusAccent)}"><div class="mc-card-focus-scene"><div class="mc-focus-aura" aria-hidden="true"><i></i><i></i><i></i></div>${renderLooseCard(card,members,0,'focus')}</div><div class="mc-card-focus-note"><small>${typeName(card.card_type).toUpperCase()}</small><h2>${card.card_type==='photo'?'Ein Blick, der geblieben ist':card.content?esc(card.content):card.reaction?esc(card.reaction):'Kleine Erinnerung'}</h2><p>${esc(whoName(card,members))}${Number(card.weight)>=3?' · Herzstück':Number(card.weight)===2?' · im Fokus':''}</p><span>Klick oder tippe auf die freie Fläche, um die Karten neu auszubreiten.</span></div></div>`,{motion:'focus',showBack:true});
   await paintLoosePhotos(p,[card],media);const detail=p.querySelector('.mc-loose-card');detail.classList.add('is-focus');
   const back=async()=>{ctx.back.onclick=null;await onBack()};ctx.back.onclick=back;
   p.onclick=e=>{if(e.target.closest('.mc-loose-card,.mc-card-focus-note,button'))return;back()};
 }
 async function mount(node){host=node;await renderHome();stopCards=await window.LuviaMemoryCards.subscribe(()=>setTimeout(renderHome,350));stopIdentities=await window.LuviaMemoryCards.subscribeIdentities?.(()=>{window.LuviaMemoryCards.members().then(m=>{if(!homeState)return;homeState.members=m;renderHome()})});return()=>{stopCards?.();stopIdentities?.();stopCards=null;stopIdentities=null;host=null}}
-window.LuviaAlbumsView=Object.freeze({version:VERSION,build:BUILD,mount,render:renderHome,experience:'memory-deck-visual-cohesion-focus-polish',model:'cards -> decks -> moments -> journeys -> studio'});
+window.LuviaAlbumsView=Object.freeze({version:VERSION,build:BUILD,mount,render:renderHome,experience:'memory-deck-spatial-color-interaction-correction',model:'cards -> decks -> moments -> journeys -> studio'});
 })();
