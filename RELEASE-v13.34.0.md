@@ -1,4 +1,4 @@
-# Luvia 13.34.1 / Core 4.34.1 — Memory Render Engine Rebuild
+# Luvia 13.35.0 / Core 4.35.0 — Memory Render Engine Rebuild
 
 ## Ziel
 Memory Moments und Memory Journeys verlassen den bisherigen CSS-Szenenansatz. Die neue Memory-Erlebnis-Schicht nutzt einen eigenen TypeScript-Renderer mit WebGL2/GLSL, Canvas-Compositing und einem separaten Export-Renderer.

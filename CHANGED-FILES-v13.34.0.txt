@@ -19,7 +19,7 @@ supabase/functions/luvia-intelligence/index.ts
 supabase/functions/luvia-intelligence/providers/openai.ts
 supabase/functions/luvia-intelligence/capabilities/registry.ts
 supabase/functions/luvia-intelligence/schemas/index.ts
-RELEASE-v13.34.1.md
-DEPLOYMENT-v13.34.1.md
-COMMIT-v13.34.1.txt
-CHANGED-FILES-v13.34.1.txt
+RELEASE-v13.35.0.md
+DEPLOYMENT-v13.35.0.md
+COMMIT-v13.35.0.txt
+CHANGED-FILES-v13.35.0.txt

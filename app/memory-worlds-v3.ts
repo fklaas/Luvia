@@ -1,6 +1,6 @@
 (() => {
 'use strict';
-const BUILD='13.34.1', VERSION='4.34.1';
+const BUILD='13.35.0', VERSION='4.35.0';
 let host:HTMLElement|null=null,stopAlbums:any=null,stopJourneys:any=null;
 const esc=(v:any)=>String(v??'').replace(/[&<>"']/g,(c:string)=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'} as any)[c]);
 const plain=(html='')=>{const d=document.createElement('div');d.innerHTML=html;return(d.textContent||'').replace(/\s+/g,' ').trim()};

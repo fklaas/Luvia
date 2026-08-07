@@ -1,12 +1,12 @@
-COMMIT-v13.34.1.txt
+COMMIT-v13.35.0.txt
 CHANGED-FILES-v13.34.0.txt
 sw.js
 force-update.html
 DEPLOYMENT-v13.34.0.md
 RELEASE-v13.34.0.md
 index.html
-RELEASE-v13.34.1.md
-DEPLOYMENT-v13.34.1.md
+RELEASE-v13.35.0.md
+DEPLOYMENT-v13.35.0.md
 app/memory-render-engine.js
 app/memory-worlds-v3.ts
 app/memory-worlds-v3.js

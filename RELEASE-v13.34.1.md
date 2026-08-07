@@ -1,4 +1,4 @@
-# Luvia 13.34.1 / Core 4.34.1 — Memory Flight Interaction Fix
+# Luvia 13.35.0 / Core 4.35.0 — Memory Studio Motion Rebuild
 
 - Repariert den nicht reagierenden `Reise starten`-Button: Scene-UI wird synchron montiert, Event-Handler werden nicht mehr vor dem DOM-Aufbau gebunden.
 - Derselbe Race-Condition-Fix gilt für KI-, Tages-, Moment-, Cover- und Navigationsinteraktionen im Memory Sceneflow.
