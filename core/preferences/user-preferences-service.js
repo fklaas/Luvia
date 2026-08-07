@@ -1,7 +1,7 @@
 (() => {
   'use strict';
 
-  const VERSION = '3.0.0';
+  const VERSION = '3.0.1';
   const listeners = new Set();
   let revision = 0;
   let state = {value:null, loaded:false, syncing:false, error:null, source:'profile-cache', updatedAt:null};
@@ -107,7 +107,7 @@
 
   async function completeOnboarding(input = {}, options = {}) {
     const now = new Date().toISOString();
-    const preferences = normalize({...input, preferenceSchemaVersion:schema().profileVersion, preferencesCompletedAt:input.preferencesCompletedAt || input.preferences_completed_at || now, preferencesUpdatedAt:now});
+    const preferences = merge(get(), {...input, preferenceSchemaVersion:schema().profileVersion, preferencesCompletedAt:input.preferencesCompletedAt || input.preferences_completed_at || get().preferencesCompletedAt || now, preferencesUpdatedAt:now});
     return update(preferences, {...options, reason:options.reason || 'onboarding-completed'});
   }
 

@@ -1,0 +1,26 @@
+Luvia 13.36.10 / Core 4.36.10 automated local checks
+
+PASS | JS syntax app/memory-worlds-v3.js
+PASS | JS syntax core/media/memory-cards.js
+PASS | JS syntax core/profiles/profile-service.js
+PASS | JS syntax core/preferences/user-preferences-service.js
+PASS | JS syntax intelligence/kernel/version.js
+PASS | JS syntax intelligence/services/base-services.js
+PASS | JS syntax core/diagnostics/media-readiness.js
+PASS | Kernel build/core
+PASS | Service worker cache
+PASS | Force update target
+PASS | Cursor-relative mobile visibility
+PASS | No fixed nth-child mobile freeze
+PASS | Swipe persists included/excluded
+PASS | Review cloud API
+PASS | Desktop review controls
+PASS | Responsive card width
+PASS | Profile cloud readback
+PASS | No optimistic cache write before cloud
+PASS | Reisekompass merges partial updates
+PASS | Migration memory review
+PASS | Migration profile hardening
+PASS | No stale active version refs
+PASS | Local index assets | 152 refs, 0 missing
+PASS | CSS brace balance | 667/667

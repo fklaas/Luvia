@@ -1,6 +1,6 @@
 (() => {
   'use strict';
-  const VERSION = '3.0.0';
+  const VERSION = '3.0.1';
   const KEY = 'luviaUserProfileCacheV3';
   const LEGACY_KEYS = ['luviaUserProfileCacheV2','luviaUserProfileCacheV1'];
   const listeners = new Set();
@@ -89,6 +89,10 @@
     };
   }
 
+  const durableFingerprint=p=>JSON.stringify({avatarColor:p?.avatarColor||null,dietaryPreferences:p?.dietaryPreferences||[],travelInterests:p?.travelInterests||[],travelStyles:p?.travelStyles||[],activityPreferences:p?.activityPreferences||[],entertainmentPreferences:p?.entertainmentPreferences||[],diningPreferences:p?.diningPreferences||[],mobilityPreferences:p?.mobilityPreferences||[],atmospherePreferences:p?.atmospherePreferences||[],travelPace:p?.travelPace||null,budgetPreference:p?.budgetPreference||null,familyPreferences:p?.familyPreferences||{},accessibilityPreferences:p?.accessibilityPreferences||{},preferencesCompletedAt:p?.preferencesCompletedAt||null});
+  async function fetchCloudProfile(client,user){const response=await client.rpc('luvia_get_my_profile');if(response.error)throw response.error;const row=Array.isArray(response.data)?response.data[0]:response.data;if(!row)throw new Error('PROFILE_CLOUD_ROW_MISSING');return mapRow(row,user);}
+  function assertDurableRoundtrip(expected,actual){if(durableFingerprint(expected)!==durableFingerprint(actual)){const error=new Error('PROFILE_CLOUD_ROUNDTRIP_MISMATCH');error.expected=durableFingerprint(expected);error.actual=durableFingerprint(actual);throw error;}return true;}
+
   async function load(client) {
     const auth=window.ParisAuth.getState(),user=auth.user;
     if(!auth.authenticated||!user){state={profile:null,loaded:true,syncing:false,error:null,lastSyncedAt:null};return emit('signed-out');}
@@ -96,10 +100,7 @@
     state={...state,profile:mergeProfile(defaults(user),cached?.userId===user.id?cached:{}),syncing:true,error:null};
     emit('cache-loaded');
     try {
-      const response=await client.rpc('luvia_get_my_profile');
-      if(response.error)throw response.error;
-      const row=Array.isArray(response.data)?response.data[0]:response.data;
-      state.profile=mapRow(row,user);state.loaded=true;state.syncing=false;state.lastSyncedAt=new Date().toISOString();write(state.profile);emit('cloud-loaded');
+      state.profile=await fetchCloudProfile(client,user);state.loaded=true;state.syncing=false;state.lastSyncedAt=new Date().toISOString();write(state.profile);emit('cloud-loaded');
       const meta=normalizedPreferences(authPreferences(user));
       if(Number(state.profile.preferenceSchemaVersion||0)<3&&(meta.preferencesCompletedAt||meta.travelInterests.length||meta.dietaryPreferences.length)){
         try {
@@ -122,12 +123,12 @@
     if(!auth.authenticated)throw new Error('Bitte zuerst anmelden.');
     const previous=clone(state.profile||defaults(auth.user));
     const next=mergeProfile(previous,patch);
-    state.profile=next;state.syncing=true;state.error=null;write(next);emit('saving');
+    state.profile=next;state.syncing=true;state.error=null;emit('saving');
     try {
       const response=await client.rpc('luvia_upsert_my_profile_v2',rowPayload(next));
       if(response.error)throw response.error;
       const row=Array.isArray(response.data)?response.data[0]:response.data;
-      state.profile=mapRow(row,auth.user);state.syncing=false;state.error=null;state.lastSyncedAt=new Date().toISOString();write(state.profile);emit('saved');
+      const rpcProfile=mapRow(row,auth.user);const verified=await fetchCloudProfile(client,auth.user);assertDurableRoundtrip(next,verified);state.profile=verified;state.syncing=false;state.error=null;state.lastSyncedAt=new Date().toISOString();write(state.profile);emit('saved-cloud-verified');
       return clone(state.profile);
     } catch(error) {
       state.profile=previous;state.syncing=false;state.error=error;write(previous);emit('save-failed');

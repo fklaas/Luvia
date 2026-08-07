@@ -1,6 +1,6 @@
 (() => {
 'use strict';
-const VERSION='4.36.9',BUILD='13.36.9';
+const VERSION='4.36.10',BUILD='13.36.10';
 let channel=null,identityChannel=null,writeDepth=0;
 const missing=e=>['42P01','PGRST205'].includes(e?.code);
 const validColor=v=>/^#[0-9a-f]{6}$/i.test(String(v||'').trim())?String(v).trim().toLowerCase():null;
@@ -27,7 +27,22 @@ async function members(){
   return resolved;
 }
 
+
+async function setAlbumReview(cardId,decision){
+  const allowed=['included','excluded','undecided'];if(!allowed.includes(decision))throw new Error('INVALID_ALBUM_REVIEW_DECISION');
+  const{client,tripId,userId}=await ctx();
+  const payload={trip_id:tripId,card_id:cardId,user_id:userId,decision,updated_at:new Date().toISOString()};
+  const r=await client.from('memory_card_album_reviews').upsert(payload,{onConflict:'card_id,user_id'}).select('*').single();
+  if(r.error){if(missing(r.error))throw new Error('Bitte die 13.36.10 Migration für Memory Album Review ausführen.');throw r.error}
+  window.dispatchEvent(new CustomEvent('luvia:memory-album-review-updated',{detail:{cardId,decision,tripId,local:true}}));return r.data;
+}
+async function albumReviews(cardIds=[]){
+  const ids=[...new Set(cardIds.map(String).filter(Boolean))];if(!ids.length)return{};
+  const{client,userId}=await ctx();const r=await client.from('memory_card_album_reviews').select('card_id,decision,updated_at').eq('user_id',userId).in('card_id',ids);
+  if(r.error){if(missing(r.error))return{};throw r.error}return Object.fromEntries((r.data||[]).map(x=>[String(x.card_id),x.decision]));
+}
+
 async function subscribe(cb){const{client,tripId}=await ctx();if(channel)await client.removeChannel(channel);channel=client.channel(`luvia-memory-cards-${tripId}-${Math.random().toString(36).slice(2)}`).on('postgres_changes',{event:'*',schema:'public',table:'memory_cards',filter:`trip_id=eq.${tripId}`},p=>{if(!writeDepth)cb?.(p)}).subscribe();return async()=>{if(channel){await client.removeChannel(channel);channel=null}}}
 async function subscribeIdentities(cb){const{client}=await ctx();if(identityChannel)await client.removeChannel(identityChannel);identityChannel=client.channel(`luvia-memory-identities-${Math.random().toString(36).slice(2)}`).on('postgres_changes',{event:'*',schema:'public',table:'memory_member_identity'},p=>cb?.(p)).subscribe();return async()=>{if(identityChannel){await client.removeChannel(identityChannel);identityChannel=null}}}
-window.LuviaMemoryCards=Object.freeze({version:VERSION,build:BUILD,list,save,setWeight,dismiss,members,subscribe,subscribeIdentities,tripAccent,activeTrip,isWriting:()=>writeDepth>0});
+window.LuviaMemoryCards=Object.freeze({version:VERSION,build:BUILD,list,save,setWeight,dismiss,members,setAlbumReview,albumReviews,subscribe,subscribeIdentities,tripAccent,activeTrip,isWriting:()=>writeDepth>0});
 })();

@@ -420,7 +420,7 @@ body.mc-open{overflow:hidden}.mc-overlay{position:fixed;inset:0;z-index:10000;ba
   .mc-mobile-throw{position:relative;z-index:9;display:flex;flex:1 1 auto;min-height:0;width:100%;flex-direction:column;align-items:center;justify-content:center;overflow:hidden;padding:2px 0 42px;touch-action:none}
   .mc-throw-stack{position:relative;width:min(430px,94vw);height:min(610px,calc(100dvh - 220px));min-height:390px;display:grid;place-items:center;touch-action:none;user-select:none;-webkit-user-select:none}
   .mc-throw-card{--drag-x:0px;--drag-y:0px;--drag-r:0deg;--throw-depth:0;position:absolute;inset:0;display:grid;place-items:center;transform:translate3d(calc(var(--throw-depth)*2px),calc(var(--throw-depth)*7px),0) scale(calc(1 - min(var(--throw-depth),2)*.025));opacity:calc(1 - min(var(--throw-depth),3)*.10);z-index:calc(40 - var(--throw-depth));transition:transform 260ms cubic-bezier(.2,.82,.2,1),opacity 220ms ease,filter 220ms ease;pointer-events:none}
-  .mc-throw-card:nth-child(n+4){visibility:hidden}
+  
   .mc-throw-card.is-front{pointer-events:auto;transform:translate3d(var(--drag-x),var(--drag-y),0) rotate(var(--drag-r)) scale(1);opacity:1;visibility:visible;cursor:grab;will-change:transform;z-index:60}
   .mc-throw-card.is-front.is-dragging{transition:none!important;cursor:grabbing}
   .mc-throw-card.is-front.is-thrown{transition:transform 330ms cubic-bezier(.18,.72,.2,1),opacity 300ms ease!important;opacity:.2}
@@ -448,7 +448,7 @@ body.mc-open{overflow:hidden}.mc-overlay{position:fixed;inset:0;z-index:10000;ba
 }
 
 
-/* v13.36.9 — Layout Recovery & Canonical Trip Accent */
+/* v13.36.10 — Memory Review & Profile Persistence Hardening */
 .mc-deck[data-stack]{--deck-trip:var(--deck-accent)}
 .mc-deck-layer{background:color-mix(in srgb,var(--layer-color) 28%,#fff)!important;border-color:color-mix(in srgb,var(--layer-color) 58%,#fff)!important;box-shadow:0 18px 40px color-mix(in srgb,var(--layer-color) 18%,transparent)!important}
 .mc-deck-front{border-color:color-mix(in srgb,var(--deck-accent) 56%,#fff)!important;box-shadow:0 26px 62px rgba(71,52,48,.14),0 0 0 2px color-mix(in srgb,var(--deck-accent) 18%,transparent)!important}
@@ -462,8 +462,19 @@ body.mc-open{overflow:hidden}.mc-overlay{position:fixed;inset:0;z-index:10000;ba
   .mc-mobile-throw{padding:8px 0 58px!important;overflow:visible!important}
   .mc-throw-stack{width:min(430px,94vw)!important;height:min(640px,calc(100dvh - 205px))!important;min-height:430px!important;overflow:visible!important}
   .mc-throw-card{transform:translate3d(var(--stack-x,0px),var(--stack-y,0px),0) rotate(var(--stack-r,0deg)) scale(var(--stack-scale,1))!important;opacity:var(--stack-opacity,1)!important;transform-origin:50% 88%;visibility:visible}
-  .mc-throw-card:nth-child(n+5){visibility:hidden!important}
+  
   .mc-throw-card.is-front{transform:translate3d(var(--drag-x),var(--drag-y),0) rotate(var(--drag-r)) scale(1)!important;opacity:1!important}
   .mc-throw-card .mc-loose-card{box-shadow:0 30px 72px rgba(54,44,46,.20),0 8px 24px color-mix(in srgb,var(--person-color) 12%,transparent)!important}
   .mc-throw-card:not(.is-front) .mc-loose-card{pointer-events:none;filter:saturate(.92) brightness(.995)}
 }
+
+/* v13.36.10 — Memory Review & responsive card density */
+@media(min-width:801px){
+  .mc-spread .mc-loose-card{width:var(--mc-card-width,clamp(178px,15vw,258px))!important;}
+  .mc-spread .mc-loose-copy p{font-size:clamp(15px,calc(var(--mc-card-width,220px)*.078),20px)!important;}
+  .mc-album-review{position:absolute;left:50%;bottom:-39px;transform:translateX(-50%);display:flex;align-items:center;gap:7px;padding:5px 7px;border-radius:999px;background:rgba(255,255,255,.9);border:1px solid color-mix(in srgb,var(--person-color) 18%,#ddd);box-shadow:0 9px 24px rgba(40,35,36,.10);opacity:0;pointer-events:none;transition:opacity .18s ease,transform .22s ease;white-space:nowrap;}
+  .mc-loose-card:hover .mc-album-review,.mc-loose-card:focus-within .mc-album-review{opacity:1;pointer-events:auto;transform:translateX(-50%) translateY(-3px);}
+  .mc-album-review button{width:29px;height:29px;border:0;border-radius:50%;background:color-mix(in srgb,var(--person-color) 10%,#fff);color:color-mix(in srgb,var(--person-color) 76%,#334);font-weight:900;cursor:pointer;}
+  .mc-album-review button.is-selected{background:var(--person-color);color:#fff}.mc-album-review span{font-size:10px;font-weight:800;color:#6f6567}
+}
+@media(max-width:800px){.mc-album-review{display:none!important}.mc-throw-card[hidden]{display:none!important}}
