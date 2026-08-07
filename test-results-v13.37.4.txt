@@ -1,0 +1,18 @@
+Luvia 13.37.4 / Core 4.37.4 — automated local checks
+PASS JavaScript syntax: app/memory-worlds-v3.js
+PASS JavaScript syntax: core/media/memory-cards.js
+PASS JavaScript syntax: intelligence/kernel/version.js
+PASS JavaScript syntax: intelligence/services/base-services.js
+PASS JavaScript syntax: core/diagnostics/media-readiness.js
+PASS Version/cache target: 13.37.4 / 4.37.4
+PASS Direct spread navigation guard: old 2350ms launch wait absent
+PASS Stack summary outside clipped front-card content
+PASS Stack content chips present
+PASS Stack workflow status present
+PASS Desktop spread preserved
+PASS Mobile throw/swipe preserved
+PASS Voting preserved
+PASS Gallery photo preview preserved
+PASS Local index.html assets: 152 checked, 0 missing
+PASS CSS braces: 862 opening / 862 closing
+NOTE Real browser navigation, mobile gesture behavior and authenticated media remain manual deployment tests.

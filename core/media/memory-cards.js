@@ -1,6 +1,6 @@
 (() => {
 'use strict';
-const VERSION='4.37.3',BUILD='13.37.3';
+const VERSION='4.37.4',BUILD='13.37.4';
 let channel=null,identityChannel=null,voteChannel=null,writeDepth=0;
 const missing=e=>['42P01','PGRST205'].includes(e?.code);
 const validColor=v=>/^#[0-9a-f]{6}$/i.test(String(v||'').trim())?String(v).trim().toLowerCase():null;

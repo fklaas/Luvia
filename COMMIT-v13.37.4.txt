@@ -1,0 +1,1 @@
+fix(memories): recover stack navigation and summary

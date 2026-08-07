@@ -1,6 +1,6 @@
 (() => {
 'use strict';
-const VERSION='4.37.3',BUILD='13.37.3';
+const VERSION='4.37.4',BUILD='13.37.4';
 let host=null,stopCards=null,stopIdentities=null,stopVotes=null,stopTrip=null,stopTheme=null,urlCache=new Map(),homeState=null;
 const deckSessionSeed=Math.random().toString(36).slice(2);
 const validColor=v=>/^#[0-9a-f]{6}$/i.test(String(v||'').trim())?String(v).trim().toLowerCase():null;
@@ -110,10 +110,11 @@ function renderStack(key,items,members,index){
   const remaining=Math.max(0,items.length-reviewed),waiting=vote?Math.max(0,members.length-vote.completed.length):0;
   const status=!reviewReady?`Noch ${remaining} ${remaining===1?'Karte':'Karten'} gemeinsam ansehen`:!candidates.length?'Gemeinsam angesehen':vote?.allDone?`Eure Auswahl steht fest · ${vote.winners.length} ${vote.winners.length===1?'Favorit':'Favoriten'}`:vote?.meDone?`Du hast gewählt · ${waiting} ${waiting===1?'Stimme fehlt':'Stimmen fehlen'} noch`:'Bereit: Lieblingsmomente wählen';
   const voteAction=reviewReady&&candidates.length?(vote?.allDone?`<button type="button" class="primary" data-vote-result="${esc(clusterId)}">Ergebnis ansehen</button>`:`<button type="button" class="primary" data-vote-open="${esc(clusterId)}">${vote?.meDone?'Punkte ändern':'Lieblingsmomente wählen'}</button>`):'';
+  const summaryChips=`<span class="mc-deck-summary-chips"><b>${heroCount} Foto${heroCount===1?'':'s'}</b>${storyCount?`<b>${storyCount} ${storyCount===1?'Geschichte':'Geschichten'}</b>`:''}${signalCount?`<b>${signalCount} Moment${signalCount===1?'':'e'}</b>`:''}</span>`;
   return `<div class="mc-deck-wrap"><button class="mc-deck" data-stack="${esc(key)}" style="--deck-rot:${rot}deg;--deck-lift:${lift}px;--deck-accent:${esc(accent)}">
     ${layers}
-    <span class="mc-deck-front tone-${cardTone(hero.card_type)}" style="--person-color:${esc(accent)}"><span class="mc-deck-photo" data-card-media="${esc(hero.media_id||'')}">${hero.media_id?'':`<b>${typeIcon(hero.card_type)}</b>`}</span><span class="mc-deck-info"><span class="mc-deck-meta"><small>${items.length} Karten · ${people.length} ${people.length===1?'Stimme':'Stimmen'}</small><span class="mc-voices">${voices}</span></span><span class="mc-deck-day">${esc(titleParts.day)}</span><strong>${esc(titleParts.title)}</strong><span class="mc-deck-chips"><b>${heroCount} Foto${heroCount===1?'':'s'}</b>${storyCount?`<b>${storyCount} ${storyCount===1?'Geschichte':'Geschichten'}</b>`:''}${signalCount?`<b>${signalCount} Moment${signalCount===1?'':'e'}</b>`:''}</span><i>${esc(status)}</i></span></span>
-  </button>${cluster?`<div class="mc-deck-curation"><button type="button" data-title-propose="${esc(clusterId)}">Titel vorschlagen${proposals.length?` · ${proposals.length}`:''}</button>${voteAction}${isTripOwner()?`<button type="button" class="danger" data-stack-dissolve="${esc(clusterId)}">Stapel auflösen</button>`:''}</div>`:''}</div>`
+    <span class="mc-deck-front tone-${cardTone(hero.card_type)}" style="--person-color:${esc(accent)}"><span class="mc-deck-photo" data-card-media="${esc(hero.media_id||'')}">${hero.media_id?'':`<b>${typeIcon(hero.card_type)}</b>`}</span><span class="mc-deck-info"><span class="mc-deck-meta"><small>${items.length} Karten · ${people.length} ${people.length===1?'Stimme':'Stimmen'}</small><span class="mc-voices">${voices}</span></span><span class="mc-deck-day">${esc(titleParts.day)}</span><strong>${esc(titleParts.title)}</strong></span></span>
+  </button><div class="mc-deck-summary">${summaryChips}<span class="mc-deck-summary-status">${esc(status)}</span></div>${cluster?`<div class="mc-deck-curation"><button type="button" data-title-propose="${esc(clusterId)}">Titel vorschlagen${proposals.length?` · ${proposals.length}`:''}</button>${voteAction}${isTripOwner()?`<button type="button" class="danger" data-stack-dissolve="${esc(clusterId)}">Stapel auflösen</button>`:''}</div>`:''}</div>`
 }
 
 function curationModal(html){const root=document.createElement('div');root.className='mc-curation-modal';root.innerHTML=`<div class="mc-curation-dialog">${html}</div>`;document.body.append(root);const close=()=>root.remove();root.addEventListener('click',e=>{if(e.target===root)close()});root.querySelectorAll('[data-modal-close]').forEach(b=>b.addEventListener('click',close));return{root,close}}
@@ -179,12 +180,9 @@ async function openDeck(key,sourceEl){
   await new Promise(r=>setTimeout(r,520));
   const ctx=overlay({deck:true});ctx.root.classList.add('mc-canvas-overlay');
   const baseClose=ctx.close;ctx.close=()=>{ctx.root.classList.add('closing');setTimeout(()=>{ctx.root.remove();document.body.classList.remove('mc-open');home?.classList.remove('is-deck-opening');decks.forEach(d=>d.classList.remove('is-source'));},420)};ctx.root.querySelector('.mc-x').onclick=ctx.close;
-  const visual=resolveMemoryVisualPalette(items,homeState.members),people=visual.people,previewItems=shuffled(items,`${key}:launch`).slice(0,Math.min(6,items.length));
+  const visual=resolveMemoryVisualPalette(items,homeState.members),people=visual.people;
   const [stageA,stageB]=stagePalette(items,homeState.members);ctx.root.style.setProperty('--mc-stage-a',stageA);ctx.root.style.setProperty('--mc-stage-b',stageB);ctx.root.style.setProperty('--mc-stage-trip',tripAccent());
-  const launch=await swap(ctx,`<div class="mc-deck-launch"><div class="mc-launch-stack">${previewItems.map((c,i)=>`<span style="--launch-i:${i};--launch-color:${esc(visual.stackLayers[i%visual.stackLayers.length])}"></span>`).join('')}</div><small>${items.length} ${items.length===1?'Card':'Cards'} · ${people.length} ${people.length===1?'Stimme':'Stimmen'}</small></div>`,{motion:'focus',showBack:true});
-  const launchStack=launch.querySelector('.mc-launch-stack');requestAnimationFrame(()=>launchStack?.classList.add('alive','breathing'));
   ctx.back.onclick=()=>ctx.close();
-  await new Promise(r=>setTimeout(r,2350));
   const showSpread=async()=>{
     const arranged=shuffled(items,`${key}:${Math.random()}`);
     const mobile=matchMedia('(max-width:800px)').matches;

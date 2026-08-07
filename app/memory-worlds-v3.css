@@ -672,3 +672,16 @@ body.mc-open{overflow:hidden}.mc-overlay{position:fixed;inset:0;z-index:10000;ba
 /* Deck overview titles also stay compact on laptop-sized layouts. */
 .mc-deck-info strong{font-size:clamp(17px,1.15vw,20px)!important;line-height:1.16!important;letter-spacing:-.02em!important}
 @media(max-width:1200px) and (min-width:801px){.mc-deck-info strong{font-size:17px!important}.mc-deck-info{gap:5px!important}}
+
+
+/* v13.37.4 — Memory Stack Navigation & Summary Recovery */
+.mc-deck-wrap{display:flex;flex-direction:column;align-items:center;min-width:0}
+.mc-deck-summary{width:min(320px,94%);margin:-7px auto 12px;display:grid;justify-items:center;gap:7px;position:relative;z-index:5;text-align:center;color:#667076}
+.mc-deck-summary-chips{display:flex;justify-content:center;gap:6px;flex-wrap:wrap}
+.mc-deck-summary-chips b{display:inline-flex;align-items:center;min-height:24px;padding:5px 8px;border-radius:999px;background:rgba(255,255,255,.82);border:1px solid color-mix(in srgb,var(--deck-accent,var(--trip-accent,#67ad96)) 16%,#e8e2df);font:800 9px/1 var(--lv-font-body,Inter,sans-serif);color:#6b6f70;box-shadow:0 4px 12px rgba(43,38,39,.035)}
+.mc-deck-summary-status{max-width:290px;font:700 10.5px/1.35 var(--lv-font-body,Inter,sans-serif);color:#82777a}
+.mc-deck-info .mc-deck-chips,.mc-deck-info>i{display:none!important}
+.mc-deck-curation{margin-top:0!important}
+@media(max-width:800px){.mc-deck-summary{width:min(330px,90vw);margin-top:-3px}.mc-deck-summary-status{font-size:11px}.mc-deck-summary-chips b{font-size:9.5px}}
+
+/* Release marker: Luvia 13.37.4 · Core 4.37.4 */
