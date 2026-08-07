@@ -674,7 +674,7 @@ body.mc-open{overflow:hidden}.mc-overlay{position:fixed;inset:0;z-index:10000;ba
 @media(max-width:1200px) and (min-width:801px){.mc-deck-info strong{font-size:17px!important}.mc-deck-info{gap:5px!important}}
 
 
-/* v13.37.5 — Memory Spread Runtime Recovery */
+/* v13.37.6 — Memory Motion & Interaction Polish */
 .mc-deck-wrap{display:flex;flex-direction:column;align-items:center;min-width:0}
 .mc-deck-summary{width:min(320px,94%);margin:-7px auto 12px;display:grid;justify-items:center;gap:7px;position:relative;z-index:5;text-align:center;color:#667076}
 .mc-deck-summary-chips{display:flex;justify-content:center;gap:6px;flex-wrap:wrap}
@@ -684,4 +684,98 @@ body.mc-open{overflow:hidden}.mc-overlay{position:fixed;inset:0;z-index:10000;ba
 .mc-deck-curation{margin-top:0!important}
 @media(max-width:800px){.mc-deck-summary{width:min(330px,90vw);margin-top:-3px}.mc-deck-summary-status{font-size:11px}.mc-deck-summary-chips b{font-size:9.5px}}
 
-/* Release marker: Luvia 13.37.5 · Core 4.37.5 */
+/* Release marker: Luvia 13.37.6 · Core 4.37.6 */
+
+
+/* v13.37.6 — Memory Motion & Interaction Polish */
+:root{
+  --mc-motion-ease:cubic-bezier(.22,.72,.24,1);
+  --mc-motion-soft:cubic-bezier(.16,.84,.28,1);
+  --mc-motion-fast:320ms;
+  --mc-motion-medium:560ms;
+  --mc-motion-slow:760ms;
+}
+@media(min-width:801px){
+  .mc-spread .mc-loose-card{
+    opacity:0;
+    transform:translate3d(var(--spread-from-x,0),var(--spread-from-y,0),0) rotate(0deg)!important;
+    transition:
+      transform var(--mc-motion-slow) var(--mc-motion-soft),
+      opacity 460ms ease,
+      box-shadow var(--mc-motion-fast) var(--mc-motion-ease),
+      filter var(--mc-motion-fast) ease!important;
+    transition-delay:calc(var(--motion-order,0) * 34ms),calc(var(--motion-order,0) * 26ms),0ms,0ms!important;
+    animation:none!important;
+  }
+  .mc-spread.mc-motion-ready .mc-loose-card{
+    opacity:1;
+    transform:translate3d(0,0,0) rotate(var(--spread-r,0deg))!important;
+  }
+  .mc-spread.mc-motion-ready .mc-loose-card:hover{
+    z-index:1800!important;
+    transform:translate3d(0,-11px,0) rotate(calc(var(--spread-r,0deg)*.12))!important;
+    box-shadow:0 38px 84px rgba(55,41,44,.18),0 16px 36px color-mix(in srgb,var(--person-color) 17%,transparent)!important;
+    transition-duration:360ms,220ms,360ms,300ms!important;
+    transition-timing-function:var(--mc-motion-ease),ease,var(--mc-motion-ease),ease!important;
+    transition-delay:0ms!important;
+  }
+  .mc-spread.is-gathering .mc-loose-card{
+    opacity:0!important;
+    transform:translate3d(var(--spread-from-x,0),var(--spread-from-y,0),0) rotate(0deg)!important;
+    transition-duration:620ms,420ms,280ms,260ms!important;
+    transition-delay:0ms!important;
+  }
+  .mc-card-focus-wrap,.mc-card-focus-scene,.mc-card-focus-note{
+    transition:transform 520ms var(--mc-motion-soft),opacity 420ms ease,box-shadow 420ms ease!important;
+  }
+  .mc-card-focus-wrap .mc-loose-card{
+    transition:transform 520ms var(--mc-motion-soft),box-shadow 420ms var(--mc-motion-ease)!important;
+  }
+  .motion-focus{transform:scale(.975)!important;filter:blur(4px)!important}
+  .motion-focus.is-visible{transform:none!important;filter:none!important}
+}
+.mc-screen{
+  transition:opacity 420ms ease,filter 460ms ease,transform 540ms var(--mc-motion-soft)!important;
+}
+.mc-screen.is-leaving{transition-duration:320ms!important}
+.mc-back,.mc-x{transition:transform 320ms var(--mc-motion-ease),box-shadow 320ms ease,background 320ms ease!important}
+.mc-back:hover,.mc-x:hover{transform:translateY(-1px) scale(1.025)!important}
+@media(prefers-reduced-motion:reduce){
+  .mc-spread .mc-loose-card,.mc-screen,.mc-card-focus-wrap,.mc-card-focus-scene,.mc-card-focus-note,.mc-back,.mc-x{transition-duration:1ms!important;animation-duration:1ms!important;transition-delay:0ms!important}
+}
+/* Release marker: Luvia 13.37.6 · Core 4.37.6 */
+
+/* v13.37.6 regression recovery — stable actions, uniform cards, accurate status */
+@media(min-width:801px){
+  /* Every spread card keeps one shared physical size, regardless of curation/result state. */
+  .mc-spread .mc-loose-card{
+    height:calc(var(--mc-card-width,216px) * 1.68)!important;
+    min-height:0!important;
+  }
+  /* Softer hover: visible lift without the rigid snap or rasterizing scale. */
+  .mc-spread.mc-motion-ready .mc-loose-card:hover{
+    transform:translate3d(0,-9px,0) rotate(calc(var(--spread-r,0deg)*.18))!important;
+    transition-duration:420ms,260ms,420ms,360ms!important;
+  }
+}
+
+/* Curation controls are stationary interactive UI, never animated targets. */
+.mc-deck-curation{position:relative;z-index:20;pointer-events:auto!important}
+.mc-deck-curation button{
+  position:relative;z-index:21;pointer-events:auto!important;touch-action:manipulation;
+  transform:none!important;
+  transition:background-color 220ms ease,border-color 220ms ease,box-shadow 220ms ease,color 220ms ease!important;
+}
+.mc-deck-curation button:hover,.mc-deck-curation button:active{transform:none!important}
+
+/* On touch/coarse-pointer devices the first tap must be a click, not a sticky hover animation. */
+@media(hover:none),(pointer:coarse){
+  .mc-deck:hover{transform:translateY(var(--deck-lift)) rotate(var(--deck-rot))!important}
+  .mc-deck:hover .layer-1{transform:translate(-17px,4px) rotate(-1.7deg)!important}
+  .mc-deck:hover .layer-2{transform:translate(14px,-8px) rotate(1.3deg)!important}
+  .mc-deck:hover .layer-3{transform:translate(-7px,-17px) rotate(-.7deg)!important}
+  .mc-deck:hover .layer-4{transform:translate(20px,-25px) rotate(1.8deg)!important}
+  .mc-deck:hover .layer-5{transform:translate(-12px,-31px) rotate(-1.2deg)!important}
+  .mc-deck:hover .layer-6{transform:translate(6px,-39px) rotate(.6deg)!important}
+  .mc-deck:hover .mc-deck-front{transform:none!important}
+}

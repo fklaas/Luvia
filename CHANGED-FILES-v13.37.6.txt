@@ -1,9 +1,8 @@
 app/memory-worlds-v3.js
 app/memory-worlds-v3.css
-core/media/memory-cards.js
-core/diagnostics/media-readiness.js
 intelligence/kernel/version.js
 intelligence/services/base-services.js
+core/diagnostics/media-readiness.js
 index.html
 sw.js
 force-update.html

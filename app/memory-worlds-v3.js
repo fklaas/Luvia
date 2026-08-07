@@ -1,6 +1,6 @@
 (() => {
 'use strict';
-const VERSION='4.37.5',BUILD='13.37.5';
+const VERSION='4.37.6',BUILD='13.37.6';
 let host=null,stopCards=null,stopIdentities=null,stopVotes=null,stopTrip=null,stopTheme=null,urlCache=new Map(),homeState=null;
 const deckSessionSeed=Math.random().toString(36).slice(2);
 const validColor=v=>/^#[0-9a-f]{6}$/i.test(String(v||'').trim())?String(v).trim().toLowerCase():null;
@@ -84,9 +84,9 @@ async function renderHome(){
   for(const b of host.querySelectorAll('[data-cluster]')){const c=pending[Number(b.dataset.i)];const media=await window.LuviaMemoryAlbums.mediaByIds(c.mediaIds);putImg(b.querySelector('.mc-discover-photo'),media[0]);b.onclick=()=>openDiscovery(c,media,members)}
   await paintCardPhotos(host,effectiveCards,src.media||[]);
   for(const el of host.querySelectorAll('[data-stack]'))el.onclick=()=>openDeck(el.dataset.stack,el);
-  host.querySelectorAll('[data-title-propose]').forEach(b=>b.onclick=e=>{e.stopPropagation();openTitleModal(b.dataset.titlePropose)});
-  host.querySelectorAll('[data-vote-open]').forEach(b=>b.onclick=e=>{e.stopPropagation();openVotingModal(b.dataset.voteOpen)});
-  host.querySelectorAll('[data-vote-result]').forEach(b=>b.onclick=e=>{e.stopPropagation();openVotingResults(b.dataset.voteResult)});
+  host.querySelectorAll('[data-title-propose]').forEach(b=>b.addEventListener('click',e=>{e.preventDefault();e.stopPropagation();openTitleModal(b.dataset.titlePropose)},{once:false}));
+  host.querySelectorAll('[data-vote-open]').forEach(b=>b.addEventListener('click',e=>{e.preventDefault();e.stopPropagation();openVotingModal(b.dataset.voteOpen)},{once:false}));
+  host.querySelectorAll('[data-vote-result]').forEach(b=>b.addEventListener('click',e=>{e.preventDefault();e.stopPropagation();openVotingResults(b.dataset.voteResult)},{once:false}));
   host.querySelectorAll('[data-stack-dissolve]').forEach(b=>b.onclick=async e=>{e.stopPropagation();if(!confirm('Kartenstapel auflösen? Fotos und Memory Cards bleiben erhalten. Nur die gemeinsame Stapel-Zuordnung wird ausgeblendet.'))return;b.disabled=true;try{await window.LuviaMemoryCards.dissolveStack(b.dataset.stackDissolve);await renderHome()}catch(error){alert(error.message||error)}finally{b.disabled=false}});
 }
 
@@ -107,9 +107,10 @@ function renderStack(key,items,members,index){
   const titleParts=stackTitleParts(cluster,state,homeState?.src?.media||[]);
   const heroCount=items.filter(c=>curationClass(c)==='hero').length,storyCount=items.filter(c=>curationClass(c)==='story').length,signalCount=items.filter(c=>curationClass(c)==='signal').length,reviewed=items.filter(c=>(homeState?.reviewSummary?.byCard?.[String(c.id)]?.total||0)>=members.length).length,reviewReady=members.length>0&&reviewed===items.length;
   const candidates=candidateCards(items,homeState?.reviewSummary),vote=clusterId?clusterVoteProgress(clusterId,candidates,homeState?.voteSummary,members):null;
-  const remaining=Math.max(0,items.length-reviewed),waiting=vote?Math.max(0,members.length-vote.completed.length):0;
-  const status=!reviewReady?`Noch ${remaining} ${remaining===1?'Karte':'Karten'} gemeinsam ansehen`:!candidates.length?'Gemeinsam angesehen':vote?.allDone?`Eure Auswahl steht fest · ${vote.winners.length} ${vote.winners.length===1?'Favorit':'Favoriten'}`:vote?.meDone?`Du hast gewählt · ${waiting} ${waiting===1?'Stimme fehlt':'Stimmen fehlen'} noch`:'Bereit: Lieblingsmomente wählen';
-  const voteAction=reviewReady&&candidates.length?(vote?.allDone?`<button type="button" class="primary" data-vote-result="${esc(clusterId)}">Ergebnis ansehen</button>`:`<button type="button" class="primary" data-vote-open="${esc(clusterId)}">${vote?.meDone?'Punkte ändern':'Lieblingsmomente wählen'}</button>`):'';
+  const waiting=vote?Math.max(0,members.length-vote.completed.length):0;
+  const hasVoteProgress=Boolean(vote&&(vote.allDone||vote.meDone||Object.keys(vote.byUser||{}).length));
+  const status=vote?.allDone?`Eure Auswahl steht fest · ${vote.winners.length} ${vote.winners.length===1?'Favorit':'Favoriten'}`:vote?.meDone?`Du hast gewählt · ${waiting} ${waiting===1?'Stimme fehlt':'Stimmen fehlen'} noch`:reviewReady&&candidates.length?'Bereit für eure Lieblingsmomente':reviewReady?'Gemeinsam angesehen':'Ihr entscheidet gerade, was ins Album soll';
+  const voteAction=candidates.length&&(reviewReady||hasVoteProgress)?(vote?.allDone?`<button type="button" class="primary" data-vote-result="${esc(clusterId)}">Ergebnis ansehen</button>`:`<button type="button" class="primary" data-vote-open="${esc(clusterId)}">${vote?.meDone?'Punkte ändern':'Lieblingsmomente wählen'}</button>`):'';
   const summaryChips=`<span class="mc-deck-summary-chips"><b>${heroCount} Foto${heroCount===1?'':'s'}</b>${storyCount?`<b>${storyCount} ${storyCount===1?'Geschichte':'Geschichten'}</b>`:''}${signalCount?`<b>${signalCount} Moment${signalCount===1?'':'e'}</b>`:''}</span>`;
   return `<div class="mc-deck-wrap"><button class="mc-deck" data-stack="${esc(key)}" style="--deck-rot:${rot}deg;--deck-lift:${lift}px;--deck-accent:${esc(accent)}">
     ${layers}
@@ -200,8 +201,12 @@ async function openDeck(key,sourceEl){
     ctx.back.onclick=()=>closeSpread();
   };
   const closeSpread=async()=>{
-    const spread=ctx.flow.querySelector('.mc-spread');if(spread){spread.classList.add('is-gathering');await new Promise(r=>setTimeout(r,900))}
+    const spread=ctx.flow.querySelector('.mc-spread');if(spread){spread.classList.add('is-gathering');spread.classList.remove('mc-motion-ready');await new Promise(r=>setTimeout(r,720))}
     ctx.close();
+    // Refresh persisted review/vote summaries after the overlay closes. Album review
+    // decisions live in their own table and are not covered by the memory-card
+    // subscription, so the overview must explicitly reload them here.
+    setTimeout(()=>{if(host)renderHome()},460);
   };
   await showSpread();
 }
@@ -257,7 +262,9 @@ function positionSpread(root,items,reroll=false){
     }
     placed.push(best||{x:cx,y:cy});
   }
-  cards.forEach((el,i)=>{const p=placed[i],w=el.getBoundingClientRect().width||cw,h=el.getBoundingClientRect().height||ch;el.style.setProperty('--spread-left',`${Math.round(p.x-w/2)}px`);el.style.setProperty('--spread-top',`${Math.round(p.y-h/2)}px`);el.style.setProperty('--spread-r',`${((rnd()-.5)*5).toFixed(2)}deg`);el.style.zIndex=String(20+i)});
+  root.classList.remove('mc-motion-ready');
+  cards.forEach((el,i)=>{const p=placed[i],w=el.getBoundingClientRect().width||cw,h=el.getBoundingClientRect().height||ch;const left=Math.round(p.x-w/2),top=Math.round(p.y-h/2),fromX=Math.round(cx-(left+w/2)),fromY=Math.round(cy-(top+h/2));el.style.setProperty('--spread-left',`${left}px`);el.style.setProperty('--spread-top',`${top}px`);el.style.setProperty('--spread-r',`${((rnd()-.5)*5).toFixed(2)}deg`);el.style.setProperty('--spread-from-x',`${fromX}px`);el.style.setProperty('--spread-from-y',`${fromY}px`);el.style.setProperty('--motion-order',String(i));el.style.zIndex=String(20+i)});
+  requestAnimationFrame(()=>requestAnimationFrame(()=>root.classList.add('mc-motion-ready')));
 }
 
 async function openCardDetail(ctx,card,members,media,onBack){
@@ -271,5 +278,5 @@ async function openCardDetail(ctx,card,members,media,onBack){
 }
 
 async function mount(node){host=node;await renderHome();stopCards=await window.LuviaMemoryCards.subscribe(()=>setTimeout(renderHome,350));stopIdentities=await window.LuviaMemoryCards.subscribeIdentities?.(()=>{window.LuviaMemoryCards.members().then(m=>{if(!homeState)return;homeState.members=m;renderHome()})});stopVotes=await window.LuviaMemoryCards.subscribeVotes?.(()=>{if(host)setTimeout(renderHome,180)});stopTrip=window.LuviaTripStore?.subscribe?.(()=>{if(host)setTimeout(renderHome,80)});const onTheme=()=>{if(host)setTimeout(renderHome,60)};window.addEventListener('luvia:theme-changed',onTheme);stopTheme=()=>window.removeEventListener('luvia:theme-changed',onTheme);return()=>{stopCards?.();stopIdentities?.();stopVotes?.();stopTrip?.();stopTheme?.();stopCards=null;stopIdentities=null;stopVotes=null;stopTrip=null;stopTheme=null;host=null}}
-window.LuviaAlbumsView=Object.freeze({version:VERSION,build:BUILD,mount,render:renderHome,experience:'memory-card-visual-consistency-voting-media-polish',model:'cards -> decks -> moments -> journeys -> studio'});
+window.LuviaAlbumsView=Object.freeze({version:VERSION,build:BUILD,mount,render:renderHome,experience:'memory-motion-interaction-polish',model:'cards -> decks -> moments -> journeys -> studio'});
 })();

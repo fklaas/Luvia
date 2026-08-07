@@ -1,9 +1,9 @@
-# TEST — Luvia 13.37.5
+# TEST — Luvia 13.37.6
 
 ## Automatisch geprüft
 - JavaScript-Syntax der kritischen Runtime-Dateien.
 - `renderLooseCard()` definiert `cls` vor jeder Nutzung.
-- App/Core/Cache/Force-Update stehen auf 13.37.5 / 4.37.5.
+- App/Core/Cache/Force-Update stehen auf 13.37.6 / 4.37.6.
 - Lokale `index.html`-Assets existieren.
 - Keine aktiven 13.37.4-/4.37.4-Referenzen in den Runtime-Versiondateien.
 - ZIP-Integrität.

@@ -1,4 +1,4 @@
-# Luvia 13.37.5 · Core 4.37.5 — Memory Spread Runtime Recovery
+# Luvia 13.37.6 · Core 4.37.6 — Memory Motion & Interaction Polish
 
 ## Anlass
 13.37.4 konnte beim Öffnen eines Memory-Stapels eine leere Bühne anzeigen. Ursache war ein Runtime-Fehler in `renderLooseCard()`: die Variable `cls` wurde für Story-/Curation-Klassen verwendet, aber nach dem 13.37.3-Polish nicht mehr initialisiert.

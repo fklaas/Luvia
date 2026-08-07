@@ -1,0 +1,1 @@
+fix(memories): soften motion and recover curation interactions

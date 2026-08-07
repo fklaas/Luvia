@@ -1,4 +1,4 @@
-# Deployment — Luvia 13.37.5
+# Deployment — Luvia 13.37.6
 
 - Keine neue Supabase-Migration.
 - Keine neue Edge Function.

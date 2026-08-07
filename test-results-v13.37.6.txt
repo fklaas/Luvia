@@ -1,0 +1,27 @@
+Luvia 13.37.6 / Core 4.37.6 — local regression results
+
+PASS JavaScript syntax: app/memory-worlds-v3.js
+PASS JavaScript syntax: core/media/memory-cards.js
+PASS JavaScript syntax: intelligence/kernel/version.js
+PASS JavaScript syntax: intelligence/services/base-services.js
+PASS JavaScript syntax: core/diagnostics/media-readiness.js
+PASS version marker: 13.37.6 / Core 4.37.6
+PASS service worker cache: luvia-shell-v13.37.6
+PASS force-update target: appv=13.37.6
+PASS center-origin spread motion present
+PASS staggered motion-ready transition present
+PASS gather-back closing motion present
+PASS softened 9 px hover lift present
+PASS voting result state prioritizes stale review counter
+PASS vote action remains available when vote progress exists
+PASS old `Karten gemeinsam ansehen` overview wording removed
+PASS persisted overview refresh after spread close present
+PASS stationary curation buttons on hover/tap
+PASS coarse-pointer first-tap hover guard present
+PASS uniform desktop spread-card height present
+PASS mobile swipe code path preserved
+PASS voting + results code paths preserved
+PASS CSS brace integrity: 893 / 893
+PASS index.html local assets: 152 checked, 0 missing
+
+Not automatically validated: subjective browser animation feel, real pointer behavior on the user's exact hybrid device, Supabase multi-user state, and visual card sharpness on the user's display. These are covered by TEST-v13.37.6.md.
