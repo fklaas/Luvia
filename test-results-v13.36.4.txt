@@ -1,0 +1,31 @@
+Luvia 13.36.4 automated test results
+Generated: 2026-08-07T13:41:00+02:00
+
+[1] JavaScript syntax
+PASS app/memory-worlds-v3.js
+PASS core/media/memory-cards.js
+PASS intelligence/kernel/version.js
+PASS intelligence/services/base-services.js
+PASS core/diagnostics/media-readiness.js
+
+[2] Runtime version consistency
+PASS kernel 13.36.4 / 4.36.4
+PASS service worker cache 13.36.4
+PASS force-update target 13.36.4
+PASS memory UI version
+PASS memory core version
+PASS no stale 13.36.3/4.36.3 refs in active changed runtime files
+
+[3] Requested behavior guards
+PASS live identity merge present
+PASS old foreign rose identity fallback removed
+PASS hover top-layer rule
+PASS staged header surface
+PASS travel decor layer
+PASS focus aura
+
+[4] index.html local asset references
+PASS 152 local references resolve
+
+[5] ZIP integrity
+PASS full archive integrity: No errors detected in compressed data of /mnt/data/luvia-v13.36.4-core-v4.36.4-memory-deck-visual-cohesion-focus-polish.zip.
