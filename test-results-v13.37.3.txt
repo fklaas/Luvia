@@ -1,0 +1,26 @@
+Luvia 13.37.3 / Core 4.37.3 — automated local checks
+
+PASS  JavaScript syntax: app/memory-worlds-v3.js
+PASS  JavaScript syntax: core/media/memory-cards.js
+PASS  JavaScript syntax: intelligence/kernel/version.js
+PASS  JavaScript syntax: intelligence/services/base-services.js
+PASS  JavaScript syntax: core/diagnostics/media-readiness.js
+PASS  App version 13.37.3 / Core 4.37.3
+PASS  Service-worker cache 13.37.3
+PASS  Force-update target 13.37.3
+PASS  152 local index.html assets checked; 0 missing
+PASS  CSS brace structure 851 / 851
+PASS  Existing Luvia Gallery lightbox wired into voting photos
+PASS  Existing Luvia Gallery lightbox wired into result photos
+PASS  Desktop spread uses rounded pixel placement
+PASS  Desktop hover has no scale enlargement in 13.37.3 override
+PASS  Unified desktop card proportion override present
+PASS  Story-card visual hierarchy present
+PASS  Compact stack header/date split present
+PASS  No active 13.37.2 / 4.37.2 references in critical runtime version files
+
+NOT AUTOMATED / MANUAL AFTER DEPLOYMENT
+- Browser-perceived sharpness on real laptop/GPU/display scaling
+- Visual text fit for real long story content
+- Gallery lightbox interaction under authenticated production media URLs
+- Mobile swipe regression on real phone

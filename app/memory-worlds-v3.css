@@ -604,3 +604,71 @@ body.mc-open{overflow:hidden}.mc-overlay{position:fixed;inset:0;z-index:10000;ba
   .mc-result-card{grid-template-columns:38px 62px minmax(0,1fr)}
   .mc-result-preview{width:62px;height:56px}
 }
+
+/* v13.37.3 — Memory Card Visual Consistency & Voting Media Polish */
+/* Desktop cards return to a calm, consistent physical size. Content adapts inside the card. */
+@media(min-width:801px){
+  .mc-spread .mc-loose-card{
+    width:var(--mc-card-width,216px)!important;
+    height:calc(var(--mc-card-width,216px) * 1.68)!important;
+    min-height:0!important;
+    max-height:none!important;
+    left:var(--spread-left,0px)!important;
+    top:var(--spread-top,0px)!important;
+    transform:rotate(var(--spread-r,0deg))!important;
+    animation:mcSpreadSharpIn .42s cubic-bezier(.2,.82,.28,1) both!important;
+    will-change:auto!important;
+    backface-visibility:hidden;
+    -webkit-font-smoothing:antialiased;
+    text-rendering:optimizeLegibility;
+  }
+  .mc-spread .mc-loose-card:hover{
+    transform:translateY(-16px) rotate(calc(var(--spread-r,0deg)*.08))!important;
+    box-shadow:0 42px 88px rgba(55,41,44,.20),0 18px 38px color-mix(in srgb,var(--person-color) 18%,transparent)!important;
+  }
+  .mc-spread .mc-loose-card.curation-hero,
+  .mc-spread .mc-loose-card.curation-story,
+  .mc-spread .mc-loose-card.curation-story.text-long,
+  .mc-spread .mc-loose-card.curation-signal{height:calc(var(--mc-card-width,216px) * 1.68)!important;min-height:0!important}
+  .mc-spread .mc-loose-media{height:34%!important;min-height:0!important;flex:0 0 34%}
+  .mc-spread .mc-loose-card.curation-hero .mc-loose-media{height:55%!important;flex-basis:55%!important}
+  .mc-spread .mc-loose-copy{height:auto!important;min-height:0!important;flex:1 1 auto!important;padding:15px 16px 14px!important;overflow:hidden}
+  .mc-spread .mc-loose-card.curation-hero .mc-loose-copy{min-height:0!important}
+  .mc-spread .mc-loose-copy p{font-size:16px!important;line-height:1.34!important;margin:10px 0 auto!important}
+  .mc-spread .mc-loose-card.text-medium .mc-loose-copy p{font-size:14.5px!important;line-height:1.34!important}
+  .mc-spread .mc-loose-card.text-long .mc-loose-copy p{font-size:12.7px!important;line-height:1.31!important;letter-spacing:-.01em}
+  .mc-spread .mc-loose-card.curation-signal .mc-loose-copy>strong{font-size:30px!important}
+  .mc-card-foot{padding-top:9px!important}
+}
+@keyframes mcSpreadSharpIn{from{opacity:0;filter:blur(2px);transform:translateY(10px) rotate(0deg)}to{opacity:1;filter:none;transform:translateY(0) rotate(var(--spread-r,0deg))}}
+
+/* Story cards read as a small personal memory, not as another system type. */
+.mc-story-kicker{display:inline-flex;align-items:center;gap:5px;margin:9px 0 0;padding:5px 8px;border-radius:999px;background:color-mix(in srgb,var(--person-color) 9%,#fff);color:color-mix(in srgb,var(--person-color) 72%,#55636a);font:850 8.5px/1 var(--lv-font-body,Inter,sans-serif);letter-spacing:.09em;text-transform:uppercase}
+.mc-loose-card.curation-story .mc-loose-media{background:linear-gradient(160deg,color-mix(in srgb,var(--person-color) 8%,#fffdf9),color-mix(in srgb,var(--person-color) 13%,#f7f2ed))!important}
+.mc-loose-card.curation-story .mc-card-symbol{font-size:40px!important;opacity:.88}
+.mc-loose-card.curation-story .mc-loose-media em{font-size:9px!important;opacity:.72}
+.mc-loose-card.curation-story .mc-loose-copy p{font-family:var(--lv-font-body,Inter,sans-serif)!important;font-weight:570!important;color:#334853}
+
+/* Open-stack title becomes a quiet editorial header. */
+.mc-deck-stage-head{width:min(650px,calc(100vw - 44px))!important}
+.mc-stage-head-surface{padding:13px 26px 14px!important;border-radius:25px!important}
+.mc-stage-head-surface>small{font-size:8px!important;letter-spacing:.19em!important;margin-bottom:3px}
+.mc-stage-day{display:block;margin:3px 0 5px;color:color-mix(in srgb,var(--mc-stage-trip,#67ad96) 82%,#526b64);font:850 10px/1.2 var(--lv-font-body,Inter,sans-serif);letter-spacing:.1em;text-transform:uppercase}
+.mc-deck-stage-head h2{font:650 clamp(22px,2vw,31px)/1.12 var(--lv-font-display,var(--lv-font-body,Inter,sans-serif))!important;letter-spacing:-.025em!important;max-width:560px!important;margin:3px auto 7px!important;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.mc-deck-stage-head span{font-size:10px!important;color:#81797b!important}
+
+/* Voting/result photos are real interactive Luvia media previews. */
+.mc-vote-preview,.mc-result-preview{appearance:none;-webkit-appearance:none;border:0;padding:0;cursor:default;font-family:inherit;color:inherit}
+.mc-vote-preview.has-photo,.mc-result-preview.has-photo{cursor:zoom-in;position:relative;box-shadow:inset 0 0 0 1px rgba(68,87,94,.08)}
+.mc-vote-preview.has-photo:after,.mc-result-preview.has-photo:after{content:'↗';position:absolute;right:6px;bottom:6px;width:21px;height:21px;border-radius:50%;display:grid;place-items:center;background:rgba(255,255,255,.9);color:#456158;font:900 10px/1 var(--lv-font-body,Inter,sans-serif);box-shadow:0 4px 12px rgba(42,55,60,.12);opacity:.9}
+.mc-vote-preview.has-photo:hover,.mc-result-preview.has-photo:hover{box-shadow:0 0 0 2px color-mix(in srgb,var(--trip-accent,#67ad96) 32%,transparent)}
+
+@media(max-width:800px){
+  .mc-deck-stage-head{width:calc(100% - 24px)!important}
+  .mc-stage-head-surface{padding:9px 15px 10px!important}
+  .mc-stage-day{font-size:9px}
+  .mc-deck-stage-head h2{font-size:clamp(20px,5.8vw,27px)!important;line-height:1.1!important;max-width:92%!important}
+}
+/* Deck overview titles also stay compact on laptop-sized layouts. */
+.mc-deck-info strong{font-size:clamp(17px,1.15vw,20px)!important;line-height:1.16!important;letter-spacing:-.02em!important}
+@media(max-width:1200px) and (min-width:801px){.mc-deck-info strong{font-size:17px!important}.mc-deck-info{gap:5px!important}}
