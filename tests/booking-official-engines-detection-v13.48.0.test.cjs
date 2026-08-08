@@ -1,0 +1,16 @@
+const fs=require('fs'),path=require('path'),vm=require('vm'),assert=require('assert');
+const root=path.resolve(__dirname,'..');
+const context={window:{},location:{href:'https://myluvia.app/'},URL,console};context.globalThis=context;vm.createContext(context);
+vm.runInContext(fs.readFileSync(path.join(root,'core/booking/booking-engine-detection.js'),'utf8'),context);
+const d=context.window.LuviaBookingEngineDetection;assert(d);assert.equal(d.version,'2.0.0');
+assert.equal(d.detectUrl('https://www.sevenrooms.com/explore/foo/reservations/create/search').id,'sevenrooms');
+assert.equal(d.detectUrl('https://www.exploretock.com/example').id,'tock');
+assert.equal(d.detectUrl('https://www.covermanager.com/reservation/example').id,'covermanager');
+assert.equal(d.detectUrl('https://widget.resdiary.com/widget/Standard/Foo/123').id,'resdiary');
+assert.equal(d.detectUrl('https://www.example.com/reserve'),null);
+const route=fs.readFileSync(path.join(root,'supabase/functions/booking-route-resolve/index.ts'),'utf8');
+for(const needle of ["const VERSION='2.0.0'","'tock'","'covermanager'","'resdiary'","'tablecheck'","'formitable'","'aleno'","'simpleerb'",'data-widget-url','embedded booking config','function detectedEngines','enginesDetected','LEGAL_HINT','BROKEN_HANDOFF_HINT']) assert(route.includes(needle),`route resolver missing ${needle}`);
+const migration=fs.readFileSync(path.join(root,'supabase/migrations/20260808154500_core_v4_48_0_official_booking_engines_detection_v2.sql'),'utf8');
+assert(migration.includes("luvia_access_state='connected'"),'migration must preserve already connected providers');
+assert(migration.includes("'discovery'"),'engine rows must remain discovery-only');
+console.log('LUVIA_V13_48_0_OFFICIAL_BOOKING_ENGINES_DETECTION_V2_OK');
