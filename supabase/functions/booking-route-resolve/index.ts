@@ -1,6 +1,6 @@
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
 
-const VERSION='2.0.0';
+const VERSION='2.1.0';
 const corsHeaders={
   'Access-Control-Allow-Origin':'https://myluvia.app',
   'Access-Control-Allow-Headers':'authorization, x-client-info, apikey, content-type',
@@ -16,6 +16,9 @@ const isReservationEmail=(v:string)=>/(reserv|booking|table|restaurant)/i.test(v
 const RESERVATION_HINT=/(reserv|book(?:ing)?|table|tisch|réserv|reserve|availability|disponibilit|prenota|mesa|seat|widget)/i;
 const LEGAL_HINT=/(\/|\b)(gtc|terms?|conditions?|privacy|legal|cgu|cgv|mentions[-_ ]?legales|impressum|cookies?|policy)(\/|\b|[?&#=_-])/i;
 const BLOCKED_EXTERNAL=/(facebook\.com|instagram\.com|tiktok\.com|youtube\.com|google\.|maps\.|tripadvisor\.|yelp\.|linkedin\.com)/i;
+const NAVIGATION_HOST=/(^|\.)(google\.[a-z.]+|maps\.apple\.com|waze\.com|mapbox\.com|bing\.com|openstreetmap\.org)$/i;
+const NAVIGATION_PATH=/(\/maps?(?:\/|$)|\/directions?(?:\/|$)|\/route(?:\/|$)|\/navigation(?:\/|$)|\/itineraire(?:\/|$)|\/anfahrt(?:\/|$)|[?&](?:destination|directions?|route|navigate|navigation)=)/i;
+const NAVIGATION_TEXT=/^(?:route|navigation|navigieren|anfahrt|anreise|wegbeschreibung|directions?|maps?|karte|itin[ée]raire)$/i;
 const BROKEN_HANDOFF_HINT=/(booking|reservation|reservierung|réservation|widget|venue|restaurant)[^<\n]{0,80}(unavailable|not available|not found|disabled|closed|error|failed|temporarily unavailable|indisponible|introuvable|non disponible|nicht verfügbar|nicht verf[uü]gbar|fehlgeschlagen)|404\s*(?:not found)?|page not found|seite nicht gefunden/i;
 const PROVIDERS:[RegExp,string][]=[
   [/(^|\.)opentable\./i,'opentable'],[/(^|\.)thefork\./i,'thefork'],[/(^|\.)resy\.com$/i,'resy'],[/(^|\.)sevenrooms\.com$/i,'sevenrooms'],[/(^|\.)quandoo\./i,'quandoo'],[/(^|\.)zenchef\./i,'zenchef'],
@@ -39,9 +42,10 @@ function hasVenueIdentifier(url:string){
   try{const u=new URL(url);const q=u.search.toLowerCase();return /(^|[?&])(rid|venue|venue_id|restaurant|restaurant_id|restid|shop|location|slug|host)=/.test(`?${q.replace(/^\?/,'')}`)||/\/(explore|restaurant|restaurants|venue|venues)\//i.test(u.pathname)}catch{return false}
 }
 function isLegalUrl(url:string){try{const u=new URL(url);return LEGAL_HINT.test(`${u.pathname}${u.search}${u.hash}`)}catch{return true}}
+function isNavigationTarget(url:string,text=''){try{const u=new URL(url);const h=u.hostname.toLowerCase().replace(/^www\./,'');return NAVIGATION_HOST.test(h)||NAVIGATION_PATH.test(`${u.pathname}${u.search}${u.hash}`)||NAVIGATION_TEXT.test(clean(text));}catch{return true}}
 function hasReservationIntent(url:string,text=''){return RESERVATION_HINT.test(`${url} ${text}`)}
 function acceptableProviderLink(url:string,text:string,venueName:string){
-  if(isLegalUrl(url))return false;
+  if(isLegalUrl(url)||isNavigationTarget(url,text))return false;
   return hasReservationIntent(url,text)||venueMatch(venueName,url,text)||hasVenueIdentifier(url);
 }
 async function fetchPage(url:string){
@@ -56,6 +60,7 @@ async function validateHandoff(url:string,venueName:string){
     const finalUrl=res.url||u.toString();
     if([404,410].includes(res.status)||res.status>=500)return {ok:false,reason:`HTTP_${res.status}`,finalUrl,status:res.status};
     if(isLegalUrl(finalUrl))return {ok:false,reason:'LEGAL_REDIRECT',finalUrl,status:res.status};
+    if(isNavigationTarget(finalUrl))return {ok:false,reason:'NAVIGATION_REDIRECT',finalUrl,status:res.status};
     // 401/403/429 can be bot protection while the same URL remains valid in a user's browser.
     if([401,403,429].includes(res.status))return {ok:true,reason:'BOT_PROTECTION_UNVERIFIED',finalUrl,status:res.status};
     if(!res.ok)return {ok:false,reason:`HTTP_${res.status}`,finalUrl,status:res.status};
@@ -89,7 +94,7 @@ function resourceLinks(base:string,html:string){
   for(const m of html.matchAll(/(?:bookingUrl|booking_url|reservationUrl|reservation_url|widgetUrl|widget_url|reserveUrl|reserve_url)\s*["']?\s*[:=]\s*["'](https?:\/\/[^"'\s<>]+)["']/gi)){try{const u=new URL(clean(m[1]).replace(/\\\//g,'/'));if(!safeHttpUrl(u.toString()))continue;const provider=providerFor(u.toString());if(!provider&&!hasReservationIntent(u.toString()))continue;out.push({url:u.toString(),text:'embedded booking config',sameOrigin:u.origin===origin,provider,tag:'config'})}catch{}}
   return out.filter((v,i,a)=>a.findIndex(x=>x.url===v.url&&x.tag===v.tag)===i);
 }
-function crawlLinks(base:string,html:string){return [...new Set(resourceLinks(base,html).filter(x=>x.sameOrigin&&!isLegalUrl(x.url)&&hasReservationIntent(x.url,x.text)).map(x=>x.url))].slice(0,6)}
+function crawlLinks(base:string,html:string){return [...new Set(resourceLinks(base,html).filter(x=>x.sameOrigin&&!isLegalUrl(x.url)&&!isNavigationTarget(x.url,x.text)&&(hasReservationIntent(x.url,x.text)||/(contact|kontakt|impressum|imprint|about|nous[-_ ]contacter|contatti)/i.test(`${x.url} ${x.text}`))).map(x=>x.url))].slice(0,8)}
 function detectedEngines(page:{url:string,html:string}){
   const ids=new Set<string>();
   for(const link of resourceLinks(page.url,page.html)){const p=link.provider||providerFor(link.url);if(p)ids.add(p);}
@@ -99,7 +104,7 @@ function detectedEngines(page:{url:string,html:string}){
 function candidatesFromPage(page:{url:string,html:string},venueName:string){
   const out:Candidate[]=[];const baseOrigin=new URL(page.url).origin;
   for(const link of resourceLinks(page.url,page.html)){
-    if(isLegalUrl(link.url))continue;
+    if(isLegalUrl(link.url)||isNavigationTarget(link.url,link.text))continue;
     const intent=hasReservationIntent(link.url,link.text);const venueSpecific=venueMatch(venueName,link.url,link.text)||hasVenueIdentifier(link.url);
     if(link.provider&&acceptableProviderLink(link.url,link.text,venueName)){
       const score=100+(venueSpecific?8:0)+(intent?4:0)+(link.tag==='iframe'||link.tag==='data'?2:0);
@@ -111,10 +116,11 @@ function candidatesFromPage(page:{url:string,html:string},venueName:string){
   return out.filter((v,i,a)=>a.findIndex(x=>x.kind===v.kind&&x.contactValue===v.contactValue)===i&&new URL(v.sourceUrl).origin===baseOrigin);
 }
 function bestCandidate(candidates:Candidate[]){return [...candidates].sort((a,b)=>b.score-a.score||b.confidence-a.confidence)[0]||null}
-async function discoverRoute(input:{name:string,website:string,reservationUrl?:string}){
-  const venueName=clean(input.name);const rejected:{url:string,reason:string,status:number}[]=[];const engines=new Set<string>();
+async function discoverRoute(input:{name:string,website:string,reservationUrl?:string,placeType?:string}){
+  const venueName=clean(input.name);const placeType=clean(input.placeType).toLowerCase();
+  if(placeType&&placeType!=='restaurant')return {resolved:false,reason:'PLACE_TYPE_NOT_SUPPORTED_YET',pages:[],candidates:[] as Candidate[],rejected:[] as {url:string,reason:string,status:number}[],enginesDetected:[] as string[]};const rejected:{url:string,reason:string,status:number}[]=[];const engines=new Set<string>();
   const existing=clean(input.reservationUrl);const direct=safeHttpUrl(existing);
-  if(direct&&!isLegalUrl(direct.toString())){
+  if(direct&&!isLegalUrl(direct.toString())&&!isNavigationTarget(direct.toString(),'direct reservation url')){
     const provider=providerFor(direct.toString());const intent=hasReservationIntent(direct.toString());
     if((provider&&acceptableProviderLink(direct.toString(),'direct reservation url',venueName))||intent){
       const health=await validateHandoff(direct.toString(),venueName);
@@ -153,15 +159,15 @@ Deno.serve(async(req)=>{
 
     // Preview mode: resolve the route before Luvia shows an e-mail fallback form.
     if(!bookingId){
-      const place=body.place||{};const name=clean(place.name);const website=clean(place.website);const reservationUrl=clean(place.reservationUrl||place.bookingUrl);
+      const place=body.place||{};const name=clean(place.name);const placeType=clean(place.placeType||place.type);const website=clean(place.website);const reservationUrl=clean(place.reservationUrl||place.bookingUrl);
       if(!name)return json({error:'PLACE_NAME_REQUIRED'},400);
-      const discovered=await discoverRoute({name,website,reservationUrl});
+      const discovered=await discoverRoute({name,placeType,website,reservationUrl});
       return json({ok:true,resolved:discovered.resolved,channel:(discovered as any).channel||null,provider:(discovered as any).provider||null,value:(discovered as any).value||null,kind:(discovered as any).kind||null,reason:discovered.reason,pagesChecked:discovered.pages.length,candidatesFound:discovered.candidates.length,rejectedRoutes:discovered.rejected?.length||0,enginesDetected:(discovered as any).enginesDetected||[],resolverVersion:VERSION});
     }
 
     const {data:booking,error}=await userClient.from('bookings').select('*').eq('id',bookingId).single();if(error||!booking)return json({error:'BOOKING_NOT_FOUND_OR_FORBIDDEN'},404);
     const existingUrl=clean(booking.contact?.bookingUrl||booking.contact?.booking_url||booking.request?.reservationUrl);
-    const discovered=await discoverRoute({name:clean(booking.title),website:clean(booking.contact?.website||booking.request?.website||booking.metadata?.website),reservationUrl:existingUrl});
+    const discovered=await discoverRoute({name:clean(booking.title),placeType:clean(booking.request?.sourcePlaceType||booking.booking_type),website:clean(booking.contact?.website||booking.request?.website||booking.metadata?.website),reservationUrl:existingUrl});
     if(!discovered.resolved&&discovered.reason==='OFFICIAL_WEBSITE_MISSING'&&clean(booking.contact?.email))return json({ok:true,resolved:true,channel:'email',provider:booking.provider||'manual',value:clean(booking.contact.email),kind:'public_contact_email',reason:'CONTACT_ALREADY_PRESENT',resolverVersion:VERSION});
 
     const {data:run,error:runError}=await admin.from('booking_discovery_runs').insert({booking_id:booking.id,trip_id:booking.trip_id,status:'running',resolver_version:VERSION}).select('*').single();if(runError)return json({error:'DISCOVERY_RUN_CREATE_FAILED',details:runError.message},500);

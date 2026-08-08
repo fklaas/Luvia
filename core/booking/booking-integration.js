@@ -1,6 +1,6 @@
 (() => {
   'use strict';
-  const VERSION='1.5.0';
+  const VERSION='1.6.0';
   let client=null, repository=null, initialized=false, initPromise=null;
 
   const mapType=type=>({
@@ -166,10 +166,29 @@
     return data;
   }
 
+
+  async function recordPlaceHandoff(place={},route={}){
+    await init();
+    const tripId=activeTripId();
+    if(!tripId||!route?.value)return null;
+    const {data,error}=await client.rpc('luvia_booking_record_place_handoff',{
+      p_trip_id:tripId,
+      p_place_type:String(place.type||place.primaryType||place.primary_type||'restaurant').toLowerCase(),
+      p_provider_place_id:providerId(place)||null,
+      p_venue_name:clean(place.name)||null,
+      p_provider:clean(route.provider)||'official',
+      p_destination_url:clean(route.value),
+      p_metadata:{source:'places_reserve_action',resolverReason:route.reason||null,resolverVersion:route.resolverVersion||null}
+    });
+    if(error)throw error;
+    return data;
+  }
+
   async function resolvePlaceRoute(place={}){
     await init();
     const payload={
       name:clean(place.name),
+      placeType:String(place.type||place.primaryType||place.primary_type||'').toLowerCase(),
       website:clean(place.website||place.websiteUri||place.website_uri),
       reservationUrl:clean(place.reservationUrl||place.reservation_url||place.bookingUrl||place.booking_url)
     };
@@ -210,7 +229,7 @@
   }
 
   const api=Object.freeze({
-    version:VERSION,init,createForPlace,listForTrip,get,transition,providerCapabilities,statusHistory,recordHandoff,planRoute,resolvePlaceRoute,resolveRoute,resolveContact,updateContact,sendEmail,cancel,mapType,
+    version:VERSION,init,createForPlace,listForTrip,get,transition,providerCapabilities,statusHistory,recordHandoff,recordPlaceHandoff,planRoute,resolvePlaceRoute,resolveRoute,resolveContact,updateContact,sendEmail,cancel,mapType,
     diagnostics:()=>({version:VERSION,initialized,activeTripId:activeTripId(),coreVersion:window.LuviaBookingCore?.version||null})
   });
   window.LuviaBooking=api;

@@ -1,0 +1,16 @@
+PASS app version 13.49.0
+PASS core version 4.49.0
+PASS accommodation reservation disabled
+PASS restaurant reservation enabled
+PASS mobile viewport prefetch
+PASS direct email send
+PASS verified email display
+PASS navigation URLs rejected
+PASS category-aware resolver
+PASS contact pages crawled
+PASS handoff attribution client
+PASS handoff attribution database
+PASS profile session hardening
+PASS profile RLS hardening
+
+RESULT: LUVIA_V13_49_0_FAST_HANDOFF_ATTRIBUTION_OK

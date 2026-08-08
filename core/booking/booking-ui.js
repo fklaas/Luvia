@@ -1,6 +1,6 @@
 (() => {
   'use strict';
-  const VERSION='1.3.1';
+  const VERSION='1.4.0';
   const esc=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
   const canonicalType=raw=>{
     const type=String(raw||'').toLowerCase();
@@ -10,7 +10,8 @@
   };
   const capable=type=>{
     const canonical=canonicalType(type);
-    if(['restaurant','accommodation'].includes(canonical))return true;
+    if(canonical==='restaurant')return true;
+    if(canonical==='accommodation')return false;
     return Boolean(window.LuviaPlaceTypeContracts?.capability?.(canonical,'reservation')||window.LuviaPlaceTypeContracts?.capability?.(canonical,'booking'));
   };
 
@@ -41,16 +42,16 @@
           <label><span>${isHotel?'Check-in':'Datum'}</span><input type="date" data-booking-date value="${esc(defaultDate)}"></label>
           ${isHotel?`<label><span>Check-out</span><input type="date" data-booking-end-date value="${esc(defaultDate)}"></label>`:`<label><span>Uhrzeit</span><input type="time" data-booking-time value="19:00"></label>`}
           <label><span>${isHotel?'Gäste':'Personen'}</span><input type="number" min="1" max="50" value="2" data-booking-party></label>
-          <label><span>Kontakt</span><div class="lv-booking-auto-contact">${place.email?'Kein direkter Buchungsanbieter verfügbar. Luvia hat einen belegbaren E-Mail-Fallback gefunden.':'Kein direkter Buchungsanbieter verfügbar. Luvia nutzt nur einen belegbaren E-Mail-Kontakt oder deinen manuellen Fallback.'}</div><input type="email" data-booking-email value="${esc(place.email||'')}" placeholder="Optionaler manueller Fallback"></label>
+          <label><span>E-Mail des Restaurants</span>${place.email?`<div class="lv-booking-auto-contact is-found"><strong>${esc(place.email)}</strong><small>Von Luvia auf der offiziellen Restaurant-Seite gefunden.</small></div><input type="hidden" data-booking-email value="${esc(place.email)}">`:`<div class="lv-booking-auto-contact is-missing"><strong>Keine verifizierte E-Mail gefunden.</strong><small>Luvia versendet nichts an geratene oder unbestätigte Adressen.</small></div><input type="hidden" data-booking-email value="">`}</label>
           <label class="is-wide"><span>Wunsch / Hinweis</span><textarea data-booking-note rows="3" placeholder="z. B. Kinderwagen, ruhiger Tisch, spätes Check-in …"></textarea></label>
         </div>
         <div class="lv-booking-safety">
           <strong>So funktioniert es</strong>
-          <p>Dieses Formular erscheint nur, wenn Luvia keinen verifizierten direkten Buchungsweg gefunden hat. E-Mail bleibt der Fallback. Luvia rät keine Adressen und bestätigt nichts ohne Nachweis.</p>
+          <p>Wenn kein direkter Buchungsanbieter verfügbar ist, nutzt Luvia automatisch eine verifizierte öffentliche E-Mail des Restaurants. Mit dem Klick auf „Anfrage senden“ bestätigst du den Versand.</p>
         </div>
         <div class="lv-booking-actions">
           <button type="button" data-booking-close>Abbrechen</button>
-          <button type="button" class="is-primary" data-booking-create>Anfrage anlegen</button>
+          <button type="button" class="is-primary" data-booking-create>${place.email?'Anfrage per E-Mail senden':'Anfrage vormerken'}</button>
         </div>
         <div class="lv-booking-result" data-booking-result hidden></div>
       </section>
@@ -86,9 +87,12 @@
         });
         const hasEmail=Boolean(booking?.contact?.email);
         result.hidden=false;
-        result.innerHTML=hasEmail
-          ? `<strong>Anfrage vorbereitet.</strong><p>Die Buchungsanfrage wurde in Luvia angelegt. Du kannst sie im Bereich „Buchungen“ verbindlich versenden.</p>`
-          : `<strong>Anfrage angelegt.</strong><p>Für diesen Ort liegt noch keine sichere E-Mail-Adresse vor. Luvia hält die Anfrage offen und verwendet keine geratenen Kontaktdaten.</p>`;
+        if(hasEmail){
+          await window.LuviaBooking.sendEmail(booking.id,{note:node.querySelector('[data-booking-note]')?.value||''});
+          result.innerHTML=`<strong>Anfrage versendet.</strong><p>Luvia hat die Reservierungsanfrage direkt an ${esc(booking.contact.email)} gesendet. Der Status bleibt „Angefragt“, bis eine belastbare Antwort vorliegt.</p>`;
+        }else{
+          result.innerHTML=`<strong>Anfrage vorgemerkt.</strong><p>Für dieses Restaurant wurde keine verifizierte öffentliche E-Mail gefunden. Es wurde keine Nachricht versendet.</p>`;
+        }
         create.remove();
         // Nach erfolgreichem Anlegen die gesamte Overlay-Kette schließen: Booking-Dialog
         // und ggf. darunter geöffnete Place-Detailkarte.
@@ -170,6 +174,23 @@
     resolveRouteCached(placeFromButton(button)).catch(()=>{});
   },true);
 
+  // Mobile has no hover. Resolve as soon as a reservation action becomes visible so the
+  // verified destination is normally ready before the user's click.
+  const bookingObserver=('IntersectionObserver' in window)?new IntersectionObserver(entries=>{
+    for(const entry of entries){
+      if(!entry.isIntersecting)continue;
+      const button=entry.target;
+      if(button?.dataset?.bookingPrefetched!=='1'){
+        button.dataset.bookingPrefetched='1';
+        resolveRouteCached(placeFromButton(button)).catch(()=>{});
+      }
+      bookingObserver.unobserve(button);
+    }
+  },{rootMargin:'240px'}):null;
+  const observeBookingButtons=()=>document.querySelectorAll('[data-luvia-booking-place]').forEach(button=>bookingObserver?.observe(button));
+  new MutationObserver(observeBookingButtons).observe(document.documentElement,{childList:true,subtree:true});
+  queueMicrotask(observeBookingButtons);
+
   document.addEventListener('click',async e=>{
     const button=e.target.closest('[data-luvia-booking-place]');
     if(!button)return;
@@ -192,6 +213,7 @@
       const route=resolved.route;
       if(route?.resolved&&route.channel==='external_link'&&route.value){
         let target=null;try{target=new URL(route.value);if(!/^https?:$/.test(target.protocol))throw new Error('invalid')}catch{throw new Error('Der gefundene Buchungslink ist ungültig.')}
+        window.LuviaBooking.recordPlaceHandoff?.(place,{...route,value:target.toString()}).catch(error=>console.debug('[Luvia Booking] Handoff-Attribution konnte nicht protokolliert werden.',error?.message||error));
         if(handoffWindow&&!handoffWindow.closed){handoffWindow.location.replace(target.toString());return;}
         const opened=window.open(target.toString(),'_blank','noopener,noreferrer');
         if(!opened)window.LuviaUIKit?.toast?.('Der Browser hat das Buchungsfenster blockiert. Bitte Pop-ups für Luvia erlauben und erneut auf „Reservieren“ klicken.',{type:'warning'});

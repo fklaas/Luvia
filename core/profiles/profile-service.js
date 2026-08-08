@@ -121,6 +121,11 @@
   async function save(patch) {
     const client=await window.LuviaSupabaseService.start(),auth=window.ParisAuth.getState();
     if(!auth.authenticated)throw new Error('Bitte zuerst anmelden.');
+    // Profile writes must never race ahead of the Supabase auth session. This was the
+    // source of intermittent Reisekompass RLS failures after session/bootstrap changes.
+    let session=(await client.auth.getSession()).data?.session||null;
+    if(!session){session=(await client.auth.refreshSession()).data?.session||null;}
+    if(!session?.user?.id)throw new Error('Deine Anmeldung wird noch synchronisiert. Bitte erneut speichern.');
     const previous=clone(state.profile||defaults(auth.user));
     const next=mergeProfile(previous,patch);
     state.profile=next;state.syncing=true;state.error=null;emit('saving');
