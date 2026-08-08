@@ -1,0 +1,14 @@
+core/booking/providers/opentable-adapter.js
+supabase/functions/booking-provider-opentable/index.ts
+supabase/migrations/20260808133000_core_v4_44_0_opentable_adapter_foundation.sql
+supabase/config.toml
+index.html
+intelligence/kernel/version.js
+sw.js
+force-update.html
+core/diagnostics/media-readiness.js
+intelligence/services/base-services.js
+tests/booking-opentable-adapter-v13.44.0.test.cjs
+RELEASE-v13.44.0.md
+DEPLOYMENT-v13.44.0.md
+TEST-v13.44.0.md

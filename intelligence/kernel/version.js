@@ -1,1 +1,1 @@
-(()=>{'use strict';window.LuviaKernelVersion=Object.freeze({core:'4.43.0',build:'13.43.0',name:'Zenchef Adapter Foundation',channel:'production',builtAt:'2026-08-08T13:00:00+02:00'});window.LuviaCoreVersion=window.LuviaKernelVersion;window.LUVIA_RELEASE=window.LuviaKernelVersion;})();
+(()=>{'use strict';window.LuviaKernelVersion=Object.freeze({core:'4.44.0',build:'13.44.0',name:'OpenTable Adapter Foundation',channel:'production',builtAt:'2026-08-08T13:30:00+02:00'});window.LuviaCoreVersion=window.LuviaKernelVersion;window.LUVIA_RELEASE=window.LuviaKernelVersion;})();

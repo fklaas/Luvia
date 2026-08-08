@@ -1,0 +1,13 @@
+const fs=require('fs'),path=require('path'),vm=require('vm'),assert=require('assert');
+const root=path.resolve(__dirname,'..');
+const context={window:{LuviaBookingProviderCapabilities:{get:id=>({id,luviaAccessState:'partner_required',platform:{availability:true,createReservation:true,statusWebhook:null,statusPolling:true},attribution:'none'})},LuviaBookingStatusProvenance:{canAutoApply:()=>false}},console};context.globalThis=context;vm.createContext(context);
+vm.runInContext(fs.readFileSync(path.join(root,'core/booking/providers/opentable-adapter.js'),'utf8'),context);
+const a=context.window.LuviaOpenTableProviderAdapter;assert(a);
+assert.equal(a.normalizeVenueReference('123456'),'123456');
+assert.equal(a.normalizeVenueReference('abc'),null);
+assert.equal(a.mapProviderStatus('confirmed'),'confirmed');
+assert.equal(a.mapProviderStatus('cancelled'),'cancelled');
+assert.equal(a.mapProviderStatus('rejected'),'declined');
+assert.equal(a.mapProviderStatus('something_new'),null);
+assert.equal(a.canApplyProviderStatus('confirmed'),false);
+console.log('LUVIA_V13_44_0_OPENTABLE_ADAPTER_FOUNDATION_OK');
