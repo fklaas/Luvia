@@ -1,0 +1,14 @@
+const fs=require('fs'),path=require('path'),vm=require('vm'),assert=require('assert');
+const root=path.resolve(__dirname,'..');
+const context={window:{LuviaBookingProviderCapabilities:{get:id=>({id,luviaAccessState:'partner_required',platform:{availability:true,createReservation:true,statusWebhook:null,statusPolling:null},attribution:'none'})}},console};context.globalThis=context;vm.createContext(context);
+vm.runInContext(fs.readFileSync(path.join(root,'core/booking/providers/resy-adapter.js'),'utf8'),context);
+const a=context.window.LuviaResyProviderAdapter;assert(a);
+assert.equal(a.normalizeVenueReference('12345'),'12345');
+assert.equal(a.normalizeVenueReference('venue_paris-1'),'venue_paris-1');
+assert.equal(a.normalizeVenueReference('bad value with spaces'),null);
+assert.equal(a.normalizeReservationReference('res_123-ABC'),'res_123-ABC');
+assert.equal(a.mapProviderStatus('confirmed'),null,'unverified Resy status vocabulary must not be guessed');
+assert.equal(a.canApplyProviderStatus('confirmed'),false);
+const cap=context.window.LuviaBookingProviderCapabilities.get('resy');
+assert.equal(cap.luviaAccessState,'partner_required');
+console.log('LUVIA_V13_46_0_RESY_ADAPTER_FOUNDATION_OK');

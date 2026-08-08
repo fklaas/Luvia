@@ -1,0 +1,1 @@
+feat(booking): add Resy adapter foundation with safe partner access seam

@@ -1,1 +1,1 @@
-(()=>{'use strict';window.LuviaKernelVersion=Object.freeze({core:'4.45.1',build:'13.45.1',name:'Final Console Reliability Fix',channel:'production',builtAt:'2026-08-08T14:13:00+02:00'});window.LuviaCoreVersion=window.LuviaKernelVersion;window.LUVIA_RELEASE=window.LuviaKernelVersion;})();
+(()=>{'use strict';window.LuviaKernelVersion=Object.freeze({core:'4.46.0',build:'13.46.0',name:'Resy Adapter Foundation',channel:'production',builtAt:'2026-08-08T14:29:00+02:00'});window.LuviaCoreVersion=window.LuviaKernelVersion;window.LUVIA_RELEASE=window.LuviaKernelVersion;})();

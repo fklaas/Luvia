@@ -1,0 +1,11 @@
+const fs=require('fs'),path=require('path'),assert=require('assert');
+const root=path.resolve(__dirname,'..');
+const collab=fs.readFileSync(path.join(root,'core/collaboration/collaboration-service.js'),'utf8');
+const gateway=fs.readFileSync(path.join(root,'supabase/functions/luvia-gateway/index.ts'),'utf8');
+const backend=fs.readFileSync(path.join(root,'intelligence/backend-service.js'),'utf8');
+assert(collab.includes('heartbeatInFlight') || collab.includes('inFlight'),'presence single-flight guard missing');
+assert(collab.includes('sessionEpoch'),'session epoch guard missing');
+assert(gateway.includes("req.method==='OPTIONS'") || gateway.includes('req.method === \'OPTIONS\''),'gateway OPTIONS preflight missing');
+assert(gateway.includes('corsHeaders') && gateway.includes('resolveOrigin'),'gateway shared CORS handling missing');
+assert(backend.includes('4.46.0-gateway-runtime'),'backend version not bumped');
+console.log('LUVIA_V13_46_0_CONSOLE_RELIABILITY_REGRESSION_OK');

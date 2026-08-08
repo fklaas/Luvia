@@ -1,6 +1,6 @@
 (() => {
   'use strict';
-  const VERSION='4.45.1';
+  const VERSION='4.46.0';
   const listeners=new Set();
   const STORAGE='cloud-only';
   const REMOTE_RETRY_MS=[0];
