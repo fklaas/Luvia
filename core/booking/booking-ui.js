@@ -1,6 +1,6 @@
 (() => {
   'use strict';
-  const VERSION='1.4.0';
+  const VERSION='1.5.0';
   const esc=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
   const canonicalType=raw=>{
     const type=String(raw||'').toLowerCase();
@@ -42,7 +42,7 @@
           <label><span>${isHotel?'Check-in':'Datum'}</span><input type="date" data-booking-date value="${esc(defaultDate)}"></label>
           ${isHotel?`<label><span>Check-out</span><input type="date" data-booking-end-date value="${esc(defaultDate)}"></label>`:`<label><span>Uhrzeit</span><input type="time" data-booking-time value="19:00"></label>`}
           <label><span>${isHotel?'Gäste':'Personen'}</span><input type="number" min="1" max="50" value="2" data-booking-party></label>
-          <label><span>E-Mail des Restaurants</span>${place.email?`<div class="lv-booking-auto-contact is-found"><strong>${esc(place.email)}</strong><small>Von Luvia auf der offiziellen Restaurant-Seite gefunden.</small></div><input type="hidden" data-booking-email value="${esc(place.email)}">`:`<div class="lv-booking-auto-contact is-missing"><strong>Keine verifizierte E-Mail gefunden.</strong><small>Luvia versendet nichts an geratene oder unbestätigte Adressen.</small></div><input type="hidden" data-booking-email value="">`}</label>
+          <label><span>Kontaktprüfung</span>${place.email?`<div class="lv-booking-auto-contact is-found"><strong>${esc(place.email)}</strong><small>Verifizierte öffentliche E-Mail auf der offiziellen Restaurant-Seite gefunden.</small></div><input type="hidden" data-booking-email value="${esc(place.email)}">`:place._bookingContactChecked?`<div class="lv-booking-auto-contact is-missing"><strong>Keine verifizierte öffentliche E-Mail-Adresse gefunden.</strong><small>Luvia hat die verfügbare offizielle Website und Kontaktseiten geprüft. Es wird keine Adresse geraten und keine Nachricht versendet.</small></div><input type="hidden" data-booking-email value="">`:`<div class="lv-booking-auto-contact"><strong>Kontakt wird geprüft …</strong><small>Luvia sucht ausschließlich auf belegbaren offiziellen Quellen.</small></div><input type="hidden" data-booking-email value="">`}</label>
           <label class="is-wide"><span>Wunsch / Hinweis</span><textarea data-booking-note rows="3" placeholder="z. B. Kinderwagen, ruhiger Tisch, spätes Check-in …"></textarea></label>
         </div>
         <div class="lv-booking-safety">
@@ -51,7 +51,7 @@
         </div>
         <div class="lv-booking-actions">
           <button type="button" data-booking-close>Abbrechen</button>
-          <button type="button" class="is-primary" data-booking-create>${place.email?'Anfrage per E-Mail senden':'Anfrage vormerken'}</button>
+          <button type="button" class="is-primary" data-booking-create ${place.email?'':'disabled'}>${place.email?'Reservierungsanfrage senden':'Keine E-Mail verfügbar'}</button>
         </div>
         <div class="lv-booking-result" data-booking-result hidden></div>
       </section>
@@ -70,6 +70,7 @@
       if(e.target===node||e.target.closest('[data-booking-close]'))return close(node);
       const create=e.target.closest('[data-booking-create]');
       if(!create)return;
+      if(!node.querySelector('[data-booking-email]')?.value){return;}
       create.disabled=true;
       const result=node.querySelector('[data-booking-result]');
       try{
@@ -91,7 +92,7 @@
           await window.LuviaBooking.sendEmail(booking.id,{note:node.querySelector('[data-booking-note]')?.value||''});
           result.innerHTML=`<strong>Anfrage versendet.</strong><p>Luvia hat die Reservierungsanfrage direkt an ${esc(booking.contact.email)} gesendet. Der Status bleibt „Angefragt“, bis eine belastbare Antwort vorliegt.</p>`;
         }else{
-          result.innerHTML=`<strong>Anfrage vorgemerkt.</strong><p>Für dieses Restaurant wurde keine verifizierte öffentliche E-Mail gefunden. Es wurde keine Nachricht versendet.</p>`;
+          result.innerHTML=`<strong>Keine Nachricht versendet.</strong><p>Für dieses Restaurant wurde keine verifizierte öffentliche E-Mail gefunden.</p>`;
         }
         create.remove();
         // Nach erfolgreichem Anlegen die gesamte Overlay-Kette schließen: Booking-Dialog
@@ -187,7 +188,10 @@
       bookingObserver.unobserve(button);
     }
   },{rootMargin:'240px'}):null;
-  const observeBookingButtons=()=>document.querySelectorAll('[data-luvia-booking-place]').forEach(button=>bookingObserver?.observe(button));
+  const observeBookingButtons=()=>document.querySelectorAll('[data-luvia-booking-place]').forEach(button=>{
+    if(button.dataset.bookingPrefetched!=='1'){button.dataset.bookingPrefetched='1';resolveRouteCached(placeFromButton(button)).catch(()=>{});}
+    bookingObserver?.observe(button);
+  });
   new MutationObserver(observeBookingButtons).observe(document.documentElement,{childList:true,subtree:true});
   queueMicrotask(observeBookingButtons);
 
@@ -220,11 +224,14 @@
         return;
       }
       if(handoffWindow&&!handoffWindow.closed)handoffWindow.close();
+      place._bookingContactChecked=true;
+      place._bookingContactReason=route?.reason||'NO_VERIFIED_ROUTE';
       if(route?.resolved&&route.channel==='email'&&route.value)place.email=route.value;
       await open(place);
     }catch(error){
       try{for(const w of [])w.close()}catch{}
       console.warn('[Luvia Booking] Route-Preview fehlgeschlagen; sicherer Fallback wird geöffnet.',error);
+      place._bookingContactChecked=false;
       await open(place);
     }finally{
       button.dataset.bookingBusy='0';button.disabled=false;

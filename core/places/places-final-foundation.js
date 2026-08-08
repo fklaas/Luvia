@@ -1,6 +1,6 @@
 (() => {
   'use strict';
-  const VERSION='4.38.4';
+  const VERSION='4.49.1';
   const MAX_RESULTS=5;
   const CATEGORY_DEFS=Object.freeze({
     food:{icon:'🍽️',label:'Essen & Trinken',type:'restaurant',includedType:'restaurant',query:'Restaurants Cafés Bars Essen',keywords:['essen','restaurant','nudeln','pasta','vegetar','vegan','café','cafe','frühstück','bar','trinken']},
@@ -68,6 +68,8 @@
       const def=CATEGORY_DEFS[goal.category]||CATEGORY_DEFS.activities;
       let places=[];const intent=window.LuviaGlobalPlaceContracts?.intentFor?.(goal.text,goal.category)||{};for(const query of searchQueries(goal)){if(seq!==state.sequence)return false;for(const strictDestination of (intent.niche?[true,false]:[true])){const response=await window.LuviaPlaceEntities.searchPlaces({tripId:tripId(state.trip),type:def.type,includedType:intent.niche?'':def.includedType,query,maxResultCount:18,strictDestination,providers:['google','foursquare'],profileContext:profilePayload(),intentContext:{text:goal.text,category:goal.category,niche:Boolean(intent.niche),variants:searchQueries(goal)}});places.push(...(response?.data?.places||[]).filter(p=>!state.rejected.has(providerId(p))).filter(p=>validForCategory(p,goal.category)));if(places.length>=12)break}if(places.length>=12)break}if(seq!==state.sequence)return false;
       places=await enrich(places);
+      const semanticRequest=/nicht jeder tourist|geheimtipp|hidden gem|abseits|wenig bekannt|unbekannt|ruhig|romant|aussicht|panorama|kinderwagen|mit kind|vegetar|vegan|rooftop|local|lokal/i.test(goal.text||'');
+      if(semanticRequest){places=places.filter(p=>{const rel=window.LuviaGlobalPlaceContracts?.relevance?.(p,goal.text,goal.category,currentPreferences())||{score:0};return Number(rel.score||0)>-20;});}
       const unique=[];const seen=new Set();
       for(const p of places){const id=providerId(p);if(!id||seen.has(id))continue;seen.add(id);unique.push(p)}
       state.results=unique.sort((a,b)=>score(b)-score(a)).slice(0,MAX_RESULTS);

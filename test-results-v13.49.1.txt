@@ -1,0 +1,14 @@
+PASS booking UI version
+PASS manual fallback removed
+PASS explicit missing-email state
+PASS direct email send CTA
+PASS eager route prefetch
+PASS virtual menu blocked
+PASS provider booking affordance required
+PASS fast first-page route
+PASS parallel contact crawl
+PASS hidden gem intent
+PASS mass tourism rejection
+PASS semantic place filtering
+PASS cross-place roles canonicalized
+RESULT: LUVIA_V13_49_1_VERIFIED_BOOKING_CONTACT_PLACES_PRECISION_OK
