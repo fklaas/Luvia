@@ -24,3 +24,6 @@ verify_jwt = true
 
 [functions.booking-provider-quandoo]
 verify_jwt = true
+
+[functions.booking-provider-zenchef]
+verify_jwt = true

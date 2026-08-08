@@ -1,0 +1,12 @@
+core/booking/providers/zenchef-adapter.js
+core/booking/providers/thefork-adapter.js
+supabase/functions/booking-provider-zenchef/index.ts
+supabase/functions/booking-provider-thefork/index.ts
+supabase/migrations/20260808130000_core_v4_43_0_zenchef_adapter_foundation.sql
+supabase/config.toml
+intelligence/kernel/version.js
+index.html
+RELEASE-v13.43.0.md
+TEST-v13.43.0.md
+DEPLOYMENT-v13.43.0.md
+CHANGED-FILES-v13.43.0.txt

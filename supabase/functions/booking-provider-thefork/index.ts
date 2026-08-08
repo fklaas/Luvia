@@ -26,9 +26,9 @@ Deno.serve(async(req)=>{
     const action=clean(body?.action).toLowerCase();
     if(action==='diagnostics')return json({ok:true,provider:'thefork',adapterVersion:'1.0.0',accessState:cap.luvia_access_state,bookingMode:cap.booking_mode,connected:cap.luvia_access_state==='connected',credentialsConfigured:Boolean(Deno.env.get('THEFORK_CLIENT_ID')&&Deno.env.get('THEFORK_CLIENT_SECRET')),apiBase:'https://api.thefork.io/manager/v1'});
     if(!['availability','create_reservation'].includes(action))return json({error:'UNSUPPORTED_ACTION'},400);
-    if(cap.luvia_access_state!=='connected')return json({error:'PARTNER_REQUIRED',details:'TheFork ist vorbereitet, aber der Luvia-Partnerzugang ist noch nicht verbunden.',provider:'thefork',accessState:cap.luvia_access_state},409);
-    if(!Deno.env.get('THEFORK_CLIENT_ID')||!Deno.env.get('THEFORK_CLIENT_SECRET'))return json({error:'THEFORK_CREDENTIALS_MISSING',details:'TheFork Partner-Credentials sind noch nicht konfiguriert.'},503);
+    if(cap.luvia_access_state!=='connected')return json({ok:false,expected:true,error:'PARTNER_REQUIRED',details:'TheFork ist vorbereitet, aber der Luvia-Partnerzugang ist noch nicht verbunden.',provider:'thefork',accessState:cap.luvia_access_state});
+    if(!Deno.env.get('THEFORK_CLIENT_ID')||!Deno.env.get('THEFORK_CLIENT_SECRET'))return json({ok:false,expected:true,error:'THEFORK_CREDENTIALS_MISSING',details:'TheFork Partner-Credentials sind noch nicht konfiguriert.',provider:'thefork'});
     // Foundation guard: do not invent an auth/token flow before partner credentials and the exact contract are verified.
-    return json({error:'THEFORK_LIVE_TRANSPORT_NOT_ENABLED',details:'Adapter Foundation aktiv. Live-API-Transport wird erst nach verifiziertem Partnerzugang freigeschaltet.'},501);
+    return json({ok:false,expected:true,error:'THEFORK_LIVE_TRANSPORT_NOT_ENABLED',details:'Adapter Foundation aktiv. Live-API-Transport wird erst nach verifiziertem Partnerzugang freigeschaltet.',provider:'thefork'});
   }catch(error){console.error('[booking-provider-thefork]',error);return json({error:'THEFORK_ADAPTER_FAILED',details:error instanceof Error?error.message:String(error)},500);}
 });
