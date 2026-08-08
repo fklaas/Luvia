@@ -1,1 +1,1 @@
-(()=>{'use strict';window.LuviaKernelVersion=Object.freeze({core:'4.38.8',build:'13.38.8',name:'Booking Action Execution Hardening',channel:'production',builtAt:'2026-08-08T00:41:00+02:00'});window.LuviaCoreVersion=window.LuviaKernelVersion;window.LUVIA_RELEASE=window.LuviaKernelVersion;})();
+(()=>{'use strict';window.LuviaKernelVersion=Object.freeze({core:'4.39.0',build:'13.39.0',name:'Booking Provider Routing V1',channel:'production',builtAt:'2026-08-08T08:53:00+02:00'});window.LuviaCoreVersion=window.LuviaKernelVersion;window.LUVIA_RELEASE=window.LuviaKernelVersion;})();

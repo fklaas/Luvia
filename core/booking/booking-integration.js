@@ -1,6 +1,6 @@
 (() => {
   'use strict';
-  const VERSION='1.0.4';
+  const VERSION='1.1.0';
   let client=null, repository=null, initialized=false, initPromise=null;
 
   const mapType=type=>({
@@ -70,7 +70,9 @@
         note:clean(input.note),
         providerPlaceId:providerId(place),
         sourcePlaceType:placeType,
-        source:'luvia_places'
+        source:'luvia_places',
+        website:website||null,
+        reservationUrl:clean(place.reservationUrl||place.reservation_url||place.bookingUrl||place.booking_url)||null
       },
       metadata:{
         integrationVersion:VERSION,
@@ -79,8 +81,8 @@
     });
     let ready=await window.LuviaBookingCore.transition(row.id,'ready',{metadata:{createdFrom:'places'}});
     window.dispatchEvent(new CustomEvent('luvia:booking-changed',{detail:{booking:ready,action:'created'}}));
-    if(!ready?.contact?.email && ready?.contact?.website){
-      try{await resolveContact(ready.id);ready=await get(ready.id)||ready}catch(error){console.warn('[Luvia Booking] automatische Kontaktermittlung nicht verfügbar',error)}
+    if(!ready?.contact?.email){
+      try{await resolveRoute(ready.id);ready=await get(ready.id)||ready}catch(error){console.warn('[Luvia Booking] automatische Buchungskanal-Ermittlung nicht verfügbar',error)}
     }
     return ready;
   }
@@ -141,14 +143,16 @@
     return data;
   }
 
-  async function resolveContact(id){
+  async function resolveRoute(id){
     await init();
-    const {data,error}=await client.functions.invoke('booking-contact-resolve',{body:{bookingId:id}});
-    if(error)throw await functionError(error,'Automatische Kontaktsuche ist derzeit nicht verfügbar.');
+    const {data,error}=await client.functions.invoke('booking-route-resolve',{body:{bookingId:id}});
+    if(error)throw await functionError(error,'Automatische Buchungskanal-Suche ist derzeit nicht verfügbar.');
     if(data?.error)throw new Error(data.details||data.error);
-    window.dispatchEvent(new CustomEvent('luvia:booking-changed',{detail:{bookingId:id,action:'contact-resolved',result:data}}));
+    window.dispatchEvent(new CustomEvent('luvia:booking-changed',{detail:{bookingId:id,action:'route-resolved',result:data}}));
     return data;
   }
+
+  async function resolveContact(id){return resolveRoute(id);}
 
   async function sendEmail(id,{requesterName,note}={}){
     await init();
@@ -169,7 +173,7 @@
   }
 
   const api=Object.freeze({
-    version:VERSION,init,createForPlace,listForTrip,get,transition,planRoute,resolveContact,updateContact,sendEmail,cancel,mapType,
+    version:VERSION,init,createForPlace,listForTrip,get,transition,planRoute,resolveRoute,resolveContact,updateContact,sendEmail,cancel,mapType,
     diagnostics:()=>({version:VERSION,initialized,activeTripId:activeTripId(),coreVersion:window.LuviaBookingCore?.version||null})
   });
   window.LuviaBooking=api;

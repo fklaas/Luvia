@@ -1,6 +1,6 @@
 (() => {
   'use strict';
-  const VERSION='1.0.4';
+  const VERSION='1.1.0';
   const esc=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
   const canonicalType=raw=>{
     const type=String(raw||'').toLowerCase();
@@ -22,7 +22,8 @@
     const name=place?.name||'';
     const email=place?.email||place?.contactEmail||'';
     const website=place?.website||place?.websiteUri||place?.website_uri||'';
-    return `<button type="button" class="luv-place-primary-action" data-luvia-booking-place data-booking-place-type="${esc(type)}" data-booking-place-id="${esc(pid)}" data-booking-place-name="${esc(name)}" data-booking-place-email="${esc(email)}" data-booking-place-website="${esc(website)}">◇ ${label}</button>`;
+    const reservationUrl=place?.reservationUrl||place?.reservation_url||place?.bookingUrl||place?.booking_url||'';
+    return `<button type="button" class="luv-place-primary-action" data-luvia-booking-place data-booking-place-type="${esc(type)}" data-booking-place-id="${esc(pid)}" data-booking-place-name="${esc(name)}" data-booking-place-email="${esc(email)}" data-booking-place-website="${esc(website)}" data-booking-place-reservation-url="${esc(reservationUrl)}">◇ ${label}</button>`;
   }
 
   function dialogHtml(place={}){
@@ -40,12 +41,12 @@
           <label><span>${isHotel?'Check-in':'Datum'}</span><input type="date" data-booking-date value="${esc(defaultDate)}"></label>
           ${isHotel?`<label><span>Check-out</span><input type="date" data-booking-end-date value="${esc(defaultDate)}"></label>`:`<label><span>Uhrzeit</span><input type="time" data-booking-time value="19:00"></label>`}
           <label><span>${isHotel?'Gäste':'Personen'}</span><input type="number" min="1" max="50" value="2" data-booking-party></label>
-          <label><span>Kontakt</span><div class="lv-booking-auto-contact">Luvia ermittelt den offiziellen Buchungskontakt automatisch.</div><input type="email" data-booking-email value="${esc(place.email||'')}" placeholder="Optionaler manueller Fallback"></label>
+          <label><span>Kontakt</span><div class="lv-booking-auto-contact">Luvia ermittelt automatisch den besten belegbaren Buchungskanal.</div><input type="email" data-booking-email value="${esc(place.email||'')}" placeholder="Optionaler manueller Fallback"></label>
           <label class="is-wide"><span>Wunsch / Hinweis</span><textarea data-booking-note rows="3" placeholder="z. B. Kinderwagen, ruhiger Tisch, spätes Check-in …"></textarea></label>
         </div>
         <div class="lv-booking-safety">
           <strong>So funktioniert es</strong>
-          <p>Luvia sucht zuerst selbst nach einem belegbaren öffentlichen Buchungskanal auf der offiziellen Website. Nur wenn kein sicherer Kontakt gefunden wird, bleibt die Anfrage offen oder kann manuell ergänzt werden. Luvia rät keine Adressen.</p>
+          <p>Luvia bevorzugt direkte Buchungsanbieter und offizielle Reservierungslinks. Nur wenn kein besserer Kanal verfügbar ist, nutzt Luvia eine belegbare öffentliche E-Mail. Luvia rät keine Adressen und bestätigt nichts ohne Nachweis.</p>
         </div>
         <div class="lv-booking-actions">
           <button type="button" data-booking-close>Abbrechen</button>
@@ -115,7 +116,8 @@
       providerPlaceId:button.dataset.bookingPlaceId,
       name:button.dataset.bookingPlaceName,
       email:button.dataset.bookingPlaceEmail,
-      website:button.dataset.bookingPlaceWebsite
+      website:button.dataset.bookingPlaceWebsite,
+      reservationUrl:button.dataset.bookingPlaceReservationUrl
     }).catch(console.error);
   },true);
 

@@ -15,3 +15,6 @@ verify_jwt = false
 
 [functions.booking-contact-resolve]
 verify_jwt = true
+
+[functions.booking-route-resolve]
+verify_jwt = true
