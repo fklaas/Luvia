@@ -1,0 +1,1 @@
+feat(booking,places): add status attribution v2 and Reisekompass-driven universal place intelligence

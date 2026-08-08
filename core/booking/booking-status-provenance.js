@@ -1,6 +1,6 @@
 (function(){
 'use strict';
-const VERSION='1.0.0';
+const VERSION='2.0.0';
 const STATUSES=Object.freeze(['draft','ready','forwarded','requested','awaiting_reply','alternative_proposed','needs_action','confirmed','declined','cancelled','failed']);
 const SOURCES=Object.freeze(['system','handoff','provider_webhook','provider_api','provider_polling','affiliate_callback','email_reply','user_confirmation']);
 const TERMINAL=Object.freeze(['confirmed','declined','cancelled']);

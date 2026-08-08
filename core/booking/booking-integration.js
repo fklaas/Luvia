@@ -1,6 +1,6 @@
 (() => {
   'use strict';
-  const VERSION='1.6.0';
+  const VERSION='1.7.0';
   let client=null, repository=null, initialized=false, initPromise=null;
 
   const mapType=type=>({
@@ -134,6 +134,25 @@
     return data||[];
   }
 
+
+  async function statusSignals(id){
+    await init();
+    const {data,error}=await client.from('booking_status_signals').select('*').eq('booking_id',id).order('occurred_at',{ascending:false}).order('received_at',{ascending:false});
+    if(error)throw error;return data||[];
+  }
+
+  async function attributionJourney(id){
+    await init();
+    const {data,error}=await client.from('booking_attribution_events_v2').select('*').eq('booking_id',id).order('occurred_at',{ascending:true});
+    if(error)throw error;return data||[];
+  }
+
+  async function statusAttributionSummary(id){
+    await init();
+    const {data,error}=await client.from('booking_status_attribution_v2_summary').select('*').eq('booking_id',id).maybeSingle();
+    if(error)throw error;return data;
+  }
+
   async function recordHandoff(id,{provider,url,providerReference=null,metadata={}}={}){
     await init();
     const {data,error}=await client.rpc('luvia_booking_record_handoff',{p_booking_id:id,p_provider:clean(provider)||'official',p_external_url:clean(url),p_provider_reference:clean(providerReference)||null,p_metadata:metadata||{}});
@@ -229,7 +248,7 @@
   }
 
   const api=Object.freeze({
-    version:VERSION,init,createForPlace,listForTrip,get,transition,providerCapabilities,statusHistory,recordHandoff,recordPlaceHandoff,planRoute,resolvePlaceRoute,resolveRoute,resolveContact,updateContact,sendEmail,cancel,mapType,
+    version:VERSION,init,createForPlace,listForTrip,get,transition,providerCapabilities,statusHistory,statusSignals,attributionJourney,statusAttributionSummary,recordHandoff,recordPlaceHandoff,planRoute,resolvePlaceRoute,resolveRoute,resolveContact,updateContact,sendEmail,cancel,mapType,
     diagnostics:()=>({version:VERSION,initialized,activeTripId:activeTripId(),coreVersion:window.LuviaBookingCore?.version||null})
   });
   window.LuviaBooking=api;
