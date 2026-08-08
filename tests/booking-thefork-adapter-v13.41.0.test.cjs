@@ -1,0 +1,14 @@
+const fs=require('fs'),vm=require('vm'),assert=require('assert');
+const root=process.cwd();
+const cap=fs.readFileSync(root+'/core/booking/booking-provider-capabilities.js','utf8');
+const prov=fs.readFileSync(root+'/core/booking/booking-status-provenance.js','utf8');
+const reg=fs.readFileSync(root+'/core/booking/booking-provider-registry.js','utf8');
+const adapter=fs.readFileSync(root+'/core/booking/providers/thefork-adapter.js','utf8');
+const ctx={window:{},console};vm.createContext(ctx);vm.runInContext(cap,ctx);vm.runInContext(prov,ctx);vm.runInContext(reg,ctx);vm.runInContext(adapter,ctx);
+const a=ctx.window.LuviaTheForkProviderAdapter;
+assert(a,'adapter missing');assert.equal(a.providerId,'thefork');assert.equal(a.access().state,'partner_required');assert.equal(a.access().connected,false);
+assert.equal(a.normalizeVenueReference('not-a-uuid'),null);
+assert.equal(a.mapProviderStatus('confirmed'),'confirmed');assert.equal(a.mapProviderStatus('CANCELED'),'cancelled');assert.equal(a.mapProviderStatus('mystery_state'),null);
+assert.equal(a.canApplyProviderStatus('confirmed'),false,'partner_required provider must not auto-apply');
+const registered=ctx.window.LuviaBookingProviderRegistry.get('thefork');assert(registered,'registry entry missing');
+Promise.resolve(registered.supports({request:{theforkRestaurantId:'00000000-0000-4000-8000-000000000000'}},{})).then(s=>{assert.equal(Boolean(s.supported),false);console.log('LUVIA_V13_41_0_THEFORK_ADAPTER_FOUNDATION_OK')});

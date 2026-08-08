@@ -18,3 +18,9 @@ verify_jwt = true
 
 [functions.booking-route-resolve]
 verify_jwt = true
+
+[functions.booking-provider-thefork]
+verify_jwt = true
+
+[functions.booking-provider-quandoo]
+verify_jwt = true

@@ -1,4 +1,4 @@
-/* Release 13.39.3 · Core 4.39.3 */
+/* Release 13.42.0 · Core 4.42.0 */
 (function(){
   'use strict';
   const R=window.LuviaServiceRegistry;

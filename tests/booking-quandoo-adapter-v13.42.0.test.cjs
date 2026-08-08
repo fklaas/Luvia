@@ -1,0 +1,5 @@
+const fs=require('fs'),path=require('path'),vm=require('vm'),assert=require('assert');
+const root=path.resolve(__dirname,'..');
+const context={window:{LuviaBookingProviderCapabilities:{get:id=>({id,luviaAccessState:'partner_required',platform:{availability:true,createReservation:true,statusWebhook:true,statusPolling:true},attribution:'click'})},LuviaBookingStatusProvenance:{canAutoApply:()=>false}},console};context.globalThis=context;vm.createContext(context);
+vm.runInContext(fs.readFileSync(path.join(root,'core/booking/providers/quandoo-adapter.js'),'utf8'),context);
+const a=context.window.LuviaQuandooProviderAdapter;assert(a);assert.equal(a.normalizeVenueReference('12345'),'12345');assert.equal(a.normalizeVenueReference('abc'),null);assert.equal(a.mapProviderStatus('RESERVATION_CONFIRMED'),'confirmed');assert.equal(a.mapProviderStatus('RESERVATION_REJECTED'),'declined');assert.equal(a.mapProviderStatus('RESERVATION_CUSTOMER_CANCELED'),'cancelled');assert.equal(a.mapProviderStatus('SOMETHING_NEW'),null);assert.equal(a.canApplyProviderStatus('RESERVATION_CONFIRMED'),false);console.log('LUVIA_V13_42_0_QUANDOO_ADAPTER_FOUNDATION_OK');
