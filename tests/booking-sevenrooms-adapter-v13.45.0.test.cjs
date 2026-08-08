@@ -1,0 +1,11 @@
+const fs=require('fs'),path=require('path'),vm=require('vm'),assert=require('assert');
+const root=path.resolve(__dirname,'..');
+const context={window:{LuviaBookingProviderCapabilities:{get:id=>({id,luviaAccessState:'partner_required',platform:{availability:true,createReservation:true,statusWebhook:null,statusPolling:null},attribution:'none'})}},console};context.globalThis=context;vm.createContext(context);
+vm.runInContext(fs.readFileSync(path.join(root,'core/booking/providers/sevenrooms-adapter.js'),'utf8'),context);
+const a=context.window.LuviaSevenRoomsProviderAdapter;assert(a);
+assert.equal(a.normalizeVenueReference('pinkmamma-paris'),'pinkmamma-paris');
+assert.equal(a.normalizeVenueReference('bad value with spaces'),null);
+assert.equal(a.normalizeReservationReference('res_123-ABC'),'res_123-ABC');
+assert.equal(a.mapProviderStatus('confirmed'),null,'unverified SevenRooms status vocabulary must not be guessed');
+assert.equal(a.canApplyProviderStatus('confirmed'),false);
+console.log('LUVIA_V13_45_0_SEVENROOMS_ADAPTER_FOUNDATION_OK');

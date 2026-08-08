@@ -1,6 +1,6 @@
 (function(){
   'use strict';
-  const VERSION='4.17.0-gateway-runtime';
+  const VERSION='4.45.0-gateway-runtime';
   const DEFAULT_FUNCTION='luvia-gateway';
   const DEFAULT_TIMEOUT=12000;
   const ACTION_PATTERN=/^[a-z][a-z0-9]*(?:[._-][a-z0-9]+)*$/;
@@ -50,10 +50,11 @@
     return window.ParisSupabaseClient||window.ParisCloud?.client||window.LuviaDatabaseFoundation?.client?.()||null;
   }
   const sleep=ms=>new Promise(resolve=>setTimeout(resolve,ms));
+  function jwtNeedsRefresh(token,skewSeconds=90){try{const part=String(token||'').split('.')[1];if(!part)return true;const json=JSON.parse(atob(part.replace(/-/g,'+').replace(/_/g,'/')));return !Number(json.exp)||json.exp*1000<=Date.now()+skewSeconds*1000}catch{return true}}
   async function accessToken({refresh=false,waitMs=1800}={}){
     try{
       const stateToken=window.ParisAuth?.getState?.()?.session?.access_token;
-      if(stateToken&&!refresh)return stateToken;
+      if(stateToken&&!refresh&&!jwtNeedsRefresh(stateToken))return stateToken;
       let client=authClient();
       if(!client&&window.LuviaSupabaseService?.start){
         try{client=await window.LuviaSupabaseService.start();}catch{}
@@ -69,8 +70,9 @@
       const deadline=Date.now()+Math.max(0,Number(waitMs)||0);
       do{
         const result=await client?.auth?.getSession?.();
-        const sessionToken=result?.data?.session?.access_token||window.ParisAuth?.getState?.()?.session?.access_token||'';
-        if(sessionToken)return sessionToken;
+        let sessionToken=result?.data?.session?.access_token||window.ParisAuth?.getState?.()?.session?.access_token||'';
+        if(sessionToken&&jwtNeedsRefresh(sessionToken)&&client?.auth?.refreshSession){try{const refreshed=await client.auth.refreshSession();sessionToken=refreshed?.data?.session?.access_token||''}catch{sessionToken=''}}
+        if(sessionToken&&!jwtNeedsRefresh(sessionToken,30))return sessionToken;
         if(Date.now()>=deadline)break;
         await sleep(80);
         client=client||authClient();
@@ -97,6 +99,8 @@
     if(!cfg.configured){const error=new Error('Supabase ist nicht konfiguriert.');error.code='BACKEND_NOT_CONFIGURED';throw error;}
     if(!cfg.secureContext&&location.hostname!=='localhost'){const error=new Error('Sichere Backend-Aufrufe benötigen HTTPS.');error.code='INSECURE_CONTEXT';throw error;}
     const safeAction=validateAction(action);
+    const guard=window.LuviaNetworkGuard;
+    if(navigator.onLine===false||guard?.canRequest?.()===false){const error=new Error('Netzwerk vorübergehend nicht verfügbar.');error.code='NETWORK_OFFLINE';error.expected=true;throw error;}
     const requestId=options.requestId||uuid();
     const timeoutMs=clamp(Number(options.timeoutMs)||cfg.timeoutMs,1000,30000);
     const controller=new AbortController();
@@ -134,12 +138,13 @@
         error.code=body?.error?.code||`HTTP_${response.status}`;error.status=response.status;error.requestId=responseRequestId;error.retryAfter=response.headers.get('retry-after');throw error;
       }
       const durationMs=Math.round((performance.now()-started)*100)/100;
-      state.successes++;state.lastSuccessAt=now();state.lastStatus=response.status;state.lastError=null;
+      window.LuviaNetworkGuard?.markSuccess?.();state.successes++;state.lastSuccessAt=now();state.lastStatus=response.status;state.lastError=null;
       remember({requestId:responseRequestId,action:safeAction,ok:true,status:response.status,durationMs,at:now()});
       emit('request.succeeded',{requestId:responseRequestId,action:safeAction,status:response.status,durationMs});
       return {...body,meta:{...(body.meta||{}),requestId:responseRequestId,durationMs}};
     }catch(raw){
       const aborted=controller.signal.aborted;
+      if(window.LuviaNetworkGuard?.markFailure?.(raw,{cooldownMs:8000})){const expected=normalizeError(raw,aborted?'BACKEND_TIMEOUT':'NETWORK_UNAVAILABLE');expected.expected=true;expected.code=aborted?'BACKEND_TIMEOUT':'NETWORK_UNAVAILABLE';throw expected;}
       const error=normalizeError(raw,aborted?'BACKEND_TIMEOUT':'BACKEND_REQUEST_FAILED');
       if(aborted){error.code='BACKEND_TIMEOUT';error.message=`Backend-Anfrage nach ${timeoutMs} ms abgebrochen.`;state.timeouts++;}
       state.failures++;state.lastError={code:error.code,message:error.message,status:error.status,requestId:error.requestId,at:now()};state.lastStatus=error.status||0;

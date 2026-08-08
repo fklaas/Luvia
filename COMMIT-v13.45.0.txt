@@ -1,0 +1,1 @@
+feat(booking): add SevenRooms adapter foundation and eliminate recurring console request failures

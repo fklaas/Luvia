@@ -1,9 +1,9 @@
 (() => {
   'use strict';
-  const VERSION='4.2.0.1';
+  const VERSION='4.45.0';
   const listeners=new Set();
   const STORAGE='cloud-only';
-  const REMOTE_RETRY_MS=[0,300,900];
+  const REMOTE_RETRY_MS=[0];
   const state={loading:false,hydrated:false,tripId:null,events:[],today:[],next:null,freeWindow:null,warnings:[],lastUpdatedAt:null,lastError:null,persistence:'cloud'};
   let refreshPromise=null,refreshQueued=false,refreshEpoch=0;
   const pendingWrites=new Set();
@@ -23,14 +23,16 @@
   const trackWrite=promise=>{pendingWrites.add(promise);promise.finally(()=>pendingWrites.delete(promise));return promise};
   const waitForPersistence=async()=>{if(pendingWrites.size)await Promise.allSettled([...pendingWrites])};
   const dbClient=()=>window.ParisSupabaseClient||window.ParisCloud?.client||window.LuviaDatabaseFoundation?.client?.()||null;
+  const networkReady=()=>navigator.onLine!==false&&(window.LuviaNetworkGuard?.canRequest?.()??true);
+  async function authenticatedClient(){const client=dbClient();if(!client?.auth?.getSession)return null;try{const {data}=await client.auth.getSession();return data?.session?.access_token?client:null}catch{return null}}
   const rowToEvent=row=>{const start=parseDateTime(row.event_date,row.start_time?.slice?.(0,5)||row.start_time);if(!start)return null;const duration=Number(row.duration_minutes||60);return{id:String(row.source_key||row.id),entityType:row.entity_type||'place',title:row.title||row.metadata?.displayName||'Ort',date:row.event_date,time:String(row.start_time||'').slice(0,5),startAt:start.toISOString(),endAt:new Date(start.getTime()+duration*60000).toISOString(),durationMinutes:duration,lifecycleStatus:row.lifecycle_status||'planned',placeId:row.place_id||null,tripPlaceId:row.trip_place_id||null,providerPlaceId:row.provider_place_id||null,source:{persisted:true,tripPlaceId:row.trip_place_id,placeId:row.place_id,providerPlaceId:row.provider_place_id,metadata:row.metadata||{}}}};
   const uuidOrNull=value=>/^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(String(value||''))?String(value):null;
   const currentUserId=()=>window.ParisAuth?.getState?.()?.user?.id||window.LuviaUser?.snapshot?.()?.id||null;
   const eventRow=(id,event)=>{const end=new Date(event.endAt),source=event.source||{},raw=source.rawEntity||{},trustedPlaceId=source.persistedPlace===true||source.persistedRestaurant===true||raw.place?.id?uuidOrNull(raw.place?.id||event.placeId||source.placeId):null;return{trip_id:id,user_id:currentUserId(),source_key:sourceKey(event),entity_type:event.entityType||'place',place_id:trustedPlaceId,trip_place_id:uuidOrNull(event.tripPlaceId||source.tripPlaceId||raw.tripPlace?.id),provider_place_id:event.providerPlaceId||source.providerPlaceId||raw.place?.providerPlaceId||null,title:event.title||'Ort',event_date:event.date,start_time:event.time,end_time:Number.isNaN(end.getTime())?null:formatTime(end),duration_minutes:Number(event.durationMinutes||60),lifecycle_status:event.lifecycleStatus||'planned',metadata:{...(event.source?.metadata||{}),source:'schedule-intelligence',displayName:event.title||'Ort'}}};
   const isPermissionError=error=>String(error?.code||'')==='42501'||/permission denied|forbidden/i.test(String(error?.message||''));
   const wait=ms=>new Promise(resolve=>setTimeout(resolve,ms));
-  const persistEvent=(id,event)=>{if(!id||!event)return Promise.resolve(null);const row=eventRow(id,event),client=dbClient();const promise=(async()=>{if(client?.from){const {data,error}=await client.from('trip_schedule_events').upsert(row,{onConflict:'trip_id,source_key'}).select().maybeSingle();if(!error){state.persistence='supabase-direct';return data}state.persistence=isPermissionError(error)?'permission-error':'supabase-error';console.warn('[Luvia Schedule] Direkte Persistenz fehlgeschlagen.',error);if(isPermissionError(error))throw new Error('Schedule-Berechtigung fehlt. Migration 025 ausführen.')}if(window.LuviaBackend?.request){const response=await window.LuviaBackend.request('schedule.upsert',{tripId:id,event:{sourceKey:row.source_key,entityType:row.entity_type,placeId:row.place_id,tripPlaceId:row.trip_place_id,providerPlaceId:row.provider_place_id,title:row.title,date:row.event_date,time:row.start_time,endTime:row.end_time,durationMinutes:row.duration_minutes,lifecycleStatus:row.lifecycle_status,metadata:row.metadata}});state.persistence='gateway';return response}throw new Error('Keine Schedule-Persistenz verfügbar.');})().catch(error=>{state.lastError=error?.message||String(error);console.warn('[Luvia Schedule] Persistenz fehlgeschlagen',error);throw error});return trackWrite(promise)};
-  const loadPersisted=async id=>{if(!id)return[];const client=dbClient();if(client?.from){for(const delay of REMOTE_RETRY_MS){if(delay)await wait(delay);const {data,error}=await client.from('trip_schedule_events').select('*').eq('trip_id',id).order('event_date',{ascending:true}).order('start_time',{ascending:true});if(!error){state.persistence='supabase-direct';state.lastError=null;return(data||[]).map(rowToEvent).filter(Boolean)}if(isPermissionError(error)){state.persistence='permission-error';state.lastError='Schedule-Berechtigung fehlt. Migration 025 ausführen.';console.error('[Luvia Schedule] SELECT auf trip_schedule_events nicht erlaubt.',error);return[]}console.warn('[Luvia Schedule] Direkter Schedule-Load fehlgeschlagen.',error)}}if(window.LuviaBackend?.request){try{const r=await window.LuviaBackend.request('schedule.list',{tripId:id});state.persistence='gateway';return(r?.data?.events||[]).map(rowToEvent).filter(Boolean)}catch(error){console.warn('[Luvia Schedule] Gateway-Schedule konnte nicht geladen werden.',error)}}return[]};
+  const persistEvent=(id,event)=>{if(!id||!event)return Promise.resolve(null);const row=eventRow(id,event);const promise=(async()=>{if(!networkReady()){state.persistence='offline';return null}const client=await authenticatedClient();if(!client){state.persistence='auth-wait';return null}const {data,error}=await client.from('trip_schedule_events').upsert(row,{onConflict:'trip_id,source_key'}).select().maybeSingle();if(!error){state.persistence='supabase-direct';window.LuviaNetworkGuard?.markSuccess?.();return data}if(isPermissionError(error)){state.persistence='permission-error';state.lastError='Schedule-Berechtigung nicht aktiv.';return null}state.persistence='supabase-error';window.LuviaNetworkGuard?.markFailure?.(error,{cooldownMs:8000});return null})().catch(error=>{state.lastError=error?.message||String(error);if(!window.LuviaNetworkGuard?.expected?.(error))console.warn('[Luvia Schedule] Persistenz fehlgeschlagen',error);return null});return trackWrite(promise)};
+  const loadPersisted=async id=>{if(!id)return[];if(!networkReady()){state.persistence='offline';return[]}const client=await authenticatedClient();if(!client){state.persistence='auth-wait';return[]}const {data,error}=await client.from('trip_schedule_events').select('*').eq('trip_id',id).order('event_date',{ascending:true}).order('start_time',{ascending:true});if(!error){state.persistence='supabase-direct';state.lastError=null;window.LuviaNetworkGuard?.markSuccess?.();return(data||[]).map(rowToEvent).filter(Boolean)}if(isPermissionError(error)){state.persistence='permission-error';state.lastError='Schedule-Berechtigung nicht aktiv.';return[]}window.LuviaNetworkGuard?.markFailure?.(error,{cooldownMs:8000});state.persistence='supabase-error';state.lastError=error?.message||'Schedule nicht verfügbar.';return[]};
   const travelMinutes=(distance,mode)=>window.LuviaRestaurantIntelligence?.minutesFor?.(distance,mode)||((Number(distance)>2000)?Math.max(5,Math.ceil(Number(distance)/420)+3):Math.max(1,Math.ceil(Number(distance)/75)));
   function normalizeRestaurant(entry){
     const date=entry.date||entry.plannedDate||entry.rawEntity?.tripPlace?.planned_date||entry.reservationDate||null,time=entry.time||entry.plannedTime||entry.rawEntity?.tripPlace?.planned_time||entry.reservationTime||entry.recommendedVisitTime||null;
@@ -184,18 +186,16 @@
       const sourceKeys=[...new Set([event,...removed].map(sourceKey).filter(Boolean))];
       const ids=[...new Set([event,...removed].flatMap(item=>[item?.tripPlaceId,item?.source?.tripPlaceId,item?.placeId,item?.source?.placeId,item?.providerPlaceId,item?.source?.providerPlaceId]).filter(Boolean).map(String))];
       trackWrite((async()=>{
-        const client=dbClient();
-        if(client?.from){
-          for(const key of sourceKeys){const {error}=await client.from('trip_schedule_events').delete().eq('trip_id',active).eq('source_key',key);if(error&&!isPermissionError(error))console.warn('[Luvia Schedule] Source-Key-Löschung fehlgeschlagen.',error)}
-          for(const value of ids){
-            if(uuidOrNull(value)){await client.from('trip_schedule_events').delete().eq('trip_id',active).or(`trip_place_id.eq.${value},place_id.eq.${value}`)}
-            await client.from('trip_schedule_events').delete().eq('trip_id',active).eq('provider_place_id',value);
-          }
-          state.persistence='supabase-direct';return true;
+        if(!networkReady()){state.persistence='offline';return false}
+        const client=await authenticatedClient();
+        if(!client){state.persistence='auth-wait';return false}
+        for(const key of sourceKeys){const {error}=await client.from('trip_schedule_events').delete().eq('trip_id',active).eq('source_key',key);if(error){if(isPermissionError(error)){state.persistence='permission-error';return false}window.LuviaNetworkGuard?.markFailure?.(error,{cooldownMs:8000});return false}}
+        for(const value of ids){
+          if(uuidOrNull(value)){const {error}=await client.from('trip_schedule_events').delete().eq('trip_id',active).or(`trip_place_id.eq.${value},place_id.eq.${value}`);if(error){window.LuviaNetworkGuard?.markFailure?.(error,{cooldownMs:8000});return false}}
+          const {error}=await client.from('trip_schedule_events').delete().eq('trip_id',active).eq('provider_place_id',value);if(error){window.LuviaNetworkGuard?.markFailure?.(error,{cooldownMs:8000});return false}
         }
-        for(const key of sourceKeys)await window.LuviaBackend?.request?.('schedule.delete',{tripId:active,sourceKey:key});
-        return true;
-      })().catch(error=>{console.warn('[Luvia Schedule] Remote-Löschung fehlgeschlagen',error);return false}));
+        state.persistence='supabase-direct';window.LuviaNetworkGuard?.markSuccess?.();return true;
+      })().catch(error=>{if(!window.LuviaNetworkGuard?.expected?.(error))state.lastError=error?.message||String(error);return false}));
     }
     emit();return snapshot();
   }
@@ -203,11 +203,13 @@
   function removeEvent(id,options={}){const key=String(id||'');if(!key)return snapshot();const event=options.event||state.events.find(e=>String(e.id)===key)||{id:key,title:options.title||''};return removeByIdentity(event,options)}
   function snapshot(){return clone(state)}
   function subscribe(fn){listeners.add(fn);return()=>listeners.delete(fn)}
-  const hydrateActiveLocal=()=>{const id=tripId();if(id)refresh({tripId:id,force:true}).catch(()=>{});};
+  const hydrateActiveLocal=()=>{const id=tripId();if(id)return refresh({tripId:id,force:true});return Promise.resolve(snapshot())};
   const api=Object.freeze({version:VERSION,refresh,hydrateLocal:hydrateActiveLocal,upsertRestaurant,upsertRestaurantAsync,updateRestaurantTime,upsertEvent,removeEvent,removeByIdentity,clearByType,waitForPersistence,snapshot,subscribe,analyze,travelMinutes,diagnostics:()=>({version:VERSION,persistenceKey:null,cloudAuthoritative:true,...snapshot(),trace:(state.events||[]).map(e=>({id:e.id,entityType:e.entityType,date:e.date,time:e.time,startAt:e.startAt,source:Boolean(e.source)}))})});
   window.LuviaScheduleIntelligence=api;
-  window.addEventListener('luvia:trip-changed',()=>{hydrateActiveLocal();refresh({force:true}).catch(()=>{})});
-  ['luvia:restaurant-lifecycle-changed','luvia:restaurant-imported','luvia:restaurants-v2-updated','luvia:travel-context-changed','luvia:auth-changed'].forEach(name=>window.addEventListener(name,()=>refresh().catch(()=>{})));
-  hydrateActiveLocal();
-  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',()=>{hydrateActiveLocal();refresh().catch(()=>{})},{once:true});else queueMicrotask(()=>{hydrateActiveLocal();refresh().catch(()=>{})});
+  window.addEventListener('luvia:trip-changed',()=>hydrateActiveLocal().catch(()=>{}));
+  ['luvia:restaurant-lifecycle-changed','luvia:restaurant-imported','luvia:restaurants-v2-updated','luvia:travel-context-changed'].forEach(name=>window.addEventListener(name,()=>refresh().catch(()=>{})));
+  window.addEventListener('luvia:auth-changed',e=>{if(e.detail?.authenticated!==false)hydrateActiveLocal().catch(()=>{})});
+  window.addEventListener('online',()=>refresh({force:true,skipThrottle:true}).catch(()=>{}));
+  const boot=()=>hydrateActiveLocal().catch(()=>{});
+  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',boot,{once:true});else queueMicrotask(boot);
 })();

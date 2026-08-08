@@ -30,3 +30,6 @@ verify_jwt = true
 
 [functions.booking-provider-opentable]
 verify_jwt = true
+
+[functions.booking-provider-sevenrooms]
+verify_jwt = true
