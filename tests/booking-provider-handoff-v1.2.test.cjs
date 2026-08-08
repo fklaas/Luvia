@@ -1,0 +1,17 @@
+const fs=require('fs');const path=require('path');const assert=require('assert');
+const root=path.resolve(__dirname,'..');
+const ui=fs.readFileSync(path.join(root,'core/booking/booking-ui.js'),'utf8');
+const ver=fs.readFileSync(path.join(root,'intelligence/kernel/version.js'),'utf8');
+const html=fs.readFileSync(path.join(root,'index.html'),'utf8');
+assert(ver.includes("core:'4.39.2'"));
+assert(ver.includes("build:'13.39.2'"));
+assert(html.includes('v=13.39.2'));
+assert(ui.includes('window.LuviaPlaceDetails?.prepare'));
+assert(ui.includes('websiteUri'));
+assert(ui.includes('reservationUrl'));
+const prepareIndex=ui.indexOf('window.LuviaPlaceDetails?.prepare');
+const resolveIndex=ui.indexOf('window.LuviaBooking.resolvePlaceRoute(place)');
+assert(prepareIndex>-1 && resolveIndex>-1 && prepareIndex<resolveIndex,'Place enrichment must happen before route resolution');
+assert(ui.includes("route?.resolved&&route.channel==='external_link'&&route.value"));
+assert(ui.includes('await open(place)'));
+console.log('LUVIA_V13_39_2_PROVIDER_HANDOFF_ENRICHMENT_OK');

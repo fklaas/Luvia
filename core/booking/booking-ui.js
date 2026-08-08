@@ -1,6 +1,6 @@
 (() => {
   'use strict';
-  const VERSION='1.2.0';
+  const VERSION='1.2.1';
   const esc=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
   const canonicalType=raw=>{
     const type=String(raw||'').toLowerCase();
@@ -111,7 +111,7 @@
     e.preventDefault();
     e.stopPropagation();
     if(button.dataset.bookingBusy==='1')return;
-    const place={
+    let place={
       type:button.dataset.bookingPlaceType,
       id:button.dataset.bookingPlaceId,
       providerPlaceId:button.dataset.bookingPlaceId,
@@ -123,6 +123,22 @@
     const original=button.textContent;
     button.dataset.bookingBusy='1';button.disabled=true;button.textContent='Buchungsweg wird geprüft …';
     try{
+      // Die kompakten KI-/Place-Karten enthalten oft noch keine Website. Vor dem
+      // Booking-Routing deshalb die kanonischen Place-Details nachladen, damit der
+      // Resolver den offiziellen Anbieterweg statt vorschnell den Mail-Fallback sieht.
+      const providerId=String(place.providerPlaceId||'').replace(/^places\//,'');
+      if(providerId&&window.LuviaPlaceDetails?.prepare&&(!place.website||!place.reservationUrl)){
+        try{
+          const prepared=await window.LuviaPlaceDetails.prepare(providerId,{regionCode:'DE',photoLimit:1,seedPlace:{name:place.name,primaryType:place.type}});
+          const detail=prepared?.place||{};
+          place={...place,
+            name:place.name||detail.name||detail.displayName?.text||'',
+            website:place.website||detail.website||detail.websiteUri||detail.website_uri||'',
+            reservationUrl:place.reservationUrl||detail.reservationUrl||detail.reservation_url||detail.bookingUrl||detail.booking_url||'',
+            email:place.email||detail.email||detail.contactEmail||''
+          };
+        }catch(error){console.debug('[Luvia Booking] Place-Details für Provider-Routing konnten nicht nachgeladen werden.',error?.message||error)}
+      }
       const route=await window.LuviaBooking.resolvePlaceRoute(place);
       if(route?.resolved&&route.channel==='external_link'&&route.value){
         let target=null;try{target=new URL(route.value);if(!/^https?:$/.test(target.protocol))throw new Error('invalid')}catch{throw new Error('Der gefundene Buchungslink ist ungültig.')}

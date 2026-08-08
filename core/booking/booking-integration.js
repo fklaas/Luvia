@@ -1,6 +1,6 @@
 (() => {
   'use strict';
-  const VERSION='1.2.0';
+  const VERSION='1.2.1';
   let client=null, repository=null, initialized=false, initPromise=null;
 
   const mapType=type=>({
