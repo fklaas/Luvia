@@ -1,6 +1,6 @@
 (() => {
   'use strict';
-  const VERSION='1.1.0';
+  const VERSION='1.2.0';
   let root=null,trip=null,busy=new Set(),feedback=new Map();
   const esc=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
   const STATUS={draft:'Entwurf',ready:'Bereit',requested:'Angefragt',awaiting_reply:'Antwort ausstehend',confirmed:'Bestätigt',declined:'Abgelehnt',needs_action:'Aktion nötig',cancelled:'Storniert',failed:'Fehler'};
@@ -41,7 +41,9 @@
     if(!root||!trip)return;
     root.innerHTML='<section class="lv-bookings-view"><div class="lv-booking-empty">Buchungen werden geladen …</div></section>';
     try{
-      const rows=await window.LuviaBooking.listForTrip(trip.id||trip.tripId);
+      const tripId=trip.id||trip.tripId;
+      await window.LuviaBooking.reconcileTripReturns?.(tripId);
+      const rows=await window.LuviaBooking.listForTrip(tripId);
       root.innerHTML=`<section class="lv-bookings-view"><header class="lv-bookings-head"><span>Booking Core</span><h1>Buchungen & Reservierungen</h1><p>Luvia bevorzugt direkte Buchungsanbieter und offizielle Reservierungswege. E-Mail ist nur der Fallback.</p></header>${rows.length?`<div class="lv-booking-list">${rows.map(card).join('')}</div>`:`<div class="lv-booking-empty"><strong>Noch keine Buchungsanfragen.</strong><p>Öffne ein reservierbares Restaurant oder eine Unterkunft in Places und wähle „Reservieren“ bzw. „Buchen“.</p></div>`}</section>`;
     }catch(error){
       root.innerHTML=`<section class="lv-bookings-view"><div class="lv-booking-empty"><strong>Buchungen konnten nicht geladen werden.</strong><p>${esc(error?.message||'Unbekannter Fehler')}</p></div></section>`;

@@ -1,6 +1,6 @@
 (() => {
   'use strict';
-  const VERSION='1.8.0';
+  const VERSION='1.9.0';
   let client=null, repository=null, initialized=false, initPromise=null;
 
   const mapType=type=>({
@@ -229,6 +229,19 @@
     if(error)throw error;return data||[];
   }
 
+  async function reconcileTripReturns(tripId=activeTripId()){
+    await init();
+    if(!tripId)return {ok:false,reason:'TRIP_REQUIRED'};
+    if(!window.LuviaBookingReturnOrchestration?.reconcileTrip)return {ok:false,reason:'ORCHESTRATOR_UNAVAILABLE'};
+    try{return await window.LuviaBookingReturnOrchestration.reconcileTrip(tripId,{limit:50,source:'bookings_view'});}
+    catch(error){console.warn('[Luvia Booking] Provider-Rückkanal konnte noch nicht abgeglichen werden.',error);return {ok:false,reason:'RECONCILIATION_DEFERRED'};}
+  }
+
+  async function returnOrchestrationSummary(id){
+    await init();
+    return window.LuviaBookingReturnOrchestration?.summary?.(id)||null;
+  }
+
   async function resolvePlaceRoute(place={}){
     await init();
     const payload={
@@ -274,7 +287,7 @@
   }
 
   const api=Object.freeze({
-    version:VERSION,init,createForPlace,listForTrip,get,transition,providerCapabilities,statusHistory,statusSignals,attributionJourney,statusAttributionSummary,correlationJourney,conversionReports,linkRecentPlaceHandoff,recordHandoff,recordPlaceHandoff,planRoute,resolvePlaceRoute,resolveRoute,resolveContact,updateContact,sendEmail,cancel,mapType,
+    version:VERSION,init,createForPlace,listForTrip,get,transition,providerCapabilities,statusHistory,statusSignals,attributionJourney,statusAttributionSummary,correlationJourney,conversionReports,reconcileTripReturns,returnOrchestrationSummary,linkRecentPlaceHandoff,recordHandoff,recordPlaceHandoff,planRoute,resolvePlaceRoute,resolveRoute,resolveContact,updateContact,sendEmail,cancel,mapType,
     diagnostics:()=>({version:VERSION,initialized,activeTripId:activeTripId(),coreVersion:window.LuviaBookingCore?.version||null})
   });
   window.LuviaBooking=api;
