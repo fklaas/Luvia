@@ -1,0 +1,863 @@
+# UNBEDINGT IMMER LESEN – Verbindliche Luvia-Places-Architektur
+
+> **Pflichtlektüre vor jeder Änderung an Places, Dashboard, Timeline, Favoriten, Place-Details, Place-Modulen, Boot, Realtime oder Reisewechsel.**
+>
+> Diese Datei ist keine unverbindliche Dokumentation. Sie beschreibt den verbindlichen Architektur-, Technik-, Funktions-, Design- und UI-Vertrag von Luvia. Neue Implementierungen dürfen davon nicht abweichen. Bestehende Abweichungen sind in den Core zurückzuführen – nicht durch weitere Sonderwege zu ergänzen.
+
+## 1. Grundsatz: Cloud ist die einzige Wahrheit
+
+Luvia besitzt für Places genau einen maßgeblichen Datenstand: Supabase/Cloud.
+
+Nicht zulässig als konkurrierende Wahrheit:
+
+- LocalStorage für Place-Domain-Daten
+- modulinterne Favoritenlisten
+- separate Restaurant-, Unterkunfts- oder Aktivitäts-Timelines
+- lokale aktive Reise, die das Cloud-Profil überschreibt
+- duplizierte Place-Details oder eigene Provider-Caches außerhalb der globalen Services
+
+LocalStorage darf ausschließlich für kurzlebige UI-Zustände verwendet werden, niemals als fachlicher Place-Datenspeicher.
+
+## 2. Kanonisches Datenmodell
+
+Jeder reale Ort folgt derselben Kette:
+
+```text
+Provider Place
+→ Place Entity
+→ Trip Place
+→ Trip Place Data
+→ Collections / Timeline / Detail / Intelligence
+```
+
+### Place Entity
+Globale Identität des realen Ortes. Provider-IDs, Name, Adresse, Koordinaten, Kategorie und Provider-Metadaten gehören hierhin.
+
+### Trip Place
+Verknüpfung eines Place mit genau einer Reise. Enthält reisebezogenen Status und Lifecycle.
+
+### Trip Place Data
+Flexible, typabhängige Reisedaten wie:
+
+- `planned_at`
+- `starts_at`
+- `ends_at`
+- `check_in_at`
+- `check_out_at`
+- Reservierungs-, Buchungs- oder Notizfelder
+
+### Wichtige ID-Regel
+`place_id` in Supabase muss eine interne UUID sein. Google-/Provider-IDs dürfen niemals als UUID in Cloud-Tabellen geschrieben werden.
+
+## 3. Place Type Contract
+
+Jeder Place-Typ muss in `core/places/place-type-contract.js` bzw. den Type Definitions registriert sein.
+
+Der Contract definiert verbindlich:
+
+- kanonischen Typ
+- `moduleKey`
+- Lifecycle-Zustände
+- Capabilities
+- Provider-Mapping
+- Planungsfelder
+- Timeline-Rollen
+- UI-Verhalten
+- Detailabschnitte
+- erlaubte Aktionen
+- Intelligence-Adapter
+
+Ein Modul darf keine eigenen Lifecycle-Werte, Timeline-Feldnamen oder Aktionsbezeichnungen erfinden.
+
+## 4. Globale Services und ihre Verantwortung
+
+### `LuviaPlaceEntities`
+Einziger Weg für Import, Laden und kanonische Place-/Trip-Place-Verknüpfungen.
+
+### `LuviaTripPlaceData`
+Einziger Weg für typabhängige Place-Daten und Timeline-Persistenz.
+
+### `LuviaPlaceCollections`
+Einziger Weg für Favoriten, Sammlungen und „Alle entfernen“.
+
+### `LuviaPlaceDetail` / `LuviaPlaceDetails`
+Einziger universeller Detail-Renderer. Keine eigene Detailkarte pro Modul.
+
+### `LuviaPlaceUI`
+Einziger globaler Kartenrenderer für Discovery- und Favoritenkarten.
+
+### `LuviaPlaceUIActions`
+Einziger Weg für Favorit- und Timeline-Aktionen sowie das Contract-gesteuerte Planungsdialogfenster.
+
+### `LuviaPlaceExperience`
+Einzige globale Modulschablone für Header, Planned Panel, Discovery, Suche, Kategorien, Ergebnisse, Loading-/Empty-States und Favoritensammlung.
+
+### `LuviaTimelineCore`
+Einzige Timeline für alle Place-Typen. Module erstellen keine eigene Timeline.
+
+### `LuviaPlacesShell`
+Steuert Place-Hub, Modul-Mounting, Wechsel, Rückkehr und aktiven Trip-Kontext.
+
+### `LuviaPlaceConformance`
+Prüft Architektur- und UI-Verträge. Regeln dürfen nicht abgeschwächt werden, um Abweichungen „grün“ zu machen. Der Code muss korrigiert werden.
+
+## 5. Verbindliche Modul-Schablone
+
+Jedes Place-Modul verwendet dieselben Core-Bausteine:
+
+```text
+LuviaPlaceExperience.plannedPanel
+LuviaPlaceExperience.discovery
+LuviaPlaceCollections.favoritePanel
+LuviaPlaceUI.card
+LuviaPlaceUIActions.openTimelineDialog
+LuviaPlaceDetail.open
+```
+
+Ein Modul liefert nur typabhängige Konfiguration und Adapter. Es baut nicht selbst:
+
+- Header
+- Such-Shell
+- Favoriten-Shell
+- Karten
+- Planungsdialog
+- Detail-Overlay
+- Loading State
+- Empty State
+
+## 6. Verbindliches Design und UI
+
+### Typografie
+Immer globale Design-Tokens verwenden:
+
+- `--lv-font-body`
+- `--lv-font-display`
+- `--lv-text`
+- `--lv-muted`
+
+Keine lokale Schriftart und keine fest codierten Textfarben.
+
+### Flächen und Linien
+Immer globale Tokens:
+
+- `--lv-bg`
+- `--lv-surface-elevated`
+- `--lv-surface-soft`
+- `--lv-line`
+- `--lv-shadow-*`
+
+### Akzentfarbe
+Favorit und „Zur Timeline“ verwenden immer die Akzentfarbe der aktiven Reise. Module dürfen keine eigene Primärfarbe setzen.
+
+### Globale Hauptaktionen
+Immer dieselben Bezeichnungen:
+
+```text
+♡ Favorit
+＋ Zur Timeline
+```
+
+Nach Zustandsänderung:
+
+```text
+♥ Favorit
+✓ In Timeline
+```
+
+### Karten
+Discovery- und Favoritenkarten sind dieselbe Komponente. Favoritenstatus verändert nur Zustand und Aktion, niemals Layout, Bildfläche oder Fact Slots.
+
+### Globale Fact Slots
+Kompakte Karten verwenden ausschließlich:
+
+- Bewertung
+- Entfernung
+- beste Besuchszeit
+- Preisniveau
+- Öffnungsstatus
+
+Keine lokalen Intelligence-Chips auf kompakten Karten.
+
+### Dark Mode
+Alle Places-Flächen und Texte müssen ausschließlich Theme-Tokens verwenden. Weiß auf heller Fläche oder dunkle fest codierte Farben sind Architekturfehler.
+
+## 7. Detailkarten
+
+Alle Typen verwenden denselben Detail-Renderer mit:
+
+- Galerie
+- Name, Typ und Adresse
+- Favorit und Zur Timeline
+- Fact Slots
+- Lifecycle
+- Überblick
+- Provider-Felder
+- Empfehlungen / Einschränkungen
+- Alternativen
+- optionalen typabhängigen Abschnitten
+
+Typabhängige Abschnitte ergänzen die Karte, ersetzen sie nicht.
+
+## 8. Globale Timeline-Regel
+
+Jeder planbare Place-Typ registriert seine Zeitfelder im Contract.
+
+Beispiele:
+
+```text
+Restaurant: planned_at (point)
+Sehenswürdigkeit: starts_at (point)
+Unterkunft: check_in_at (start), check_out_at (end)
+```
+
+Nach erfolgreicher Planung müssen zentral ausgelöst werden:
+
+```text
+luvia:place-plan-changed
+luvia:timeline-invalidated
+LuviaTimelineCore.hydrate(tripId)
+```
+
+Die Timeline erzeugt fachliche Titel, z. B.:
+
+- `Restaurant · Name`
+- `Sehenswürdigkeit · Name`
+- `Check-in · Unterkunft`
+- `Check-out · Unterkunft`
+
+Feldnamen wie „Zeitpunkt“ oder „Datum und Uhrzeit“ dürfen nicht als sichtbare Ereignistitel erscheinen.
+
+## 9. Favoriten und Sammlungen
+
+Favoriten laufen ausschließlich über `LuviaPlaceCollections`.
+
+„Alle entfernen“ muss:
+
+1. den kanonischen Place-Typ verwenden,
+2. alle Favoriten dieses Typs in der aktiven Reise laden,
+3. zentral zurücksetzen,
+4. Collection-/Place-Events senden,
+5. die globale Shell neu rendern.
+
+Kein Modul implementiert eine eigene Sammellöschung.
+
+## 10. Boot, Reisewechsel und Realtime
+
+### Boot
+Genau ein Bootprozess:
+
+```text
+Intro
+→ Auth
+→ Cloud-Profil
+→ aktive Reise
+→ Timeline / Place-Daten
+→ UI
+→ Realtime
+```
+
+Das Intro darf nicht durch Service-Worker-Aktivierung, Auth-Events oder doppelte `bootstrap()`-Aufrufe erneut starten.
+
+### Aktive Reise
+Die Cloud-Profil-ID ist maßgeblich. Ein sichtbarer View darf nur wiederverwendet werden, wenn View und `tripId` übereinstimmen.
+
+### Realtime
+Realtime liefert ausschließlich spätere Änderungen. Es darf nicht parallel den Initialzustand aufbauen oder vollständige Module bei Fokus-/Tabwechsel neu mounten.
+
+## 11. Performance-Regeln
+
+- Erstes sichtbares Kartenbild eager laden.
+- Bekannte Preview-Daten sofort rendern.
+- Detail-, Foto- und Importanfragen deduplizieren.
+- Kein Modul wartet auf vollständige Intelligence, bevor Grundkarten erscheinen.
+- Keine komplette Modul-Neuhydration bei jedem Event.
+- Keine konkurrierenden `place.list`-Anfragen.
+- Keine automatischen Scrollsprünge bei Fokus, `visibilitychange` oder Realtime-Reconnect.
+
+## 12. Verbotene Sonderwege
+
+Strikt verboten:
+
+- eigener Favoritenspeicher pro Modul
+- eigene Detailkarte
+- eigene Timeline
+- eigener Planungsdialog
+- lokale Card-Komponente
+- direkte Supabase-Tabellenzugriffe aus Place-Modulen
+- direkte Manipulation von `trip_places` oder `trip_place_data`
+- Provider-ID als interne UUID
+- Inline-Styles und direkte `element.style`-Manipulation für Place-UI
+- lokale Aktionsnamen oder Farben
+- lokale Dark-Mode-Regeln
+- Mounting/Rendern ohne aktiven eindeutigen `tripId`-Kontext
+
+## 13. Pflichtablauf für neue Place-Typen
+
+1. Contract registrieren.
+2. Provider-Mapping ergänzen.
+3. Type Capability und Timeline-Rollen definieren.
+4. Modul nur als Adapter auf die globale Experience Shell bauen.
+5. Globale Card und Favorite Collection verwenden.
+6. Globale Detailkarte verwenden.
+7. Globalen Planungsdialog verwenden.
+8. Timeline-Persistenz ausschließlich über `LuviaTripPlaceData`.
+9. Reisewechsel, Reload, Dark Mode und mobile Darstellung testen.
+10. `await LuviaPlaceConformance.runAll()` ausführen.
+11. Erst veröffentlichen, wenn `ok: true` und alle Interaktionen manuell geprüft sind.
+
+## 14. Pflicht-Regressionscheck vor jedem Release
+
+- App startet genau einmal.
+- Zuletzt aktive Cloud-Reise wird geladen.
+- Alle Core-Place-Module sind nach Reload sichtbar.
+- Restaurant, Unterkunft und Sehenswürdigkeit öffnen.
+- Suche und Kategorien reagieren sofort.
+- Discovery- und Favoritenkarten sind identisch.
+- Favorit setzen und entfernen funktioniert.
+- „Alle entfernen“ funktioniert für jeden Typ.
+- „Zur Timeline“ funktioniert für jeden planbaren Typ.
+- Timeline zeigt fachliche Titel und richtige Reise.
+- Reisewechsel hinterlässt keine alten Daten.
+- Detailaktionen nutzen die Reisefarbe.
+- Dark Mode ist vollständig lesbar.
+- Keine Architekturfehler in der Konsole.
+- `LuviaPlaceConformance.runAll()` meldet `ok: true`.
+
+## 15. Regel für ChatGPT und alle zukünftigen Entwickler
+
+Vor jeder Änderung an Luvia Places muss diese Datei vollständig gelesen werden. Bei Konflikten zwischen einer schnellen lokalen Lösung und diesem Dokument gewinnt immer der globale Core-Vertrag. Keine neue Sonderstruktur, kein Workaround und keine Doppelimplementierung.
+
+## Verbindliche Regel: Favoriten-Sammelaktionen und Kartenstatus
+
+Stand ab Build 13.6.9 / Core 4.6.9:
+
+- `Alle entfernen` wird ausschließlich durch `LuviaPlaceCollections` ausgeführt.
+- Die Sammelaktion darf **nicht** zuerst erneut die komplette Place-Liste vom Gateway laden. Die globale Favorite-Shell übergibt die bereits bekannten kanonischen `tripPlaceId`-Werte direkt an den Collection Core.
+- Jede betroffene Verknüpfung wird über `LuviaPlaceEntities.updateLifecycle(..., { isFavorite:false })` aktualisiert.
+- Anschließend wird genau ein globales Ereignis `luvia:place-collection-changed` mit `action: favorites-cleared`, den betroffenen `clearedTripPlaceIds` und den `providerPlaceIds` ausgelöst.
+- Alle Place-Module müssen dieses Ereignis konsumieren und sowohl Favoritensammlung als auch Discovery-Karten synchronisieren.
+- Eine Karte darf nach einer Sammellöschung nirgendwo weiter `Favorit ✓` oder `♥ Favorit` anzeigen. Der Zustand ist global, tripgebunden und cloudautoritativ.
+- Lokale Sammellöschungen, modulinterne Favoritenlisten oder ein erneuter `place.list`-Zwang vor dem Entfernen sind verboten.
+
+Diese Regel gilt gleichermaßen für Restaurants, Unterkünfte, Sehenswürdigkeiten und alle zukünftigen Place-Typen.
+
+
+## 18. Verbindliches globales Favoritensystem (Core 4.6.9)
+
+Favoriten dürfen ausnahmslos nur über `LuviaPlaceCollections` verändert werden. Die verbindliche UI-Aktion ist `data-place-favorite-toggle`; modulbezogene Schreibaktionen wie `data-rv2-import`, `data-favorite` oder eigene Favoriten-Handler sind für neue Implementierungen verboten.
+
+Jede Favoritenaktion benötigt den Place-Typ und mindestens eine kanonische Identität: `tripPlaceId` für bereits verknüpfte Orte oder `providerPlaceId` für noch nicht importierte Orte. Der Core importiert bei Bedarf genau einmal, schreibt `trip_places.is_favorite`, synchronisiert alle sichtbaren Karten und sendet `luvia:place-favorite-changed` sowie `luvia:place-collection-changed`.
+
+Ein Klick auf einen bereits aktiven Favoritenbutton entfernt den Ort wieder aus den Favoriten. Das gilt für Discovery-Karten, Favoritenkarten und Detailkarten. `Alle entfernen` verwendet denselben zentralen Schreibweg für jeden einzelnen Place. Nach erfolgreichem Entfernen müssen alle Karten desselben Ortes sofort `♡ Favorit` zeigen; ein Reload ist unzulässig.
+
+Module dürfen Favoriten nur darstellen und auf die globalen Events mit einem normalen Daten-Refresh reagieren. Sie dürfen weder einen eigenen Favoriten-Cache als Wahrheit führen noch direkt `place.lifecycle.update`, `place.import` oder `trip_places` für Favoriten aufrufen.
+
+
+## Verbindlicher Favoriten-Writer ab Core 4.6.9
+
+Restaurants, Unterkünfte, Sehenswürdigkeiten und alle zukünftigen Place-Typen verwenden **ausschließlich** `LuviaPlaceCollections`.
+
+Verboten sind insbesondere:
+
+- modulinterne Favoriten-Importfunktionen,
+- eigene Entfernen-Handler,
+- deaktivierte Favoritenbuttons,
+- eigene Favoritencaches als Wahrheit,
+- direkte Lifecycle-Schreibvorgänge für Favoriten aus einem Place-Modul.
+
+Jeder Favoritenbutton muss durch `LuviaPlaceCollections.favoriteButton(...)` erzeugt werden. Jeder Klick wird zentral über `data-place-favorite-toggle` verarbeitet. Ein aktiver Favorit bleibt anklickbar und entfernt den Ort wieder aus der Sammlung. `Alle entfernen` verwendet denselben Writer für jeden einzelnen kanonischen `tripPlaceId`.
+
+Der globale Core normalisiert sowohl `is_favorite` als auch historische `isFavorite`-Antworten. Module dürfen diese Varianten nicht selbst auswerten. Ereignisse `luvia:place-favorite-changed` und `luvia:place-collection-changed` sind die einzige UI-Synchronisationsschnittstelle.
+
+## 19. Verbindliche Favoriten-Persistenz ab Core 4.7.0
+
+Für alle Place-Typen gilt derselbe atomare Ablauf. Ein noch nicht mit der Reise verknüpfter Provider-Ort wird beim ersten Favoritenklick direkt mit `status: favorite` und `isFavorite: true` importiert. Es ist verboten, zunächst einen unfavorisierten Datensatz zu importieren und anschließend über einen zweiten konkurrierenden Request zu favorisieren.
+
+Der sichtbare Buttonzustand (`aria-pressed`) bestimmt beim Klick eindeutig den gewünschten Folgezustand. Modulinterne Models, alte Restaurant-Caches oder historische Feldnamen dürfen diese Entscheidung nicht überschreiben.
+
+Nach erfolgreicher Persistenz verteilt `LuviaPlaceCollections` den kanonischen Zustand über `luvia:place-favorite-changed` und `luvia:place-collection-changed`. Jedes Modul darf diesen Zustand nur spiegeln. Insbesondere darf ein Restaurant-Render einen gerade erfolgreich gespeicherten Favoriten nicht durch ein veraltetes lokales Model wieder zurücksetzen.
+
+Geschützte Gateway-Aufrufe warten auf die initialisierte Supabase-Sitzung und verwenden ausschließlich das aktuelle Access Token. Ein Request ohne verfügbare Sitzung darf nicht als paralleler anonymer Schreibversuch gestartet werden.
+
+## 20. Restaurant-Favoriten-Rendering ab Core 4.7.0
+
+Auch die Darstellung gespeicherter Restaurantfavoriten muss ausschließlich mit den bereits kanonisch aufgelösten Identitäten arbeiten.
+
+Verbindlich:
+
+- Der Kartenrenderer löst die Provider-ID einmal als lokale `providerId` auf.
+- Genau diese aufgelöste ID wird an `LuviaPlaceCollections.favoriteButton(...)` übergeben.
+- Nicht deklarierte oder implizite Variablennamen wie `providerPlaceId` sind im Renderer verboten.
+- Ein Renderfehler in einer Favoritensammlung darf niemals den erfolgreichen globalen Favoritenstatus überschreiben oder dessen UI-Synchronisation abbrechen.
+- Restaurant, Unterkunft und Sehenswürdigkeit verwenden denselben Favorite-Core und unterscheiden sich nur in `placeType` und Identitätsdaten.
+
+Pflichttest nach jeder Änderung an Place-Karten:
+
+1. Einen neuen Favoriten über eine Discovery-Karte setzen.
+2. Favoritensammlung öffnen.
+3. Favoritenkarte vollständig rendern.
+4. Favorit über Discovery- oder Favoritenkarte wieder entfernen.
+5. `Alle entfernen` ausführen.
+6. Prüfen, dass keine `ReferenceError`-Meldung entsteht und alle Karten denselben Zustand zeigen.
+
+
+## Build 13.7.0 – Global Place Runtime & Conformance Closure
+
+Ab Build 13.7.0 gilt zusätzlich verbindlich:
+
+1. `LuviaPlaceRuntime` ist der einzige UI-Laufzeitsnapshot für Place Entities, Trip-Place-Verknüpfungen, Favoriten und reisespezifische Place-Daten. Module dürfen Cloud-Daten nicht als eigene zweite Wahrheit spiegeln.
+2. `LuviaPlaceCommands` ist die einzige Command-Fassade für `favorite`, `unfavorite`, `toggleFavorite`, `clearFavorites`, `plan` und `unplan`.
+3. Restaurant, Unterkunft und Sehenswürdigkeit müssen dieselben Shell-Bausteine verwenden: `LuviaPlaceExperience.discovery`, `LuviaPlaceExperience.plannedPanel`, `LuviaPlaceCollections.favoritePanel`, `LuviaPlaceUI.card`, `LuviaPlaceDetail` und `LuviaPlaceUIActions`.
+4. Lokale Funktionen namens `setFavorite`, `toggleFavorite` oder `clearFavorites` in Place-Modulen sind verboten.
+5. Direkte Lifecycle-Schreibvorgänge mit `isFavorite` aus Modulen sind verboten.
+6. Der Runtime Store ist an eine eindeutige `tripId` gebunden. Ein Reisewechsel darf niemals Datensätze einer vorherigen Reise weiterverwenden.
+7. Conformance muss für alle Module einschließlich Restaurants dieselben Shell-Anforderungen prüfen.
+8. Vor jedem Release ist `node tests/place-architecture-regression.test.cjs` sowie `await LuviaPlaceConformance.runAll()` auszuführen.
+
+
+## Build 13.8.0 / Core 4.8.0 – Gateway-, Diagnose- und Versionsvertrag
+
+Diese Regeln sind verbindlich:
+
+1. **Eine Release-Version:** `intelligence/kernel/version.js` ist die einzige Quelle für Core, Build, Kanal und Build-Zeit. App, Diagnose, Developer Console, Backend Console, PWA und Edge-Health müssen diese Werte anzeigen.
+2. **Auth vor geschützten Requests:** `LuviaBackend` wartet vor dem ersten geschützten Request auf eine gültige Supabase-Sitzung. Ein 401 darf höchstens einen kontrollierten Token-Refresh auslösen.
+3. **Öffentliche Aktionen:** `system.health`, `places.health` und `destination.resolve` dürfen ohne Benutzer-Token laufen. Alle schreibenden Place-Aktionen bleiben geschützt.
+4. **CORS-Vertrag:** Die Edge Function beantwortet `OPTIONS` für freigegebene Origins mit vollständigen CORS-Headern. Nicht freigegebene Origins werden eindeutig mit 403 abgewiesen.
+5. **Deduplizierung und Backoff:** Identische parallele Requests werden zusammengeführt. 502/503/504 werden höchstens zweimal mit exponentiellem Backoff wiederholt; anschließend schützt ein kurzer Circuit Breaker vor Request-Stürmen.
+6. **Keine unhandled Background Requests:** Automatische Destination-Auflösung arbeitet fehlertolerant, gedrosselt und darf die App oder Konsole nicht mit wiederholten Promise-Fehlern fluten.
+7. **Places-Testmatrix:** Backend & Places muss Restaurants, Unterkünfte und Sehenswürdigkeiten einzeln über dieselbe produktive Pipeline testen können.
+8. **Place Readiness:** In der Developer Console stehen implementierte Typen `restaurant`, `accommodation` und `attraction` auf `ready`. Noch nicht implementierte Contracts stehen auf `planned`, nicht fälschlich auf produktionsbereit.
+9. **Diagnose ist Teil des Releases:** Diagnose-, Developer- und Backend-Konsole müssen bei jedem Build aktualisiert und gegen die zentrale Version geprüft werden.
+10. **Konsolen-Regressionsregel:** Normaler Start, Reisewechsel, alle Place-Module, Favorit, Timeline und Backend-Tests dürfen keine Luvia-eigenen 400/401/503/CORS- oder unhandled-Promise-Fehler erzeugen.
+
+## Build 13.8.0 – Fotospots als Referenz für neue Place-Typen
+
+`photo_spot` ist der erste Place-Typ, der nach der Runtime-&-Conformance-Closure vollständig als Contract plus fachlicher Adapter ergänzt wurde.
+
+Verbindlich gilt:
+
+- Modul-ID: `photo_spots`
+- Place-Typ: `photo_spot`
+- Shell, Karten, Favoriten, Detailkarte, Timeline-Dialog und Cloud-Persistenz kommen ausschließlich aus dem globalen Place Core.
+- Der kurze Planungstermin wird als `planned_at` mit `timelineRole: point` gespeichert.
+- Fotofachliche Werte sind Empfehlungen mit sichtbarer Quelle und Sicherheit. Nutzerangaben überschreiben automatische Ableitungen immer.
+- Sonnenaufgang/-untergang, Lichtfenster und Sonnenrichtung werden aus Place-Koordinaten, Reisedatum und astronomischem Sonnenstand berechnet.
+- Motiv, Indoor/Outdoor, Stativ und Zugang werden aus Google-Kategorie, Name und Beschreibung abgeleitet. Unklare Werte müssen als „wahrscheinlich“ oder „prüfen“ gekennzeichnet werden; erfundene Gewissheit ist verboten.
+- `LuviaPhotoSpotIntelligence` ist der einzige fachliche Ableitungsdienst für Fotospots.
+- Fotospots müssen dieselben Conformance-Regeln wie Restaurant, Unterkunft und Sehenswürdigkeit bestehen.
+
+## Build 13.8.1 / Core 4.8.1 – Verbindlicher Places-Hub- und Insight-Card-Vertrag
+
+Ab Build 13.8.1 gilt zusätzlich:
+
+- Der Places-Hub verwendet auf großen Web-Ansichten **maximal drei Spalten**. Unterhalb von 1040 px werden zwei Spalten, auf mobilen Ansichten eine Spalte verwendet.
+- Hub-Kacheln werden ausschließlich durch `LuviaPlacesShell` erzeugt. Sie müssen globale Theme-, Reiseakzent-, Typografie-, Flächen- und Linien-Tokens verwenden.
+- Inhalte einer Hub-Kachel dürfen ihre Containergrenzen niemals überschreiten. Titel, Beschreibungen und Tags müssen umbrechen können und auf Mobilgeräten vollständig lesbar bleiben.
+- Typabhängige Intelligence-Informationen in Detailkarten werden über den globalen Renderer `LuviaPlaceUI.insightGrid(...)` ausgegeben.
+- Ein Place-Modul liefert an `insightGrid` nur fachliche Werte, Icons, Quellen und Sicherheiten. Es erstellt keine eigene Card-Struktur und keine lokale Insight-CSS-Shell.
+- Insight Cards zeigen Wert, Quelle und Ableitungssicherheit klar getrennt. Unklare Daten dürfen weiterhin nicht als sichere Tatsachen dargestellt werden.
+- Der Fotospot-Bereich ist die erste Referenzimplementierung für diesen globalen Insight-Card-Vertrag. Weitere Place-Typen sollen denselben Renderer für typabhängige Informationen verwenden.
+
+
+## Verbindliche Detailkarten-Öffnung aus Timeline, Dashboard und Cross-Module-Flows
+
+- Timeline und Dashboard dürfen niemals eine reduzierte lokale Kopie der Place-Detailkarte erzeugen.
+- Ein externer Place-Aufruf delegiert zuerst an den zuständigen Place-Typ und öffnet damit dieselbe Detailkarte wie innerhalb des Place-Moduls.
+- Der globale Detail-Core besitzt zusätzlich typabhängige Capability-Renderer als sicheren Fallback.
+- Typabhängige Bereiche wie `Licht, Motiv und Zugang` müssen deshalb auch beim Öffnen aus Timeline, Today, Dashboard oder späteren Modulen sichtbar bleiben.
+- Provider-Details dürfen den angeforderten Luvia-Place-Typ beim Nachladen nicht überschreiben. Ein als `photo_spot` geöffneter Ort bleibt für diese Darstellung ein Fotospot, auch wenn Google ihn zusätzlich als Museum, Park oder Sehenswürdigkeit klassifiziert.
+
+## Build 13.9.0 / Core 4.9.0 – Shopping als fünfter produktiver Place-Typ
+
+`shopping` wird ausschließlich als neuer fachlicher Vertrag auf der bestehenden globalen Places-Architektur ergänzt. Es ist verboten, dafür eine eigene Favoriten-, Timeline-, Karten-, Detail- oder Cloud-Struktur zu bauen.
+
+Verbindlich gilt:
+
+- Modul-ID und Place-Typ: `shopping`
+- Die globale Places-Shell, Discovery, Vorschaukarten, Favoritensammlung, Detailkarte, Timeline-Dialoge, Reiseakzentfarben, Dark Mode, Runtime, Commands und Conformance werden unverändert wiederverwendet.
+- Der Planungstermin wird als `planned_at` mit `timelineRole: point` in `trip_place_data.fields` gespeichert.
+- `LuviaShoppingIntelligence` ist der einzige fachliche Ableitungsdienst für Einkaufsformat, Sortiment, Einkaufserlebnis, Indoor/Outdoor, Preisgefühl, lokalen Charakter und beste Besuchszeit.
+- Diese Werte sind nachvollziehbare Hinweise aus Google-Place-Daten. Sortiment, konkrete Produkte, Preise, Marktstände und Verfügbarkeit dürfen niemals erfunden werden.
+- Typabhängige Shopping-Hinweise werden ausschließlich über `LuviaPlaceUI.insightGrid(...)` dargestellt.
+- Shopping-Suchen dürfen nicht pauschal auf den Google-Typ `shopping_mall` beschränkt werden. Märkte, Boutiquen, Souvenirshops, Feinkostläden, Kaufhäuser und Outlets müssen über zielgebundene Textsuche erreichbar bleiben.
+- Der Places Explorer muss Shopping separat über die produktive Destination- und Gateway-Pipeline testen können.
+- `restaurant`, `accommodation`, `attraction`, `photo_spot` und `shopping` müssen in Registry, Developer Console, Backend und Conformance als produktive Typen auf `ready` stehen.
+
+### Universelle Persistenz typabhängiger Place-Felder
+
+Ab Core 4.9.0 darf `place.import` ein nicht leeres typabhängiges `extension`-Objekt nicht nur in der Importantwort zurückgeben. Für alle nicht restaurant-spezifischen Place-Typen wird es zusätzlich über `luvia_upsert_trip_place_fields(...)` in der vorhandenen kanonischen Tabelle `trip_place_data` gespeichert.
+
+Damit gilt:
+
+- jedes typabhängige reisebezogene Feld besitzt genau eine cloudautoritative Quelle,
+- Module lesen diese Werte über `LuviaTripPlaceData`,
+- Reload, Reisewechsel, Timeline und externe Detailöffnung verwenden denselben Datensatz,
+- neue Place-Typen benötigen für reine JSON-Felder keine eigene Tabelle und keine parallele lokale Persistenz,
+- eigene Tabellen sind nur zulässig, wenn ein klarer relationaler Fachbedarf besteht und der zentrale Vertrag entsprechend erweitert wird.
+
+
+## Build 13.9.1 / Core 4.9.1 – Globaler Planungsdialog und Insight-Card-Contract
+
+Ab Build 13.9.1 ist die Planung sämtlicher Place-Typen verbindlich vereinheitlicht.
+
+### Globaler Planungsdialog
+
+- `LuviaPlaceExperience.planningEditor(...)` rendert das einzige zulässige Formular für Datum und Uhrzeit.
+- `LuviaTimelineCore.openPlanningEditor(...)` steuert Öffnen, Schließen, Validierung, Enter-Bestätigung, Ladezustand und Fehlermeldungen.
+- `LuviaPlaceUIActions.openTimelineDialog(...)` verwendet denselben Editor für neue Planungseinträge.
+- `LuviaTimelineCore.editEntry(...)` verwendet denselben Editor für nachträgliche Änderungen aus Timeline, Dashboard und den geplanten Karten oberhalb der Place-Suche.
+- Restaurants, Unterkünfte, Sehenswürdigkeiten, Fotospots, Shopping und alle kommenden Place-Typen dürfen keinen eigenen Datumsdialog mehr implementieren.
+- Enter muss das Formular überall genau wie ein Klick auf den primären Speichern-Button absenden.
+- Die Felddefinitionen stammen ausschließlich aus den `timelineRole`-Feldern des jeweiligen Place-Type-Contracts.
+- Unterkünfte erhalten deshalb Check-in und Check-out; punktuelle Places erhalten genau ihr kanonisches Point-Feld.
+
+### Einziger Cloud-Writer und UUID-Schutz
+
+- Planung und Änderungen schreiben ausschließlich über `LuviaPlaceCollections.saveDateFields(...)` und damit über `LuviaTripPlaceData`.
+- `tripId` und `tripPlaceId` müssen vor jedem RPC-Aufruf als gültige UUID geprüft werden.
+- Werte wie `undefined`, leere IDs oder Provider-IDs dürfen niemals an UUID-Parameter von Supabase übergeben werden.
+- Ein unvollständiger Datensatz wird vor dem Netzwerkaufruf mit einer verständlichen UI-Meldung abgebrochen.
+- Rohe Einträge aus `LuviaTripPlaceData.dateEntries(...)` gelten auch ohne zusätzliches `source`-Attribut als Place-Data-Einträge und dürfen niemals in den Legacy-Writer für `trip_schedule_events` geraten.
+- Nach erfolgreichem Speichern werden Timeline, geplantes Panel und aktuelle Modulansicht ohne Reload über die zentralen Events aktualisiert.
+
+### Insight Cards
+
+- Die visuelle Card-Shell ist ausschließlich `LuviaPlaceUI.insightGrid(...)`.
+- Ein Place-Type-Contract aktiviert typabhängige Insight Cards über `capabilities.insightCards` und beschreibt den Abschnitt unter `ui.detail.insightSection`.
+- Ein aktivierter Insight-Card-Typ muss einen Renderer über `LuviaPlaceDetail.registerCapabilityRenderer(...)` registrieren.
+- Conformance muss fehlende Insight-Section-Metadaten oder fehlende Renderer als Architekturverletzung melden.
+- Nicht jeder Place-Typ muss dieselben Inhalte zeigen. Nur fachlich belastbare, typabhängige Informationen dürfen als Karten erscheinen.
+- Restaurants, Unterkünfte und Sehenswürdigkeiten können denselben globalen Renderer künftig für eigene Intelligence-Bereiche nutzen; doppelte Fact-Chips oder erfundene Informationen sind dabei verboten.
+
+## Build 13.10.0 / Core 4.10.0 – globaler Contract-Bootstrap und Planungsparität
+
+Der Place-Type-Contract ist eine kritische Laufzeitabhängigkeit. Ein kurzzeitiger Fehler beim Laden von `place-type-contract.js` darf keinen Place-Typ ohne Timeline-Schema zurücklassen.
+
+Verbindlich gilt ab diesem Build:
+
+- `index.html` installiert vor den externen Place-Core-Dateien einen kleinen funktionalen Inline-Bootstrap unter derselben API `LuviaPlaceTypeContracts`.
+- Dieser Bootstrap ist kein zweites Datenmodell und keine alternative Fachlogik. Er hält nur die zentrale Contract-Registry funktionsfähig, bis der vollständige validierende Contract-Core geladen ist.
+- `place-type-definitions.js` registriert Restaurant, Unterkunft, Sehenswürdigkeit, Fotospot und Shopping sowohl gegen den Bootstrap als auch gegen den vollständigen Contract-Core.
+- Auch im Bootstrap-Modus müssen alle kanonischen Timeline-Felder verfügbar sein: `planned_at`, `check_in_at`, `check_out_at` und `starts_at`.
+- Der Definitions-Loader versucht nach einer Bootstrap-Registrierung weiterhin begrenzt, den vollständigen Contract-Core nachzuladen.
+- Beim späteren Upgrade übernimmt `place-type-contract.js` alle bereits registrierten Contracts, validiert sie und verwirft keinen Typ.
+- Nach dem Upgrade werden Registry und Diagnostics über zentrale Events auf die echte Core-Version aktualisiert.
+- Der globale Planungsdialog darf bei keinem produktiven Typ den Fehler „kein Timeline-Schema registriert“ erzeugen, nur weil ein einzelner Asset-Request kurzzeitig fehlschlug.
+- Restaurant darf keinen lokal hart codierten Datumsdialog mehr als Sonderweg verwenden. Auch Restaurant ruft `LuviaPlaceUIActions.openTimelineDialog(...)` auf.
+- Typabhängige Validierungen, etwa die Prüfung von Restaurant-Öffnungszeiten, werden als Callback in den globalen Dialog eingebracht und rechtfertigen keinen eigenen Dialog oder Writer.
+- Alle fünf produktiven Place-Typen verwenden damit denselben Contract, denselben Dialog, Enter-Bestätigung, UUID-Schutz und Cloud-Writer.
+- Der Service Worker hält Contract, Definitionen, Timeline, UI Actions und Conformance weiterhin als kritische App-Shell-Dateien vor und nutzt bei Netzwerkfehlern gültige Cache-Kopien unabhängig vom Build-Query-String.
+
+Pflichttest nach Änderungen am Bootstrap oder Planungsdialog:
+
+```javascript
+['restaurant','accommodation','attraction','photo_spot','shopping'].map(type => ({
+  type,
+  schema: LuviaPlaceUIActions.schema(type)
+}))
+```
+
+Jeder Typ muss mindestens ein kanonisches Timeline-Feld liefern. Zusätzlich muss `node tests/place-contract-bootstrap-resilience.test.cjs` erfolgreich sein.
+
+## Build 13.14.0 / Core 4.14.0 – Transport & Mobilität und Rücknahme von Fahrradrouten
+
+Der Place-Typ `cycling_route` ist ab diesem Build **kein produktiver Bestandteil von Luvia**. Der Fahrradrouten-Ansatz wurde wegen regional lückenhafter Tourendaten, unzuverlässiger Provider-Antworten und nicht belastbarer automatisch erzeugter Strecken vollständig aus Runtime, Registry, Hub, Gateway, Diagnostics und Conformance entfernt. Historische Migrationen dürfen aus Gründen der Datenbank-Stabilität im Repository verbleiben; sie begründen weder einen aktiven Adapter noch eine sichtbare Funktion.
+
+Der neue produktive Place-Typ ist `mobility` mit der Modul-ID `mobility`. Er nutzt ausschließlich die verbindliche globale Places-Architektur:
+
+- `LuviaPlaceRuntime` und `LuviaPlaceCommands`
+- `LuviaPlaceExperience.moduleShell(...)`
+- globale Discovery-, Favoriten- und geplante Karten
+- `LuviaPlaceDetail` mit Capability Renderer
+- zentrale Timeline über `planned_at`
+- kanonische Cloud-Persistenz und Reiseisolation
+- `LuviaPlaceConformance`
+
+### Verbindliche Discovery-Strategie
+
+Transport & Mobilität sucht reale, dauerhaft existierende Punkte direkt über Google Places (New). Exakte Provider-Typen werden je Kategorie parallel abgefragt und anschließend dedupliziert und sortiert. Unterstützt werden insbesondere Bahn, Metro/U-Bahn, Bus, Tram, Fähren, Flughäfen, Taxi, Parken/P+R, Mietwagen, E-Auto- und E-Bike-Laden sowie Bike-Sharing.
+
+Großräumige Kategorien wie Flughäfen, Fährterminals und Mietwagen dürfen nicht durch einen engen Ziel-Viewport abgeschnitten werden. Sie verwenden eine Standortgewichtung; lokale Kategorien bleiben strikt am kanonischen Reiseziel gebunden.
+
+### Fachliche Intelligence
+
+`LuviaTransportIntelligence` ist der einzige fachliche Ableitungsdienst für:
+
+- Verkehrsart und Rolle im Reiseablauf
+- empfohlene Umstiegs- beziehungsweise Ankunftspuffer
+- Zugangs- und Betriebsinformationen
+- Park- und Ladehinweise aus vorhandenen Providerfeldern
+- Ticket- und Vor-Ort-Hinweise
+
+Luvia darf keine Live-Abfahrten, Verspätungen, Auslastungen, freien Stellplätze oder Preise erfinden. Solche Echtzeitinformationen müssen später über einen eigenen, vertraglich angebundenen Transit-Provider kommen.
+
+### Pflichtdiagnose
+
+```javascript
+LuviaPlaceRegistry.status('mobility')
+LuviaPlaceDetail.diagnostics()
+await LuviaPlaceConformance.runAll()
+```
+
+Erwartet werden ein produktiver `mobility`-Adapter, der Capability Renderer `mobility` und keine Conformance-Verletzungen. `cycling_route` darf in keiner produktiven Registry, Shell oder Gateway-Action mehr erscheinen.
+
+## Build 13.15.0 / Core 4.15.0 – Places / Move Domain Separation
+
+`mobility` ist ab diesem Build fachlich kein sichtbarer Bereich der Places-Übersicht mehr. Die Hauptnavigation trennt verbindlich zwischen **Places** und **Move**.
+
+### Verbindliche Navigation
+
+- Dashboard
+- Places
+- Move
+
+Der Name **Places** bleibt bestehen. Eine globale Umbenennung in „Entdecken“ ist mit diesem Build ausdrücklich nicht erfolgt.
+
+### Domain-Zuordnung
+
+`LuviaModuleRegistry.domains.places` enthält ausschließlich:
+
+- `accommodations`
+- `restaurants`
+- `attractions`
+- `photo_spots`
+- `shopping`
+- `nature`
+
+`LuviaModuleRegistry.domains.move` enthält ausschließlich:
+
+- `mobility`
+
+`LuviaPlacesShell` darf `mobility` weder als Kachel rendern noch als Öffnungspfad behandeln. `LuviaMoveShell` ist der einzige sichtbare Domain-Einstieg für Mobilität.
+
+### Keine Kopie des Places-Core
+
+Move ist eine neue fachliche Shell, aber kein zweites technisches System. Verbindlich wiederverwendet werden:
+
+- Place-Entity und Trip-Place-Modell
+- `LuviaPlaceRuntime`
+- `LuviaPlaceCommands`
+- `LuviaPlaceExperience`
+- `LuviaPlaceUI`
+- `LuviaPlaceCollections`
+- `LuviaPlaceDetail`
+- `LuviaPlaceUIActions`
+- `LuviaTripPlaceData`
+- `LuviaTimelineCore`
+- `LuviaPlaceConformance`
+
+Der kanonische Typ bleibt `mobility`. Es dürfen keine Typen wie `flight`, `rail`, `bus` oder `ferry` als parallele Cloud-Domänen eingeführt werden. Die Move-Kacheln konfigurieren lediglich unterschiedliche, streng typisierte Suchansichten desselben Moduls.
+
+### Move-Hub
+
+Die Move-Übersicht verwendet die globalen Hub-Klassen `places-hub`, `places-hub-grid` und `places-hub-tile`. Lokale Kopien von Kachel-, Karten- oder Shell-Komponenten sind verboten.
+
+Die Nutzerführung ist verbindlich in zwei Gruppen gegliedert:
+
+- **An- & Abreise:** Flüge, Bahn, Bus & Fernbus, Fähren
+- **Vor Ort:** Nahverkehr, Taxi & Fahrdienste, Vermietung, Parken & Laden
+
+### Typvalidierung
+
+Jede Move-Suche besitzt eine explizite Provider-Typ-Whitelist. Ein Ergebnis darf nur angezeigt werden, wenn mindestens ein tatsächlicher Google-Place-Typ zum aktiven Suchplan passt.
+
+Insbesondere gilt:
+
+- Flughafen darf nicht in Fähren erscheinen.
+- Bus- oder Bahntreffer dürfen nicht in Flüge erscheinen.
+- Allgemeine untypisierte Treffer sind kein zulässiger Fallback.
+- Ein ehrlicher Leerzustand ist einem fachfremden Ergebnis vorzuziehen.
+
+### Namen und Entfernung
+
+Rohe Provider-Namen dürfen durch die erkannte Verkehrsart verständlich ergänzt werden. Der Originalname wird nicht ersetzt, sondern beispielsweise als `Augustenstraße · Bus` eingeordnet.
+
+Die Discovery-Distanz stammt vom kanonischen Reiseziel beziehungsweise Suchanker. Das Move-Modul darf diese Distanz in der Planungsansicht nicht mit der Entfernung vom aktuellen Gerät überschreiben.
+
+### Echtzeitdaten
+
+Move darf keine Live-Abfahrten, Verspätungen, Gates, Gleise, Belegungen, Preise oder Tarife aus allgemeinen Places-Daten ableiten. Dafür ist künftig eine eigene, vertraglich angebundene Fahrplan- oder Betreiberquelle erforderlich.
+
+### Pflichttests
+
+```bash
+node tests/move-domain-separation.test.cjs
+node tests/mobility-place-integration.test.cjs
+node tests/place-architecture-regression.test.cjs
+node tests/release-version-consistency.test.cjs
+```
+
+Zusätzlich müssen `LuviaPlaceRegistry.status('mobility')`, `LuviaMoveShell.tiles()` und `await LuviaPlaceConformance.runAll()` erfolgreich sein.
+
+---
+
+## Build 13.16.0 · Core 4.16.0 · Guided Discovery
+
+Places und Move besitzen ab diesem Build einen gemeinsamen, globalen Guided-Discovery-Unterbau. Die Sequenz ist kein mehrseitiges Formular, sondern eine zustandsbasierte Vollbildoberfläche mit weichen Szenenübergängen, Gedankenwolken, Reisefarbverläufen, Progress-Route und mobilem Zurück-Wischen.
+
+### Globale Präferenzen
+
+Registrierung, Profil, Places, Move und Recommendation-Services verwenden dieselbe normalisierte Präferenzstruktur. Verbindliche Cloud-Felder bleiben `dietary_preferences` und `travel_preferences`; es dürfen keine lokalen Modulprofile daneben entstehen.
+
+Die Registrierung fragt mindestens Interessen, Ernährung, Reisestil, Aktivitäten, Reisetempo und Budget ab. Das Profil muss alle Angaben jederzeit über denselben Guided Flow änderbar machen.
+
+### Strikte Discovery Contracts
+
+Jeder abgeschlossene Flow erzeugt einen fachlichen Suchvertrag mit erlaubten Google-Typen, ausgeschlossenen Typen, Standortgrenze und Qualitätsanforderungen. Provider-Ergebnisse werden nach der Antwort erneut validiert. Cross-Category-Fallbacks sind verboten. Ein ehrlicher Leerzustand ist verbindlich besser als ein fachfremder Treffer.
+
+### Visuelle Regeln
+
+Jede Gedankenwolke kombiniert die aktive Reisefarbe mit einem deterministisch zugewiesenen Begleitton aus Rosa, Pfirsich, Lavendel, Creme, Mint oder Himmelblau. Animationen müssen weich, mobil flüssig und bei reduzierter Bewegung deaktivierbar sein.
+
+### Move ohne Timeline
+
+Move bleibt vollständig ohne Timeline-Planung. Verboten sind `planned_at`, Planning-Capability, `openTimelineDialog` und die sichtbare Aktion „Zur Timeline“. Move darf nur Details, externe Navigation/Anbieter, Merken und Teilen anbieten.
+
+### Pflichttests 13.16.0
+
+```bash
+node tests/guided-discovery-preferences.test.cjs
+node tests/discovery-contract-strictness.test.cjs
+node tests/guided-discovery-integration.test.cjs
+node tests/move-domain-separation.test.cjs
+node tests/mobility-place-integration.test.cjs
+node tests/release-version-consistency.test.cjs
+```
+
+---
+
+## Build 13.16.1 · Core 4.16.1 · Global User Preference Persistence
+
+Ab diesem Build ist `public.user_profiles` die einzige dauerhafte Source of Truth für globale Benutzerpräferenzen. Die expliziten Präferenzspalten sind führend; `travel_preferences` bleibt ausschließlich als migrationsfähige Legacy-Kompatibilität bestehen. Auth-Metadaten dürfen nur bei Registrierung beziehungsweise einmaliger Migration verwendet werden. Local Storage ist nur Cache und verliert jeden Konflikt gegen den Cloud-Datensatz.
+
+Alle Präferenzzugriffe laufen über `LuviaUserPreferences`. Registrierung, Profil, Places, Move und spätere Recommendation-Services dürfen keine eigenen Feldnamen oder lokalen Präferenzmodelle pflegen.
+
+Verbindliche Pflichttests:
+
+```bash
+node tests/guided-discovery-preferences.test.cjs
+node tests/user-preference-core.test.cjs
+node tests/profile-preference-payload.test.cjs
+node tests/preference-database-migration.test.cjs
+node tests/guided-discovery-integration.test.cjs
+node tests/move-no-timeline-v13.16.1.test.cjs
+node tests/release-version-consistency.test.cjs
+```
+
+---
+
+## Build 13.16.2 · Core 4.16.2 · Guided Travel Canvas Focus Mode
+
+### Fokussierter Vorschlagsmodus
+
+Nach einem abgeschlossenen Guided-Discovery-Flow zeigen Places und Move ausschließlich die daraus entstandenen persönlichen Vorschläge. Suche, Quick-Filter, Verfeinerung, Planungskopf und Sammlung bleiben in diesem Zustand geschlossen. Der vollständige Katalog wird erst über eine bewusste Aktion am Ende der Vorschläge geöffnet.
+
+### Zwei Präferenzebenen
+
+Das globale Reiseprofil ist ein dauerhafter, benutzergebundener Reisekompass und wird ausschließlich über das Profil beziehungsweise das Registrierungs-Onboarding geändert. Die Auswahl in Places oder Move beschreibt nur den aktuellen Reisemoment. Sie ergänzt den globalen Kontext, überschreibt ihn aber niemals. Jeder Discovery Contract muss `preferenceLayers`, die Merge-Policy `global-profile-context-plus-explicit-module-moment` und `mutatesGlobalProfile: false` enthalten.
+
+### Guided Travel Canvas
+
+Die Sequenz und die Ergebnisansicht bilden eine offene Reiseleinwand statt eines technischen Katalogs. Gedankenwolken müssen als organische Wolken aufgebaut sein. Mehrfachauswahlen werden ohne vollständigen Szenen-Neuaufbau aktualisiert. Daueranimationen sind sparsam und transform-basiert; `prefers-reduced-motion` bleibt verbindlich.
+
+### Modale Ebenen
+
+Ein aus dem Profil gestarteter Preference Flow liegt immer oberhalb des Profilfensters. Das Profil wird währenddessen inert und unsichtbar geschaltet und nach Abschluss oder Abbruch vollständig wiederhergestellt.
+
+### Pflichttests 13.16.2
+
+```bash
+node tests/guided-travel-canvas-focus-mode.test.cjs
+node tests/guided-discovery-integration.test.cjs
+node tests/move-domain-separation.test.cjs
+node tests/move-no-timeline-v13.16.2.test.cjs
+node tests/release-version-consistency.test.cjs
+```
+
+---
+
+## Build 13.17.0 · Core 4.17.0 · Luvia Brain Foundation
+
+Ab diesem Build steht `LuviaAI` als zentrale, providerunabhängige Intelligenzschicht über den fachlichen Entscheidungen der App. Kein Modul darf OpenAI oder einen späteren Modellprovider direkt aufrufen. Dashboard, Places, Move, Timeline, Profil, Empfehlungen, Medien, Reisebuch und alle zukünftigen Module kommunizieren ausschließlich über registrierte AI-Capabilities, den globalen Context Engine und kontrollierte Core-Tools.
+
+### Verbindliche Hierarchie
+
+```text
+UI und Module
+→ LuviaAI Facade
+→ Capability Registry / Context Engine / Model Router / Policy Engine
+→ kontrollierte Read-Tools und bestätigungspflichtige Action Proposals
+→ bestehende Luvia Core APIs
+→ Supabase und externe Provider
+```
+
+Die KI ist federführend für Absichtsverständnis, persönliche Gewichtung, Planungsvorschläge, Erklärungen und Lernsignale. Sie steht niemals über:
+
+- Supabase/RLS und Benutzerrechten,
+- kanonischen Cloud-Daten,
+- Providerfakten,
+- harten Place-/Move-Contracts,
+- ausdrücklichen Benutzerentscheidungen,
+- der Bestätigung vor schreibenden Änderungen.
+
+### Provider- und Modellvertrag
+
+Der Browser kennt nur die internen Tiers `fast`, `default` und `deep`. Die tatsächlichen Modelle werden ausschließlich serverseitig in `luvia-intelligence` konfiguriert. Die Standardzuordnung lautet:
+
+```text
+fast    → GPT-5.6 Luna
+standard→ GPT-5.6 Terra
+deep    → GPT-5.6 Sol
+```
+
+OpenAI ist der erste Provider. Die öffentliche Luvia-API und alle Capability Contracts bleiben providerunabhängig, damit später weitere Provider ergänzt oder ausgetauscht werden können.
+
+### Context Engine und Datensparsamkeit
+
+Jeder AI-Aufruf erhält nur den für seine Capability erforderlichen Kontext. Der Context Engine trennt verbindlich:
+
+- ausdrücklich bestätigte globale Präferenzen,
+- temporäre Auswahl des aktuellen Moduls,
+- belegte, getrennt gespeicherte Lernsignale,
+- Reise-, Tages-, Timeline- und Provider-Evidence.
+
+E-Mail-Adressen, Tokens, Zahlungsdaten, Buchungsnummern und andere nicht erforderliche private Felder dürfen nicht in AI-Requests gelangen. Lernsignale dürfen `user_profiles` niemals automatisch verändern. Sie werden im Profil als getrennte Belege sichtbar und dürfen ausschließlich nach bewusster Benutzerbestätigung über `LuviaUserPreferences` in den globalen Reisekompass übernommen werden.
+
+### Tool- und Schreibvertrag
+
+AI-Capabilities verwenden nur registrierte Read-Tools. Schreibende Vorschläge werden als `DRAFT` in `ai_action_proposals` gespeichert und müssen sichtbar bestätigt werden. Erst danach darf ein whitelisted Core Command ausgeführt werden. Direkte SQL- oder Modulschreibzugriffe aus einer Modellantwort sind verboten.
+
+### Places und Move
+
+Die KI darf Suchpläne erweitern und bereits fachlich valide Kandidaten persönlich neu gewichten. Die Reihenfolge bleibt zwingend:
+
+```text
+Guided Contract
+→ Provider-Suche
+→ harte Typ-, Ziel-, Ausschluss- und Qualitätsprüfung
+→ AI-Reranking der verbleibenden echten Kandidaten
+→ nachvollziehbare Gründe und ehrlich markierte Unbekannte
+```
+
+KI darf nie fachfremde Ergebnisse in die Liste zurückholen. Move bleibt ohne Timeline und ohne Planning-Capability.
+
+### Ausfallverhalten
+
+Jede Capability besitzt einen deterministischen Fallback. Bei fehlendem API-Key, Rate Limit, Timeout oder Providerfehler bleiben Kernfunktionen verfügbar, Cloud-Daten unverändert und harte Contracts aktiv. Ein AI-Ausfall darf den App-Start nicht blockieren.
+
+### Pflichttests 13.17.0
+
+```bash
+node tests/ai-model-router.test.cjs
+node tests/ai-context-policy.test.cjs
+node tests/ai-core-runtime.test.cjs
+node tests/ai-discovery-integration.test.cjs
+node tests/ai-command-proposal.test.cjs
+node tests/ai-database-migration.test.cjs
+node tests/ai-edge-function.test.cjs
+node tests/ai-dashboard-integration.test.cjs
+node tests/discovery-contract-strictness.test.cjs
+node tests/move-no-timeline-v13.16.2.test.cjs
+node tests/release-version-consistency.test.cjs
+```
+

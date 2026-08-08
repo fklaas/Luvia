@@ -22,10 +22,20 @@ const RECOMMENDATION_ACTIONS=new Set(['recommendation.health','recommendation.st
 
 Deno.serve(async(req:Request)=>{
   const id=requestId(req);
-  const origin=resolveOrigin(req.headers.get('origin'));
-  const cors=corsHeaders(origin,id);
+  const rawOrigin=req.headers.get('origin');
+  const origin=resolveOrigin(rawOrigin);
+  const cors=corsHeaders(origin||'https://myluvia.app',id);
+  // Preflight must always be answered before auth/content checks. This prevents
+  // browsers from surfacing a CORS transport failure before Luvia can handle
+  // the actual request. Only approved origins receive a successful preflight.
+  if(req.method==='OPTIONS'){
+    if(!origin)return new Response(null,{status:403,headers:cors});
+    const requested=req.headers.get('access-control-request-headers');
+    const headers=new Headers(cors);
+    if(requested)headers.set('Access-Control-Allow-Headers',requested);
+    return new Response(null,{status:204,headers});
+  }
   if(!origin)return errorResponse(403,'ORIGIN_NOT_ALLOWED','Origin ist nicht freigeschaltet.',id,cors);
-  if(req.method==='OPTIONS')return new Response(null,{status:204,headers:cors});
   if(req.method!=='POST')return errorResponse(405,'METHOD_NOT_ALLOWED','Nur POST ist erlaubt.',id,cors);
   const contentType=req.headers.get('content-type')||'';
   if(!contentType.includes('application/json'))return errorResponse(415,'UNSUPPORTED_MEDIA_TYPE','Content-Type application/json erforderlich.',id,cors);
@@ -62,7 +72,7 @@ Deno.serve(async(req:Request)=>{
     let data:unknown;
     switch(action){
       case 'system.health':
-        data={status:'ok',service:'luvia-gateway',version:'4.28.5',build:'13.28.5',core:'4.28.5',time:new Date().toISOString(),authenticated:Boolean(userId),places:placesDiagnostics(),restaurants:restaurantDiagnostics(),recommendations:recommendationDiagnostics()};
+        data={status:'ok',service:'luvia-gateway',version:'4.45.1',build:'13.45.1',core:'4.45.1',time:new Date().toISOString(),authenticated:Boolean(userId),places:placesDiagnostics(),restaurants:restaurantDiagnostics(),recommendations:recommendationDiagnostics()};
         break;
       default:
         if(PLACES_ACTIONS.has(action)){

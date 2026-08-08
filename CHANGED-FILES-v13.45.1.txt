@@ -1,0 +1,17 @@
+M core/collaboration/collaboration-service.js
+M intelligence/backend-service.js
+M intelligence/kernel/version.js
+M intelligence/services/base-services.js
+M core/recommendations/schedule-intelligence-service.js
+M core/diagnostics/media-readiness.js
+M supabase/functions/luvia-gateway/index.ts
+M app/app-shell.js
+M index.html
+M sw.js
+M force-update.html
+A tests/final-console-reliability-v13.45.1.test.cjs
+A RELEASE-v13.45.1.md
+A DEPLOYMENT-v13.45.1.md
+A TEST-v13.45.1.md
+A COMMIT-v13.45.1.txt
+A CHANGED-FILES-v13.45.1.txt
