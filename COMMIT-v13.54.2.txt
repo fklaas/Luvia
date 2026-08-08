@@ -1,0 +1,1 @@
+fix(booking): allow trusted provider confirmation from ready state

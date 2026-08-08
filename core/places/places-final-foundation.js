@@ -1,6 +1,6 @@
 (() => {
   'use strict';
-  const VERSION='4.54.1';
+  const VERSION='4.54.2';
   const MAX_RESULTS=5;
   const CATEGORY_DEFS=Object.freeze({
     food:{icon:'🍽️',label:'Essen & Trinken',type:'restaurant',includedType:'restaurant',query:'Restaurants Cafés Bars Essen',keywords:['essen','restaurant','nudeln','pasta','vegetar','vegan','café','cafe','frühstück','bar','trinken']},

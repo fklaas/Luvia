@@ -1,0 +1,14 @@
+Luvia v13.54.2 / Core 4.54.2
+- supabase/migrations/20260808213000_core_v4_54_2_verified_provider_transition_fix.sql
+- intelligence/kernel/version.js
+- intelligence/backend-service.js
+- supabase/functions/luvia-gateway/index.ts
+- app/app-shell.js
+- index.html
+- sw.js
+- force-update.html
+- runtime files carrying the release/core version
+- RELEASE-v13.54.2.md
+- DEPLOYMENT-v13.54.2.md
+- COMMIT-v13.54.2.txt
+- tests/v13.54.2-verified-provider-transition-fix.test.cjs
