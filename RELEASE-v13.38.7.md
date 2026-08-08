@@ -1,4 +1,4 @@
-# Luvia v13.38.7 / Core 4.38.7
+# Luvia v13.38.8 / Core 4.38.8
 
 ## Booking Action Execution Hardening
 - Booking-Aktionen laufen nach dem funktionierenden globalen Click-Delegation-Fix jetzt direkt gegen die produktiven Core-/Function-Schnittstellen.
