@@ -1,0 +1,10 @@
+(() => {
+'use strict';
+const VERSION='1.0.0';
+const VERIFICATION_STATES=Object.freeze(['verified_public','partner_schema_required','unsupported']);
+const clean=v=>String(v??'').trim();
+function normalize(row={}){return Object.freeze({id:row.id||null,provider:clean(row.provider_id||row.provider).toLowerCase()||null,transport:clean(row.transport).toLowerCase()||null,contractVersion:row.contract_version||row.contractVersion||null,verificationState:row.verification_state||row.verificationState||null,autoApply:Boolean(row.auto_apply??row.autoApply),active:row.active!==false,statusMap:Object.freeze({...((row.status_map||row.statusMap)&&typeof(row.status_map||row.statusMap)==='object'?(row.status_map||row.statusMap):{})}),sourceLabel:row.source_label||row.sourceLabel||null,sourceUrl:row.source_url||row.sourceUrl||null,notes:row.notes||null,verifiedAt:row.verified_at||row.verifiedAt||null});}
+function canAutoApply(contract,{signatureVerified=null}={}){const c=normalize(contract);if(!c.active||c.verificationState!=='verified_public'||!c.autoApply)return false;if(c.transport==='webhook'&&signatureVerified!==true)return false;return true;}
+function resolve(contract,providerStatus,options={}){const c=normalize(contract),key=clean(providerStatus).toUpperCase(),normalized=c.statusMap[key]||null,allowed=canAutoApply(c,options)&&Boolean(normalized);return Object.freeze({provider:c.provider,transport:c.transport,contractVersion:c.contractVersion,verified:c.verificationState==='verified_public',autoApply:allowed,normalizedStatus:allowed?normalized:null,reason:!c.active?'CONTRACT_INACTIVE':c.verificationState!=='verified_public'?'PARTNER_STATUS_SCHEMA_REQUIRED':c.transport==='webhook'&&options.signatureVerified!==true?'UNVERIFIED_WEBHOOK_TRANSPORT':!normalized?'STATUS_NOT_IN_VERIFIED_CONTRACT':'VERIFIED_PROVIDER_STATUS_CONTRACT'});}
+window.LuviaBookingProviderStatusContracts=Object.freeze({version:VERSION,VERIFICATION_STATES,normalize,canAutoApply,resolve,diagnostics:()=>({version:VERSION,status:'ready',verifiedOnlyAutoApply:true,webhookRequiresVerifiedTransport:true})});
+})();

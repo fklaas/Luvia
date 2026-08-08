@@ -1,6 +1,6 @@
 (function(){
 'use strict';
-const VERSION='4.53.0';
+const VERSION='4.54.0';
 const TYPES=Object.freeze(['restaurant','accommodation','attraction','photo_spot','activity','shopping','nature','family','mobility','transit','custom']);
 const LIFECYCLES=Object.freeze(['discovered','saved','favorite','planned','visited','rated','memory']);
 const VISIT_STATES=Object.freeze(['nearby','arrived','stay_detected','visited','left']);

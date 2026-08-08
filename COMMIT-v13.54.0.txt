@@ -1,0 +1,1 @@
+feat(booking): add verified provider status contracts and trusted return mapping

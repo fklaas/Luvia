@@ -25,11 +25,11 @@ Deno.serve(async(req)=>{
     const body=await req.json().catch(()=>({}));
     const action=clean(body?.action).toLowerCase();
     if(action==='diagnostics')return json({
-      ok:true,provider:'tock',adapterVersion:'1.0.0',accessState:cap.luvia_access_state,
+      ok:true,provider:'tock',adapterVersion:'1.1.0',accessState:cap.luvia_access_state,
       bookingMode:cap.booking_mode,connected:cap.luvia_access_state==='connected',
       capabilities:{availability:cap.supports_availability===true,createReservation:cap.supports_create_reservation===true,statusWebhook:cap.supports_status_webhook===true,statusPolling:cap.supports_status_polling===true},
       publicSurface:{reservationDataModel:true,stableReservationId:true,confirmationCode:true,partyState:true,sequenceId:true,lastUpdatedTimestamp:true,isCancelled:true,businessDomainName:true},
-      publicAvailabilityCreateContractVerified:false,statusPollingContractVerified:true,statusWebhookContractVerified:false,liveTransportEnabled:false
+      publicAvailabilityCreateContractVerified:false,statusPollingContractVerified:true,statusContractVersion:'tock-reservation-model-2026-08',verifiedPartyStates:['EXPECTED','ARRIVED','SEATED','LEFT','NO_SHOW','CANCELLED','PARTIALLY_ARRIVED','PARTIALLY_SEATED'],statusWebhookContractVerified:false,liveTransportEnabled:false
     });
     if(!['get_reservation','poll_status'].includes(action))return json({ok:false,expected:true,error:'TOCK_ACTION_NOT_PUBLICLY_VERIFIED',details:'Für diese Tock-Aktion ist in der geprüften öffentlichen API-Dokumentation kein allgemeiner Luvia-kompatibler Vertrag verifiziert.',provider:'tock',accessState:cap.luvia_access_state});
     if(cap.luvia_access_state!=='connected')return json({ok:false,expected:true,error:'PARTNER_REQUIRED',details:'Tock ist vorbereitet, aber der Luvia-Partnerzugang ist noch nicht verbunden.',provider:'tock',accessState:cap.luvia_access_state});

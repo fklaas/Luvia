@@ -1,0 +1,18 @@
+Luvia v13.54.0 / Core 4.54.0
+- supabase/migrations/20260808203000_core_v4_54_0_verified_provider_status_contracts_v1.sql
+- supabase/functions/booking-provider-status-ingest/index.ts
+- supabase/functions/booking-provider-quandoo-webhook/index.ts
+- supabase/functions/booking-provider-tock/index.ts
+- core/booking/booking-provider-status-contracts.js
+- core/booking/booking-reconciliation-provider-return.js
+- intelligence/kernel/version.js
+- intelligence/backend-service.js
+- supabase/functions/luvia-gateway/index.ts
+- app/app-shell.js
+- index.html
+- sw.js
+- force-update.html
+- RELEASE-v13.54.0.md
+- DEPLOYMENT-v13.54.0.md
+- COMMIT-v13.54.0.txt
+- tests/v13.54.0-verified-provider-status-contracts-v1.test.cjs

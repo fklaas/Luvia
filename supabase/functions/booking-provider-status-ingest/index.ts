@@ -19,11 +19,12 @@ Deno.serve(async(req)=>{
     if(!cap)return json({error:'PROVIDER_CAPABILITY_NOT_FOUND'},404);
     if(cap.luvia_access_state!=='connected')return json({ok:false,expected:true,error:'PARTNER_REQUIRED',provider,accessState:cap.luvia_access_state});
     if(transport==='polling'&&cap.supports_status_polling!==true)return json({ok:false,expected:true,error:'STATUS_POLLING_NOT_ENABLED',provider});
+    const {data:contract}=await admin.rpc('luvia_booking_resolve_provider_status_contract',{p_provider_id:provider,p_transport:transport,p_provider_status:providerStatus,p_signature_verified:true});
     const {data,error:rpcError}=await admin.rpc('luvia_booking_ingest_provider_status_receipt',{
       p_provider_id:provider,p_transport:transport,p_provider_reference:body?.providerReference??null,p_provider_status:providerStatus,p_external_event_id:body?.externalEventId??null,
       p_correlation_token:body?.correlationToken??null,p_booking_id:body?.bookingId??null,p_signature_verified:true,p_raw_payload:body?.rawPayload??body,p_evidence:{source:'booking-provider-status-ingest',actorUserId:user.id,...(body?.evidence||{})},p_occurred_at:body?.occurredAt??null
     });
     if(rpcError)throw rpcError;
-    return json({ok:true,provider,transport,result:data});
+    return json({ok:true,provider,transport,contract,result:data});
   }catch(error){console.error('[booking-provider-status-ingest]',error);return json({error:'PROVIDER_STATUS_INGEST_FAILED',details:error instanceof Error?error.message:String(error)},500);}
 });
