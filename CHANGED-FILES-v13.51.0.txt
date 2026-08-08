@@ -1,0 +1,27 @@
+Luvia v13.51.0 / Core 4.51.0
+
+Added:
+- supabase/migrations/20260808181500_core_v4_51_0_booking_correlation_conversion_foundation.sql
+- core/booking/booking-correlation-conversion.js
+- tests/v13.51.0-booking-correlation-conversion.test.cjs
+- RELEASE-v13.51.0.md
+- DEPLOYMENT-v13.51.0.md
+- COMMIT-v13.51.0.txt
+
+Updated:
+- core/booking/booking-integration.js
+- core/booking/booking-status-attribution-v2.js
+- index.html
+- sw.js
+- app/app-shell.js
+- intelligence/kernel/version.js
+- intelligence/backend-service.js
+- intelligence/services/base-services.js
+- core/ai/providers/openai-provider.js
+- core/diagnostics/media-readiness.js
+- core/places/global-place-contracts.js
+- core/places/places-final-foundation.js
+- core/places/place-domain.js
+- core/recommendations/schedule-intelligence-service.js
+- supabase/functions/luvia-gateway/index.ts
+- force-update.html

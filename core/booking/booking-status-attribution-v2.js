@@ -1,6 +1,6 @@
 (() => {
 'use strict';
-const VERSION='2.0.0';
+const VERSION='2.1.0';
 const SOURCE_AUTHORITY=Object.freeze({provider_webhook:100,provider_api:95,provider_polling:90,email_reply:75,user_confirmation:70,system:50,handoff:25,affiliate_callback:20});
 const NON_CONFIRMING=new Set(['handoff','affiliate_callback']);
 const clean=v=>String(v??'').trim().toLowerCase();

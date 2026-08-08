@@ -1,6 +1,6 @@
 (() => {
   'use strict';
-  const VERSION='1.7.0';
+  const VERSION='1.8.0';
   let client=null, repository=null, initialized=false, initPromise=null;
 
   const mapType=type=>({
@@ -80,6 +80,7 @@
       }
     });
     let ready=await window.LuviaBookingCore.transition(row.id,'ready',{metadata:{createdFrom:'places'}});
+    try{await linkRecentPlaceHandoff(ready.id,place)}catch(error){console.warn('[Luvia Booking] Korrelation des vorherigen Handoffs übersprungen.',error)}
     window.dispatchEvent(new CustomEvent('luvia:booking-changed',{detail:{booking:ready,action:'created'}}));
     if(!ready?.contact?.email){
       try{await resolveRoute(ready.id);ready=await get(ready.id)||ready}catch(error){console.warn('[Luvia Booking] automatische Buchungskanal-Ermittlung nicht verfügbar',error)}
@@ -203,6 +204,31 @@
     return data;
   }
 
+  async function linkRecentPlaceHandoff(bookingId,place={}){
+    await init();
+    if(!bookingId)return {linked:false,reason:'BOOKING_REQUIRED'};
+    const {data,error}=await client.rpc('luvia_booking_link_recent_place_handoff',{
+      p_booking_id:bookingId,
+      p_provider_place_id:providerId(place)||null,
+      p_venue_name:clean(place.name)||null,
+      p_max_age_minutes:120
+    });
+    if(error){console.warn('[Luvia Booking] Handoff-Korrelation konnte nicht verknüpft werden.',error);return {linked:false,reason:'RPC_ERROR'};}
+    return data||{linked:false};
+  }
+
+  async function correlationJourney(id){
+    await init();
+    const {data,error}=await client.from('booking_correlation_conversion_summary').select('*').eq('booking_id',id).order('handoff_correlated_at',{ascending:false});
+    if(error)throw error;return data||[];
+  }
+
+  async function conversionReports(id){
+    await init();
+    const {data,error}=await client.from('booking_conversion_reports').select('*').eq('booking_id',id).order('occurred_at',{ascending:false});
+    if(error)throw error;return data||[];
+  }
+
   async function resolvePlaceRoute(place={}){
     await init();
     const payload={
@@ -248,7 +274,7 @@
   }
 
   const api=Object.freeze({
-    version:VERSION,init,createForPlace,listForTrip,get,transition,providerCapabilities,statusHistory,statusSignals,attributionJourney,statusAttributionSummary,recordHandoff,recordPlaceHandoff,planRoute,resolvePlaceRoute,resolveRoute,resolveContact,updateContact,sendEmail,cancel,mapType,
+    version:VERSION,init,createForPlace,listForTrip,get,transition,providerCapabilities,statusHistory,statusSignals,attributionJourney,statusAttributionSummary,correlationJourney,conversionReports,linkRecentPlaceHandoff,recordHandoff,recordPlaceHandoff,planRoute,resolvePlaceRoute,resolveRoute,resolveContact,updateContact,sendEmail,cancel,mapType,
     diagnostics:()=>({version:VERSION,initialized,activeTripId:activeTripId(),coreVersion:window.LuviaBookingCore?.version||null})
   });
   window.LuviaBooking=api;
