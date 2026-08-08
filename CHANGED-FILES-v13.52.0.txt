@@ -1,0 +1,30 @@
+Luvia v13.52.0 / Core 4.52.0
+
+Added:
+- supabase/migrations/20260808190000_core_v4_52_0_booking_reconciliation_provider_return.sql
+- core/booking/booking-reconciliation-provider-return.js
+- supabase/functions/booking-provider-status-ingest/index.ts
+- supabase/functions/booking-provider-quandoo-webhook/index.ts
+- tests/v13.52.0-booking-reconciliation-provider-return.test.cjs
+- RELEASE-v13.52.0.md
+- DEPLOYMENT-v13.52.0.md
+- COMMIT-v13.52.0.txt
+
+Updated:
+- index.html
+- sw.js
+- app/app-shell.js
+- intelligence/kernel/version.js
+- intelligence/backend-service.js
+- intelligence/services/base-services.js
+- core/ai/providers/openai-provider.js
+- core/diagnostics/media-readiness.js
+- core/places/global-place-contracts.js
+- core/places/places-final-foundation.js
+- core/places/place-domain.js
+- core/recommendations/schedule-intelligence-service.js
+- supabase/functions/luvia-gateway/index.ts
+- force-update.html
+- supabase/config.toml
+
+- test-results-v13.52.0.txt

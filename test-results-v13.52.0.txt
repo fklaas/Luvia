@@ -1,0 +1,22 @@
+Luvia v13.52.0 / Core 4.52.0
+
+PASS Build 13.52.0 / Core 4.52.0 release consistency
+PASS booking provider status receipt inbox
+PASS correlation-aware provider return
+PASS provider-reference fallback
+PASS verified provider-status mapping gate
+PASS unlinked provider status retained for reconciliation
+PASS conversion does not confirm reservation
+PASS commission does not confirm reservation
+PASS commission_paid attribution
+PASS Quandoo webhook static custom-token guard
+PASS Quandoo documented reservation webhook event mapping
+PASS API/polling ingest bridge partner-access guard
+PASS Quandoo adapter regression
+PASS SevenRooms adapter regression
+PASS OpenTable adapter regression
+PASS Tock adapter regression
+PASS TypeScript parse booking-provider-status-ingest
+PASS TypeScript parse booking-provider-quandoo-webhook
+
+RESULT: LUVIA_V13_52_0_BOOKING_RECONCILIATION_PROVIDER_RETURN_OK

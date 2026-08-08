@@ -1,0 +1,12 @@
+(() => {
+'use strict';
+const VERSION='1.0.0';
+const TRANSPORTS=Object.freeze(['webhook','api','polling']);
+const RECEIPT_STATES=Object.freeze(['received','pending_unlinked','pending_review','applied','ignored','duplicate','failed']);
+const COMMISSION_STATES=Object.freeze(['pending','matched','approved','paid','rejected','disputed']);
+const clean=v=>String(v??'').trim();
+function normalizeReceipt(row={}){return Object.freeze({id:row.id||null,correlationId:row.correlation_id||row.correlationId||null,bookingId:row.booking_id||row.bookingId||null,tripId:row.trip_id||row.tripId||null,provider:clean(row.provider_id||row.provider).toLowerCase()||null,transport:clean(row.transport).toLowerCase()||null,providerReference:row.provider_reference||row.providerReference||null,providerStatus:row.provider_status||row.providerStatus||null,luviaStatus:row.normalized_luvia_status||row.luviaStatus||null,externalEventId:row.external_event_id||row.externalEventId||null,signatureVerified:row.signature_verified??row.signatureVerified??null,resolutionState:row.resolution_state||row.resolutionState||null,resolutionReason:row.resolution_reason||row.resolutionReason||null,occurredAt:row.occurred_at||row.occurredAt||null});}
+function normalizeReconciliation(row={}){return Object.freeze({id:row.id||null,conversionReportId:row.conversion_report_id||row.conversionReportId||null,correlationId:row.correlation_id||row.correlationId||null,bookingId:row.booking_id||row.bookingId||null,provider:clean(row.provider_id||row.provider).toLowerCase()||null,state:clean(row.state).toLowerCase()||null,expectedAmount:row.expected_amount??row.expectedAmount??null,reportedAmount:row.reported_amount??row.reportedAmount??null,settledAmount:row.settled_amount??row.settledAmount??null,currency:row.settled_currency||row.reported_currency||row.expected_currency||row.currency||null,statementReference:row.statement_reference||row.statementReference||null,paidAt:row.paid_at||row.paidAt||null});}
+function semantics(){return Object.freeze({providerReceiptRequiresVerifiedMapping:true,unlinkedReceiptDoesNotChangeStatus:true,conversionDoesNotConfirmReservation:true,commissionDoesNotConfirmReservation:true,correlationBridgesHandoffBookingConversion:true});}
+window.LuviaBookingReconciliationProviderReturn=Object.freeze({version:VERSION,TRANSPORTS,RECEIPT_STATES,COMMISSION_STATES,normalizeReceipt,normalizeReconciliation,semantics,diagnostics:()=>({version:VERSION,status:'ready',...semantics()})});
+})();
