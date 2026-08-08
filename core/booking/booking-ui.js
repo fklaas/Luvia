@@ -1,6 +1,6 @@
 (() => {
   'use strict';
-  const VERSION='1.2.1';
+  const VERSION='1.3.0';
   const esc=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
   const canonicalType=raw=>{
     const type=String(raw||'').toLowerCase();
@@ -121,7 +121,12 @@
       reservationUrl:button.dataset.bookingPlaceReservationUrl
     };
     const original=button.textContent;
-    button.dataset.bookingBusy='1';button.disabled=true;button.textContent='Buchungsweg wird geprüft …';
+    // Open exactly one neutral tab while the click still counts as a user gesture.
+    // The async route resolver can then navigate that tab without popup-blocker fallbacks
+    // ever replacing the current Luvia tab.
+    let handoffWindow=null;
+    try{handoffWindow=window.open('about:blank','_blank');if(handoffWindow)handoffWindow.opener=null}catch{}
+    button.dataset.bookingBusy='1';button.disabled=true;
     try{
       // Die kompakten KI-/Place-Karten enthalten oft noch keine Website. Vor dem
       // Booking-Routing deshalb die kanonischen Place-Details nachladen, damit der
@@ -142,13 +147,17 @@
       const route=await window.LuviaBooking.resolvePlaceRoute(place);
       if(route?.resolved&&route.channel==='external_link'&&route.value){
         let target=null;try{target=new URL(route.value);if(!/^https?:$/.test(target.protocol))throw new Error('invalid')}catch{throw new Error('Der gefundene Buchungslink ist ungültig.')}
-        const opened=window.open(target.toString(),'_blank','noopener,noreferrer');
-        if(!opened)window.location.assign(target.toString());
+        if(handoffWindow&&!handoffWindow.closed){handoffWindow.location.replace(target.toString());return;}
+        // Never navigate the Luvia tab as a popup-blocker fallback. Keep the user in Luvia
+        // and surface a clear retry message instead.
+        window.LuviaUIKit?.toast?.('Der Browser hat das Buchungsfenster blockiert. Bitte Pop-ups für Luvia erlauben und erneut auf „Reservieren“ klicken.',{type:'warning'});
         return;
       }
+      if(handoffWindow&&!handoffWindow.closed)handoffWindow.close();
       if(route?.resolved&&route.channel==='email'&&route.value)place.email=route.value;
       await open(place);
     }catch(error){
+      if(handoffWindow&&!handoffWindow.closed)handoffWindow.close();
       console.warn('[Luvia Booking] Route-Preview fehlgeschlagen; sicherer Fallback wird geöffnet.',error);
       await open(place);
     }finally{
