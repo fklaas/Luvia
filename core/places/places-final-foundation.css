@@ -5,13 +5,13 @@
 
 .places-final-provider{font-size:.75rem;color:var(--lv-muted);margin:.35rem 0}.places-final-reasons{margin:.5rem 0 1rem;padding-left:1.2rem}.places-final-reasons li{margin:.25rem 0}
 
-/* v13.39.3 — AI result rhythm: equal desktop card height, generous but compact. */
+/* v13.40.0 — AI result rhythm: visually even, but never clip text or actions. */
 @media (min-width:761px){
-  .places-final-result{height:350px;min-height:350px;max-height:350px}
-  .places-final-result img,.places-final-photo-fallback{height:350px;min-height:350px;max-height:350px}
-  .places-final-result-body{min-height:0;overflow:hidden}
-  .places-final-reason{display:-webkit-box;-webkit-box-orient:vertical;-webkit-line-clamp:2;overflow:hidden;min-height:45px;max-height:45px;margin:4px 0 10px}
-  .places-final-reasons{max-height:42px;overflow:hidden;margin:0 0 10px}
-  .places-final-reasons li{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin:0}
-  .places-final-actions{min-height:78px;align-content:flex-end;align-items:flex-end}
+  .places-final-result{height:auto;min-height:372px;max-height:none;align-items:stretch}
+  .places-final-result img,.places-final-photo-fallback{height:100%;min-height:372px;max-height:none}
+  .places-final-result-body{min-height:372px;overflow:visible;padding:26px 30px 24px}
+  .places-final-reason{display:-webkit-box;-webkit-box-orient:vertical;-webkit-line-clamp:2;overflow:hidden;min-height:44px;margin:4px 0 10px}
+  .places-final-reasons{margin:0 0 10px;max-height:none;overflow:visible}
+  .places-final-reasons li{display:-webkit-box;-webkit-box-orient:vertical;-webkit-line-clamp:1;overflow:hidden}
+  .places-final-actions{min-height:46px;align-items:flex-end;margin-top:auto;padding-top:4px}
 }

@@ -1,0 +1,14 @@
+intelligence/kernel/version.js
+index.html
+core/booking/booking-contract.js
+core/booking/booking-provider-registry.js
+core/booking/booking-provider-capabilities.js
+core/booking/booking-status-provenance.js
+core/booking/booking-integration.js
+supabase/migrations/20260808103000_core_v4_40_0_booking_provider_capabilities_status.sql
+RELEASE-v13.40.0.md
+TEST-v13.40.0.md
+DEPLOYMENT-v13.40.0.md
+BOOKING-PROVIDER-CAPABILITY-STATUS-SMOKE.sql
+COMMIT-v13.40.0.txt
+CHANGED-FILES-v13.40.0.txt

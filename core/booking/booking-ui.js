@@ -1,6 +1,6 @@
 (() => {
   'use strict';
-  const VERSION='1.3.0';
+  const VERSION='1.3.1';
   const esc=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
   const canonicalType=raw=>{
     const type=String(raw||'').toLowerCase();
@@ -105,13 +105,46 @@
     return node;
   }
 
-  document.addEventListener('click',async e=>{
-    const button=e.target.closest('[data-luvia-booking-place]');
-    if(!button)return;
-    e.preventDefault();
-    e.stopPropagation();
-    if(button.dataset.bookingBusy==='1')return;
-    let place={
+  const routeCache=new Map();
+  const cacheKey=place=>[place?.providerPlaceId||place?.id||'',place?.name||'',place?.website||'',place?.reservationUrl||''].join('|');
+
+  async function enrichPlace(place){
+    let enriched={...place};
+    const providerId=String(enriched.providerPlaceId||'').replace(/^places\//,'');
+    if(providerId&&window.LuviaPlaceDetails?.prepare&&(!enriched.website||!enriched.reservationUrl)){
+      try{
+        const prepared=await window.LuviaPlaceDetails.prepare(providerId,{regionCode:'DE',photoLimit:1,seedPlace:{name:enriched.name,primaryType:enriched.type}});
+        const detail=prepared?.place||{};
+        enriched={...enriched,
+          name:enriched.name||detail.name||detail.displayName?.text||'',
+          website:enriched.website||detail.website||detail.websiteUri||detail.website_uri||'',
+          reservationUrl:enriched.reservationUrl||detail.reservationUrl||detail.reservation_url||detail.bookingUrl||detail.booking_url||'',
+          email:enriched.email||detail.email||detail.contactEmail||''
+        };
+      }catch(error){console.debug('[Luvia Booking] Place-Details für Provider-Routing konnten nicht nachgeladen werden.',error?.message||error)}
+    }
+    return enriched;
+  }
+
+  async function resolveRouteCached(place){
+    const firstKey=cacheKey(place);
+    if(routeCache.has(firstKey))return routeCache.get(firstKey);
+    const promise=(async()=>{
+      const enriched=await enrichPlace(place);
+      const enrichedKey=cacheKey(enriched);
+      if(enrichedKey!==firstKey&&routeCache.has(enrichedKey))return routeCache.get(enrichedKey);
+      const route=await window.LuviaBooking.resolvePlaceRoute(enriched);
+      const resolved={place:enriched,route};
+      if(enrichedKey!==firstKey)routeCache.set(enrichedKey,Promise.resolve(resolved));
+      return resolved;
+    })();
+    routeCache.set(firstKey,promise);
+    promise.catch(()=>routeCache.delete(firstKey));
+    return promise;
+  }
+
+  function placeFromButton(button){
+    return {
       type:button.dataset.bookingPlaceType,
       id:button.dataset.bookingPlaceId,
       providerPlaceId:button.dataset.bookingPlaceId,
@@ -120,48 +153,59 @@
       website:button.dataset.bookingPlaceWebsite,
       reservationUrl:button.dataset.bookingPlaceReservationUrl
     };
-    const original=button.textContent;
-    // Open exactly one neutral tab while the click still counts as a user gesture.
-    // The async route resolver can then navigate that tab without popup-blocker fallbacks
-    // ever replacing the current Luvia tab.
-    let handoffWindow=null;
-    try{handoffWindow=window.open('about:blank','_blank');if(handoffWindow)handoffWindow.opener=null}catch{}
+  }
+
+  // Warm the provider route as soon as the user approaches the action. On desktop this
+  // normally completes before the click, so the external booking page opens immediately.
+  document.addEventListener('pointerover',e=>{
+    const button=e.target.closest?.('[data-luvia-booking-place]');
+    if(!button||button.dataset.bookingPrefetched==='1')return;
+    button.dataset.bookingPrefetched='1';
+    resolveRouteCached(placeFromButton(button)).catch(()=>{});
+  },{passive:true,capture:true});
+  document.addEventListener('focusin',e=>{
+    const button=e.target.closest?.('[data-luvia-booking-place]');
+    if(!button||button.dataset.bookingPrefetched==='1')return;
+    button.dataset.bookingPrefetched='1';
+    resolveRouteCached(placeFromButton(button)).catch(()=>{});
+  },true);
+
+  document.addEventListener('click',async e=>{
+    const button=e.target.closest('[data-luvia-booking-place]');
+    if(!button)return;
+    e.preventDefault();
+    e.stopPropagation();
+    if(button.dataset.bookingBusy==='1')return;
+    let place=placeFromButton(button);
     button.dataset.bookingBusy='1';button.disabled=true;
     try{
-      // Die kompakten KI-/Place-Karten enthalten oft noch keine Website. Vor dem
-      // Booking-Routing deshalb die kanonischen Place-Details nachladen, damit der
-      // Resolver den offiziellen Anbieterweg statt vorschnell den Mail-Fallback sieht.
-      const providerId=String(place.providerPlaceId||'').replace(/^places\//,'');
-      if(providerId&&window.LuviaPlaceDetails?.prepare&&(!place.website||!place.reservationUrl)){
-        try{
-          const prepared=await window.LuviaPlaceDetails.prepare(providerId,{regionCode:'DE',photoLimit:1,seedPlace:{name:place.name,primaryType:place.type}});
-          const detail=prepared?.place||{};
-          place={...place,
-            name:place.name||detail.name||detail.displayName?.text||'',
-            website:place.website||detail.website||detail.websiteUri||detail.website_uri||'',
-            reservationUrl:place.reservationUrl||detail.reservationUrl||detail.reservation_url||detail.bookingUrl||detail.booking_url||'',
-            email:place.email||detail.email||detail.contactEmail||''
-          };
-        }catch(error){console.debug('[Luvia Booking] Place-Details für Provider-Routing konnten nicht nachgeladen werden.',error?.message||error)}
+      // If a warmed route already exists, this resolves immediately. Otherwise open one
+      // lightweight Luvia handoff tab while the authenticated resolver validates the route.
+      const key=cacheKey(place);
+      const warmed=routeCache.has(key);
+      let handoffWindow=null;
+      if(!warmed){
+        try{handoffWindow=window.open('/booking-handoff.html','_blank');if(handoffWindow)handoffWindow.opener=null}catch{}
       }
-      const route=await window.LuviaBooking.resolvePlaceRoute(place);
+      const resolved=await resolveRouteCached(place);
+      place=resolved.place||place;
+      const route=resolved.route;
       if(route?.resolved&&route.channel==='external_link'&&route.value){
         let target=null;try{target=new URL(route.value);if(!/^https?:$/.test(target.protocol))throw new Error('invalid')}catch{throw new Error('Der gefundene Buchungslink ist ungültig.')}
         if(handoffWindow&&!handoffWindow.closed){handoffWindow.location.replace(target.toString());return;}
-        // Never navigate the Luvia tab as a popup-blocker fallback. Keep the user in Luvia
-        // and surface a clear retry message instead.
-        window.LuviaUIKit?.toast?.('Der Browser hat das Buchungsfenster blockiert. Bitte Pop-ups für Luvia erlauben und erneut auf „Reservieren“ klicken.',{type:'warning'});
+        const opened=window.open(target.toString(),'_blank','noopener,noreferrer');
+        if(!opened)window.LuviaUIKit?.toast?.('Der Browser hat das Buchungsfenster blockiert. Bitte Pop-ups für Luvia erlauben und erneut auf „Reservieren“ klicken.',{type:'warning'});
         return;
       }
       if(handoffWindow&&!handoffWindow.closed)handoffWindow.close();
       if(route?.resolved&&route.channel==='email'&&route.value)place.email=route.value;
       await open(place);
     }catch(error){
-      if(handoffWindow&&!handoffWindow.closed)handoffWindow.close();
+      try{for(const w of [])w.close()}catch{}
       console.warn('[Luvia Booking] Route-Preview fehlgeschlagen; sicherer Fallback wird geöffnet.',error);
       await open(place);
     }finally{
-      button.dataset.bookingBusy='0';button.disabled=false;button.textContent=original;
+      button.dataset.bookingBusy='0';button.disabled=false;
     }
   },true);
 

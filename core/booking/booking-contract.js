@@ -1,14 +1,16 @@
 (function(){
 'use strict';
-const VERSION='0.6.0';
+const VERSION='0.7.0';
 const TYPES=Object.freeze(['restaurant','hotel','activity','event','transport','rental','other']);
-const STATUSES=Object.freeze(['draft','ready','requested','awaiting_reply','needs_action','confirmed','declined','cancelled','failed']);
+const STATUSES=Object.freeze(['draft','ready','forwarded','requested','awaiting_reply','alternative_proposed','needs_action','confirmed','declined','cancelled','failed']);
 const CHANNELS=Object.freeze(['email','api','affiliate','external_link','manual']);
 const TRANSITIONS=Object.freeze({
   draft:['ready','cancelled'],
-  ready:['requested','cancelled','failed'],
-  requested:['awaiting_reply','confirmed','declined','needs_action','cancelled','failed'],
-  awaiting_reply:['confirmed','declined','needs_action','cancelled','failed'],
+  ready:['forwarded','requested','cancelled','failed'],
+  forwarded:['ready','requested','awaiting_reply','confirmed','declined','alternative_proposed','needs_action','cancelled','failed'],
+  requested:['awaiting_reply','confirmed','declined','alternative_proposed','needs_action','cancelled','failed'],
+  awaiting_reply:['confirmed','declined','alternative_proposed','needs_action','cancelled','failed'],
+  alternative_proposed:['requested','awaiting_reply','confirmed','declined','needs_action','cancelled','failed'],
   needs_action:['requested','awaiting_reply','confirmed','declined','cancelled','failed'],
   confirmed:['cancelled','needs_action'],
   declined:['ready','cancelled'],

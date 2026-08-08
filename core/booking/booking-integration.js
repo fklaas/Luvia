@@ -1,6 +1,6 @@
 (() => {
   'use strict';
-  const VERSION='1.2.1';
+  const VERSION='1.4.0';
   let client=null, repository=null, initialized=false, initPromise=null;
 
   const mapType=type=>({
@@ -119,6 +119,29 @@
     return new Error(error.message||fallback);
   }
 
+
+  async function providerCapabilities(){
+    await init();
+    const {data,error}=await client.from('booking_provider_capabilities').select('*').eq('active',true).order('provider_id');
+    if(error){console.warn('[Luvia Booking] Provider-Capabilities DB nicht verfügbar; lokaler Contract wird genutzt.',error);return window.LuviaBookingProviderCapabilities?.list?.()||[];}
+    return (data||[]).map(row=>window.LuviaBookingProviderCapabilities?.normalize?.(row)||row);
+  }
+
+  async function statusHistory(id){
+    await init();
+    const {data,error}=await client.from('booking_status_updates').select('*').eq('booking_id',id).order('occurred_at',{ascending:false}).order('created_at',{ascending:false});
+    if(error)throw error;
+    return data||[];
+  }
+
+  async function recordHandoff(id,{provider,url,providerReference=null,metadata={}}={}){
+    await init();
+    const {data,error}=await client.rpc('luvia_booking_record_handoff',{p_booking_id:id,p_provider:clean(provider)||'official',p_external_url:clean(url),p_provider_reference:clean(providerReference)||null,p_metadata:metadata||{}});
+    if(error)throw new Error(error.message||'Weiterleitung konnte nicht protokolliert werden.');
+    window.dispatchEvent(new CustomEvent('luvia:booking-changed',{detail:{bookingId:id,action:'forwarded',result:data}}));
+    return data;
+  }
+
   async function planRoute(id,excludedChannels=[]){
     await init();
     const {data,error}=await client.rpc('luvia_booking_plan_route',{
@@ -187,7 +210,7 @@
   }
 
   const api=Object.freeze({
-    version:VERSION,init,createForPlace,listForTrip,get,transition,planRoute,resolvePlaceRoute,resolveRoute,resolveContact,updateContact,sendEmail,cancel,mapType,
+    version:VERSION,init,createForPlace,listForTrip,get,transition,providerCapabilities,statusHistory,recordHandoff,planRoute,resolvePlaceRoute,resolveRoute,resolveContact,updateContact,sendEmail,cancel,mapType,
     diagnostics:()=>({version:VERSION,initialized,activeTripId:activeTripId(),coreVersion:window.LuviaBookingCore?.version||null})
   });
   window.LuviaBooking=api;
