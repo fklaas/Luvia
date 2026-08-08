@@ -1,0 +1,21 @@
+const fs=require('fs');
+const assert=require('assert');
+const ui=fs.readFileSync('core/booking/booking-ui.js','utf8');
+const integration=fs.readFileSync('core/booking/booking-integration.js','utf8');
+const resolver=fs.readFileSync('supabase/functions/booking-route-resolve/index.ts','utf8');
+const version=fs.readFileSync('intelligence/kernel/version.js','utf8');
+
+assert(version.includes("core:'4.39.1'"));
+assert(version.includes("build:'13.39.1'"));
+assert(integration.includes('async function resolvePlaceRoute(place={})'),'pre-booking route resolver missing');
+assert(integration.includes("body:{place:payload}"),'place preview request missing');
+assert(ui.includes('await window.LuviaBooking.resolvePlaceRoute(place)'),'reservation action does not resolve before form');
+assert(ui.includes("route.channel==='external_link'"),'direct provider handoff missing');
+assert(ui.indexOf('await window.LuviaBooking.resolvePlaceRoute(place)') < ui.indexOf('await open(place);'),'form can open before provider resolution');
+assert(resolver.includes('Preview mode: resolve the route before Luvia shows an e-mail fallback form.'),'preview mode missing');
+assert(resolver.includes('LEGAL_HINT'),'legal-link rejection missing');
+assert(resolver.includes('gtc|terms?'),'GTC/terms rejection missing');
+assert(resolver.includes('hasVenueIdentifier'),'venue-specific identifier verification missing');
+assert(resolver.includes("tag:'iframe'"),'embedded booking widget discovery missing');
+assert(resolver.includes('venueVerified:true'),'venue verification evidence missing');
+console.log('LUVIA_V13_39_1_VENUE_VERIFIED_BOOKING_HANDOFF_OK');

@@ -1,1 +1,1 @@
-(()=>{'use strict';window.LuviaKernelVersion=Object.freeze({core:'4.39.0',build:'13.39.0',name:'Booking Provider Routing V1',channel:'production',builtAt:'2026-08-08T08:53:00+02:00'});window.LuviaCoreVersion=window.LuviaKernelVersion;window.LUVIA_RELEASE=window.LuviaKernelVersion;})();
+(()=>{'use strict';window.LuviaKernelVersion=Object.freeze({core:'4.39.1',build:'13.39.1',name:'Venue-Verified Booking Handoff',channel:'production',builtAt:'2026-08-08T09:20:00+02:00'});window.LuviaCoreVersion=window.LuviaKernelVersion;window.LUVIA_RELEASE=window.LuviaKernelVersion;})();

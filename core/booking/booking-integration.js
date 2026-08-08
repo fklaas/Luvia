@@ -1,6 +1,6 @@
 (() => {
   'use strict';
-  const VERSION='1.1.0';
+  const VERSION='1.2.0';
   let client=null, repository=null, initialized=false, initPromise=null;
 
   const mapType=type=>({
@@ -143,6 +143,20 @@
     return data;
   }
 
+  async function resolvePlaceRoute(place={}){
+    await init();
+    const payload={
+      name:clean(place.name),
+      website:clean(place.website||place.websiteUri||place.website_uri),
+      reservationUrl:clean(place.reservationUrl||place.reservation_url||place.bookingUrl||place.booking_url)
+    };
+    if(!payload.name)throw new Error('Ort konnte nicht eindeutig bestimmt werden.');
+    const {data,error}=await client.functions.invoke('booking-route-resolve',{body:{place:payload}});
+    if(error)throw await functionError(error,'Buchungsweg konnte derzeit nicht geprüft werden.');
+    if(data?.error)throw new Error(data.details||data.error);
+    return data||{resolved:false};
+  }
+
   async function resolveRoute(id){
     await init();
     const {data,error}=await client.functions.invoke('booking-route-resolve',{body:{bookingId:id}});
@@ -173,7 +187,7 @@
   }
 
   const api=Object.freeze({
-    version:VERSION,init,createForPlace,listForTrip,get,transition,planRoute,resolveRoute,resolveContact,updateContact,sendEmail,cancel,mapType,
+    version:VERSION,init,createForPlace,listForTrip,get,transition,planRoute,resolvePlaceRoute,resolveRoute,resolveContact,updateContact,sendEmail,cancel,mapType,
     diagnostics:()=>({version:VERSION,initialized,activeTripId:activeTripId(),coreVersion:window.LuviaBookingCore?.version||null})
   });
   window.LuviaBooking=api;

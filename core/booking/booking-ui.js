@@ -1,6 +1,6 @@
 (() => {
   'use strict';
-  const VERSION='1.1.0';
+  const VERSION='1.2.0';
   const esc=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
   const canonicalType=raw=>{
     const type=String(raw||'').toLowerCase();
@@ -41,12 +41,12 @@
           <label><span>${isHotel?'Check-in':'Datum'}</span><input type="date" data-booking-date value="${esc(defaultDate)}"></label>
           ${isHotel?`<label><span>Check-out</span><input type="date" data-booking-end-date value="${esc(defaultDate)}"></label>`:`<label><span>Uhrzeit</span><input type="time" data-booking-time value="19:00"></label>`}
           <label><span>${isHotel?'Gäste':'Personen'}</span><input type="number" min="1" max="50" value="2" data-booking-party></label>
-          <label><span>Kontakt</span><div class="lv-booking-auto-contact">Luvia ermittelt automatisch den besten belegbaren Buchungskanal.</div><input type="email" data-booking-email value="${esc(place.email||'')}" placeholder="Optionaler manueller Fallback"></label>
+          <label><span>Kontakt</span><div class="lv-booking-auto-contact">${place.email?'Kein direkter Buchungsanbieter verfügbar. Luvia hat einen belegbaren E-Mail-Fallback gefunden.':'Kein direkter Buchungsanbieter verfügbar. Luvia nutzt nur einen belegbaren E-Mail-Kontakt oder deinen manuellen Fallback.'}</div><input type="email" data-booking-email value="${esc(place.email||'')}" placeholder="Optionaler manueller Fallback"></label>
           <label class="is-wide"><span>Wunsch / Hinweis</span><textarea data-booking-note rows="3" placeholder="z. B. Kinderwagen, ruhiger Tisch, spätes Check-in …"></textarea></label>
         </div>
         <div class="lv-booking-safety">
           <strong>So funktioniert es</strong>
-          <p>Luvia bevorzugt direkte Buchungsanbieter und offizielle Reservierungslinks. Nur wenn kein besserer Kanal verfügbar ist, nutzt Luvia eine belegbare öffentliche E-Mail. Luvia rät keine Adressen und bestätigt nichts ohne Nachweis.</p>
+          <p>Dieses Formular erscheint nur, wenn Luvia keinen verifizierten direkten Buchungsweg gefunden hat. E-Mail bleibt der Fallback. Luvia rät keine Adressen und bestätigt nichts ohne Nachweis.</p>
         </div>
         <div class="lv-booking-actions">
           <button type="button" data-booking-close>Abbrechen</button>
@@ -105,12 +105,13 @@
     return node;
   }
 
-  document.addEventListener('click',e=>{
+  document.addEventListener('click',async e=>{
     const button=e.target.closest('[data-luvia-booking-place]');
     if(!button)return;
     e.preventDefault();
     e.stopPropagation();
-    open({
+    if(button.dataset.bookingBusy==='1')return;
+    const place={
       type:button.dataset.bookingPlaceType,
       id:button.dataset.bookingPlaceId,
       providerPlaceId:button.dataset.bookingPlaceId,
@@ -118,8 +119,27 @@
       email:button.dataset.bookingPlaceEmail,
       website:button.dataset.bookingPlaceWebsite,
       reservationUrl:button.dataset.bookingPlaceReservationUrl
-    }).catch(console.error);
+    };
+    const original=button.textContent;
+    button.dataset.bookingBusy='1';button.disabled=true;button.textContent='Buchungsweg wird geprüft …';
+    try{
+      const route=await window.LuviaBooking.resolvePlaceRoute(place);
+      if(route?.resolved&&route.channel==='external_link'&&route.value){
+        let target=null;try{target=new URL(route.value);if(!/^https?:$/.test(target.protocol))throw new Error('invalid')}catch{throw new Error('Der gefundene Buchungslink ist ungültig.')}
+        const opened=window.open(target.toString(),'_blank','noopener,noreferrer');
+        if(!opened)window.location.assign(target.toString());
+        return;
+      }
+      if(route?.resolved&&route.channel==='email'&&route.value)place.email=route.value;
+      await open(place);
+    }catch(error){
+      console.warn('[Luvia Booking] Route-Preview fehlgeschlagen; sicherer Fallback wird geöffnet.',error);
+      await open(place);
+    }finally{
+      button.dataset.bookingBusy='0';button.disabled=false;button.textContent=original;
+    }
   },true);
+
 
   window.LuviaBookingUI=Object.freeze({version:VERSION,actionButton,open});
 })();
